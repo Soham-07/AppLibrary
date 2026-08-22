@@ -182,9 +182,18 @@
     padding:12px 0; border-bottom:1px solid var(--border-soft);
   }
   .manage-row:last-child{ border-bottom:none; }
-  .manage-row .info{ min-width:0; }
+  .manage-row .info{ min-width:0; flex:1; }
   .manage-row .info b{ font-family:var(--font-display); font-size:14px; display:block; }
   .manage-row .info span{ font-family:var(--font-mono); font-size:11px; color:var(--text-faint); }
+  .reorder{ display:flex; flex-direction:column; gap:3px; flex:none; }
+  .btn-icon{
+    width:26px; height:21px; display:flex; align-items:center; justify-content:center;
+    border:1px solid var(--border); border-radius:6px; background:transparent; color:var(--text-dim);
+    cursor:pointer; transition:.15s ease; padding:0;
+  }
+  .btn-icon svg{ width:12px; height:12px; }
+  .btn-icon:hover:not(:disabled){ border-color:var(--teal); color:var(--teal); }
+  .btn-icon:disabled{ opacity:.25; cursor:not-allowed; }
   .confirm{ display:flex; align-items:center; gap:8px; }
   .confirm span{ font-size:12px; color:var(--text-dim); }
 
@@ -472,14 +481,24 @@
   function renderManageList(list){
     const el = document.getElementById('manageList');
     if(!list.length){ el.innerHTML = `<p class="sub" style="margin:0">Nothing docked yet.</p>`; return; }
-    el.innerHTML = list.map(app => `
+    el.innerHTML = list.map((app, i) => `
       <div class="manage-row" data-id="${app.id}">
+        <div class="reorder">
+          <button class="btn-icon up-btn" ${i===0 ? 'disabled' : ''} aria-label="Move ${escapeHtml(app.name)} up">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>
+          </button>
+          <button class="btn-icon down-btn" ${i===list.length-1 ? 'disabled' : ''} aria-label="Move ${escapeHtml(app.name)} down">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
+          </button>
+        </div>
         <div class="info"><b>${escapeHtml(app.name)}</b><span>${escapeHtml(app.filename)}</span></div>
         <div class="actions">
           <button class="btn btn-danger btn-ghost undock-btn">Undock</button>
         </div>
       </div>
     `).join('');
+    el.querySelectorAll('.up-btn').forEach((btn, i) => btn.addEventListener('click', () => reorderApp(i, -1)));
+    el.querySelectorAll('.down-btn').forEach((btn, i) => btn.addEventListener('click', () => reorderApp(i, 1)));
     el.querySelectorAll('.undock-btn').forEach(btn => {
       btn.addEventListener('click', () => confirmUndock(btn, list.find(a => a.id === btn.closest('.manage-row').dataset.id)));
     });
@@ -567,6 +586,26 @@
       }
       setStatus('ok', `✓ synced · ${app.filename} removed at ${timeNow()}`);
       await loadApps();
+    }catch(e){
+      setStatus('error', `✗ sync failed · ${e.message}`);
+    }
+  }
+
+  async function reorderApp(index, direction){
+    const cfg = getConfig();
+    if(!cfg.owner || !cfg.repo || !cfg.token){ setStatus('error','not connected · open settings first'); return; }
+    const newIndex = index + direction;
+    if(newIndex < 0 || newIndex >= currentList.length) return;
+    const list = currentList.slice();
+    [list[index], list[newIndex]] = [list[newIndex], list[index]];
+    setStatus('pending', 'saving new order...');
+    try{
+      const manifestFile = await ghGet('manifest.json', cfg);
+      await ghPut('manifest.json', b64EncodeUnicode(JSON.stringify(list, null, 2)), 'Reorder tools', cfg, manifestFile ? manifestFile.sha : undefined);
+      currentList = list;
+      renderGrid(list);
+      renderManageList(list);
+      setStatus('ok', `✓ synced · order saved at ${timeNow()}`);
     }catch(e){
       setStatus('error', `✗ sync failed · ${e.message}`);
     }
