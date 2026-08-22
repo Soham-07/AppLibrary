@@ -56,13 +56,6 @@
     "addedAt": "2026-08-22T05:52:20.715Z"
   },
   {
-    "id": "c64ac17a-a76c-48b4-b7ae-3d783d8e1e4f",
-    "name": "Instagram Report",
-    "description": "",
-    "filename": "opx-instagram-report.html",
-    "addedAt": "2026-08-22T05:52:59.792Z"
-  },
-  {
     "id": "c8945343-8de8-467e-8263-d2a970394ee5",
     "name": "Opx LifeOS",
     "description": "",
@@ -70,87 +63,17 @@
     "addedAt": "2026-08-22T05:53:14.651Z"
   },
   {
+    "id": "c64ac17a-a76c-48b4-b7ae-3d783d8e1e4f",
+    "name": "Instagram Report",
+    "description": "",
+    "filename": "opx-instagram-report.html",
+    "addedAt": "2026-08-22T05:52:59.792Z"
+  },
+  {
     "id": "e1efc255-ae25-433a-871c-ff8aba2b25be",
     "name": "Enhanced Name Calc",
     "description": "",
     "filename": "enhanced_name_calc.html",
     "addedAt": "2026-08-22T05:53:22.844Z"
-  },
-  {
-    "id": "3354e368-f8ed-452b-8876-d7c1ffa654fd",
-    "name": "Natural vs Medicines",
-    "description": "",
-    "filename": "energy_handbook.pdf",
-    "addedAt": "2026-08-22T05:54:04.087Z"
-  },
-  {
-    "id": "e09a1b6e-87eb-4f32-8578-910140c21441",
-    "name": "Talkative - Silent",
-    "description": "",
-    "filename": "the_silent_shift.html",
-    "addedAt": "2026-08-22T05:54:39.437Z"
-  },
-  {
-    "id": "6a3cc091-e13b-46d5-b7b1-5a0de341a758",
-    "name": "Personal vs Professional Banking",
-    "description": "",
-    "filename": "opx_treasury_rv002.html",
-    "addedAt": "2026-08-22T05:55:00.117Z"
-  },
-  {
-    "id": "78089d9c-a15b-4f32-8234-45ede0f540ba",
-    "name": "Picture Crop For Printer",
-    "description": "",
-    "filename": "picture-crop-for-printer-1.html",
-    "addedAt": "2026-08-22T05:55:12.790Z"
-  },
-  {
-    "id": "98ed9f65-0771-4d9c-8903-133ebe583018",
-    "name": "Professional Terms",
-    "description": "",
-    "filename": "the-ledger-salary-guide.html",
-    "addedAt": "2026-08-22T05:55:29.700Z"
-  },
-  {
-    "id": "c8818c94-b0c6-4407-a85c-e1e22f0ded75",
-    "name": "Professional Life Operating System",
-    "description": "",
-    "filename": "professional-life-operating-system.html",
-    "addedAt": "2026-08-22T05:55:41.175Z"
-  },
-  {
-    "id": "dfaf4542-b635-4fce-9ad9-279a99f769ac",
-    "name": "Nightowl Routine",
-    "description": "",
-    "filename": "opx_nightowl_routine.html",
-    "addedAt": "2026-08-22T05:55:47.898Z"
-  },
-  {
-    "id": "45c4fb93-2353-49f8-8750-0e49fe62acb6",
-    "name": "3D Artist Salary",
-    "description": "",
-    "filename": "3d-artist-salary-reality-india-2026_1.html",
-    "addedAt": "2026-08-22T05:55:56.070Z"
-  },
-  {
-    "id": "cc91146f-9099-4406-8185-9275011d9e9b",
-    "name": "Stimulus Escape",
-    "description": "",
-    "filename": "stimulus-escape.html",
-    "addedAt": "2026-08-22T05:56:01.725Z"
-  },
-  {
-    "id": "b7622051-9988-42a0-9188-da0aa683dc8d",
-    "name": "Opx Valorant Tunnel",
-    "description": "",
-    "filename": "opx_valoranttunnel_v1.html",
-    "addedAt": "2026-08-22T05:56:09.343Z"
-  },
-  {
-    "id": "e4df4524-7680-41a5-a2a0-8ef8417a0e9f",
-    "name": "Weight Height Instrument",
-    "description": "",
-    "filename": "weight-height-instrument.html",
-    "addedAt": "2026-08-22T05:56:18.551Z"
   }
 ]
