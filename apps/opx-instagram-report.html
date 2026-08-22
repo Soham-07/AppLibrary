@@ -1,0 +1,961 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>OPX REPORT — Instagram Decision</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Bebas+Neue&family=DM+Mono:ital,wght@0,300;0,400;0,500;1,300&family=Fraunces:ital,opsz,wght@0,9..144,300;0,9..144,700;1,9..144,300&display=swap');
+
+  :root {
+    --ink: #0a0a0a;
+    --paper: #f0ece4;
+    --red: #c0392b;
+    --gold: #c9922a;
+    --muted: #8a8070;
+    --line: #d4cfc6;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--paper);
+    color: var(--ink);
+    font-family: 'DM Mono', monospace;
+    font-size: 13px;
+    line-height: 1.7;
+    overflow-x: hidden;
+  }
+
+  /* GRAIN OVERLAY */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 200 200' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.9' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.04'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 999;
+    opacity: 0.5;
+  }
+
+  .container {
+    max-width: 860px;
+    margin: 0 auto;
+    padding: 60px 24px 100px;
+  }
+
+  /* HEADER */
+  .header {
+    border-top: 3px solid var(--ink);
+    border-bottom: 1px solid var(--ink);
+    padding: 20px 0 16px;
+    margin-bottom: 60px;
+    display: flex;
+    justify-content: space-between;
+    align-items: flex-end;
+    flex-wrap: wrap;
+    gap: 12px;
+    animation: fadeDown 0.6s ease both;
+  }
+
+  .header-left .label {
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  .header-left h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(42px, 10vw, 80px);
+    line-height: 0.9;
+    letter-spacing: 0.03em;
+    color: var(--ink);
+  }
+
+  .header-left h1 span {
+    color: var(--red);
+  }
+
+  .header-right {
+    text-align: right;
+    font-size: 11px;
+    color: var(--muted);
+    line-height: 1.9;
+  }
+
+  /* VERDICT BOX */
+  .verdict {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 32px 36px;
+    margin-bottom: 60px;
+    position: relative;
+    animation: fadeUp 0.7s 0.2s ease both;
+  }
+
+  .verdict::before {
+    content: 'FINAL VERDICT';
+    position: absolute;
+    top: -10px;
+    left: 24px;
+    background: var(--red);
+    color: white;
+    font-size: 10px;
+    letter-spacing: 0.18em;
+    padding: 3px 10px;
+    font-weight: 500;
+  }
+
+  .verdict p {
+    font-family: 'Fraunces', serif;
+    font-size: clamp(16px, 3vw, 22px);
+    line-height: 1.55;
+    font-style: italic;
+  }
+
+  .verdict strong {
+    font-style: normal;
+    color: var(--gold);
+  }
+
+  /* SECTION */
+  .section {
+    margin-bottom: 56px;
+    animation: fadeUp 0.6s ease both;
+  }
+
+  .section-header {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 20px;
+    padding-bottom: 10px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .section-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 36px;
+    color: var(--line);
+    line-height: 1;
+    min-width: 40px;
+  }
+
+  .section-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: clamp(18px, 4vw, 28px);
+    letter-spacing: 0.05em;
+    color: var(--ink);
+  }
+
+  .section-sub {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-top: 2px;
+  }
+
+  /* STAT GRID */
+  .stat-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(160px, 1fr));
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    margin-bottom: 24px;
+  }
+
+  .stat-cell {
+    background: var(--paper);
+    padding: 20px 18px;
+  }
+
+  .stat-value {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 38px;
+    color: var(--red);
+    line-height: 1;
+    margin-bottom: 4px;
+  }
+
+  .stat-label {
+    font-size: 10px;
+    letter-spacing: 0.1em;
+    text-transform: uppercase;
+    color: var(--muted);
+  }
+
+  /* PRO CON TABLE */
+  .two-col {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    margin-bottom: 24px;
+  }
+
+  @media (max-width: 560px) {
+    .two-col { grid-template-columns: 1fr; }
+  }
+
+  .col-block {
+    background: var(--paper);
+    padding: 22px 20px;
+  }
+
+  .col-block h4 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    letter-spacing: 0.1em;
+    margin-bottom: 14px;
+    padding-bottom: 8px;
+    border-bottom: 1px solid var(--line);
+  }
+
+  .col-block.stay h4 { color: var(--gold); }
+  .col-block.leave h4 { color: var(--red); }
+
+  .col-block ul {
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 9px;
+  }
+
+  .col-block ul li {
+    padding-left: 16px;
+    position: relative;
+    font-size: 12px;
+    line-height: 1.5;
+    color: #2a2a2a;
+  }
+
+  .col-block ul li::before {
+    content: '→';
+    position: absolute;
+    left: 0;
+    color: var(--muted);
+    font-size: 11px;
+  }
+
+  .col-block.leave ul li::before { color: var(--red); }
+  .col-block.stay ul li::before { color: var(--gold); }
+
+  /* REALITY CHECK */
+  .reality-row {
+    display: grid;
+    grid-template-columns: 120px 1fr 1fr;
+    gap: 1px;
+    background: var(--line);
+    border-left: 1px solid var(--line);
+    border-right: 1px solid var(--line);
+  }
+
+  .reality-row:first-child { border-top: 1px solid var(--line); }
+  .reality-row:last-child { border-bottom: 1px solid var(--line); }
+
+  @media (max-width: 560px) {
+    .reality-row { grid-template-columns: 1fr; }
+  }
+
+  .reality-cell {
+    background: var(--paper);
+    padding: 16px 18px;
+    font-size: 12px;
+  }
+
+  .reality-cell.label {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 13px;
+    letter-spacing: 0.08em;
+    color: var(--muted);
+    display: flex;
+    align-items: center;
+  }
+
+  .reality-cell.illusion { color: #888; font-style: italic; }
+  .reality-cell.truth { color: var(--ink); font-weight: 500; }
+
+  .reality-header {
+    display: grid;
+    grid-template-columns: 120px 1fr 1fr;
+    gap: 1px;
+    background: var(--line);
+    border: 1px solid var(--line);
+    margin-bottom: 1px;
+  }
+
+  @media (max-width: 560px) {
+    .reality-header { grid-template-columns: 1fr; }
+  }
+
+  .reality-header-cell {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 10px 18px;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+  }
+
+  /* TIMELINE */
+  .timeline {
+    border-left: 2px solid var(--line);
+    padding-left: 24px;
+    display: flex;
+    flex-direction: column;
+    gap: 0;
+  }
+
+  .tl-item {
+    position: relative;
+    padding-bottom: 28px;
+  }
+
+  .tl-item:last-child { padding-bottom: 0; }
+
+  .tl-item::before {
+    content: '';
+    position: absolute;
+    left: -30px;
+    top: 6px;
+    width: 10px;
+    height: 10px;
+    border-radius: 50%;
+    background: var(--paper);
+    border: 2px solid var(--muted);
+  }
+
+  .tl-item.positive::before { border-color: var(--gold); background: var(--gold); }
+  .tl-item.milestone::before { border-color: var(--red); background: var(--red); }
+
+  .tl-period {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 15px;
+    letter-spacing: 0.1em;
+    color: var(--muted);
+    margin-bottom: 4px;
+  }
+
+  .tl-text {
+    font-size: 12px;
+    line-height: 1.6;
+    color: var(--ink);
+  }
+
+  /* SOCIAL SECTION */
+  .quote-block {
+    border-left: 3px solid var(--red);
+    padding: 16px 20px;
+    background: #faf7f2;
+    margin-bottom: 16px;
+    font-size: 12px;
+    line-height: 1.7;
+  }
+
+  .quote-block .quote-label {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 8px;
+  }
+
+  .response-block {
+    border-left: 3px solid var(--gold);
+    padding: 16px 20px;
+    background: #fdf9f2;
+    margin-bottom: 28px;
+    font-size: 12px;
+    line-height: 1.7;
+  }
+
+  .response-block .quote-label {
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    color: var(--gold);
+    margin-bottom: 8px;
+  }
+
+  /* DECISION FRAMEWORK */
+  .question-block {
+    border: 1px solid var(--line);
+    padding: 22px 24px;
+    margin-bottom: 12px;
+    display: flex;
+    gap: 18px;
+    align-items: flex-start;
+  }
+
+  .q-num {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    color: var(--line);
+    line-height: 1;
+    min-width: 32px;
+  }
+
+  .q-text {
+    font-family: 'Fraunces', serif;
+    font-size: 15px;
+    font-style: italic;
+    line-height: 1.5;
+    color: var(--ink);
+  }
+
+  .q-sub {
+    font-family: 'DM Mono', monospace;
+    font-style: normal;
+    font-size: 11px;
+    color: var(--muted);
+    margin-top: 6px;
+    display: block;
+  }
+
+  /* ACTION BOX */
+  .action-box {
+    border: 2px solid var(--ink);
+    padding: 32px 36px;
+    margin-top: 8px;
+    position: relative;
+  }
+
+  .action-box::before {
+    content: 'THE PLAY';
+    position: absolute;
+    top: -11px;
+    left: 20px;
+    background: var(--paper);
+    padding: 0 8px;
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+  }
+
+  .action-steps {
+    counter-reset: steps;
+    list-style: none;
+    display: flex;
+    flex-direction: column;
+    gap: 16px;
+  }
+
+  .action-steps li {
+    counter-increment: steps;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    font-size: 13px;
+    line-height: 1.6;
+  }
+
+  .action-steps li::before {
+    content: counter(steps, decimal-leading-zero);
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 22px;
+    color: var(--red);
+    line-height: 1;
+    min-width: 28px;
+  }
+
+  /* FOOTER */
+  .footer {
+    margin-top: 80px;
+    padding-top: 20px;
+    border-top: 1px solid var(--line);
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 0.1em;
+  }
+
+  /* ANIMATIONS */
+  @keyframes fadeDown {
+    from { opacity: 0; transform: translateY(-16px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  @keyframes fadeUp {
+    from { opacity: 0; transform: translateY(20px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section:nth-child(1) { animation-delay: 0.1s; }
+  .section:nth-child(2) { animation-delay: 0.2s; }
+  .section:nth-child(3) { animation-delay: 0.3s; }
+  .section:nth-child(4) { animation-delay: 0.35s; }
+  .section:nth-child(5) { animation-delay: 0.4s; }
+  .section:nth-child(6) { animation-delay: 0.45s; }
+  .section:nth-child(7) { animation-delay: 0.5s; }
+  .section:nth-child(8) { animation-delay: 0.55s; }
+
+  .tag {
+    display: inline-block;
+    font-size: 10px;
+    letter-spacing: 0.12em;
+    text-transform: uppercase;
+    padding: 2px 8px;
+    border: 1px solid currentColor;
+    margin-right: 6px;
+    margin-bottom: 6px;
+  }
+
+  .tag.red { color: var(--red); border-color: var(--red); }
+  .tag.gold { color: var(--gold); border-color: var(--gold); }
+  .tag.muted { color: var(--muted); border-color: var(--line); }
+
+  .highlight {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 1px 5px;
+    font-size: 12px;
+  }
+  
+  .separator {
+    border: none;
+    border-top: 1px solid var(--line);
+    margin: 32px 0;
+  }
+
+  .mantra-bar {
+    background: var(--ink);
+    color: var(--paper);
+    padding: 14px 24px;
+    display: flex;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+    font-size: 10px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    margin-bottom: 60px;
+    animation: fadeUp 0.6s 0.15s ease both;
+  }
+
+  .mantra-bar span { color: var(--gold); }
+</style>
+</head>
+<body>
+<div class="container">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-left">
+      <div class="label">Opx Personal Intelligence Report — Confidential</div>
+      <h1>INSTA<span>GRAM</span><br>DECISION</h1>
+    </div>
+    <div class="header-right">
+      Case File: OPX-001<br>
+      Category: Behavioral / Digital<br>
+      Status: FINAL ANALYSIS<br>
+      Prepared by: Claude (Anthropic)
+    </div>
+  </div>
+
+  <!-- MANTRA BAR -->
+  <div class="mantra-bar">
+    <div>WHAT &nbsp;<span>→</span>&nbsp; WHY &nbsp;<span>→</span>&nbsp; HOW &nbsp;<span>→</span>&nbsp; WHEN &nbsp;<span>→</span>&nbsp; WHERE &nbsp;<span>→</span>&nbsp; WHO</div>
+    <div>Top 0.1% Thinking Framework</div>
+  </div>
+
+  <!-- VERDICT -->
+  <div class="verdict">
+    <p>You are not addicted to Instagram. You are addicted to <strong>emotional avoidance</strong> — and Instagram is just the current vehicle. The platform is not the enemy. The pattern is. But right now, the platform is feeding the pattern. So the platform has to go — at least until you have real work to post. <strong>Deactivate the personal account. Give the professional account a 60-day deadline.</strong> That's the call.</p>
+  </div>
+
+  <!-- SECTION 1: THE MATH -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">01</div>
+      <div>
+        <div class="section-title">THE COST IN NUMBERS</div>
+        <div class="section-sub">What 3-4 hours a day actually means</div>
+      </div>
+    </div>
+
+    <div class="stat-grid">
+      <div class="stat-cell">
+        <div class="stat-value">~105</div>
+        <div class="stat-label">Hours lost per month</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-value">~1,260</div>
+        <div class="stat-label">Hours lost per year</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-value">~84%</div>
+        <div class="stat-label">Of your 1,490hr roadmap — gone</div>
+      </div>
+      <div class="stat-cell">
+        <div class="stat-value">0</div>
+        <div class="stat-label">Skills gained from reels this year</div>
+      </div>
+    </div>
+
+    <p style="font-size:12px; color:var(--muted); line-height:1.7;">
+      Your personal animation roadmap is ~1,490 hours across 12.5 months. In the time you've spent on Instagram this year, you could have already finished it. Not halfway. <span class="highlight">Completely finished it.</span> That number is not motivational math. That's just arithmetic.
+    </p>
+  </div>
+
+  <!-- SECTION 2: ILLUSION VS REALITY -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">02</div>
+      <div>
+        <div class="section-title">ILLUSION VS REALITY</div>
+        <div class="section-sub">What you think is happening vs what actually is</div>
+      </div>
+    </div>
+
+    <div class="reality-header">
+      <div class="reality-header-cell">Category</div>
+      <div class="reality-header-cell">The Illusion (What your brain says)</div>
+      <div class="reality-header-cell">The Reality (What's actually true)</div>
+    </div>
+
+    <div class="reality-row">
+      <div class="reality-cell label">Learning</div>
+      <div class="reality-cell illusion">"I'm picking up ideas and inspiration"</div>
+      <div class="reality-cell truth">You forget within 10 seconds of swiping. Dopamine fired, nothing retained. That's consumption, not learning.</div>
+    </div>
+    <div class="reality-row">
+      <div class="reality-cell label">Portfolio</div>
+      <div class="reality-cell illusion">"My pro account might be useful someday"</div>
+      <div class="reality-cell truth">It's inactive. A ghost account isn't a portfolio. It's a placeholder for a future you haven't built yet.</div>
+    </div>
+    <div class="reality-row">
+      <div class="reality-cell label">Connection</div>
+      <div class="reality-cell illusion">"I stay connected to people and culture"</div>
+      <div class="reality-cell truth">You're watching Shruti and Vidhi. This isn't connection — it's emotional loop-feeding that keeps you stuck.</div>
+    </div>
+    <div class="reality-row">
+      <div class="reality-cell label">Creativity</div>
+      <div class="reality-cell illusion">"I'm staying in a creative mindset"</div>
+      <div class="reality-cell truth">Watching other people be creative is not being creative. It's creative procrastination with a dopamine wrapper.</div>
+    </div>
+    <div class="reality-row">
+      <div class="reality-cell label">Industry</div>
+      <div class="reality-cell illusion">"I need Instagram for the 3D/VFX world"</div>
+      <div class="reality-cell truth">ArtStation, Behance, LinkedIn, YouTube — all better. Instagram is where art gets 2 seconds of attention between food reels.</div>
+    </div>
+  </div>
+
+  <!-- SECTION 3: PROS AND CONS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">03</div>
+      <div>
+        <div class="section-title">STAY VS LEAVE</div>
+        <div class="section-sub">Honest pros and cons — no spin</div>
+      </div>
+    </div>
+
+    <div class="two-col">
+      <div class="col-block stay">
+        <h4>⚠ REASONS TO STAY</h4>
+        <ul>
+          <li>Portfolio visibility — <em>but your account is inactive, so this is theoretical</em></li>
+          <li>Industry networking — <em>real, but only if you're posting and engaging, not scrolling</em></li>
+          <li>Reference and inspiration — <em>Pinterest and ArtStation do this better, with zero Reels</em></li>
+          <li>Social connection — <em>this is the real one. And it's the dangerous one.</em></li>
+          <li>FOMO — <em>not a reason. A symptom.</em></li>
+        </ul>
+      </div>
+      <div class="col-block leave">
+        <h4">🔴 REASONS TO LEAVE</h4>
+        <ul>
+          <li>3-4 hours daily, zero skill gain — math doesn't lie</li>
+          <li>Algorithm knows your emotional vulnerabilities — it serves you Shruti and Vidhi on purpose</li>
+          <li>You've tried to quit 1000 times — the app is winning</li>
+          <li>Professional account is dead — it gives you false comfort without real output</li>
+          <li>Fills your "recovery" gap after stopping gaming and streaming — exact same trap, new app</li>
+          <li>Every scroll delays your actual career by hours</li>
+        </ul>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 4: THE EMOTIONAL TRAP -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">04</div>
+      <div>
+        <div class="section-title">THE EMOTIONAL TRAP</div>
+        <div class="section-sub">The people you follow and the real reason you keep opening the app</div>
+      </div>
+    </div>
+
+    <p style="font-size:13px; line-height:1.8; margin-bottom:20px;">
+      This is the section most people skip in self-analysis. Don't.
+    </p>
+
+    <p style="font-size:12px; color:#2a2a2a; line-height:1.8; margin-bottom:16px;">
+      There are specific people in your social circle whose profiles you check. Not for information. Not for inspiration. For emotional reasons you haven't fully named yet. Your brain didn't land on those profiles randomly — it landed there because those are the real hooks keeping you on the app. Not tutorials. Not 3D art feeds. <span class="highlight">People you have unresolved feelings about.</span>
+    </p>
+
+    <p style="font-size:12px; color:#2a2a2a; line-height:1.8; margin-bottom:16px;">
+      The Instagram algorithm is not neutral. It tracks your hesitation, your rewatch patterns, your scroll-stop moments. It knows which profiles make you pause. And it will keep serving those to you because that's what keeps you inside the app. This is not a glitch. This is the product.
+    </p>
+
+    <p style="font-size:12px; color:#2a2a2a; line-height:1.8;">
+      Ask yourself honestly: if those specific people didn't have Instagram accounts — would you still open the app 10 times a day? The answer to that question is the real answer to this whole decision.
+    </p>
+  </div>
+
+  <!-- SECTION 5: BEFORE / AFTER -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">05</div>
+      <div>
+        <div class="section-title">BEFORE / AFTER TIMELINE</div>
+        <div class="section-sub">What actually happens when you deactivate</div>
+      </div>
+    </div>
+
+    <div class="timeline">
+      <div class="tl-item">
+        <div class="tl-period">Day 1-3</div>
+        <div class="tl-text">Phantom urge. You'll reach for your phone and feel the muscle memory pull toward Instagram. Your brain is looking for the dopamine hit. This is withdrawal — literally. Normal. Push through.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-period">Day 4-10</div>
+        <div class="tl-text">Boredom sets in. Real boredom — not the fake restlessness you feel between scrolls. This is actually good. Boredom is the precursor to creative thought. Don't fill it with YouTube Shorts. Let it sit.</div>
+      </div>
+      <div class="tl-item">
+        <div class="tl-period">Week 2-3</div>
+        <div class="tl-text">Your attention span starts recovering. You'll notice you can sit with Maya for longer without wanting to tab out. Ideas start forming from inside your head instead of from reels you half-watched.</div>
+      </div>
+      <div class="tl-item positive">
+        <div class="tl-period">Week 3-4</div>
+        <div class="tl-text">You start making things. Small things. A render, a study, a reference breakdown. But you made it — not watched it. This is the shift that matters.</div>
+      </div>
+      <div class="tl-item positive">
+        <div class="tl-period">Month 2</div>
+        <div class="tl-text">Visible skill progress. You're deeper into your modules. You have actual work to show. The professional account now has a reason to exist.</div>
+      </div>
+      <div class="tl-item milestone">
+        <div class="tl-period">Day 60</div>
+        <div class="tl-text">Reactivate the professional account. Post your first real work. Now Instagram is a tool with a purpose — not a habitat you live in.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 6: WHAT PEOPLE WILL SAY -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">06</div>
+      <div>
+        <div class="section-title">WHAT PEOPLE WILL SAY</div>
+        <div class="section-sub">Every comment, decoded and answered</div>
+      </div>
+    </div>
+
+    <div class="quote-block">
+      <div class="quote-label">They will say</div>
+      "Why are you acting like a woman? Men use Insta."
+    </div>
+    <div class="response-block">
+      <div class="quote-label">The real answer</div>
+      This statement has zero logic in it. It's social pressure disguised as cultural commentary. Men also die of heart disease, drive without seatbelts, and avoid doctors. "Men do X" has never been a good reason to do X. The people saying this are still scrolling Instagram with nothing to show for it. You don't want their validation — you want their results. And their results are average.
+    </div>
+
+    <div class="quote-block">
+      <div class="quote-label">They will say</div>
+      "You're overthinking it, it's just an app."
+    </div>
+    <div class="response-block">
+      <div class="quote-label">The real answer</div>
+      3-4 hours a day is not "just an app." That's a part-time job. You're not overthinking it — you're finally thinking clearly about something you've been avoiding thinking about.
+    </div>
+
+    <div class="quote-block">
+      <div class="quote-label">They will say</div>
+      "You'll be out of the loop, miss things."
+    </div>
+    <div class="response-block">
+      <div class="quote-label">The real answer</div>
+      Every important thing reaches you through other people, WhatsApp, or real conversation. Nothing genuinely important lives only on Instagram Stories. What you'll miss is drama. What you'll gain is time.
+    </div>
+
+    <div class="quote-block">
+      <div class="quote-label">They will say</div>
+      "So now you think you're better than us?"
+    </div>
+    <div class="response-block">
+      <div class="quote-label">The real answer</div>
+      No. You just have different goals. You don't need to explain or justify a personal decision about your own phone to anyone. "I'm taking a break from it" is a complete sentence.
+    </div>
+  </div>
+
+  <!-- SECTION 7: SOCIAL CIRCLE -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">07</div>
+      <div>
+        <div class="section-title">YOUR SOCIAL CIRCLE</div>
+        <div class="section-sub">Friends, classmates, acquaintances — what actually happens to each relationship</div>
+      </div>
+    </div>
+
+    <p style="font-size:12px; color:#2a2a2a; line-height:1.8; margin-bottom:24px;">
+      This is the part people genuinely worry about. "Will I lose touch? Will people think I ghosted them? Will friendships die?" Let's go category by category.
+    </p>
+
+    <div class="reality-header">
+      <div class="reality-header-cell">Type of Person</div>
+      <div class="reality-header-cell">What you're afraid of</div>
+      <div class="reality-header-cell">What actually happens</div>
+    </div>
+
+    <div class="reality-row">
+      <div class="reality-cell label">Close Friends<br>(e.g. Hemay)</div>
+      <div class="reality-cell illusion">"They'll feel I disappeared or don't care"</div>
+      <div class="reality-cell truth">Real friends have your number. They'll text. You'll call. This relationship survives zero Instagram activity — it always did. WhatsApp exists.</div>
+    </div>
+    <div class="reality-row">
+      <div class="reality-cell label">Classmates</div>
+      <div class="reality-cell illusion">"I'll be out of the loop on what everyone's doing"</div>
+      <div class="reality-cell truth">You see them in class daily. The "loop" happens in person, not on Stories. Instagram classmate content is mostly noise anyway.</div>
+    </div>
+    <div class="reality-row">
+      <div class="reality-cell label">Acquaintances</div>
+      <div class="reality-cell illusion">"They'll think I unfollowed them or blocked them"</div>
+      <div class="reality-cell truth">They won't notice for weeks. And when they do, "I deactivated" is a complete explanation. Acquaintances don't define your social worth.</div>
+    </div>
+    <div class="reality-row">
+      <div class="reality-cell label">People you have feelings for</div>
+      <div class="reality-cell illusion">"I'll miss what they're doing, I'll feel disconnected"</div>
+      <div class="reality-cell truth">You're not connected to them through Instagram. You're just watching them. That's not connection — that's observation with emotional weight. Leaving actually helps you.</div>
+    </div>
+    <div class="reality-row">
+      <div class="reality-cell label">Social "status" in group</div>
+      <div class="reality-cell illusion">"People will think I'm weird or antisocial"</div>
+      <div class="reality-cell truth">For 3 days someone might ask. You say "took a break." By day 4 nobody remembers. Your status in a group is built by real-world presence, not follower count.</div>
+    </div>
+    <div class="reality-row">
+      <div class="reality-cell label">Group events / plans</div>
+      <div class="reality-cell illusion">"I'll miss invites, events, plans shared on Insta"</div>
+      <div class="reality-cell truth">Every real invite comes via WhatsApp or direct message. No one invites actual friends through an Instagram Story. If they did, they can text you directly.</div>
+    </div>
+
+    <div style="margin-top: 28px; border-left: 3px solid var(--gold); padding: 16px 20px; background: #fdf9f2; font-size: 12px; line-height: 1.8;">
+      <div style="font-size:10px; letter-spacing:0.15em; text-transform:uppercase; color:var(--gold); margin-bottom:8px;">The honest truth about your social circle</div>
+      Relationships that require Instagram to survive were never real relationships. They were <strong>passive observation loops</strong> — you watching them, them watching you, nobody actually talking. Real friendships are built on conversations, shared time, and genuine interest. All of that happens off the app. The social circle you're worried about losing? The real parts of it don't live on Instagram. Only the performance of it does.
+    </div>
+
+    <div style="margin-top: 16px; border-left: 3px solid var(--red); padding: 16px 20px; background: #faf7f2; font-size: 12px; line-height: 1.8;">
+      <div style="font-size:10px; letter-spacing:0.15em; text-transform:uppercase; color:var(--red); margin-bottom:8px;">What actually changes in your social life</div>
+      The people who truly matter will reach out. The ones who don't — you just found out they were social media contacts, not actual friends. That's not a loss. That's clarity. And in India specifically, where WhatsApp groups run everything from family news to college plans — Instagram is genuinely optional for your actual social life. It was always optional. You just didn't test it.
+    </div>
+  </div>
+
+  <!-- SECTION 8: THE 3 QUESTIONS -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">08</div>
+      <div>
+        <div class="section-title">THE 3 HONEST QUESTIONS</div>
+        <div class="section-sub">Answer these before you finalize anything</div>
+      </div>
+    </div>
+
+    <div class="question-block">
+      <div class="q-num">1</div>
+      <div class="q-text">
+        In the last 90 days, has Instagram made you measurably better at 3D, VFX, animation, or anything on your roadmap?
+        <span class="q-sub">Not inspired. Not interested. Actually better — with work to prove it.</span>
+      </div>
+    </div>
+
+    <div class="question-block">
+      <div class="q-num">2</div>
+      <div class="q-text">
+        If the specific people you emotionally check on didn't have Instagram accounts, would you still open the app 10+ times a day?
+        <span class="q-sub">This is the most important question in this entire report. Be brutally honest.</span>
+      </div>
+    </div>
+
+    <div class="question-block">
+      <div class="q-num">3</div>
+      <div class="q-text">
+        If you had spent your Instagram hours posting work on your professional account instead of scrolling — where would that account be today?
+        <span class="q-sub">What would those 1,260 hours of output look like to a recruiter or client right now?</span>
+      </div>
+    </div>
+  </div>
+
+  <!-- SECTION 9: THE PLAY -->
+  <div class="section">
+    <div class="section-header">
+      <div class="section-num">09</div>
+      <div>
+        <div class="section-title">WHAT TO ACTUALLY DO</div>
+        <div class="section-sub">Specific, ordered, no ambiguity</div>
+      </div>
+    </div>
+
+    <p style="font-size:12px; color:var(--muted); margin-bottom:20px; line-height:1.7;">
+      Don't say "forever." That's why you've failed 1,000 times. "Forever" triggers rebellion. Your brain fights absolutes. Instead — frame this as a <span class="highlight">60-day structured break with a defined re-entry condition.</span>
+    </p>
+
+    <div class="action-box">
+      <ol class="action-steps">
+        <li>
+          <strong>Today — Deactivate the personal account.</strong> Not delete. Deactivate. This is reversible, which removes the psychological pressure of permanence. But deactivate it now — not after one more scroll.
+        </li>
+        <li>
+          <strong>Leave the professional account dormant.</strong> Don't touch it. Don't scroll from it. Set a locked screen time limit on the app itself at the OS level — not just willpower.
+        </li>
+        <li>
+          <strong>Replace the urge — specifically.</strong> When you reach for Instagram, open your Maya project file instead. Not YouTube. Not WhatsApp. The project file. Even if you just stare at it for 3 minutes. Break the motor habit, not just the thought.
+        </li>
+        <li>
+          <strong>On Day 60 — reactivate the professional account only if you have at least one completed piece of work to post.</strong> This turns Instagram from a comfort into a reward. If you don't have work yet, extend by 30 days. No exceptions.
+        </li>
+        <li>
+          <strong>Never reactivate the personal account.</strong> You don't need it. Everyone who matters can reach you on WhatsApp. The personal account was always the problem — not the professional one.
+        </li>
+      </ol>
+    </div>
+
+    <hr class="separator">
+
+    <div style="padding: 20px 0;">
+      <div style="font-family:'Bebas Neue',sans-serif; font-size:20px; letter-spacing:0.08em; margin-bottom:12px; color:var(--ink);">USE THESE INSTEAD OF INSTAGRAM</div>
+      <span class="tag muted">ArtStation — 3D/VFX portfolio</span>
+      <span class="tag muted">Behance — broader creative work</span>
+      <span class="tag muted">Pinterest — moodboards and visual refs</span>
+      <span class="tag muted">YouTube — structured learning only</span>
+      <span class="tag muted">LinkedIn — professional presence</span>
+      <span class="tag red">Not Instagram Reels</span>
+    </div>
+  </div>
+
+  <!-- CLOSING -->
+  <div style="border: 1px solid var(--line); padding: 28px 32px; margin-top: 8px; background: #faf7f2;">
+    <div style="font-family:'Bebas Neue',sans-serif; font-size:22px; letter-spacing:0.06em; margin-bottom:14px;">THE BOTTOM LINE</div>
+    <p style="font-family:'Fraunces',serif; font-style:italic; font-size:15px; line-height:1.7; color:var(--ink);">
+      You've done this 1,000 times. Every time you framed it as "should I leave Instagram." The real question has always been: "Am I going to choose my actual future over my current comfort?" Instagram is just today's version of the same test you've been failing. You already know what to do. The only variable left is whether you do it.
+    </p>
+    <div style="margin-top:18px; font-size:11px; letter-spacing:0.12em; text-transform:uppercase; color:var(--red);">
+      Decision required: Deactivate personal. Keep pro dormant. 60-day clock starts today.
+    </div>
+  </div>
+
+  <!-- FOOTER -->
+  <div class="footer">
+    <div>OPX PERSONAL INTELLIGENCE — CASE FILE 001</div>
+    <div>WHAT · WHY · HOW · WHEN · WHERE · WHO</div>
+    <div>Top 0.1% Framework · Claude × Anthropic</div>
+  </div>
+
+</div>
+</body>
+</html>
