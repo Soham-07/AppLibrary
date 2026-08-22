@@ -1,0 +1,1113 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8"/>
+<meta name="viewport" content="width=device-width, initial-scale=1.0"/>
+<title>OPX — Break The Loop</title>
+<link href="https://fonts.googleapis.com/css2?family=Syne:wght@400;500;600;700;800&family=IBM+Plex+Mono:wght@400;500;700&family=DM+Sans:ital,wght@0,300;0,400;0,500;0,600;1,300&display=swap" rel="stylesheet"/>
+<style>
+  :root {
+    --bg: #090909;
+    --surface: #111113;
+    --surface2: #18181C;
+    --border: #232328;
+    --border2: #2E2E35;
+    --text: #EEEEF0;
+    --muted: #5C5C6B;
+    --dim: #3A3A45;
+
+    --blue: #4F8EF7;
+    --blue-dim: #4F8EF715;
+    --green: #3ECF8E;
+    --green-dim: #3ECF8E15;
+    --red: #F2614C;
+    --red-dim: #F2614C15;
+    --amber: #F5A623;
+    --amber-dim: #F5A62315;
+    --purple: #A78BFA;
+    --purple-dim: #A78BFA15;
+    --teal: #2DD4BF;
+    --teal-dim: #2DD4BF15;
+    --pink: #F472B6;
+    --pink-dim: #F472B615;
+    --orange: #FB923C;
+    --orange-dim: #FB923C15;
+    --indigo: #818CF8;
+    --indigo-dim: #818CF815;
+
+    --radius: 14px;
+    --font-display: 'Syne', sans-serif;
+    --font-body: 'DM Sans', sans-serif;
+    --font-mono: 'IBM Plex Mono', monospace;
+  }
+
+  *, *::before, *::after { box-sizing: border-box; margin: 0; padding: 0; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: var(--font-body);
+    min-height: 100vh;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  /* ─── NOISE OVERLAY ─── */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background-image: url("data:image/svg+xml,%3Csvg viewBox='0 0 512 512' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='noise'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.75' numOctaves='4' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23noise)' opacity='0.03'/%3E%3C/svg%3E");
+    pointer-events: none;
+    z-index: 0;
+  }
+
+  .wrap { position: relative; z-index: 1; max-width: 720px; margin: 0 auto; padding: 0 18px 80px; }
+
+  /* ─── HEADER ─── */
+  .header {
+    padding: 36px 0 28px;
+    border-bottom: 1px solid var(--border);
+    margin-bottom: 32px;
+  }
+  .header-top { display: flex; align-items: flex-start; justify-content: space-between; gap: 16px; }
+  .header-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 10px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 8px;
+  }
+  .header-title {
+    font-family: var(--font-display);
+    font-size: clamp(28px, 5vw, 38px);
+    font-weight: 800;
+    line-height: 1.05;
+    letter-spacing: -0.02em;
+  }
+  .header-title span { color: var(--blue); }
+  .header-sub { font-size: 13px; color: var(--muted); margin-top: 8px; line-height: 1.5; max-width: 380px; }
+
+  .stat-box {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 14px 18px;
+    text-align: center;
+    min-width: 80px;
+    flex-shrink: 0;
+  }
+  .stat-num { font-family: var(--font-mono); font-size: 26px; font-weight: 700; color: var(--green); line-height: 1; }
+  .stat-label { font-size: 9px; color: var(--muted); text-transform: uppercase; letter-spacing: 0.15em; margin-top: 4px; }
+
+  /* ─── SECTION LABELS ─── */
+  .section-label {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    color: var(--muted);
+    text-transform: uppercase;
+    margin-bottom: 12px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .section-label::after { content: ''; flex: 1; height: 1px; background: var(--border); }
+
+  /* ─── CHAT INPUT ─── */
+  .chat-block {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: var(--radius);
+    padding: 18px;
+    margin-bottom: 28px;
+  }
+  .chat-row { display: flex; gap: 10px; }
+  .chat-input {
+    flex: 1;
+    background: var(--bg);
+    border: 1px solid var(--border2);
+    border-radius: 10px;
+    padding: 11px 15px;
+    color: var(--text);
+    font-family: var(--font-body);
+    font-size: 14px;
+    outline: none;
+    transition: border 0.2s;
+  }
+  .chat-input:focus { border-color: var(--blue); }
+  .chat-input::placeholder { color: var(--muted); }
+  .chat-send {
+    background: var(--blue);
+    color: #fff;
+    border: none;
+    border-radius: 10px;
+    padding: 11px 20px;
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 700;
+    cursor: pointer;
+    transition: opacity 0.2s, transform 0.1s;
+    white-space: nowrap;
+  }
+  .chat-send:hover { opacity: 0.85; }
+  .chat-send:active { transform: scale(0.97); }
+  .chat-send:disabled { opacity: 0.4; cursor: not-allowed; }
+  .chat-response {
+    margin-top: 14px;
+    padding: 14px 16px;
+    background: #0F1829;
+    border: 1px solid var(--blue);
+    border-radius: 10px;
+    font-size: 14px;
+    line-height: 1.7;
+    color: #B8CFFE;
+    display: none;
+  }
+  .chat-response.visible { display: block; }
+  .chat-thinking {
+    display: flex;
+    gap: 5px;
+    align-items: center;
+    padding: 10px 16px;
+  }
+  .dot { width: 6px; height: 6px; background: var(--blue); border-radius: 50%; animation: blink 1.2s infinite; }
+  .dot:nth-child(2) { animation-delay: 0.2s; }
+  .dot:nth-child(3) { animation-delay: 0.4s; }
+  @keyframes blink { 0%,80%,100% { opacity: 0.2; } 40% { opacity: 1; } }
+
+  /* ─── MOOD GRID ─── */
+  .mood-grid {
+    display: grid;
+    grid-template-columns: repeat(3, 1fr);
+    gap: 8px;
+    margin-bottom: 28px;
+  }
+  @media(max-width:480px) { .mood-grid { grid-template-columns: repeat(2, 1fr); } }
+
+  .mood-btn {
+    background: var(--surface);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 13px 10px;
+    cursor: pointer;
+    text-align: left;
+    color: var(--text);
+    font-family: var(--font-body);
+    display: flex;
+    flex-direction: column;
+    gap: 5px;
+    transition: all 0.15s;
+    position: relative;
+    overflow: hidden;
+  }
+  .mood-btn:hover { border-color: var(--border2); background: var(--surface2); transform: translateY(-1px); }
+  .mood-btn.active { border-color: var(--c, var(--blue)); background: color-mix(in srgb, var(--c, var(--blue)) 8%, transparent); }
+  .mood-btn .emoji { font-size: 20px; }
+  .mood-btn .mood-name { font-size: 12px; font-weight: 600; line-height: 1.2; }
+  .mood-btn .mood-hint { font-size: 10px; color: var(--muted); }
+  .mood-btn.active::after {
+    content: '●';
+    position: absolute;
+    top: 8px; right: 10px;
+    font-size: 7px;
+    color: var(--c, var(--blue));
+  }
+
+  /* ─── ALTERNATIVE CARD ─── */
+  .alt-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 18px;
+    padding: 24px;
+    margin-bottom: 14px;
+    transition: all 0.3s;
+    display: none;
+    animation: cardIn 0.3s ease;
+  }
+  .alt-card.visible { display: block; }
+  @keyframes cardIn {
+    from { opacity: 0; transform: translateY(10px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .alt-card-top { display: flex; justify-content: space-between; align-items: center; margin-bottom: 16px; gap: 10px; }
+  .tags { display: flex; gap: 6px; flex-wrap: wrap; }
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.15em;
+    text-transform: uppercase;
+    padding: 4px 9px;
+    border-radius: 20px;
+    font-weight: 700;
+  }
+  .time-badge {
+    font-family: var(--font-mono);
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+
+  .alt-title {
+    font-family: var(--font-display);
+    font-size: 22px;
+    font-weight: 800;
+    line-height: 1.15;
+    letter-spacing: -0.01em;
+    margin-bottom: 10px;
+  }
+  .alt-desc {
+    font-size: 14px;
+    line-height: 1.7;
+    color: #9CA3AF;
+    margin-bottom: 16px;
+  }
+
+  /* ─── DEEP INFO SECTION ─── */
+  .alt-deep {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 14px 16px;
+    margin-bottom: 16px;
+  }
+  .alt-deep-title {
+    font-family: var(--font-mono);
+    font-size: 9px;
+    letter-spacing: 0.2em;
+    text-transform: uppercase;
+    color: var(--muted);
+    margin-bottom: 10px;
+  }
+  .alt-deep-content { font-size: 13px; line-height: 1.65; color: #7C8291; }
+  .alt-deep-content strong { color: #A0A8BC; font-weight: 600; }
+
+  .alt-why {
+    display: flex;
+    gap: 10px;
+    margin-bottom: 16px;
+  }
+  .why-pill {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 8px 12px;
+    font-size: 12px;
+    color: var(--muted);
+    flex: 1;
+    text-align: center;
+  }
+  .why-pill strong { display: block; color: var(--text); font-size: 13px; font-weight: 600; margin-bottom: 2px; }
+
+  /* ─── TIMER ─── */
+  .timer-wrap { text-align: center; padding: 16px 0 8px; }
+  .timer-ring { display: inline-block; position: relative; width: 90px; height: 90px; margin-bottom: 12px; }
+  .timer-ring svg { transform: rotate(-90deg); }
+  .timer-text {
+    position: absolute;
+    inset: 0;
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--text);
+  }
+  .timer-btn {
+    border: none;
+    border-radius: 10px;
+    padding: 9px 22px;
+    cursor: pointer;
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 700;
+    transition: all 0.15s;
+  }
+  .timer-done { color: var(--green); font-weight: 700; font-size: 14px; margin-top: 6px; font-family: var(--font-mono); }
+
+  /* ─── ACTION BUTTONS ─── */
+  .action-row { display: flex; gap: 10px; margin-bottom: 20px; display: none; }
+  .action-row.visible { display: flex; }
+  .btn-did {
+    flex: 1;
+    background: #0C2718;
+    color: var(--green);
+    border: 1.5px solid #3ECF8E44;
+    border-radius: 12px;
+    padding: 14px;
+    cursor: pointer;
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 700;
+    transition: all 0.15s;
+  }
+  .btn-did:hover { background: #0F3020; }
+  .btn-next {
+    flex: 1;
+    background: var(--surface);
+    color: var(--muted);
+    border: 1.5px solid var(--border);
+    border-radius: 12px;
+    padding: 14px;
+    cursor: pointer;
+    font-family: var(--font-display);
+    font-size: 14px;
+    font-weight: 600;
+    transition: all 0.15s;
+  }
+  .btn-next:hover { color: var(--text); border-color: var(--border2); }
+
+  /* ─── WIN CARD ─── */
+  .win-card {
+    background: #0A2016;
+    border: 1.5px solid var(--green);
+    border-radius: 14px;
+    padding: 20px 22px;
+    margin-bottom: 20px;
+    text-align: center;
+    display: none;
+    animation: cardIn 0.3s ease;
+  }
+  .win-card.visible { display: block; }
+  .win-icon { font-size: 30px; margin-bottom: 8px; }
+  .win-title { color: var(--green); font-family: var(--font-display); font-size: 17px; font-weight: 800; margin-bottom: 6px; }
+  .win-sub { font-size: 13px; color: #4ADE80; line-height: 1.5; }
+  .btn-continue {
+    margin-top: 14px;
+    background: #133824;
+    color: var(--green);
+    border: none;
+    border-radius: 10px;
+    padding: 10px 22px;
+    cursor: pointer;
+    font-family: var(--font-display);
+    font-size: 13px;
+    font-weight: 700;
+    transition: all 0.15s;
+  }
+  .btn-continue:hover { background: #1A4A2E; }
+
+  /* ─── SCIENCE BOX ─── */
+  .science-section { margin-bottom: 28px; display: none; }
+  .science-section.visible { display: block; }
+  .science-grid { display: grid; grid-template-columns: 1fr 1fr; gap: 10px; }
+  @media(max-width:480px) { .science-grid { grid-template-columns: 1fr; } }
+  .science-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 16px;
+  }
+  .sci-icon { font-size: 20px; margin-bottom: 8px; }
+  .sci-name { font-family: var(--font-display); font-size: 14px; font-weight: 700; margin-bottom: 6px; }
+  .sci-text { font-size: 12px; line-height: 1.6; color: var(--muted); }
+  .sci-text strong { color: #9CA3AF; }
+
+  /* ─── HISTORY ─── */
+  .history-section { margin-top: 32px; }
+  .history-list { display: flex; flex-direction: column; gap: 8px; }
+  .history-item {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 10px;
+    padding: 12px 16px;
+    display: flex;
+    justify-content: space-between;
+    align-items: center;
+  }
+  .history-name { font-size: 13px; font-weight: 500; }
+  .history-mood { font-size: 11px; color: var(--muted); margin-top: 2px; }
+  .history-time { font-family: var(--font-mono); font-size: 10px; color: var(--dim); }
+  .empty-hist { text-align: center; padding: 24px; color: var(--muted); font-size: 13px; }
+
+  /* ─── INFO PANELS ─── */
+  .info-tabs { display: flex; gap: 6px; margin-bottom: 14px; flex-wrap: wrap; }
+  .info-tab {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 7px 13px;
+    cursor: pointer;
+    font-size: 12px;
+    color: var(--muted);
+    font-family: var(--font-body);
+    transition: all 0.15s;
+  }
+  .info-tab:hover { color: var(--text); }
+  .info-tab.active { background: var(--blue-dim); border-color: var(--blue); color: var(--blue); font-weight: 600; }
+
+  .info-panel { display: none; }
+  .info-panel.active { display: block; }
+
+  .insight-card {
+    background: var(--surface);
+    border: 1px solid var(--border);
+    border-radius: 12px;
+    padding: 18px;
+    margin-bottom: 10px;
+  }
+  .insight-title { font-family: var(--font-display); font-size: 15px; font-weight: 700; margin-bottom: 8px; display: flex; align-items: center; gap: 8px; }
+  .insight-body { font-size: 13px; line-height: 1.7; color: var(--muted); }
+  .insight-body strong { color: #9CA3AF; }
+
+  .progress-bar {
+    height: 4px;
+    background: var(--border);
+    border-radius: 99px;
+    overflow: hidden;
+    margin-top: 10px;
+  }
+  .progress-fill { height: 100%; border-radius: 99px; transition: width 1s ease; }
+
+  .quote-block {
+    border-left: 3px solid var(--blue);
+    padding: 12px 16px;
+    margin: 12px 0;
+    background: var(--blue-dim);
+    border-radius: 0 8px 8px 0;
+  }
+  .quote-block p { font-size: 13px; font-style: italic; color: #93B4FD; line-height: 1.6; }
+
+  /* ─── FOOTER ─── */
+  .footer { margin-top: 48px; padding-top: 20px; border-top: 1px solid var(--border); text-align: center; }
+  .footer p { font-size: 11px; color: var(--dim); line-height: 1.6; }
+
+  /* scrollbar */
+  ::-webkit-scrollbar { width: 6px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border2); border-radius: 99px; }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <!-- HEADER -->
+  <div class="header">
+    <div class="header-top">
+      <div>
+        <div class="header-eyebrow">OPX — Stimulus Escape Engine v2</div>
+        <h1 class="header-title">Break<br><span>The Loop.</span></h1>
+        <p class="header-sub">Your brain is chasing the next hit. This tool exists for the exact moment you catch yourself reaching.</p>
+      </div>
+      <div style="display:flex;flex-direction:column;gap:8px;align-items:flex-end;">
+        <div class="stat-box">
+          <div class="stat-num" id="streak-num">0</div>
+          <div class="stat-label">wins today</div>
+        </div>
+        <div class="stat-box" style="min-width:unset;padding:10px 14px;">
+          <div style="font-family:var(--font-mono);font-size:12px;color:var(--muted)" id="current-time">--:--</div>
+          <div class="stat-label">now</div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- CHAT -->
+  <div class="section-label">Type what you're feeling</div>
+  <div class="chat-block">
+    <div class="chat-row">
+      <input class="chat-input" id="chat-input" type="text" placeholder="e.g. I'm bored and want to watch YouTube..." autocomplete="off"/>
+      <button class="chat-send" id="chat-btn" onclick="sendChat()">→ Go</button>
+    </div>
+    <div class="chat-response" id="chat-response">
+      <div class="chat-thinking" id="chat-thinking" style="display:none">
+        <div class="dot"></div><div class="dot"></div><div class="dot"></div>
+      </div>
+      <div id="chat-text"></div>
+    </div>
+  </div>
+
+  <!-- MOOD GRID -->
+  <div class="section-label">Or select your situation</div>
+  <div class="mood-grid" id="mood-grid"></div>
+
+  <!-- SCIENCE BOXES (shown on mood select) -->
+  <div class="science-section" id="science-section">
+    <div class="section-label">What's happening in your brain right now</div>
+    <div class="science-grid" id="science-grid"></div>
+  </div>
+
+  <!-- ALTERNATIVE CARD -->
+  <div id="alt-section" style="display:none">
+    <div class="section-label">Your escape — right now</div>
+    <div class="alt-card visible" id="alt-card">
+      <div class="alt-card-top">
+        <div class="tags" id="alt-tags"></div>
+        <div class="time-badge" id="alt-time"></div>
+      </div>
+      <div class="alt-title" id="alt-title"></div>
+      <div class="alt-desc" id="alt-desc"></div>
+      <div class="alt-why" id="alt-why"></div>
+      <div class="alt-deep" id="alt-deep">
+        <div class="alt-deep-title">Why this actually works</div>
+        <div class="alt-deep-content" id="alt-deep-content"></div>
+      </div>
+      <div id="timer-section" style="display:none">
+        <div class="timer-wrap">
+          <div class="timer-ring">
+            <svg width="90" height="90" viewBox="0 0 90 90">
+              <circle cx="45" cy="45" r="38" fill="none" stroke="#232328" stroke-width="7"/>
+              <circle id="timer-arc" cx="45" cy="45" r="38" fill="none" stroke="#4F8EF7" stroke-width="7"
+                stroke-dasharray="238.76" stroke-dashoffset="0" stroke-linecap="round"/>
+            </svg>
+            <div class="timer-text" id="timer-display">0:00</div>
+          </div>
+          <br/>
+          <button class="timer-btn" id="timer-btn" onclick="toggleTimer()" style="background:var(--blue-dim);color:var(--blue);border:1px solid #4F8EF744;">Start Timer</button>
+          <div class="timer-done" id="timer-done" style="display:none">Done. Feel the difference?</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="action-row visible" id="action-row">
+      <button class="btn-did" onclick="markDone()">✓ I did it</button>
+      <button class="btn-next" onclick="nextAlt()">↻ Give me another</button>
+    </div>
+
+    <div class="win-card" id="win-card">
+      <div class="win-icon">💪</div>
+      <div class="win-title" id="win-title">That's a real win.</div>
+      <p class="win-sub" id="win-sub"></p>
+      <button class="btn-continue" onclick="afterWin()">Keep going →</button>
+    </div>
+  </div>
+
+  <!-- KNOWLEDGE TABS -->
+  <div style="margin-top:36px">
+    <div class="section-label">Understand the system (read this)</div>
+    <div class="info-tabs">
+      <button class="info-tab active" onclick="switchTab('why')">Why you can't stop</button>
+      <button class="info-tab" onclick="switchTab('brain')">Brain science</button>
+      <button class="info-tab" onclick="switchTab('music')">Music trap</button>
+      <button class="info-tab" onclick="switchTab('method')">The method</button>
+    </div>
+
+    <div class="info-panel active" id="tab-why">
+      <div class="insight-card">
+        <div class="insight-title">🔁 You've built a stimulation dependency system</div>
+        <div class="insight-body">
+          Every gap in your day triggers a reflex reach. Wake up → phone. Eating → screen. Walking → music. Working → YouTube in background. This isn't laziness. It's a <strong>conditioned nervous system response</strong>. Over 8–10 years of this, your brain has rewired itself to treat silence and stillness as threats.
+          <div class="quote-block"><p>"The urge for stimulation is the brain's way of avoiding a feeling it hasn't learned to process."</p></div>
+          You're not bored. You're <strong>emotionally avoidant</strong> — and the phone is the easiest exit door. The moment you realize that, everything shifts.
+        </div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-title">📉 Your dopamine baseline has dropped</div>
+        <div class="insight-body">
+          Dopamine isn't the "pleasure chemical." It's the <strong>anticipation chemical</strong>. Every scroll, every YouTube thumbnail, every notification creates a spike of anticipatory dopamine. Over time, your baseline drops — meaning normal life (working on Maya, sitting quietly, having a real conversation) produces <strong>less dopamine than before</strong>. Your creative work feels flat. Your real relationships feel boring. Not because they are — but because you've recalibrated your brain's reward system around cheap, artificial hits.
+        </div>
+        <div style="margin-top:12px">
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin-bottom:4px">
+            <span>Dopamine baseline (estimated)</span><span>Low</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:28%;background:var(--red)"></div></div>
+          <div style="display:flex;justify-content:space-between;font-size:11px;color:var(--muted);margin:10px 0 4px">
+            <span>Sensitivity to real-world rewards</span><span>Diminished</span>
+          </div>
+          <div class="progress-bar"><div class="progress-fill" style="width:35%;background:var(--amber)"></div></div>
+        </div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-title">🌑 The 10-minute threshold</div>
+        <div class="insight-body">
+          The average urge to grab your phone or stimulate yourself <strong>peaks at 4–6 minutes and naturally fades within 10–15 minutes</strong> if not acted upon. Every time you cave before 10 minutes, you reinforce the loop. Every time you sit through 10 minutes of discomfort, you weaken it. The discomfort itself is not dangerous — it's just unfamiliar. Sit in it long enough and you'll discover thoughts, ideas, and clarity that the stimulation was burying.
+        </div>
+      </div>
+    </div>
+
+    <div class="info-panel" id="tab-brain">
+      <div class="insight-card">
+        <div class="insight-title">🧠 Default Mode Network (DMN)</div>
+        <div class="insight-body">
+          The DMN activates when your brain is at rest — not sleeping, just unstimulated. It's responsible for <strong>self-reflection, creative insight, future planning, and emotional processing</strong>. Research shows that people who allow their DMN to activate regularly have higher creativity, better emotional regulation, and stronger sense of identity. When you're always consuming, the DMN never fires. You're starving the part of your brain that makes you, you.
+          <div class="quote-block"><p>"Mind-wandering is not wasted time. It is when the brain processes the world and figures out what to do next."<br>— Marcus Raichle, DMN discoverer, Washington University</p></div>
+        </div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-title">⚡ Neuroplasticity: the 66-day rule</div>
+        <div class="insight-body">
+          Habits are physical neural pathways — grooves in your brain literally worn deeper by repetition. The good news: your brain is <strong>plastic</strong>, meaning those grooves can be replaced. Research from University College London suggests new habits become automatic at around <strong>66 days of consistent practice</strong> (not 21 — that's a myth). Each time you choose the alternative over the urge, you're physically building a new pathway. It feels weak at first. That's neurological, not motivational.
+        </div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-title">🔄 Behavioral loops: Cue → Routine → Reward</div>
+        <div class="insight-body">
+          Charles Duhigg mapped the habit loop. Your brain isn't addicted to the phone — it's addicted to the <strong>cue-response pattern</strong>:
+          <br/><br/>
+          <strong>Cue:</strong> Any gap (waking up, commute, waiting, boredom)<br/>
+          <strong>Routine:</strong> Reaching for phone / opening YouTube / gaming<br/>
+          <strong>Reward:</strong> Dopamine micro-hit, anxiety suppressed, time passed<br/>
+          <br/>
+          You can't delete the cue. You can't delete the reward-seeking. But you <strong>can replace the routine</strong>. That's the only lever. This tool exists to give your brain a different routine to run when the cue hits.
+        </div>
+      </div>
+    </div>
+
+    <div class="info-panel" id="tab-music">
+      <div class="insight-card">
+        <div class="insight-title">🎵 Why "background music" is its own trap</div>
+        <div class="insight-body">
+          Music feels harmless because it's not porn or gaming. But constant music use is <strong>auditory stimulation addiction</strong> — a real pattern with real effects. When you're commuting, eating, working, and even in class with music always on, you're never alone with your thoughts. You're avoiding silence the same way you avoid a blank screen.
+          <div class="quote-block"><p>"Silence is not the absence of something. It is the presence of everything."</p></div>
+          <strong>The cognitive cost:</strong> Music with lyrics actively competes with verbal processing in your brain. Studying or doing creative work (like Maya) with lyrics playing reduces working memory capacity by up to <strong>20–40%</strong> depending on the task.
+        </div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-title">🧩 The silence discomfort loop</div>
+        <div class="insight-body">
+          When you put in headphones immediately, you're telling your nervous system: <em>"silence = threat, music = safe."</em> Over time, your <strong>resting discomfort threshold drops</strong>. You need music to feel okay. This is the same mechanism as any dependency — the relief is real, but the dependency deepens. Try walking 10 minutes without headphones. Notice the discomfort. That discomfort IS the awareness you've been blocking.
+        </div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-title">✅ What music is actually good for</div>
+        <div class="insight-body">
+          Music isn't the enemy. Misuse is. Legitimate uses:
+          <br/><br/>
+          <strong>• Repetitive physical tasks</strong> — cleaning, gym, basic household work<br/>
+          <strong>• Mood elevation</strong> — one intentional listening session, fully present<br/>
+          <strong>• Background ambience</strong> — lo-fi or ambient (no lyrics) for certain work types<br/>
+          <br/>
+          The test: are you <em>listening</em> to music or <em>hiding</em> in music? One is conscious. The other is escape.
+        </div>
+      </div>
+    </div>
+
+    <div class="info-panel" id="tab-method">
+      <div class="insight-card">
+        <div class="insight-title">🔧 The only method that works: Gradual Friction + Replacement</div>
+        <div class="insight-body">
+          Cold turkey fails 90% of the time for long-term patterns because it relies on willpower — the most finite resource you have. The proven approach is:
+          <br/><br/>
+          <strong>1. Add friction</strong> — Make the bad behavior harder (phone in another room, log out of YouTube, delete apps)<br/>
+          <strong>2. Replace the routine</strong> — The cue will still fire. Have the replacement ready before it hits<br/>
+          <strong>3. Start tiny</strong> — One meal without screen. One commute without music. One work session without YouTube<br/>
+          <strong>4. Track wins, not failures</strong> — Every "I did it" is a neural pathway being rebuilt<br/>
+          <strong>5. Ride the wave</strong> — Urges peak and fade. You don't have to destroy them. Just outlast them.
+        </div>
+      </div>
+      <div class="insight-card">
+        <div class="insight-title">📐 Your 30-day starter protocol</div>
+        <div class="insight-body">
+          <strong>Week 1:</strong> No phone for first 15 minutes after waking. Just exist.<br/>
+          <strong>Week 2:</strong> Add: one meal per day with no screen. Eat and taste your food.<br/>
+          <strong>Week 3:</strong> Add: one commute per day without headphones (or 10 mins of it).<br/>
+          <strong>Week 4:</strong> Add: 25-minute work/Maya sessions with no YouTube in background.<br/>
+          <br/>
+          Don't add all four in week one. Stack them slowly. Each one you sustain builds tolerance for the next.
+          <div class="quote-block"><p>"You don't rise to the level of your goals. You fall to the level of your systems."<br>— James Clear</p></div>
+        </div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HISTORY -->
+  <div class="history-section">
+    <div class="section-label">Session wins</div>
+    <div id="history-list">
+      <div class="empty-hist">No wins yet this session. Your first one changes everything.</div>
+    </div>
+  </div>
+
+  <div class="footer">
+    <p>OPX Stimulus Escape Engine · Built for the moments when the loop tries to pull you back<br/>Every time you use this instead of the phone, you're winning.</p>
+  </div>
+
+</div>
+
+<script>
+// ─── DATA ───────────────────────────────────────────────────────────────────
+const MOODS = [
+  { id:"bored",     emoji:"😶", name:"Just Bored",       hint:"Nothing to do", c:"var(--blue)",   ch:"#4F8EF7" },
+  { id:"phone",     emoji:"📱", name:"Phone urge",        hint:"Mindless scroll", c:"var(--amber)",  ch:"#F5A623" },
+  { id:"youtube",   emoji:"▶️", name:"YouTube urge",      hint:"Autoplay calling", c:"var(--red)",    ch:"#F2614C" },
+  { id:"porn",      emoji:"🔥", name:"Sexual urge",       hint:"PMO pull",      c:"var(--purple)", ch:"#A78BFA" },
+  { id:"gaming",    emoji:"🎮", name:"Gaming urge",       hint:"Match or session", c:"var(--blue)",   ch:"#4F8EF7" },
+  { id:"music",     emoji:"🎵", name:"Music urge",        hint:"Headphones escape", c:"var(--teal)", ch:"#2DD4BF" },
+  { id:"anxious",   emoji:"😤", name:"Anxious/restless",  hint:"Can't settle",  c:"var(--pink)",   ch:"#F472B6" },
+  { id:"tired",     emoji:"🥱", name:"Mentally tired",    hint:"Brain fog",     c:"var(--teal)",   ch:"#2DD4BF" },
+  { id:"avoiding",  emoji:"😬", name:"Avoiding work",     hint:"Procrastinating", c:"var(--orange)", ch:"#FB923C" },
+];
+
+const SCIENCE = {
+  bored:   [{i:"🧠",t:"Default Mode Network",  d:"Your DMN is trying to activate. <strong>Boredom is not emptiness</strong> — it's your creative and reflective network firing up. Every time you reach for your phone at this moment, you cut off your most powerful mental state."},{i:"⚡",t:"Dopamine seeking mode",d:"Boredom triggers a <strong>dopamine-seeking state</strong>. Your brain wants novelty. Give it something real, not cheap. The urge will pass in under 10 minutes if you don't feed it."}],
+  phone:   [{i:"🔔",t:"Variable Reward Loop",  d:"Phone scrolling is built on <strong>variable ratio reinforcement</strong> — the same mechanism as slot machines. You don't know what you'll find, and that uncertainty is the hook. Recognizing this is the first step to escaping it."},{i:"📉",t:"Attention fragmentation",d:"Every check-in <strong>takes 23 minutes</strong> to fully recover focus from (UC Irvine research). You're not just losing the check-in time — you're losing the next 23 minutes of deep work capacity."}],
+  youtube: [{i:"▶️",t:"Autoplay trap",          d:"YouTube's autoplay is engineered to eliminate the moment of decision between videos. <strong>The friction of choosing is removed.</strong> One video becomes one hour without a single conscious decision."},{i:"🧩",t:"Parasocial substitution",d:"YouTube creators trigger <strong>parasocial relationship responses</strong> in your brain — you feel like you're with a friend. This fills social connection needs without requiring the vulnerability of real connection."}],
+  porn:    [{i:"🔬",t:"Dopamine superstimulus",  d:"Pornography delivers <strong>dopamine at a level no real-world experience matches</strong>. Over time, this makes real connection, real attraction, and real-world creativity feel muted by comparison. The escalation pattern is neurologically identical to substance dependency."},{i:"⚠️",t:"Shame-isolation cycle",d:"The shame after viewing often drives <strong>more isolation</strong>, which drives more urges. Breaking this means addressing the emotion underneath the urge, not just the urge itself."}],
+  gaming:  [{i:"🏆",t:"Achievement feedback loop",d:"Games are <strong>perfectly calibrated reward systems</strong>. Every action has immediate feedback, clear progression, and guaranteed payoff. The real world — including animation — is slower and messier. Your brain has been trained to prefer the artificial version."},{i:"🕹️",t:"Competence masking",d:"Gaming gives a <strong>feeling of mastery and progress</strong> without requiring real skill development. Each hour of gaming is an hour where your brain convinced itself it was being productive."}],
+  music:   [{i:"🎵",t:"Auditory stimulation dependency",d:"Constant background music trains your nervous system to <strong>treat silence as uncomfortable</strong>. You're no longer choosing music — you're avoiding the absence of it. That's a dependency, same as any other."},{i:"🔇",t:"Cognitive interference",d:"Music with lyrics <strong>competes directly with verbal processing</strong> in the brain. Language areas can't process both simultaneously. Your Maya work, your studying, your problem-solving — all degraded by background lyrics."}],
+  anxious: [{i:"😤",t:"Fight-or-flight activation",d:"Anxiety triggers cortisol and adrenaline — your body is <strong>prepared for a threat that isn't there</strong>. Reaching for your phone in this state doesn't resolve the anxiety. It delays it and usually amplifies it when the phone goes down."},{i:"🌊",t:"Nervous system dysregulation",d:"<strong>Your vagus nerve is the off switch</strong> for the stress response. Slow exhalation, cold water, and physical movement are the three fastest ways to activate it. Scrolling does the opposite."}],
+  tired:   [{i:"🥱",t:"Cognitive depletion",d:"Mental tiredness is a <strong>glucose and neurotransmitter depletion signal</strong>. Screens don't replenish this — they consume it. Real recovery requires physical rest, not passive consumption. YouTube makes you feel like you're resting, but your brain is still working."},{i:"💤",t:"Adenosine buildup",d:"Tiredness is caused by <strong>adenosine accumulating in your brain</strong>. The only things that clear it are sleep and physical movement. Blue screen light suppresses melatonin and makes it worse."}],
+  avoiding:[{i:"😬",t:"Task aversion response",d:"Procrastination is almost never laziness — it's <strong>emotional avoidance of a negative feeling</strong> attached to the task (fear of failure, perfectionism, unclear next step). The phone is an escape from that feeling, not from the task."},{i:"⏳",t:"Temporal discounting",d:"Your brain <strong>overvalues immediate rewards vs. future ones</strong> — this is called hyperbolic discounting. The future benefit of finishing your Maya work is abstract. The immediate comfort of gaming is real. Naming this helps override it."}],
+};
+
+const ALTS = {
+  bored:[
+    {title:"Stare at a wall. Literally.",desc:"Set a 5-minute timer and look at a blank wall. Let thoughts come. Don't fight them. This is the hardest and most rewarding thing on this list — because your brain will go to war with you in the first 90 seconds.",deep:"Activates your Default Mode Network — the part of your brain responsible for creativity, self-reflection, and insight. Most people never let it fire anymore. The discomfort you feel is 10 years of stimulation dependency screaming. Sit through it.",why:[{v:"5 min",l:"Time"},{v:"DMN activation",l:"What fires"},{v:"Insight",l:"The payoff"}],time:"5 min",intensity:"low",cat:"mind"},
+    {title:"Draw an object near you. Draw it badly.",desc:"Pick anything in your room — a cup, your hand, a charger cable. Draw it on paper without looking up any reference or technique. The point isn't art. The point is engagement without a screen.",deep:"Observational drawing forces your right hemisphere to engage. You stop naming things and start actually seeing them. This is a core skill for 3D animation — your eye for form, proportion, and weight. You're training your artist's eye, not just killing time.",why:[{v:"10 min",l:"Time"},{v:"Right brain",l:"What fires"},{v:"Eye training",l:"The payoff"}],time:"10 min",intensity:"low",cat:"creative"},
+    {title:"Write 3 things you actually want in life.",desc:"Not career goals. Not what you should want. What would make you feel truly alive? Write without editing, without judgment. Let it be messy and contradictory.",deep:"When you're always consuming, you lose contact with your own desires — you start wanting what the algorithm shows you, not what you actually want. This exercise re-establishes that contact. Five minutes of uncensored writing reveals more about you than 5 hours of scrolling.",why:[{v:"5 min",l:"Time"},{v:"Inner clarity",l:"What fires"},{v:"Self-knowledge",l:"The payoff"}],time:"5 min",intensity:"low",cat:"reflect"},
+    {title:"Do 25 pushups. Right where you are.",desc:"Not tomorrow. Not later. Stand up and do them now. Your body has energy underneath the boredom — movement is the fastest way to shift your neurological state.",deep:"Physical movement immediately raises BDNF (brain-derived neurotrophic factor) — a protein that improves mood, cognition, and motivation. A 2-minute burst of movement changes your brain state faster than any YouTube video.",why:[{v:"2 min",l:"Time"},{v:"BDNF spike",l:"What fires"},{v:"Energy shift",l:"The payoff"}],time:"2 min",intensity:"medium",cat:"body"},
+    {title:"Text someone a real question.",desc:"Not a meme. Not a reaction. A real message. 'Hey, how are you actually doing lately?' to someone you care about. Boredom is often loneliness in disguise.",deep:"Authentic social connection is one of the top predictors of wellbeing — more than income, success, or even health. A real conversation activates oxytocin and serotonin in ways that social media scrolling never does, even though both involve 'being social'.",why:[{v:"5 min",l:"Time"},{v:"Oxytocin",l:"What fires"},{v:"Real connection",l:"The payoff"}],time:"5 min",intensity:"low",cat:"social"},
+    {title:"Open Maya. Make one thing move.",desc:"A ball. A cube. Anything. Just 15 minutes. You don't need a project. You don't need a plan. Just open it, pick an object, and make it move once. The resistance to this is the exact resistance standing between you and the animator you want to be.",deep:"The single most common pattern in people who fail to build creative careers is not lack of talent — it's avoiding the tool. Every time you open Maya when you don't want to, you're building the professional identity that future-you will live inside.",why:[{v:"15 min",l:"Time"},{v:"Neural pathways",l:"What fires"},{v:"Career momentum",l:"The payoff"}],time:"15 min",intensity:"medium",cat:"skill"},
+  ],
+  phone:[
+    {title:"Phone goes in another room. Now.",desc:"Not face down. Not silenced. A different room. Distance is the only reliable barrier in the first 5 minutes of an urge. Your willpower is weakest when the phone is visible.",deep:"Research shows the mere presence of a smartphone on a desk — even face down, even off — reduces available cognitive capacity. Your brain allocates resources to not checking it. Removing it from the room removes the cognitive drain entirely.",why:[{v:"0 min",l:"Time"},{v:"Willpower restored",l:"What happens"},{v:"Physical barrier",l:"The method"}],time:"0 min",intensity:"high",cat:"action"},
+    {title:"Write what you were hoping to find.",desc:"Ask yourself: what were you about to look for? Validation? Distraction? Interesting content? Something to feel? Write the honest answer down. Naming the real need is the first step to meeting it legitimately.",deep:"Phone checking is almost always driven by one of four underlying needs: novelty, validation, anxiety relief, or social connection. Once you name which one, you can address it directly — instead of getting a cheap, non-satisfying version through the phone.",why:[{v:"3 min",l:"Time"},{v:"Self-awareness",l:"What grows"},{v:"Need-mapping",l:"The skill"}],time:"3 min",intensity:"low",cat:"reflect"},
+    {title:"Cold water on your face.",desc:"Go to the sink. Splash cold water on your face three times. This is not a joke. It's one of the fastest known ways to reset your nervous system.",deep:"Cold water activates the diving reflex — a hardwired mammalian response that slows your heart rate, redistributes blood flow, and shifts your nervous system toward calm. The urge to check your phone will feel weaker within 60 seconds.",why:[{v:"1 min",l:"Time"},{v:"Diving reflex",l:"What fires"},{v:"Instant reset",l:"The payoff"}],time:"1 min",intensity:"low",cat:"body"},
+    {title:"5 pages of any physical book.",desc:"Any book. Doesn't matter what. Physical only. The act of reading a physical page activates different neural circuitry than screen reading — slower, deeper, and more restorative.",deep:"Physical reading restores directed attention (the kind screens exhaust) through what attention restoration theory calls 'involuntary fascination' — your attention recovers while you're absorbed in the text. Even 10 minutes of physical reading measurably restores concentration.",why:[{v:"10 min",l:"Time"},{v:"Attention restored",l:"What happens"},{v:"Deep processing",l:"The mode"}],time:"10 min",intensity:"low",cat:"mind"},
+  ],
+  youtube:[
+    {title:"Write what you were going to search for.",desc:"Before you open YouTube, write down the search term. Then ask: can I think through this myself first? Can I experiment in Maya before watching someone else do it? Often the answer is yes.",deep:"Learning through struggle before watching a tutorial is called 'productive failure' — a research-backed pedagogy. Students who attempt a problem first, even unsuccessfully, retain solutions far better than those who watch first. Your first instinct to search YouTube is actually robbing you of deeper learning.",why:[{v:"3 min",l:"Time"},{v:"Deeper learning",l:"What happens"},{v:"Self-reliance",l:"What grows"}],time:"3 min",intensity:"low",cat:"reflect"},
+    {title:"Pomodoro: 25 minutes, nothing else.",desc:"Set a timer for 25 minutes. Close everything that isn't your work. Work only on that one thing. Not YouTube in the background, not music, not switching tabs. Just the work.",deep:"The Pomodoro Technique isn't about time management — it's about training your attention. Each 25-minute session is a rep for your focus muscle. YouTube in the background during work isn't background — your brain is doing partial attention to both, doing both worse.",why:[{v:"25 min",l:"Time"},{v:"Focus muscle",l:"What trains"},{v:"Real output",l:"The result"}],time:"25 min",intensity:"high",cat:"skill"},
+    {title:"Describe 5 animations that stayed with you.",desc:"From memory. No searching. Think of 5 animated shots, sequences, or scenes that genuinely moved you or impressed you. Describe what made them work — timing, weight, expression, silhouette.",deep:"This exercise trains visual memory and analytical thinking — two core animator skills. You're building an internal library that's more valuable than any external reference folder. Your own aesthetic sensibility only develops through active reflection, not passive consumption.",why:[{v:"10 min",l:"Time"},{v:"Visual memory",l:"What builds"},{v:"Aesthetic sense",l:"What sharpens"}],time:"10 min",intensity:"medium",cat:"creative"},
+    {title:"Silence. Eyes closed. 5 minutes.",desc:"The YouTube urge is often an urge for background noise — for something to fill the silence. Try the opposite, with intention. Set a timer. Sit. Let the silence exist.",deep:"Silence activates your parasympathetic nervous system and allows the brain's noise-filtering mechanisms to reset. Research from Duke University found that two minutes of silence is more restorative than 'relaxing music' for the brain's recovery from cognitive depletion.",why:[{v:"5 min",l:"Time"},{v:"PNS activation",l:"What fires"},{v:"Cognitive reset",l:"The payoff"}],time:"5 min",intensity:"low",cat:"mind"},
+  ],
+  porn:[
+    {title:"Name the emotion underneath this right now.",desc:"Bored? Lonely? Stressed? Anxious? Avoiding something uncomfortable? The urge for pornography almost always has an emotion under it, not just a physical drive. Write the honest answer.",deep:"Dr. Patrick Carnes' research on compulsive sexual behavior shows it follows the same pattern as all behavioral addictions: an uncomfortable emotion → the ritual behavior → temporary relief → shame → repeat. The emotion is the actual problem. Name it.",why:[{v:"3 min",l:"Time"},{v:"Root cause",l:"What you find"},{v:"Emotional awareness",l:"What grows"}],time:"3 min",intensity:"low",cat:"reflect"},
+    {title:"Immediate physical reset: 30-second burst.",desc:"Jumping jacks, sprint on the spot, pushups to failure — 30 seconds of maximum physical effort. Right now. Sexual energy is physical energy. It can be redirected without suppression.",deep:"Physical exertion releases the same catecholamines (adrenaline, noradrenaline) that drive sexual arousal, but channels them into a different output pathway. This isn't avoidance — it's neurological redirection. The urge will reduce significantly within 60–90 seconds of real physical effort.",why:[{v:"1 min",l:"Time"},{v:"Catecholamine redirection",l:"What happens"},{v:"Urge reduction",l:"The result"}],time:"1 min",intensity:"high",cat:"body"},
+    {title:"Cold shower. You already know it works.",desc:"You've probably already noticed that cold showers kill this specific urge almost completely within 2–3 minutes. The reason is physiological, not psychological — your body's threat response suppresses sexual arousal. Use what works.",deep:"Cold exposure activates the sympathetic nervous system in a way that competes directly with sexual arousal pathways. Beyond the immediate effect, regular cold exposure increases baseline dopamine by up to 250% according to research from Dr. Andrew Huberman at Stanford — helping reset the flattened dopamine baseline.",why:[{v:"5 min",l:"Time"},{v:"Sympathetic activation",l:"What fires"},{v:"Dopamine reset",l:"Long-term benefit"}],time:"5 min",intensity:"high",cat:"body"},
+    {title:"Write a brutally honest journal entry.",desc:"Not about the urge. About how you've been feeling this week — what's been building, what you've been avoiding, what's been making you feel small. The urge is a symptom. The journal finds the cause.",deep:"Expressive writing activates the prefrontal cortex and helps regulate limbic (emotional) responses. Psychologist James Pennebaker's research across 30+ years shows that 4 sessions of expressive writing measurably reduce cortisol, depression, and compulsive behavior frequency.",why:[{v:"10 min",l:"Time"},{v:"Prefrontal engagement",l:"What fires"},{v:"Root-level processing",l:"The payoff"}],time:"10 min",intensity:"medium",cat:"reflect"},
+    {title:"Sit with the urge for exactly 5 minutes.",desc:"Don't fight it. Don't give in to it. Just observe it like a sensation in your body. Where is it located? What does it feel like? Does it pulse? Does it change? Urges are waves — they always peak and fade.",deep:"This is 'urge surfing' — a technique developed from mindfulness-based relapse prevention. It trains you to observe cravings as temporary neural events rather than commands. Each time you ride an urge without acting, you weaken the automatic response pathway and strengthen your observer capacity.",why:[{v:"5 min",l:"Time"},{v:"Observer capacity",l:"What builds"},{v:"Urge pathway weakened",l:"What happens"}],time:"5 min",intensity:"low",cat:"mind"},
+    {title:"Open Maya. Animate a character feeling something.",desc:"Not a bouncing ball. An actual character — even a simple one — feeling an emotion. Tired. Hopeful. Frustrated. Whatever you're feeling right now. Channel it into the work.",deep:"Channeling emotional energy into creative output is called sublimation — Freud identified it as one of the most healthy and productive psychological mechanisms available. The frustration or longing driving the urge becomes the same energy that makes an animation feel real and human.",why:[{v:"30 min",l:"Time"},{v:"Sublimation",l:"The mechanism"},{v:"Real skill + emotional processing",l:"The double payoff"}],time:"30 min",intensity:"high",cat:"skill"},
+  ],
+  gaming:[
+    {title:"Name what gaming is giving you right now.",desc:"Achievement? Escape from something uncomfortable? A sense of progress? Competition? Identity? Write the specific thing. Then ask: is there a version of this that builds my real life?",deep:"Every need gaming meets is a real, legitimate psychological need. The problem isn't the need — it's the source. If gaming gives you a sense of mastery, 30 minutes in Maya gives you mastery that actually accumulates into a career. Same neurological hit, different trajectory.",why:[{v:"5 min",l:"Time"},{v:"Need identification",l:"What you find"},{v:"Real alternatives",l:"What opens up"}],time:"5 min",intensity:"low",cat:"reflect"},
+    {title:"30-minute Maya sprint. Same rules as a game.",desc:"Give yourself a 30-minute timer and one goal — a specific shot, a rigging task, a shading exercise. Treat it like a match. No pausing. No switching. When the timer goes, you're done. See what you made.",deep:"The reason games are compelling isn't the content — it's the structure: clear goals, immediate feedback, time pressure, and a defined endpoint. Maya can be structured the same way. The difference is what you have to show for it when it's over.",why:[{v:"30 min",l:"Time"},{v:"Same focus as gaming",l:"The mode"},{v:"Career-building output",l:"The difference"}],time:"30 min",intensity:"high",cat:"skill"},
+    {title:"Write your specific 3-year animation goal.",desc:"Not vague. Studio name, role, salary, location, type of work. What exactly does success look like in 3 years? Make it uncomfortably specific. Vagueness is where motivation dies.",deep:"Goal specificity directly correlates with achievement probability. The brain's goal-directed systems (dorsolateral prefrontal cortex) activate more strongly with concrete, vivid goals than abstract ones. Writing it connects your present discomfort to a future reward your brain can actually compute.",why:[{v:"10 min",l:"Time"},{v:"Goal systems",l:"What activates"},{v:"Motivation clarity",l:"What you get"}],time:"10 min",intensity:"medium",cat:"reflect"},
+    {title:"Bodyweight circuit. Count reps, not minutes.",desc:"20 pushups → 15 squats → 10 burpees → rest → repeat twice. No music. Just count. The focus of counting replaces the focus of gaming, and you come out better physically.",deep:"Exercise is the single best-studied intervention for dopamine dysregulation. Even 20 minutes of moderate-intensity movement increases dopamine receptor density — literally making your brain more capable of feeling satisfaction from ordinary life.",why:[{v:"12 min",l:"Time"},{v:"Dopamine receptors",l:"What improves"},{v:"Body + brain",l:"The double win"}],time:"12 min",intensity:"high",cat:"body"},
+  ],
+  music:[
+    {title:"Walk somewhere without headphones.",desc:"Even 10 minutes. Just your feet, the sounds around you, and your thoughts. No queue, no podcast, no ambient. The discomfort you feel in the first 2 minutes is real data — it tells you how dependent your nervous system has become on auditory input.",deep:"Auditory overstimulation prevents 'attentional restoration' — the natural process by which the brain rebuilds focused attention capacity. Natural soundscapes (wind, footsteps, distant voices, birds) restore attention. Music, even ambient music, doesn't. Your brain needs genuine acoustic quiet to repair.",why:[{v:"10 min",l:"Time"},{v:"Attention restored",l:"What happens"},{v:"Natural soundscape",l:"What heals"}],time:"10 min",intensity:"medium",cat:"body"},
+    {title:"Sit in silence and notice what surfaces.",desc:"When music is always on, you never hear your own thoughts. Set a 5-minute timer. Sit. What comes up in the silence? Often it's something you've been avoiding. Sometimes it's something you've been wanting to say. Either way, you need to hear it.",deep:"The brain's internal monologue and self-processing functions require a background state of minimal stimulation. This is why your best ideas often come in the shower — one of the few genuinely stimulation-free environments most people encounter. Silence is not absence. It's the most productive possible background.",why:[{v:"5 min",l:"Time"},{v:"Internal processing",l:"What activates"},{v:"Self-knowledge",l:"What emerges"}],time:"5 min",intensity:"low",cat:"mind"},
+    {title:"Listen to ONE song. Fully. Do nothing else.",desc:"Pick one song you genuinely love. Play it. Sit still. Don't scroll, don't move, don't work. Just listen. Notice every instrument. Notice the production. Notice how it makes you feel. This is what music is for.",deep:"Most music use today is ambient avoidance — using music as sonic wallpaper to prevent silence. Intentional, focused listening is an entirely different cognitive activity — it activates emotional memory, auditory cortex pattern recognition, and aesthetic response networks. You'll love music more, not less, when you actually listen to it.",why:[{v:"3–5 min",l:"Time"},{v:"Full musical attention",l:"The mode"},{v:"Real enjoyment",l:"What comes back"}],time:"4 min",intensity:"low",cat:"mind"},
+    {title:"Write why you're reaching for music right now.",desc:"Is it because you actually want to hear something? Or because silence feels uncomfortable? Is there something in the silence you're trying to drown out? Write the honest answer without judging it.",deep:"The line between enjoying music and using music as avoidance is important to know. One is conscious pleasure. The other is dependency. This distinction matters for your relationship with all forms of stimulation — can you choose it, or does the absence of it feel like a problem?",why:[{v:"5 min",l:"Time"},{v:"Honest self-audit",l:"The work"},{v:"Conscious choice",l:"What you build"}],time:"5 min",intensity:"low",cat:"reflect"},
+    {title:"Study audio design in one animation reference.",desc:"Pick any animated film scene and watch it with the sound on, focused entirely on how the audio is mixed — when music enters, when it stops, what silence does dramatically. This uses your music interest for craft development.",deep:"Sound design and score interaction with animation is one of the most underappreciated skills in animation production. Understanding the relationship between audio, timing, and emotion will directly improve your animation work — and you'll never think about background music the same way.",why:[{v:"15 min",l:"Time"},{v:"Craft development",l:"What builds"},{v:"Audio-visual sensitivity",l:"The skill"}],time:"15 min",intensity:"medium",cat:"skill"},
+    {title:"Do one physical task in full silence.",desc:"Clean your desk, make your bed, do dishes, fold clothes. Whatever needs doing. No music, no podcast. Just the task and the sound of doing it. Notice what your mind does.",deep:"'Monotasking' with physical tasks in silence has been shown to produce mild meditative states — reduced cortisol, increased present-moment awareness, and a sense of completion that compound over the day. It's not glamorous. That's the point.",why:[{v:"10 min",l:"Time"},{v:"Mild meditative state",l:"What happens"},{v:"Clean space + clear mind",l:"The double win"}],time:"10 min",intensity:"low",cat:"body"},
+  ],
+  anxious:[
+    {title:"4-7-8 breathing. Do it right now.",desc:"Breathe in for 4 counts. Hold for 7. Breathe out slowly for 8. Repeat 4 times. This is not a wellness trend — it's a direct physiological intervention on your autonomic nervous system.",deep:"The 4-7-8 pattern specifically elongates the exhale beyond the inhale, which activates the vagus nerve and shifts the autonomic nervous system from sympathetic (fight-or-flight) to parasympathetic (rest-and-digest). It works within 60 seconds and the effect is measurable via heart rate variability.",why:[{v:"3 min",l:"Time"},{v:"Vagus nerve",l:"What activates"},{v:"Cortisol reduced",l:"What happens"}],time:"3 min",intensity:"low",cat:"body"},
+    {title:"Write every anxious thought uncensored.",desc:"Every fear, every worry, every spiral — get it out of your head and onto paper without organizing it or making it make sense. Just dump it all.",deep:"Psychologists call this 'expressive writing.' Research by James Pennebaker at UT Austin shows that writing about anxious thoughts (even for just 4 sessions) measurably reduces anxiety, physical stress symptoms, and frequency of intrusive thoughts. The brain treats written thoughts differently from ruminated ones.",why:[{v:"10 min",l:"Time"},{v:"Cognitive offloading",l:"The mechanism"},{v:"Reduced rumination",l:"The payoff"}],time:"10 min",intensity:"medium",cat:"reflect"},
+    {title:"5-4-3-2-1 grounding. Do it here.",desc:"Name 5 things you can see. 4 things you can touch. 3 things you can hear. 2 things you can smell. 1 thing you can taste. Say them aloud or write them down.",deep:"Grounding techniques work by redirecting cognitive resources from the prefrontal cortex's simulation of future threats to present sensory data. You literally can't fully ruminate about the future and fully attend to the present simultaneously. This technique exploits that competition.",why:[{v:"2 min",l:"Time"},{v:"Sensory cortex",l:"What activates"},{v:"Present-moment anchoring",l:"The mechanism"}],time:"2 min",intensity:"low",cat:"mind"},
+    {title:"Walk slowly. No destination. No headphones.",desc:"Not a power walk. Slow. Look at things. Let the rhythm of your feet do what it's done for 200,000 years of human nervous system evolution — regulate your state.",deep:"Bilateral rhythmic movement (walking, especially slow walking) has been shown to reduce activation in the amygdala — the brain's threat detection center. This is why EMDR therapy uses bilateral stimulation. Walking is free EMDR. The effect is amplified when you're not wearing headphones.",why:[{v:"10 min",l:"Time"},{v:"Amygdala activity",l:"What reduces"},{v:"Baseline calm",l:"What returns"}],time:"10 min",intensity:"low",cat:"body"},
+  ],
+  tired:[
+    {title:"Lie flat on the floor. No phone. 10 minutes.",desc:"Not the bed (too easy to sleep). The floor. Flat. Eyes closed or open. No input. This is NSDR — Non-Sleep Deep Rest — and it's one of the most effective recovery tools that exists.",deep:"NSDR (popularized by neuroscientist Andrew Huberman) allows the brain to replay and consolidate recently learned information while the body rests. Even 10–20 minutes achieves a significant fraction of the recovery from a full 90-minute nap. Used by Navy SEALs, athletes, and researchers.",why:[{v:"10 min",l:"Time"},{v:"NSDR",l:"The technique"},{v:"Near-nap recovery",l:"The payoff"}],time:"10 min",intensity:"low",cat:"body"},
+    {title:"Drink water. Eat something real.",desc:"When did you last properly eat and drink? Dehydration accounts for up to 40% of 'mental fatigue' symptoms. Eat something with protein and slow carbs. Sit down and eat without a screen.",deep:"Glucose is the brain's primary fuel. Hydration affects neurotransmitter synthesis directly. Most 'mental tiredness' in students involves one or both of these being depleted, not genuine cognitive exhaustion. Before you rest, try fueling. The tiredness might resolve within 15 minutes.",why:[{v:"10 min",l:"Time"},{v:"Glucose + hydration",l:"What restores"},{v:"False fatigue resolved",l:"What you might find"}],time:"10 min",intensity:"low",cat:"body"},
+    {title:"Create something tiny. One sentence. One line.",desc:"When mentally tired, creation is more restorative than consumption — counter-intuitively. Write one sentence about how you feel. Draw one line. Hum one melody. Something that comes from inside, not in.",deep:"Consumption in a tired state activates passive brain circuits and doesn't restore active ones. Small acts of creation switch on different networks — and because the stakes are low (one sentence, one sketch), the threshold to start is nearly zero while the restoration effect is real.",why:[{v:"5 min",l:"Time"},{v:"Creative networks",l:"What fires"},{v:"Active restoration",l:"The difference"}],time:"5 min",intensity:"low",cat:"creative"},
+    {title:"Take a 20-minute nap. Set the alarm.",desc:"Not 30, not 2 hours. 20 minutes. This keeps you in light sleep (stages 1–2), which restores alertness without entering deep sleep cycles (which causes grogginess). Set the alarm and actually sleep.",deep:"A 20-minute 'power nap' (or 'NASA nap') has been shown to improve cognitive performance by 34% and alertness by 54% (NASA research on shift workers). It's the single most efficient recovery tool available. The key is the 20-minute cutoff — beyond that, sleep inertia makes you worse.",why:[{v:"20 min",l:"Time"},{v:"Light sleep cycles",l:"What you use"},{v:"+34% performance",l:"Research says"}],time:"20 min",intensity:"low",cat:"body"},
+  ],
+  avoiding:[
+    {title:"2-minute rule: start the thing, nothing else.",desc:"You're not committing to finishing it. You're committing to 2 minutes. Open the file. Read the first line. Place the first keyframe. That's it. 2 minutes only.",deep:"Procrastination is almost always about starting, not doing. The emotional resistance is frontloaded — it peaks before you begin and drops rapidly within the first 60–90 seconds of actually working. The 2-minute rule exploits this by removing the 'committing to the whole thing' threat.",why:[{v:"2 min",l:"Time"},{v:"Resistance drops",l:"What happens"},{v:"Starting = momentum",l:"The truth"}],time:"2 min",intensity:"medium",cat:"action"},
+    {title:"Write the honest reason you're avoiding this.",desc:"Fear of it not being good enough? Not knowing where to start? It feeling pointless? Perfectionism? Write the real reason. The avoidance has a name and it loses power when named.",deep:"Research on academic procrastination consistently shows the primary driver is emotional avoidance of a negative feeling — usually fear of failure or evaluation anxiety. Naming the feeling activates the prefrontal cortex and reduces amygdala-driven avoidance behavior. Literally changes your brain state.",why:[{v:"5 min",l:"Time"},{v:"Prefrontal engagement",l:"What fires"},{v:"Avoidance weakened",l:"What happens"}],time:"5 min",intensity:"low",cat:"reflect"},
+    {title:"Break it into 3 steps. Do only step 1.",desc:"What are you avoiding? Write 3 steps that would move it forward. Don't do all 3. Just step 1. The smallest possible action that counts as movement.",deep:"Large tasks trigger threat responses in the brain — they're cognitively overwhelming. Breaking them into discrete steps reduces the perceived task size and allows the brain's reward system to generate completion satisfaction from smaller wins. Each completed step builds forward momentum.",why:[{v:"5 min",l:"Time"},{v:"Task decomposition",l:"The method"},{v:"Completion momentum",l:"What builds"}],time:"5 min",intensity:"low",cat:"action"},
+    {title:"25-minute Pomodoro. No exceptions.",desc:"Close everything else. Set the timer. Work on exactly one thing for 25 minutes. Not 24 minutes of prep and 1 minute of work. 25 minutes of actual work. The timer going off is the reward.",deep:"The Pomodoro Technique works because it transforms an open-ended, threatening task ('finish my animation') into a bounded, manageable challenge ('work for 25 minutes'). The deadline creates the same mild positive stress (eustress) that makes games engaging — except the output is real.",why:[{v:"25 min",l:"Time"},{v:"Eustress",l:"What it creates"},{v:"Real output",l:"The result"}],time:"25 min",intensity:"high",cat:"action"},
+    {title:"Connect this task to who you're becoming.",desc:"The Maya scene you're avoiding. The skill you're procrastinating on. Visualize yourself 2 years from now in the career you want. That version of you was built in moments like this one — specifically this one.",deep:"Implementation intention research (Peter Gollwitzer, NYU) shows that connecting tasks to identity ('I am someone who works consistently') is 2–3x more effective at overcoming procrastination than goal-setting alone. You're not doing the task. You're being the animator.",why:[{v:"5 min",l:"Time"},{v:"Identity anchoring",l:"The method"},{v:"2–3x follow-through",l:"Research says"}],time:"5 min",intensity:"low",cat:"reflect"},
+  ],
+};
+
+const CAT_STYLE = {
+  mind:    {bg:"#0F1E3A", acc:"#4F8EF7"},
+  body:    {bg:"#0A1F15", acc:"#3ECF8E"},
+  creative:{bg:"#1A0F2E", acc:"#A78BFA"},
+  reflect: {bg:"#1F160A", acc:"#F5A623"},
+  skill:   {bg:"#0A1525", acc:"#38BDF8"},
+  social:  {bg:"#0A1F1C", acc:"#2DD4BF"},
+  action:  {bg:"#1F0A0A", acc:"#F2614C"},
+};
+
+const INTENSITY = { low:"Easy entry", medium:"Some effort", high:"Push through" };
+const INTENSITY_C = { low:"#3ECF8E", medium:"#F5A623", high:"#F2614C" };
+
+// ─── STATE ───────────────────────────────────────────────────────────────────
+let selectedMood = null;
+let usedIndices = [];
+let currentAlt = null;
+let streak = 0;
+let history = [];
+let timerInterval = null;
+let timerRemaining = 0;
+let timerTotal = 0;
+let timerRunning = false;
+
+// ─── INIT ─────────────────────────────────────────────────────────────────────
+function init() {
+  renderMoods();
+  updateClock();
+  setInterval(updateClock, 10000);
+  document.getElementById('chat-input').addEventListener('keydown', e => {
+    if (e.key === 'Enter') sendChat();
+  });
+}
+
+function updateClock() {
+  const now = new Date();
+  const h = now.getHours(), m = now.getMinutes();
+  const ampm = h >= 12 ? 'PM' : 'AM';
+  const hh = ((h % 12) || 12);
+  document.getElementById('current-time').textContent = `${String(hh).padStart(2,'0')}:${String(m).padStart(2,'0')} ${ampm}`;
+}
+
+function renderMoods() {
+  const grid = document.getElementById('mood-grid');
+  grid.innerHTML = MOODS.map(m => `
+    <button class="mood-btn" id="mood-${m.id}" onclick="selectMood('${m.id}')" style="--c:${m.c}">
+      <span class="emoji">${m.emoji}</span>
+      <span class="mood-name">${m.name}</span>
+      <span class="mood-hint">${m.hint}</span>
+    </button>
+  `).join('');
+}
+
+function selectMood(id) {
+  selectedMood = id;
+  usedIndices = [];
+
+  // Update mood buttons
+  MOODS.forEach(m => {
+    const btn = document.getElementById(`mood-${m.id}`);
+    if (btn) btn.classList.toggle('active', m.id === id);
+  });
+
+  // Show science
+  renderScience(id);
+
+  // Show alt
+  showNextAlt();
+}
+
+function renderScience(id) {
+  const section = document.getElementById('science-section');
+  const grid = document.getElementById('science-grid');
+  const items = SCIENCE[id] || [];
+  if (!items.length) { section.classList.remove('visible'); return; }
+  grid.innerHTML = items.map(s => `
+    <div class="science-card">
+      <div class="sci-icon">${s.i}</div>
+      <div class="sci-name">${s.t}</div>
+      <div class="sci-text">${s.d}</div>
+    </div>
+  `).join('');
+  section.classList.add('visible');
+}
+
+function showNextAlt() {
+  if (!selectedMood) return;
+  const pool = ALTS[selectedMood] || [];
+  const available = pool.map((_, i) => i).filter(i => !usedIndices.includes(i));
+  const idx = available.length > 0
+    ? available[Math.floor(Math.random() * available.length)]
+    : Math.floor(Math.random() * pool.length);
+  usedIndices.push(idx);
+  currentAlt = pool[idx];
+  renderAlt(currentAlt);
+}
+
+function renderAlt(alt) {
+  if (!alt) return;
+  const cs = CAT_STYLE[alt.cat] || CAT_STYLE.mind;
+  const mood = MOODS.find(m => m.id === selectedMood);
+
+  document.getElementById('alt-card').style.background = cs.bg;
+  document.getElementById('alt-card').style.border = `1px solid ${cs.acc}33`;
+
+  // Tags
+  document.getElementById('alt-tags').innerHTML = `
+    <span class="tag" style="background:${cs.acc}22;color:${cs.acc}">${alt.cat.toUpperCase()}</span>
+    <span class="tag" style="background:${INTENSITY_C[alt.intensity]}22;color:${INTENSITY_C[alt.intensity]}">${INTENSITY[alt.intensity]}</span>
+  `;
+  document.getElementById('alt-time').textContent = alt.time;
+  document.getElementById('alt-title').textContent = alt.title;
+  document.getElementById('alt-desc').textContent = alt.desc;
+
+  // Why pills
+  if (alt.why && alt.why.length) {
+    document.getElementById('alt-why').innerHTML = alt.why.map(w => `
+      <div class="why-pill"><strong>${w.v}</strong>${w.l}</div>
+    `).join('');
+  } else {
+    document.getElementById('alt-why').innerHTML = '';
+  }
+
+  // Deep
+  document.getElementById('alt-deep-content').innerHTML = alt.deep;
+
+  // Timer
+  const secs = parseTimeToSeconds(alt.time);
+  const timerSec = document.getElementById('timer-section');
+  if (secs && secs > 0) {
+    timerSec.style.display = 'block';
+    resetTimer(secs, cs.acc);
+  } else {
+    timerSec.style.display = 'none';
+  }
+
+  document.getElementById('alt-section').style.display = 'block';
+  document.getElementById('action-row').classList.add('visible');
+  document.getElementById('win-card').classList.remove('visible');
+}
+
+// ─── TIMER ───────────────────────────────────────────────────────────────────
+function parseTimeToSeconds(t) {
+  if (!t) return 0;
+  const m = t.match(/(\d+)/);
+  return m ? parseInt(m[1]) * 60 : 0;
+}
+
+function resetTimer(secs, color) {
+  clearInterval(timerInterval);
+  timerRunning = false;
+  timerRemaining = secs;
+  timerTotal = secs;
+  const arc = document.getElementById('timer-arc');
+  if (arc && color) arc.style.stroke = color;
+  updateTimerDisplay();
+  document.getElementById('timer-btn').textContent = 'Start Timer';
+  document.getElementById('timer-btn').style.background = (color || '#4F8EF7') + '22';
+  document.getElementById('timer-btn').style.color = color || '#4F8EF7';
+  document.getElementById('timer-btn').style.border = `1px solid ${color || '#4F8EF7'}44`;
+  document.getElementById('timer-done').style.display = 'none';
+}
+
+function toggleTimer() {
+  if (timerRemaining <= 0) return;
+  timerRunning = !timerRunning;
+  document.getElementById('timer-btn').textContent = timerRunning ? 'Pause' : 'Resume';
+  if (timerRunning) {
+    timerInterval = setInterval(() => {
+      timerRemaining--;
+      updateTimerDisplay();
+      if (timerRemaining <= 0) {
+        clearInterval(timerInterval);
+        timerRunning = false;
+        document.getElementById('timer-btn').style.display = 'none';
+        document.getElementById('timer-done').style.display = 'block';
+      }
+    }, 1000);
+  } else {
+    clearInterval(timerInterval);
+  }
+}
+
+function updateTimerDisplay() {
+  const m = Math.floor(timerRemaining / 60);
+  const s = timerRemaining % 60;
+  document.getElementById('timer-display').textContent = `${m}:${String(s).padStart(2,'0')}`;
+  const arc = document.getElementById('timer-arc');
+  if (arc) {
+    const circ = 2 * Math.PI * 38;
+    const progress = timerTotal > 0 ? timerRemaining / timerTotal : 1;
+    arc.style.strokeDashoffset = circ * (1 - progress);
+  }
+}
+
+// ─── ACTIONS ─────────────────────────────────────────────────────────────────
+function markDone() {
+  clearInterval(timerInterval);
+  timerRunning = false;
+  streak++;
+  document.getElementById('streak-num').textContent = streak;
+  document.getElementById('action-row').classList.remove('visible');
+
+  const msgs = [
+    "That's one less loop. Every rep counts.",
+    "You outlasted the urge. That's the skill.",
+    "Your brain just got a tiny bit less dependent. Stack these.",
+    "This is what discipline looks like — not big dramatic gestures. This.",
+    "One win. Stays on the record. Can't be taken back.",
+  ];
+
+  const wt = document.getElementById('win-title');
+  const ws = document.getElementById('win-sub');
+  wt.textContent = `Win #${streak} today 💪`;
+  ws.textContent = msgs[Math.floor(Math.random() * msgs.length)];
+  document.getElementById('win-card').classList.add('visible');
+
+  if (currentAlt) {
+    const mood = MOODS.find(m => m.id === selectedMood);
+    const item = document.createElement('div');
+    item.className = 'history-item';
+    item.innerHTML = `
+      <div>
+        <div class="history-name">${currentAlt.title}</div>
+        <div class="history-mood">${mood ? mood.emoji + ' ' + mood.name : ''}</div>
+      </div>
+      <div class="history-time">${new Date().toLocaleTimeString([], {hour:'2-digit',minute:'2-digit'})}</div>
+    `;
+    const list = document.getElementById('history-list');
+    const empty = list.querySelector('.empty-hist');
+    if (empty) empty.remove();
+    list.prepend(item);
+  }
+}
+
+function nextAlt() {
+  clearInterval(timerInterval);
+  timerRunning = false;
+  document.getElementById('win-card').classList.remove('visible');
+  document.getElementById('action-row').classList.add('visible');
+  showNextAlt();
+}
+
+function afterWin() {
+  document.getElementById('win-card').classList.remove('visible');
+  showNextAlt();
+  document.getElementById('action-row').classList.add('visible');
+}
+
+// ─── TABS ─────────────────────────────────────────────────────────────────────
+function switchTab(id) {
+  document.querySelectorAll('.info-tab').forEach((t,i) => {
+    const tabs = ['why','brain','music','method'];
+    t.classList.toggle('active', tabs[i] === id);
+  });
+  document.querySelectorAll('.info-panel').forEach(p => p.classList.remove('active'));
+  const panel = document.getElementById('tab-' + id);
+  if (panel) panel.classList.add('active');
+}
+
+// ─── CHAT ─────────────────────────────────────────────────────────────────────
+async function sendChat() {
+  const input = document.getElementById('chat-input');
+  const btn = document.getElementById('chat-btn');
+  const responseBox = document.getElementById('chat-response');
+  const thinking = document.getElementById('chat-thinking');
+  const textEl = document.getElementById('chat-text');
+  const msg = input.value.trim();
+  if (!msg) return;
+
+  input.value = '';
+  btn.disabled = true;
+  responseBox.classList.add('visible');
+  thinking.style.display = 'flex';
+  textEl.textContent = '';
+
+  try {
+    const res = await fetch("https://api.anthropic.com/v1/messages", {
+      method: "POST",
+      headers: { "Content-Type": "application/json" },
+      body: JSON.stringify({
+        model: "claude-sonnet-4-20250514",
+        max_tokens: 1000,
+        system: `You are Opx's personal stimulus-escape coach. Opx is a 21-year-old 3D animation student in India, working in Autodesk Maya, building toward a career in 3D animation and VFX. He is working to break an 8+ year habit of continuous digital stimulation — phone scrolling, YouTube, gaming, porn, and constant background music. He is smart, direct, and doesn't want fluff or lectures. 
+
+When he tells you how he's feeling or what urge he's having, give him ONE specific, honest, actionable alternative. Max 100 words. Be direct and warm — like a sharp older friend who knows the science but speaks plainly. Include a time estimate in brackets like [5 min]. Connect to his animation career when relevant. No bullet points, just a paragraph.`,
+        messages: [{ role: "user", content: msg }],
+      })
+    });
+    const data = await res.json();
+    const text = data.content?.find(b => b.type === 'text')?.text || "Try 5 minutes of silence. I mean it. Set a timer.";
+    thinking.style.display = 'none';
+    textEl.textContent = text;
+  } catch {
+    thinking.style.display = 'none';
+    textEl.textContent = "Couldn't connect. Use the mood buttons above — they work offline.";
+  }
+
+  btn.disabled = false;
+}
+
+init();
+</script>
+</body>
+</html>
