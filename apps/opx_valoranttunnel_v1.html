@@ -1,0 +1,1678 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THE TUNNEL — Opx's Valorant Precision Lab</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Chakra+Petch:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#08090c;
+  --bg-elevated:#0f1115;
+  --surface:#15181f;
+  --surface-2:#1a1e27;
+  --surface-hover:#20242f;
+  --border:#242833;
+  --border-bright:#343b4a;
+  --text:#eceff4;
+  --text-dim:#98a1b3;
+  --text-faint:#5b6377;
+  --accent:#ff4655;
+  --accent-dim:#7a2530;
+  --cyan:#00f0e0;
+  --cyan-dim:#0a5a56;
+  --lime:#c6ff5e;
+  --amber:#ffb020;
+  --font-display:'Chakra Petch',sans-serif;
+  --font-body:'Inter',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+  --radius:10px;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  min-height:100vh;
+  -webkit-font-smoothing:antialiased;
+  background-image:
+    radial-gradient(circle at 15% 0%, rgba(255,70,85,0.07), transparent 40%),
+    radial-gradient(circle at 85% 15%, rgba(0,240,224,0.06), transparent 45%);
+  background-attachment:fixed;
+}
+::selection{background:var(--accent);color:#fff;}
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-track{background:var(--bg-elevated);}
+::-webkit-scrollbar-thumb{background:var(--border-bright);border-radius:6px;}
+::-webkit-scrollbar-thumb:hover{background:var(--text-faint);}
+
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:600;letter-spacing:0.01em;margin:0;color:var(--text);}
+p{line-height:1.6;color:var(--text-dim);margin:0 0 12px;}
+a{color:var(--cyan);}
+.mono{font-family:var(--font-mono);}
+button{font-family:var(--font-body);cursor:pointer;}
+input,select,textarea{font-family:var(--font-body);}
+
+/* ---------- App shell ---------- */
+.app{display:flex;min-height:100vh;}
+
+.sidebar{
+  width:236px;flex-shrink:0;
+  background:var(--bg-elevated);
+  border-right:1px solid var(--border);
+  display:flex;flex-direction:column;
+  position:sticky;top:0;height:100vh;
+  z-index:50;
+}
+.brand{
+  padding:22px 20px 16px;
+  border-bottom:1px solid var(--border);
+}
+.brand-mark{
+  font-family:var(--font-display);font-weight:700;font-size:20px;letter-spacing:0.03em;
+  display:flex;align-items:center;gap:8px;color:var(--text);
+}
+.brand-mark .dot{width:8px;height:8px;border-radius:2px;background:var(--accent);box-shadow:0 0 12px var(--accent);transform:rotate(45deg);}
+.brand-sub{font-size:11px;color:var(--text-faint);margin-top:4px;letter-spacing:0.08em;text-transform:uppercase;}
+
+.nav{flex:1;padding:14px 10px;overflow-y:auto;}
+.nav-group-label{font-size:10.5px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-faint);padding:14px 10px 6px;}
+.nav-item{
+  display:flex;align-items:center;gap:10px;
+  padding:9px 12px;border-radius:8px;
+  color:var(--text-dim);font-size:14px;font-weight:500;
+  cursor:pointer;margin-bottom:2px;
+  border:1px solid transparent;
+  transition:background .12s,color .12s;
+  user-select:none;
+}
+.nav-item:hover{background:var(--surface);color:var(--text);}
+.nav-item.active{background:var(--surface-2);color:var(--text);border-color:var(--border-bright);}
+.nav-item.active .nav-ic{color:var(--accent);}
+.nav-ic{width:17px;text-align:center;font-size:14px;flex-shrink:0;}
+.nav-item.disabled{opacity:0.35;cursor:default;}
+.nav-item.disabled:hover{background:transparent;color:var(--text-dim);}
+.nav-badge{margin-left:auto;font-size:9px;padding:2px 6px;border-radius:20px;background:var(--surface-2);color:var(--text-faint);letter-spacing:0.05em;border:1px solid var(--border-bright);}
+
+.sidebar-foot{padding:14px 18px;border-top:1px solid var(--border);font-size:11px;color:var(--text-faint);}
+.sidebar-foot b{color:var(--text-dim);}
+
+.main{flex:1;min-width:0;}
+.topbar{
+  position:sticky;top:0;z-index:40;
+  background:rgba(8,9,12,0.85);backdrop-filter:blur(10px);
+  border-bottom:1px solid var(--border);
+  padding:16px 32px;
+  display:flex;align-items:center;justify-content:space-between;
+}
+.topbar h1{font-size:19px;}
+.topbar .crumb{font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.1em;margin-bottom:2px;}
+.topbar-actions{display:flex;gap:10px;align-items:center;}
+
+.section{display:none;padding:28px 32px 80px;max-width:1180px;}
+.section.active{display:block;}
+
+/* ---------- Reusable bits ---------- */
+.card{
+  background:var(--surface);
+  border:1px solid var(--border);
+  border-radius:var(--radius);
+  padding:20px;
+}
+.card + .card{margin-top:16px;}
+.card-title{font-family:var(--font-display);font-size:14px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-dim);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;}
+.grid-2{display:grid;grid-template-columns:1fr 1fr;gap:16px;}
+.grid-3{display:grid;grid-template-columns:1fr 1fr 1fr;gap:16px;}
+@media (max-width:900px){.grid-2,.grid-3{grid-template-columns:1fr;}}
+
+.btn{
+  display:inline-flex;align-items:center;gap:7px;
+  padding:9px 16px;border-radius:8px;
+  background:var(--surface-2);border:1px solid var(--border-bright);
+  color:var(--text);font-size:13.5px;font-weight:600;
+  transition:all .12s;
+}
+.btn:hover{background:var(--surface-hover);border-color:var(--text-faint);}
+.btn-accent{background:var(--accent);border-color:var(--accent);color:#fff;}
+.btn-accent:hover{background:#ff5c69;border-color:#ff5c69;}
+.btn-cyan{background:transparent;border-color:var(--cyan-dim);color:var(--cyan);}
+.btn-cyan:hover{background:rgba(0,240,224,0.08);}
+.btn-ghost{background:transparent;border-color:transparent;color:var(--text-dim);}
+.btn-ghost:hover{background:var(--surface);color:var(--text);}
+.btn-sm{padding:6px 11px;font-size:12px;}
+.btn:disabled{opacity:0.4;cursor:not-allowed;}
+.btn-block{width:100%;justify-content:center;}
+
+.field{margin-bottom:14px;}
+.field label{
+  display:flex;justify-content:space-between;align-items:center;
+  font-size:12.5px;color:var(--text-dim);margin-bottom:6px;font-weight:500;
+}
+.field label .val{font-family:var(--font-mono);color:var(--cyan);font-size:12px;}
+input[type=range]{
+  -webkit-appearance:none;width:100%;height:4px;border-radius:3px;
+  background:var(--border-bright);outline:none;
+}
+input[type=range]::-webkit-slider-thumb{
+  -webkit-appearance:none;width:15px;height:15px;border-radius:50%;
+  background:var(--text);cursor:pointer;border:2px solid var(--bg);
+  box-shadow:0 0 0 1px var(--border-bright);
+}
+input[type=range]:disabled{opacity:0.3;}
+.text-input, select.text-input{
+  width:100%;padding:9px 12px;border-radius:7px;
+  background:var(--bg-elevated);border:1px solid var(--border-bright);
+  color:var(--text);font-size:13.5px;
+}
+.text-input:focus, select.text-input:focus{outline:none;border-color:var(--cyan-dim);}
+textarea.text-input{resize:vertical;min-height:60px;font-family:var(--font-mono);font-size:12.5px;}
+
+.toggle-row{display:flex;align-items:center;justify-content:space-between;padding:9px 0;}
+.toggle-row .lbl{font-size:13px;color:var(--text);font-weight:500;}
+.toggle-row .sub{font-size:11px;color:var(--text-faint);margin-top:1px;}
+.switch{position:relative;width:38px;height:22px;flex-shrink:0;}
+.switch input{opacity:0;width:0;height:0;}
+.slider-toggle{position:absolute;cursor:pointer;inset:0;background:var(--border-bright);border-radius:20px;transition:.15s;}
+.slider-toggle:before{content:"";position:absolute;height:16px;width:16px;left:3px;top:3px;background:var(--text-faint);border-radius:50%;transition:.15s;}
+.switch input:checked + .slider-toggle{background:var(--accent-dim);}
+.switch input:checked + .slider-toggle:before{transform:translateX(16px);background:var(--accent);}
+
+.divider{height:1px;background:var(--border);margin:16px 0;}
+.tag{display:inline-flex;align-items:center;padding:3px 9px;border-radius:20px;font-size:10.5px;font-weight:600;letter-spacing:0.03em;text-transform:uppercase;border:1px solid var(--border-bright);color:var(--text-dim);}
+.tag-cyan{color:var(--cyan);border-color:var(--cyan-dim);background:rgba(0,240,224,0.06);}
+.tag-accent{color:var(--accent);border-color:var(--accent-dim);background:rgba(255,70,85,0.08);}
+.tag-lime{color:var(--lime);border-color:#4a5c22;background:rgba(198,255,94,0.06);}
+
+.pill-tabs{display:flex;gap:6px;background:var(--bg-elevated);padding:4px;border-radius:9px;border:1px solid var(--border);}
+.pill-tab{flex:1;text-align:center;padding:7px 10px;border-radius:6px;font-size:12.5px;font-weight:600;color:var(--text-faint);}
+.pill-tab.active{background:var(--surface-2);color:var(--text);}
+
+.stat-box{background:var(--bg-elevated);border:1px solid var(--border);border-radius:8px;padding:12px 14px;}
+.stat-box .num{font-family:var(--font-mono);font-size:22px;font-weight:700;color:var(--text);}
+.stat-box .lbl{font-size:11px;color:var(--text-faint);text-transform:uppercase;letter-spacing:0.05em;margin-top:2px;}
+
+.empty{padding:30px 20px;text-align:center;color:var(--text-faint);font-size:13px;}
+.hr-label{display:flex;align-items:center;gap:10px;margin:22px 0 12px;font-size:11px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-faint);}
+.hr-label:before,.hr-label:after{content:"";flex:1;height:1px;background:var(--border);}
+
+.toast{
+  position:fixed;bottom:22px;right:22px;z-index:200;
+  background:var(--surface-2);border:1px solid var(--border-bright);
+  padding:12px 18px;border-radius:9px;font-size:13px;color:var(--text);
+  box-shadow:0 10px 30px rgba(0,0,0,0.5);
+  opacity:0;transform:translateY(8px);transition:.2s;pointer-events:none;
+  display:flex;align-items:center;gap:8px;
+}
+.toast.show{opacity:1;transform:translateY(0);}
+.toast .dot{width:7px;height:7px;border-radius:50%;background:var(--lime);}
+
+::placeholder{color:var(--text-faint);}
+</style>
+</head>
+<body>
+<div class="app">
+
+  <aside class="sidebar">
+    <div class="brand">
+      <div class="brand-mark"><span class="dot"></span>THE TUNNEL</div>
+      <div class="brand-sub">Opx's Precision Lab</div>
+    </div>
+    <nav class="nav" id="navList">
+      <div class="nav-group-label">Home</div>
+      <div class="nav-item" data-section="overview"><span class="nav-ic">&#9679;</span>Overview</div>
+
+      <div class="nav-group-label">Build</div>
+      <div class="nav-item" data-section="crosshair"><span class="nav-ic">&#10010;</span>Crosshair Lab</div>
+      <div class="nav-item" data-section="sensitivity"><span class="nav-ic">&#9673;</span>Sensitivity Finder</div>
+      <div class="nav-item" data-section="routines"><span class="nav-ic">&#9642;</span>Aim Routines</div>
+
+      <div class="nav-group-label">Reference</div>
+      <div class="nav-item" data-section="vault"><span class="nav-ic">&#9733;</span>Pro Vault</div>
+      <div class="nav-item" data-section="rules"><span class="nav-ic">&#9776;</span>Tips &amp; Rules</div>
+
+      <div class="nav-group-label">Games</div>
+      <div class="nav-item" data-section="games"><span class="nav-ic">&#9635;</span>Game Library</div>
+    </nav>
+    <div class="sidebar-foot">
+      Everything here is saved <b>locally in this browser</b>. No account, no server, no leaks.
+    </div>
+  </aside>
+
+  <div class="main">
+    <div class="topbar">
+      <div>
+        <div class="crumb" id="crumbLabel">Home</div>
+        <h1 id="topbarTitle">Overview</h1>
+      </div>
+      <div class="topbar-actions" id="topbarActions"></div>
+    </div>
+
+    <!-- ============ OVERVIEW ============ -->
+    <section class="section" id="sec-overview"></section>
+
+    <!-- ============ CROSSHAIR LAB ============ -->
+    <section class="section" id="sec-crosshair"></section>
+
+    <!-- ============ SENSITIVITY FINDER ============ -->
+    <section class="section" id="sec-sensitivity"></section>
+
+    <!-- ============ AIM ROUTINES ============ -->
+    <section class="section" id="sec-routines"></section>
+
+    <!-- ============ PRO VAULT ============ -->
+    <section class="section" id="sec-vault"></section>
+
+    <!-- ============ TIPS & RULES ============ -->
+    <section class="section" id="sec-rules"></section>
+
+    <!-- ============ GAME LIBRARY ============ -->
+    <section class="section" id="sec-games"></section>
+
+  </div>
+</div>
+
+<div class="toast" id="toast"><span class="dot"></span><span id="toastMsg"></span></div>
+
+<script>
+/* =========================================================================
+   THE TUNNEL — Opx's Valorant Precision Lab
+   Single-file app. No build step, no external JS deps, no network calls.
+   All state persists via window.localStorage only.
+   ========================================================================= */
+
+/* ---------------- Storage helpers (never throw) ---------------- */
+const Store = {
+  get(key, fallback){
+    try{
+      const raw = localStorage.getItem(key);
+      if(raw===null) return fallback;
+      return JSON.parse(raw);
+    }catch(e){ return fallback; }
+  },
+  set(key, val){
+    try{ localStorage.setItem(key, JSON.stringify(val)); return true; }
+    catch(e){ return false; }
+  },
+  remove(key){ try{ localStorage.removeItem(key); }catch(e){} }
+};
+
+function toast(msg){
+  const t = document.getElementById('toast');
+  document.getElementById('toastMsg').textContent = msg;
+  t.classList.add('show');
+  clearTimeout(toast._h);
+  toast._h = setTimeout(()=>t.classList.remove('show'), 2200);
+}
+function clamp01(v){ return Math.max(0, Math.min(1, v)); }
+function uid(){ return Date.now().toString(36)+Math.random().toString(36).slice(2,8); }
+function hexToRgb(hex){
+  hex = hex.replace('#','');
+  if(hex.length===3) hex = hex.split('').map(c=>c+c).join('');
+  const n = parseInt(hex,16);
+  return {r:(n>>16)&255, g:(n>>8)&255, b:n&255};
+}
+function fmt(n, d){ if(n===undefined||n===null||isNaN(n)) return '—'; return Number(n).toFixed(d===undefined?2:d).replace(/\.00$/,'').replace(/(\.\d)0$/,'$1'); }
+
+/* ---------------- Crosshair schema ---------------- */
+const COLOR_NAMES = ['White','Green','Yellow-Green','Green-Yellow','Yellow','Cyan','Pink','Red','Custom'];
+const PRESET_HEX  = ['#FFFFFF','#00FF66','#C3FF00','#7CFF00','#FFFF00','#00F0FF','#FF5CF4','#FF3B3B'];
+
+function colorOf(idx, customHex){
+  if(idx===8){
+    let h = (customHex||'FFFFFFFF').replace('#','');
+    if(h.length>=6) return '#'+h.slice(0,6);
+    return '#FFFFFF';
+  }
+  return PRESET_HEX[idx] || '#FFFFFF';
+}
+
+function defaultCrosshair(){
+  return {
+    color:5, customHex:'00F0FFFF',
+    outlines:false, outlineOpacity:1, outlineThickness:1,
+    centerDot:false, dotThickness:2, dotOpacity:1,
+    fadeWithFiring:false, overrideFiringOffset:false,
+    innerLines:true, innerThickness:2, innerLength:4, innerOffset:2, innerOpacity:1,
+    innerLengthLinked:true, innerVLength:4,
+    innerMovement:false, innerMovementMult:1, innerFiring:false, innerFiringMult:1,
+    outerLines:false, outerThickness:2, outerLength:2, outerOffset:10, outerOpacity:0.35,
+    outerLengthLinked:true, outerVLength:2,
+    outerMovement:false, outerMovementMult:1, outerFiring:false, outerFiringMult:1,
+    sniperColor:0, sniperCustomHex:'FFFFFFFF', sniperOpacity:1, sniperScale:1, sniperDot:false
+  };
+}
+
+/* Encode our internal object into a Valorant-style crosshair import code.
+   Field map is reverse-engineered from dozens of real, working pro codes —
+   Riot has never published an official spec, so treat this as "best known
+   mapping", not gospel. It round-trips perfectly with decodeCrosshair()
+   below, and covers every field the in-game menu exposes. */
+function encodeCrosshair(cx){
+  const prim = [];
+  const pp = (k,v)=>prim.push(k+';'+v);
+  pp('c', cx.color);
+  if(cx.color===8) pp('u', (cx.customHex||'FFFFFFFF').toUpperCase());
+  pp('h', cx.outlines?1:0);
+  pp('o', cx.outlineOpacity);
+  pp('t', cx.outlineThickness);
+  pp('d', cx.centerDot?1:0);
+  pp('z', cx.dotThickness);
+  pp('a', cx.dotOpacity);
+  pp('f', cx.fadeWithFiring?1:0);
+  pp('m', cx.overrideFiringOffset?1:0);
+  pp('0b', cx.innerLines?1:0);
+  if(cx.innerLines){
+    pp('0t', cx.innerThickness);
+    pp('0l', cx.innerLength);
+    pp('0g', cx.innerLengthLinked?1:0);
+    if(!cx.innerLengthLinked) pp('0v', cx.innerVLength);
+    pp('0o', cx.innerOffset);
+    pp('0a', cx.innerOpacity);
+    pp('0m', cx.innerMovement?1:0);
+    if(cx.innerMovement) pp('0s', cx.innerMovementMult);
+    pp('0f', cx.innerFiring?1:0);
+    if(cx.innerFiring) pp('0e', cx.innerFiringMult);
+  }
+  pp('1b', cx.outerLines?1:0);
+  if(cx.outerLines){
+    pp('1t', cx.outerThickness);
+    pp('1l', cx.outerLength);
+    pp('1g', cx.outerLengthLinked?1:0);
+    if(!cx.outerLengthLinked) pp('1v', cx.outerVLength);
+    pp('1o', cx.outerOffset);
+    pp('1a', cx.outerOpacity);
+    pp('1m', cx.outerMovement?1:0);
+    if(cx.outerMovement) pp('1s', cx.outerMovementMult);
+    pp('1f', cx.outerFiring?1:0);
+    if(cx.outerFiring) pp('1e', cx.outerFiringMult);
+  }
+  const sniper = [];
+  const sp = (k,v)=>sniper.push(k+';'+v);
+  sp('c', cx.sniperColor);
+  if(cx.sniperColor===8) sp('u', (cx.sniperCustomHex||'FFFFFFFF').toUpperCase());
+  sp('d', cx.sniperDot?1:0);
+  sp('s', cx.sniperScale);
+  sp('o', cx.sniperOpacity);
+
+  return '0;s;1;P;'+prim.join(';')+';S;'+sniper.join(';');
+}
+
+/* Lenient decoder — accepts codes copied from the game, from pro-settings
+   sites, or generated by this tool. Unknown keys are safely ignored so a
+   partially-unfamiliar code still loads everything it recognizes instead
+   of failing outright. The rarely-used "A" (ADS) block is parsed past but
+   not modeled — this tool intentionally focuses on Primary + Sniper. */
+function decodeCrosshair(code){
+  const cx = defaultCrosshair();
+  if(!code || typeof code !== 'string') return {cx, ok:false};
+  const tokens = code.trim().split(';').map(t=>t.trim()).filter(t=>t.length);
+  let section = 'top', i = 0;
+  if(tokens[0] === '0') i = 1;
+  let sawP = false;
+  while(i < tokens.length){
+    const tok = tokens[i];
+    if(tok==='P'){ section='P'; sawP=true; i++; continue; }
+    if(tok==='A'){ section='A'; i++; continue; }
+    if(tok==='S'){ section='S'; i++; continue; }
+    const key = tok, val = tokens[i+1];
+    i += 2;
+    if(val===undefined) break;
+    const num = parseFloat(val), bool = (val==='1');
+    if(section==='P'){
+      switch(key){
+        case 'c': cx.color = parseInt(val)||0; break;
+        case 'u': cx.customHex = val; break;
+        case 'h': cx.outlines = bool; break;
+        case 'o': cx.outlineOpacity = num; break;
+        case 't': cx.outlineThickness = num; break;
+        case 'd': cx.centerDot = bool; break;
+        case 'z': cx.dotThickness = num; break;
+        case 'a': cx.dotOpacity = num; break;
+        case 'f': cx.fadeWithFiring = bool; break;
+        case 'm': cx.overrideFiringOffset = bool; break;
+        case '0b': cx.innerLines = bool; break;
+        case '0t': cx.innerThickness = num; break;
+        case '0l': cx.innerLength = num; break;
+        case '0v': cx.innerVLength = num; break;
+        case '0g': cx.innerLengthLinked = bool; break;
+        case '0o': cx.innerOffset = num; break;
+        case '0a': cx.innerOpacity = num; break;
+        case '0m': cx.innerMovement = bool; break;
+        case '0s': cx.innerMovementMult = num; break;
+        case '0f': cx.innerFiring = bool; break;
+        case '0e': cx.innerFiringMult = num; break;
+        case '1b': cx.outerLines = bool; break;
+        case '1t': cx.outerThickness = num; break;
+        case '1l': cx.outerLength = num; break;
+        case '1v': cx.outerVLength = num; break;
+        case '1g': cx.outerLengthLinked = bool; break;
+        case '1o': cx.outerOffset = num; break;
+        case '1a': cx.outerOpacity = num; break;
+        case '1m': cx.outerMovement = bool; break;
+        case '1s': cx.outerMovementMult = num; break;
+        case '1f': cx.outerFiring = bool; break;
+        case '1e': cx.outerFiringMult = num; break;
+      }
+      // implicit: presence of inner/outer detail keys means that block is shown
+      if(['0t','0l','0o','0a'].includes(key)) cx.innerLines = true;
+      if(['1t','1l','1o','1a'].includes(key) && key!=='1b') { /* leave as explicit 1b controls this */ }
+    } else if(section==='S'){
+      switch(key){
+        case 'c': cx.sniperColor = parseInt(val)||0; break;
+        case 'u': cx.sniperCustomHex = val; break;
+        case 'd': cx.sniperDot = bool; break;
+        case 's': cx.sniperScale = num; break;
+        case 'o': cx.sniperOpacity = num; break;
+      }
+    }
+    // section 'top' and 'A' fields are intentionally not modeled
+  }
+  return {cx, ok:sawP};
+}
+
+/* ---------------- Canvas crosshair renderer ---------------- */
+function renderCrosshair(canvas, cx, scale){
+  scale = scale || 1;
+  const ctx = canvas.getContext('2d');
+  const W = canvas.width, H = canvas.height;
+  ctx.clearRect(0,0,W,H);
+  const cxp = W/2, cyp = H/2;
+  const color = colorOf(cx.color, cx.customHex);
+
+  if(cx.centerDot){
+    const s = Math.max(1, cx.dotThickness*2) * scale;
+    if(cx.outlines){
+      const ot = Math.max(0.5, cx.outlineThickness) * scale;
+      ctx.globalAlpha = clamp01(cx.outlineOpacity);
+      ctx.fillStyle = '#000';
+      ctx.fillRect(cxp-s/2-ot, cyp-s/2-ot, s+2*ot, s+2*ot);
+    }
+    ctx.globalAlpha = clamp01(cx.dotOpacity);
+    ctx.fillStyle = color;
+    ctx.fillRect(cxp-s/2, cyp-s/2, s, s);
+  }
+
+  function drawArm(axis, sign, length, thickness, offset, opacity, outline, outlineThick){
+    const len = Math.max(0,length)*scale, th = Math.max(0.4,thickness)*scale, off = Math.max(0,offset)*scale, ot = Math.max(0,outlineThick)*scale;
+    if(len<=0) return;
+    let x,y,w,h;
+    if(axis==='x'){
+      w = len; h = th;
+      x = sign>0 ? cxp+off : cxp-off-len;
+      y = cyp - th/2;
+    } else {
+      w = th; h = len;
+      x = cxp - th/2;
+      y = sign>0 ? cyp+off : cyp-off-len;
+    }
+    if(outline){
+      ctx.globalAlpha = clamp01(cx.outlineOpacity);
+      ctx.fillStyle = '#000';
+      ctx.fillRect(x-ot, y-ot, w+2*ot, h+2*ot);
+    }
+    ctx.globalAlpha = clamp01(opacity);
+    ctx.fillStyle = color;
+    ctx.fillRect(x,y,w,h);
+  }
+
+  if(cx.innerLines){
+    const hLen = cx.innerLength, vLen = cx.innerLengthLinked ? cx.innerLength : cx.innerVLength;
+    drawArm('x', 1, hLen, cx.innerThickness, cx.innerOffset, cx.innerOpacity, cx.outlines, cx.outlineThickness);
+    drawArm('x', -1, hLen, cx.innerThickness, cx.innerOffset, cx.innerOpacity, cx.outlines, cx.outlineThickness);
+    drawArm('y', 1, vLen, cx.innerThickness, cx.innerOffset, cx.innerOpacity, cx.outlines, cx.outlineThickness);
+    drawArm('y', -1, vLen, cx.innerThickness, cx.innerOffset, cx.innerOpacity, cx.outlines, cx.outlineThickness);
+  }
+  if(cx.outerLines){
+    const hLen = cx.outerLength, vLen = cx.outerLengthLinked ? cx.outerLength : cx.outerVLength;
+    drawArm('x', 1, hLen, cx.outerThickness, cx.outerOffset, cx.outerOpacity, cx.outlines, cx.outlineThickness);
+    drawArm('x', -1, hLen, cx.outerThickness, cx.outerOffset, cx.outerOpacity, cx.outlines, cx.outlineThickness);
+    drawArm('y', 1, vLen, cx.outerThickness, cx.outerOffset, cx.outerOpacity, cx.outlines, cx.outlineThickness);
+    drawArm('y', -1, vLen, cx.outerThickness, cx.outerOffset, cx.outerOpacity, cx.outlines, cx.outlineThickness);
+  }
+  ctx.globalAlpha = 1;
+}
+
+function renderCrosshairBg(canvas, cx, scale, bg){
+  const ctx = canvas.getContext('2d');
+  ctx.fillStyle = bg;
+  ctx.fillRect(0,0,canvas.width,canvas.height);
+  renderCrosshair(canvas, cx, scale);
+}
+
+/* ---------------- Pro reference data ----------------
+   Crosshair codes below are copied verbatim from public pro-settings
+   trackers (not re-generated by this tool's own encoder), so they should
+   paste into VALORANT correctly even if a rare edge-case field in this
+   tool's own schema guess is imperfect. Sensitivity figures are the most
+   consistently reported values across multiple independent trackers as of
+   mid-2026 — pros change gear often, so treat these as "known good
+   starting points", not live-synced truth. Re-check prosettings.net /
+   valorantcrosshairdb.com before copying blindly. */
+const PROS = [
+  {
+    id:'tenz', name:'TenZ', real:'Tyson Ngo', team:'Sentinels', role:'Duelist / Flex',
+    dpi:800, sens:0.408,
+    code:'0;s;1;P;c;5;h;0;m;1;0l;4;0o;2;0a;1;0f;0;1b;0;S;c;4;o;1',
+    note:'Small cyan cross, no dot, inner lines only. The most-copied crosshair in the game for a reason — tight, clean, no visual noise.',
+    routine:'tenz'
+  },
+  {
+    id:'demon1', name:'Demon1', real:'Max Mazanov', team:'Evil Geniuses', role:'Duelist (Entry)',
+    dpi:800, sens:0.245,
+    code:'0;P;c;5;h;0;m;1;0l;4;0o;2;0a;1;0f;0;1b;0',
+    note:'Near-identical shape to TenZ\'s but run on one of the lowest eDPIs in pro play — precision over speed.',
+    routine:'demon1'
+  },
+  {
+    id:'aspas', name:'aspas', real:'Erick Santos', team:'LOUD', role:'Duelist',
+    dpi:400, sens:0.78,
+    code:'0;s;1;P;c;5;o;1;0l;4;0v;3;0g;1;0o;0;0a;1;0f;0;1b;0;S;c;0;s;1.2;o;1',
+    note:'Cyan cross with a slightly taller vertical line — built for a player whose whole game is fast first contact.',
+    routine:'aspas'
+  },
+  {
+    id:'boaster', name:'BOASTER', real:'Jake Howlett', team:'Fnatic', role:'In-Game Leader',
+    dpi:800, sens:0.26,
+    code:'0;s;1;P;c;1;o;1;d;1;0l;0;0o;2;0a;1;0f;0;1t;0;1l;0;1o;0;1a;0;S;c;1;o;1',
+    note:'Green dot-only crosshair. IGLs call the round more than they flick — a dot keeps the screen uncluttered while calling.',
+    routine:'boaster'
+  },
+  {
+    id:'yay', name:'yay', real:'Jaccob Whiteaker', team:'NRG', role:'Duelist (Rifler)',
+    dpi:800, sens:0.35,
+    code:'0;P;h;0;f;0;0l;4;0o;0;0a;1;0f;0;1b;0',
+    note:'No outlines, zero offset — the lines sit almost flush with the center. One of the most mechanically respected riflers in NA.',
+    routine:'yay'
+  }
+];
+
+/* ---------------- Aim routine data ---------------- */
+function newDrill(name, cat, minutes, notes){
+  return {id:uid(), name, cat, minutes, notes:notes||''};
+}
+const ROUTINE_CATS = [
+  {id:'precision', label:'Precision / Clicking'},
+  {id:'tracking',  label:'Tracking'},
+  {id:'flicking',  label:'Flicking'},
+  {id:'switching', label:'Target Switching'},
+  {id:'recoil',    label:'Recoil Control'},
+  {id:'placement', label:'Crosshair Placement'},
+  {id:'transfer',  label:'Game Transfer (DM/Range)'}
+];
+const PRESET_ROUTINES = [
+  { id:'tenz', name:'TenZ-Style Duelist Warm-up', pro:'TenZ', totalNote:'~38 min',
+    drills:[
+      newDrill('Static grid precision', 'precision', 8, '95%+ headshot accuracy goal, slow and deliberate'),
+      newDrill('Micro-flick correction', 'flicking', 10, 'Small flicks only — overshoot control, not speed'),
+      newDrill('Strafe tracking', 'tracking', 8, 'Smooth pursuit on a strafing target'),
+      newDrill('Target-switch chaos drill', 'switching', 7, 'Multiple spawns, fast re-acquisition'),
+      newDrill('Deathmatch transfer', 'transfer', 10, 'Apply it live — focus on the drill you felt weakest at')
+    ]},
+  { id:'demon1', name:'Demon1-Style Precision & Placement', pro:'Demon1', totalNote:'~30 min',
+    drills:[
+      newDrill('Static headshot precision', 'precision', 10, 'Zero movement — pure click timing'),
+      newDrill('Crosshair placement pre-aim', 'placement', 10, 'Walk common angles, pre-aim head level before peeking'),
+      newDrill('Slow tracking', 'tracking', 5, 'Low-speed target, focus on smoothness not reaction'),
+      newDrill('Spray control (Range)', 'recoil', 5, 'Vandal/Phantom full spray, hold the pattern')
+    ]},
+  { id:'aspas', name:'aspas-Style Aggressive Entry', pro:'aspas', totalNote:'~35 min',
+    drills:[
+      newDrill('Reaction flicks', 'flicking', 10, 'React-and-flick, not pre-aimed — trains raw reaction'),
+      newDrill('Fast strafing switch', 'switching', 10, 'High tempo, multiple simultaneous targets'),
+      newDrill('Peek-and-clear drill', 'placement', 10, 'Jiggle peek an angle, clear head-level in one motion'),
+      newDrill('Deathmatch', 'transfer', 5, 'Short, high-intensity — first-contact focus only')
+    ]},
+  { id:'boaster', name:'BOASTER-Style Consistency Routine', pro:'BOASTER', totalNote:'~25 min',
+    drills:[
+      newDrill('Precision warm-up', 'precision', 8, 'Baseline accuracy check before anything else'),
+      newDrill('Recoil patterns', 'recoil', 8, 'Rifle spray control — consistency over speed'),
+      newDrill('Utility lineups', 'placement', 9, 'Not aim, but timing discipline — same energy, different muscle')
+    ]},
+  { id:'yay', name:'yay-Style Rifle Fundamentals', pro:'yay', totalNote:'~32 min',
+    drills:[
+      newDrill('Static precision', 'precision', 8, 'Small crosshair, no outline — train exact placement'),
+      newDrill('Tracking (linear)', 'tracking', 8, 'Constant-speed target across the screen'),
+      newDrill('Flick + hold', 'flicking', 8, 'Flick onto target then hold for a follow-up shot'),
+      newDrill('Deathmatch transfer', 'transfer', 8, 'Full send — apply everything above live')
+    ]},
+  { id:'reset', name:'Full Reset (Fundamentals Rebuild)', pro:'General', totalNote:'~60 min',
+    drills:[
+      newDrill('Static grid precision', 'precision', 12, 'Rebuild the baseline — no movement, no pressure'),
+      newDrill('Slow tracking', 'tracking', 10, 'Half your normal target speed'),
+      newDrill('Micro-flicks', 'flicking', 10, 'Tiny corrections only, resist the urge to overshoot'),
+      newDrill('Target switching', 'switching', 10, 'Multiple targets, moderate pace'),
+      newDrill('Recoil control', 'recoil', 8, 'Full spray patterns, both rifles'),
+      newDrill('Deathmatch transfer', 'transfer', 10, 'Long-form live application')
+    ]}
+];
+
+/* ---------------- App state ---------------- */
+const App = {
+  cx: Store.get('tunnel_cx', null) || defaultCrosshair(),
+  saved: Store.get('tunnel_saved_crosshairs', []),
+  sens: Store.get('tunnel_sens', {dpi:800, sens:0.35, mouse:'', pad:'', notes:''}),
+  routines: Store.get('tunnel_routines', []),
+  builder: [], // in-progress drill list for the routine builder
+  activePro: null,
+  timer: {running:false, idx:0, remaining:0, handle:null, routine:null}
+};
+function saveCx(){ Store.set('tunnel_cx', App.cx); }
+function saveAll(){ Store.set('tunnel_saved_crosshairs', App.saved); }
+function saveSens(){ Store.set('tunnel_sens', App.sens); }
+function saveRoutines(){ Store.set('tunnel_routines', App.routines); }
+
+/* ---------------- Overview ---------------- */
+function renderOverview(){
+  const el = document.getElementById('sec-overview');
+  const savedCount = App.saved.length;
+  const routineCount = App.routines.length;
+  const hasSens = App.sens && App.sens.dpi && App.sens.sens;
+  const edpi = hasSens ? (App.sens.dpi*App.sens.sens) : null;
+  el.innerHTML = `
+    <div class="card" style="background:linear-gradient(135deg, rgba(255,70,85,0.09), rgba(0,240,224,0.05)); border-color:var(--border-bright);">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;gap:20px;flex-wrap:wrap;">
+        <div style="max-width:620px;">
+          <div class="tag tag-accent" style="margin-bottom:12px;">VALORANT · Phase 1</div>
+          <h2 style="font-size:24px;margin-bottom:10px;">Everything that isn't your aim, handled.</h2>
+          <p>One place to build a pixel-accurate crosshair, work out the sensitivity that actually fits your hand, and structure practice instead of doing aimless deathmatch. Nothing here leaves this browser — no accounts, no sync, no server.</p>
+        </div>
+        <div class="stat-box" style="min-width:150px;">
+          <div class="num">${savedCount}</div>
+          <div class="lbl">Saved Crosshairs</div>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-3" style="margin-top:16px;">
+      <div class="card">
+        <div class="card-title">Crosshair Lab</div>
+        <p style="font-size:13px;">Every slider from VALORANT's actual crosshair menu, a live canvas preview, and a side-by-side view of how it shrinks at higher resolutions.</p>
+        <button class="btn btn-accent btn-block" data-goto="crosshair">Open Lab &rarr;</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Sensitivity Finder</div>
+        <p style="font-size:13px;">${hasSens ? `Your current setup: <b class="mono" style="color:var(--text)">${App.sens.dpi} DPI &times; ${App.sens.sens}</b> sens &mdash; <b class="mono" style="color:var(--cyan)">${fmt(edpi,0)} eDPI</b>.` : 'DPI, eDPI, cm/360 and a real method for landing on a number and sticking with it.'}</p>
+        <button class="btn btn-cyan btn-block" data-goto="sensitivity">Open Finder &rarr;</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Aim Routines</div>
+        <p style="font-size:13px;">${routineCount ? `${routineCount} routine${routineCount>1?'s':''} saved.` : 'Build a structured warm-up instead of raw-dogging deathmatch for 20 minutes.'}</p>
+        <button class="btn btn-block" data-goto="routines">Open Routines &rarr;</button>
+      </div>
+    </div>
+
+    <div class="hr-label">Why this exists</div>
+    <div class="card">
+      <div style="display:grid;grid-template-columns:repeat(3,1fr);gap:18px;">
+        ${[
+          ['WHAT','A crosshair editor, sens calculator and practice planner, all matched to the actual in-game menu.'],
+          ['WHY','Most players tune settings once, badly, and never touch them again. A tool that shows you the reasoning fixes that.'],
+          ['HOW','Build it here, copy one code, paste it into VALORANT. Everything mirrors the real settings menu 1:1.']
+        ].map(([k,v])=>`<div><div style="font-family:var(--font-display);font-size:12px;color:var(--accent);letter-spacing:0.08em;margin-bottom:6px;">${k}</div><div style="font-size:13px;color:var(--text-dim);line-height:1.55;">${v}</div></div>`).join('')}
+      </div>
+    </div>
+
+    <div class="hr-label">Jump in</div>
+    <div class="grid-2">
+      <div class="card">
+        <div class="card-title">Pro Vault</div>
+        <p style="font-size:13px;">Crosshair + sensitivity + a style-inspired routine from 5 pro players. One click loads any of it into your own build.</p>
+        <button class="btn btn-block" data-goto="vault">Browse Pro Vault &rarr;</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Tips, Tricks &amp; Rules</div>
+        <p style="font-size:13px;">Crosshair placement, sensitivity philosophy, resolution scaling explained properly, and the discipline rules that actually move rank.</p>
+        <button class="btn btn-block" data-goto="rules">Read the Rules &rarr;</button>
+      </div>
+    </div>
+  `;
+  el.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click', ()=>go(b.dataset.goto)));
+}
+
+/* ---------------- Crosshair Lab ---------------- */
+function rngRow(key, label, min, max, step, cx, showPct){
+  const v = cx[key];
+  return `<div class="field" data-field="${key}">
+    <label>${label} <span class="val">${showPct? Math.round(v*100)+'%' : v}</span></label>
+    <input type="range" data-cxkey="${key}" min="${min}" max="${max}" step="${step}" value="${v}">
+  </div>`;
+}
+function tglRow(key, label, sub, cx){
+  const on = !!cx[key];
+  return `<div class="toggle-row" data-field="${key}">
+    <div><div class="lbl">${label}</div>${sub?`<div class="sub">${sub}</div>`:''}</div>
+    <label class="switch"><input type="checkbox" data-cxkey="${key}" ${on?'checked':''}><span class="slider-toggle"></span></label>
+  </div>`;
+}
+function colorSelectRow(key, cx, hexKey){
+  const v = cx[key];
+  return `<div class="field" data-field="${key}">
+    <label>Color</label>
+    <select class="text-input" data-cxkey="${key}" data-cxtype="select">
+      ${COLOR_NAMES.map((n,i)=>`<option value="${i}" ${v==i?'selected':''}>${n}</option>`).join('')}
+    </select>
+    ${v===8?`<div style="margin-top:8px;display:flex;gap:8px;align-items:center;">
+      <input type="color" data-cxkey="${hexKey}" data-cxtype="hex" value="#${(cx[hexKey]||'FFFFFFFF').slice(0,6)}" style="width:40px;height:34px;border:1px solid var(--border-bright);border-radius:6px;background:none;padding:2px;">
+      <input type="text" class="text-input mono" data-cxkey="${hexKey}" data-cxtype="hextext" value="${cx[hexKey]||'FFFFFFFF'}" style="flex:1;" maxlength="8" placeholder="RRGGBBAA">
+    </div>`:''}
+  </div>`;
+}
+
+function generalFieldsHTML(cx){
+  return colorSelectRow('color', cx, 'customHex') +
+    tglRow('outlines','Outlines','Thin border around every line so it reads on bright backgrounds', cx) +
+    rngRow('outlineOpacity','Outline Opacity',0,1,0.05,cx,true) +
+    rngRow('outlineThickness','Outline Thickness',0,6,1,cx) +
+    `<div class="divider"></div>` +
+    tglRow('centerDot','Center Dot','Marks the exact zero-range bullet landing point', cx) +
+    rngRow('dotThickness','Dot Thickness',1,8,1,cx) +
+    rngRow('dotOpacity','Dot Opacity',0,1,0.05,cx,true) +
+    `<div class="divider"></div>` +
+    tglRow('fadeWithFiring','Fade With Firing Error','Crosshair dims slightly as spray accuracy drops', cx) +
+    tglRow('overrideFiringOffset','Override Firing Error Offset','Crosshair visually jumps to show spread while spraying', cx);
+}
+function innerFieldsHTML(cx){
+  return tglRow('innerLines','Show Inner Lines','The 4 lines closest to center — this is what most people actually aim with', cx) +
+    rngRow('innerThickness','Thickness',0,10,1,cx) +
+    rngRow('innerLength','Length'+(cx.innerLengthLinked?' (H &amp; V)':' (Horizontal)'),0,20,1,cx) +
+    tglRow('innerLengthLinked','Length Linked','Keep top/bottom the same length as left/right', cx) +
+    (!cx.innerLengthLinked ? rngRow('innerVLength','Vertical Length',0,20,1,cx) : '') +
+    rngRow('innerOffset','Offset (gap from center)',0,40,1,cx) +
+    rngRow('innerOpacity','Opacity',0,1,0.05,cx,true) +
+    `<div class="divider"></div>` +
+    tglRow('innerMovement','Movement Error','Lines spread apart while you move', cx) +
+    (cx.innerMovement ? rngRow('innerMovementMult','Movement Error Multiplier',0,3,0.1,cx) : '') +
+    tglRow('innerFiring','Firing Error','Lines expand outward as recoil builds during a spray', cx) +
+    (cx.innerFiring ? rngRow('innerFiringMult','Firing Error Multiplier',0,3,0.1,cx) : '');
+}
+function outerFieldsHTML(cx){
+  return tglRow('outerLines','Show Outer Lines','A second, farther-out set of lines — most pros leave this off', cx) +
+    rngRow('outerThickness','Thickness',0,10,1,cx) +
+    rngRow('outerLength','Length'+(cx.outerLengthLinked?' (H &amp; V)':' (Horizontal)'),0,20,1,cx) +
+    tglRow('outerLengthLinked','Length Linked','Keep top/bottom the same length as left/right', cx) +
+    (!cx.outerLengthLinked ? rngRow('outerVLength','Vertical Length',0,20,1,cx) : '') +
+    rngRow('outerOffset','Offset (gap from center)',0,40,1,cx) +
+    rngRow('outerOpacity','Opacity',0,1,0.05,cx,true) +
+    `<div class="divider"></div>` +
+    tglRow('outerMovement','Movement Error','Lines spread apart while you move', cx) +
+    (cx.outerMovement ? rngRow('outerMovementMult','Movement Error Multiplier',0,3,0.1,cx) : '') +
+    tglRow('outerFiring','Firing Error','Lines expand outward as recoil builds during a spray', cx) +
+    (cx.outerFiring ? rngRow('outerFiringMult','Firing Error Multiplier',0,3,0.1,cx) : '');
+}
+function sniperFieldsHTML(cx){
+  return colorSelectRow('sniperColor', cx, 'sniperCustomHex') +
+    tglRow('sniperDot','Center Dot', 'Scoped crosshairs are usually just a dot or a small cross', cx) +
+    rngRow('sniperOpacity','Opacity',0,1,0.05,cx,true) +
+    rngRow('sniperScale','Scale',0.5,2,0.05,cx) +
+    `<p style="font-size:12px;margin-top:10px;">Applies to Operator, Marshal and Outlaw scope overlays. VALORANT keeps this profile separate from your primary crosshair on purpose — so a big rifle crosshair never bleeds into your scope.</p>`;
+}
+
+const RES_LIST = [
+  {label:'720p', w:1280, h:720},
+  {label:'1080p', w:1920, h:1080},
+  {label:'1440p', w:2560, h:1440},
+  {label:'4K UHD', w:3840, h:2160}
+];
+
+function renderCrosshairSection(){
+  const el = document.getElementById('sec-crosshair');
+  el.innerHTML = `
+    <div class="card" style="padding:16px 20px;">
+      <p style="margin:0;font-size:13px;">This mirrors VALORANT's actual Settings &rarr; Crosshair menu field-for-field. Build here, copy the code at the bottom, paste it into <span class="mono" style="color:var(--cyan)">Settings &rarr; Crosshair &rarr; Import Profile Code</span> in-game.</p>
+    </div>
+
+    <div class="grid-2" style="align-items:start;margin-top:16px;">
+      <div>
+        <div class="card">
+          <div class="pill-tabs" id="xhTabs">
+            <div class="pill-tab active" data-tab="general">General</div>
+            <div class="pill-tab" data-tab="inner">Inner Lines</div>
+            <div class="pill-tab" data-tab="outer">Outer Lines</div>
+            <div class="pill-tab" data-tab="sniper">Sniper</div>
+          </div>
+          <div style="margin-top:16px;">
+            <div class="xh-pane" data-pane="general"></div>
+            <div class="xh-pane" data-pane="inner" style="display:none;"></div>
+            <div class="xh-pane" data-pane="outer" style="display:none;"></div>
+            <div class="xh-pane" data-pane="sniper" style="display:none;"></div>
+          </div>
+        </div>
+      </div>
+
+      <div>
+        <div class="card" style="text-align:center;">
+          <div class="card-title" style="text-align:left;">Live Preview</div>
+          <div style="display:flex;gap:10px;justify-content:center;margin-bottom:10px;">
+            <button class="btn btn-sm bg-swatch active" data-bg="#3a3f4a" style="background:#3a3f4a;">Grey</button>
+            <button class="btn btn-sm bg-swatch" data-bg="#0d1a12" style="background:#0d1a12;">Dark</button>
+            <button class="btn btn-sm bg-swatch" data-bg="#c9c2b0" style="background:#c9c2b0;color:#111;">Sand</button>
+            <button class="btn btn-sm bg-swatch" data-bg="#101820" style="background:#101820;">Sky</button>
+          </div>
+          <canvas id="mainPreview" width="420" height="420" style="width:100%;max-width:380px;border-radius:10px;border:1px solid var(--border-bright);"></canvas>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Resolution Scaling Check <span class="tag tag-cyan">Signature Feature</span></div>
+          <p style="font-size:12.5px;margin-bottom:12px;">VALORANT crosshair sizes are set in raw screen pixels, not a percentage of your screen. The same numbers physically shrink relative to your view as resolution goes up. This is the same crosshair at four common resolutions:</p>
+          <div id="resStrip" style="display:grid;grid-template-columns:repeat(4,1fr);gap:10px;"></div>
+          <p id="resStripNote" style="font-size:11px;color:var(--text-faint);margin-top:10px;margin-bottom:0;"></p>
+        </div>
+
+        <div class="card">
+          <div class="card-title">Cross-Resolution Matcher</div>
+          <p style="font-size:12.5px;margin-bottom:12px;">Played this crosshair comfortably at one resolution and switching monitors? Get the adjusted values that make it look the same size again.</p>
+          <div class="grid-2">
+            <div class="field"><label>I tuned this at</label>
+              <select class="text-input" id="matchFrom">${RES_LIST.map(r=>`<option value="${r.h}">${r.label} (${r.w}&times;${r.h})</option>`).join('')}</select>
+            </div>
+            <div class="field"><label>Moving to</label>
+              <select class="text-input" id="matchTo">${RES_LIST.map((r,i)=>`<option value="${r.h}" ${i===2?'selected':''}>${r.label} (${r.w}&times;${r.h})</option>`).join('')}</select>
+            </div>
+          </div>
+          <div id="matchResult" style="font-size:12.5px;color:var(--text-dim);margin-bottom:10px;"></div>
+          <button class="btn btn-cyan btn-block btn-sm" id="matchApply">Apply Suggested Values</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="grid-2" style="margin-top:0;align-items:start;">
+      <div class="card">
+        <div class="card-title">Import / Export Code</div>
+        <div class="field">
+          <label>Your current crosshair code</label>
+          <textarea class="text-input" id="codeOut" readonly rows="2"></textarea>
+        </div>
+        <button class="btn btn-accent btn-sm" id="copyCodeBtn" style="margin-bottom:16px;">Copy Code</button>
+        <div class="divider"></div>
+        <div class="field">
+          <label>Paste a code to import (yours, a friend's, or from Pro Vault)</label>
+          <textarea class="text-input" id="codeIn" rows="2" placeholder="0;P;c;5;h;0;..."></textarea>
+        </div>
+        <button class="btn btn-sm" id="importCodeBtn">Import Code</button>
+        <button class="btn btn-ghost btn-sm" id="resetCxBtn">Reset to Default</button>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Save Locally</div>
+        <div style="display:flex;gap:8px;margin-bottom:14px;">
+          <input type="text" class="text-input" id="saveNameInput" placeholder="Name this crosshair (e.g. Ranked Cyan)">
+          <button class="btn btn-accent btn-sm" id="saveCxBtn" style="flex-shrink:0;">Save</button>
+        </div>
+        <div id="savedList"></div>
+      </div>
+    </div>
+  `;
+
+  // tabs
+  el.querySelectorAll('#xhTabs .pill-tab').forEach(t=>{
+    t.addEventListener('click', ()=>{
+      el.querySelectorAll('#xhTabs .pill-tab').forEach(x=>x.classList.remove('active'));
+      t.classList.add('active');
+      el.querySelectorAll('.xh-pane').forEach(p=>p.style.display = (p.dataset.pane===t.dataset.tab)?'block':'none');
+    });
+  });
+
+  el.querySelectorAll('.bg-swatch').forEach(b=>{
+    b.addEventListener('click', ()=>{
+      el.querySelectorAll('.bg-swatch').forEach(x=>x.classList.remove('active'));
+      b.classList.add('active');
+      App._previewBg = b.dataset.bg;
+      updateCrosshairPreview();
+    });
+  });
+
+  document.getElementById('copyCodeBtn').addEventListener('click', ()=>{
+    const ta = document.getElementById('codeOut');
+    ta.select();
+    try{ document.execCommand('copy'); }catch(e){}
+    if(navigator.clipboard){ navigator.clipboard.writeText(ta.value).catch(()=>{}); }
+    toast('Code copied');
+  });
+  document.getElementById('importCodeBtn').addEventListener('click', ()=>{
+    const raw = document.getElementById('codeIn').value.trim();
+    if(!raw){ toast('Paste a code first'); return; }
+    const {cx, ok} = decodeCrosshair(raw);
+    if(!ok){ toast('Could not find a "P" primary block in that code'); return; }
+    App.cx = cx; saveCx();
+    renderCrosshairPanes();
+    updateCrosshairPreview();
+    toast('Crosshair imported');
+  });
+  document.getElementById('resetCxBtn').addEventListener('click', ()=>{
+    App.cx = defaultCrosshair(); saveCx();
+    renderCrosshairPanes(); updateCrosshairPreview();
+    toast('Reset to default');
+  });
+  document.getElementById('saveCxBtn').addEventListener('click', ()=>{
+    const name = document.getElementById('saveNameInput').value.trim() || ('Crosshair '+(App.saved.length+1));
+    App.saved.push({id:uid(), name, cx:JSON.parse(JSON.stringify(App.cx)), ts:Date.now()});
+    saveAll();
+    document.getElementById('saveNameInput').value='';
+    renderSavedList();
+    toast('Saved "'+name+'"');
+  });
+
+  document.getElementById('matchFrom').addEventListener('change', updateMatcher);
+  document.getElementById('matchTo').addEventListener('change', updateMatcher);
+  document.getElementById('matchApply').addEventListener('click', applyMatcher);
+
+  App._previewBg = App._previewBg || '#3a3f4a';
+  renderCrosshairPanes();
+  renderSavedList();
+  updateMatcher();
+}
+
+function renderCrosshairPanes(){
+  const el = document.getElementById('sec-crosshair');
+  el.querySelector('[data-pane="general"]').innerHTML = generalFieldsHTML(App.cx);
+  el.querySelector('[data-pane="inner"]').innerHTML = innerFieldsHTML(App.cx);
+  el.querySelector('[data-pane="outer"]').innerHTML = outerFieldsHTML(App.cx);
+  el.querySelector('[data-pane="sniper"]').innerHTML = sniperFieldsHTML(App.cx);
+  bindCxInputs();
+  updateCrosshairPreview();
+}
+
+function bindCxInputs(){
+  document.querySelectorAll('[data-cxkey]').forEach(inp=>{
+    const key = inp.dataset.cxkey;
+    const type = inp.dataset.cxtype;
+    inp.addEventListener('input', ()=>{
+      if(inp.type==='checkbox'){ App.cx[key] = inp.checked; }
+      else if(type==='select'){ App.cx[key] = parseInt(inp.value); renderCrosshairPanes(); saveCx(); return; }
+      else if(type==='hex'){
+        App.cx[key] = inp.value.replace('#','').toUpperCase()+'FF';
+        const sibling = document.querySelector(`[data-cxkey="${key}"][data-cxtype="hextext"]`);
+        if(sibling) sibling.value = App.cx[key];
+      }
+      else if(type==='hextext'){
+        App.cx[key] = inp.value.toUpperCase();
+        const sibling = document.querySelector(`[data-cxkey="${key}"][data-cxtype="hex"]`);
+        if(sibling && /^[0-9A-F]{6,8}$/.test(App.cx[key])) sibling.value = '#'+App.cx[key].slice(0,6);
+      }
+      else { App.cx[key] = parseFloat(inp.value); }
+      saveCx();
+      // toggles that reveal/hide dependent rows need a re-render of the pane
+      if(inp.type==='checkbox'){ renderCrosshairPanes(); return; }
+      updateCrosshairPreview();
+    });
+  });
+}
+
+function updateCrosshairPreview(){
+  const main = document.getElementById('mainPreview');
+  if(main){ renderCrosshairBg(main, App.cx, 5.5, App._previewBg||'#3a3f4a'); }
+  const out = document.getElementById('codeOut');
+  if(out) out.value = encodeCrosshair(App.cx);
+  renderResStrip();
+}
+
+const RES_STRIP_ZOOM = 6; /* uniform zoom so small pro-style crosshairs stay visible in a small box —
+  relative differences between resolutions are still exactly proportional, only the absolute scale is boosted */
+function renderResStrip(){
+  const strip = document.getElementById('resStrip');
+  if(!strip) return;
+  strip.innerHTML = RES_LIST.map(r=>`
+    <div style="text-align:center;">
+      <canvas width="284" height="160" data-resh="${r.h}" style="width:100%;border-radius:6px;border:1px solid var(--border-bright);background:#2b2f38;"></canvas>
+      <div style="font-size:11px;color:var(--text-dim);margin-top:5px;font-weight:600;">${r.label}</div>
+      <div style="font-size:10px;color:var(--text-faint);" class="mono">${vSpanPct(r.h)}% of view</div>
+    </div>
+  `).join('');
+  strip.querySelectorAll('canvas').forEach(c=>{
+    const h = parseInt(c.dataset.resh);
+    const scale = (c.height / h) * RES_STRIP_ZOOM;
+    renderCrosshairBg(c, App.cx, scale, '#2b2f38');
+  });
+  const note = document.getElementById('resStripNote');
+  if(note) note.textContent = 'Boxes are equally zoomed in for visibility — the size ratio between them is exact. The % figure below each box is the real number that matters.';
+}
+function vSpanPct(resH){
+  const cx = App.cx;
+  const span = 2*(cx.innerOffset+cx.innerLength);
+  return fmt((span/resH)*100, 2);
+}
+
+function updateMatcher(){
+  const from = parseInt(document.getElementById('matchFrom').value);
+  const to = parseInt(document.getElementById('matchTo').value);
+  const factor = to/from;
+  const cx = App.cx;
+  const suggestion = {
+    innerThickness: Math.max(1, Math.round(cx.innerThickness*factor)),
+    innerLength: Math.max(1, Math.round(cx.innerLength*factor)),
+    innerOffset: Math.max(0, Math.round(cx.innerOffset*factor)),
+    outlineThickness: Math.max(0, Math.round(cx.outlineThickness*factor))
+  };
+  App._matchSuggestion = suggestion;
+  const box = document.getElementById('matchResult');
+  if(factor===1){
+    box.innerHTML = `Same resolution — nothing to adjust.`;
+  } else {
+    box.innerHTML = `Scale factor <b class="mono" style="color:var(--cyan)">&times;${fmt(factor,3)}</b> &rarr; suggested Inner Thickness <b class="mono">${suggestion.innerThickness}</b>, Length <b class="mono">${suggestion.innerLength}</b>, Offset <b class="mono">${suggestion.innerOffset}</b>, Outline Thickness <b class="mono">${suggestion.outlineThickness}</b>.`;
+  }
+}
+function applyMatcher(){
+  if(!App._matchSuggestion) return;
+  Object.assign(App.cx, App._matchSuggestion);
+  saveCx();
+  renderCrosshairPanes();
+  toast('Applied — values scaled to the new resolution');
+}
+
+function renderSavedList(){
+  const wrap = document.getElementById('savedList');
+  if(!wrap) return;
+  if(!App.saved.length){ wrap.innerHTML = `<div class="empty">No saved crosshairs yet. Build one and hit Save.</div>`; return; }
+  wrap.innerHTML = App.saved.slice().reverse().map(s=>`
+    <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--border);">
+      <canvas width="60" height="60" data-savedcanvas="${s.id}" style="width:44px;height:44px;border-radius:6px;background:#2b2f38;flex-shrink:0;"></canvas>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:600;">${s.name}</div>
+        <div style="font-size:11px;color:var(--text-faint);">${new Date(s.ts).toLocaleDateString()}</div>
+      </div>
+      <button class="btn btn-sm" data-loadcx="${s.id}">Load</button>
+      <button class="btn btn-ghost btn-sm" data-delcx="${s.id}">&times;</button>
+    </div>
+  `).join('');
+  App.saved.forEach(s=>{
+    const c = wrap.querySelector(`[data-savedcanvas="${s.id}"]`);
+    if(c) renderCrosshairBg(c, s.cx, 0.9, '#2b2f38');
+  });
+  wrap.querySelectorAll('[data-loadcx]').forEach(b=>b.addEventListener('click', ()=>{
+    const s = App.saved.find(x=>x.id===b.dataset.loadcx);
+    if(!s) return;
+    App.cx = JSON.parse(JSON.stringify(s.cx));
+    saveCx(); renderCrosshairPanes();
+    toast('Loaded "'+s.name+'"');
+  }));
+  wrap.querySelectorAll('[data-delcx]').forEach(b=>b.addEventListener('click', ()=>{
+    App.saved = App.saved.filter(x=>x.id!==b.dataset.delcx);
+    saveAll(); renderSavedList();
+  }));
+}
+
+/* ---------------- Sensitivity Finder ---------------- */
+const VALORANT_YAW = 0.07;
+function calcEdpi(dpi, sens){ return dpi*sens; }
+function calcCm360(dpi, sens){ return (2.54*360)/(dpi*sens*VALORANT_YAW); }
+function calcIn360(dpi, sens){ return calcCm360(dpi,sens)/2.54; }
+
+function renderSensitivitySection(){
+  const el = document.getElementById('sec-sensitivity');
+  const s = App.sens;
+  const edpi = calcEdpi(s.dpi, s.sens);
+  const cm360 = calcCm360(s.dpi, s.sens);
+  const in360 = calcIn360(s.dpi, s.sens);
+
+  el.innerHTML = `
+    <div class="grid-2" style="align-items:start;">
+      <div class="card">
+        <div class="card-title">Your Setup</div>
+        <div class="grid-2">
+          <div class="field"><label>Mouse DPI</label>
+            <input type="number" class="text-input mono" id="inDpi" value="${s.dpi}" min="100" step="1">
+          </div>
+          <div class="field"><label>In-game Sensitivity</label>
+            <input type="number" class="text-input mono" id="inSens" value="${s.sens}" min="0.01" step="0.001">
+          </div>
+        </div>
+        <div class="grid-2">
+          <div class="field"><label>Mouse (optional)</label>
+            <input type="text" class="text-input" id="inMouse" value="${s.mouse||''}" placeholder="e.g. Viper V3 Pro">
+          </div>
+          <div class="field"><label>Mousepad (optional)</label>
+            <input type="text" class="text-input" id="inPad" value="${s.pad||''}" placeholder="e.g. XL cloth">
+          </div>
+        </div>
+        <button class="btn btn-accent btn-sm" id="saveSensBtn">Save Setup</button>
+
+        <div class="divider"></div>
+        <div class="grid-3">
+          <div class="stat-box"><div class="num mono" id="statEdpi">${fmt(edpi,0)}</div><div class="lbl">eDPI</div></div>
+          <div class="stat-box"><div class="num mono" id="statCm">${fmt(cm360,1)}</div><div class="lbl">cm / 360&deg;</div></div>
+          <div class="stat-box"><div class="num mono" id="statIn">${fmt(in360,1)}</div><div class="lbl">in / 360&deg;</div></div>
+        </div>
+        <p style="font-size:11.5px;margin-top:12px;">Most VCT pros sit between <b style="color:var(--text-dim)">200&ndash;400 eDPI</b> (roughly 25&ndash;45 cm/360). That's a reference zone, not a target &mdash; see the method below before you copy a number blindly.</p>
+      </div>
+
+      <div class="card">
+        <div class="card-title">Convert cm/360 to a Target Sens</div>
+        <p style="font-size:12.5px;">Know the physical distance you want your mouse to travel for a full turn? Enter it, pick your DPI, and get the exact in-game sensitivity.</p>
+        <div class="grid-2">
+          <div class="field"><label>Target cm/360</label>
+            <input type="number" class="text-input mono" id="convCm" value="${fmt(cm360,1)}" step="0.1">
+          </div>
+          <div class="field"><label>Mouse DPI</label>
+            <input type="number" class="text-input mono" id="convDpi" value="${s.dpi}" step="1">
+          </div>
+        </div>
+        <div class="stat-box" style="margin-top:6px;"><div class="num mono" id="convResult">&mdash;</div><div class="lbl">Resulting Sensitivity</div></div>
+        <button class="btn btn-cyan btn-sm btn-block" id="convApplyBtn" style="margin-top:12px;">Use This Sensitivity</button>
+      </div>
+    </div>
+
+    <div class="hr-label">The Method — Finding Your Actual Sensitivity</div>
+    <div class="card">
+      <div class="grid-3">
+        ${[
+          ['WHAT','A repeatable process to land on a sensitivity that fits your hand — not a copy-pasted pro number.'],
+          ['WHY','eDPI is a comparison tool, not a target. Arm length, desk space and grip style change what "feels right" per person.'],
+          ['HOW','Lock DPI, pick a starting eDPI, test for days not minutes, then commit for a full month before judging it.'],
+          ['WHEN','Any time your aim feels inconsistent for more than a week straight — not after one bad match.'],
+          ['WHERE','Range mode and Deathmatch. Ranked is the wrong lab — you\'ll tilt before you learn anything.'],
+          ['WHO','You, mainly. Pro settings are a starting reference zone, never a rule you\'re breaking by ignoring them.']
+        ].map(([k,v])=>`<div style="margin-bottom:14px;"><div style="font-family:var(--font-display);font-size:12px;color:var(--cyan);letter-spacing:0.08em;margin-bottom:5px;">${k}</div><div style="font-size:12.5px;color:var(--text-dim);line-height:1.55;">${v}</div></div>`).join('')}
+      </div>
+      <div class="divider"></div>
+      <div id="sensSteps"></div>
+    </div>
+
+    <div class="hr-label">Pro Reference Table</div>
+    <div class="card">
+      <div style="overflow-x:auto;">
+        <table style="width:100%;border-collapse:collapse;font-size:13px;">
+          <thead><tr style="text-align:left;color:var(--text-faint);font-size:11px;text-transform:uppercase;letter-spacing:0.05em;">
+            <th style="padding:8px 10px;">Player</th><th style="padding:8px 10px;">Role</th><th style="padding:8px 10px;">DPI</th><th style="padding:8px 10px;">Sens</th><th style="padding:8px 10px;">eDPI</th><th style="padding:8px 10px;">cm/360</th><th></th>
+          </tr></thead>
+          <tbody>
+          ${PROS.map(p=>{
+            const e = calcEdpi(p.dpi,p.sens), c = calcCm360(p.dpi,p.sens);
+            return `<tr style="border-top:1px solid var(--border);">
+              <td style="padding:9px 10px;font-weight:600;">${p.name}</td>
+              <td style="padding:9px 10px;color:var(--text-dim);">${p.role}</td>
+              <td style="padding:9px 10px;" class="mono">${p.dpi}</td>
+              <td style="padding:9px 10px;" class="mono">${p.sens}</td>
+              <td style="padding:9px 10px;" class="mono" style="color:var(--cyan);">${fmt(e,0)}</td>
+              <td style="padding:9px 10px;" class="mono">${fmt(c,1)}</td>
+              <td style="padding:9px 10px;text-align:right;"><button class="btn btn-sm" data-loadprosens="${p.id}">Use</button></td>
+            </tr>`;
+          }).join('')}
+          </tbody>
+        </table>
+      </div>
+    </div>
+  `;
+
+  const steps = [
+    ['1. Lock your DPI', 'Pick a value your sensor natively supports — 400, 800 or 1600 are the safest bets — and never touch it again. Every future adjustment happens through in-game sensitivity only, so you always have one dial, not two.'],
+    ['2. Start inside the reference zone', 'Set your eDPI somewhere between 240 and 320 to begin. Not because a pro uses it — because it\'s a sane starting point that won\'t force you to relearn everything if it turns out to be wrong.'],
+    ['3. Run the 180° check', 'Aim at a fixed point on your screen. Turn your mouse until your crosshair has spun exactly 180°. Measure the distance moved. Double it — that\'s your real cm/360. Compare it to what the calculator above predicts.'],
+    ['4. Test for days, not minutes', 'Play Deathmatch and Range for at least 3–5 days on the new number before judging it. The first few hours on any new sensitivity feel wrong regardless of whether it\'s actually right — that\'s motor adaptation, not a verdict.'],
+    ['5. Judge on two things only', 'Can you flick onto a head-height target without consistently over- or under-shooting? Can you hold a spray pattern without your arm fighting the mouse? If both are yes, stop touching it.'],
+    ['6. Commit for a full month', 'Once it passes step 5, leave it alone for at least four weeks minimum. Muscle memory needs repetition without interference far more than it needs the "perfect" number.']
+  ];
+  document.getElementById('sensSteps').innerHTML = steps.map(([t,d])=>`
+    <div style="display:flex;gap:14px;margin-bottom:14px;">
+      <div style="font-family:var(--font-mono);color:var(--accent);font-weight:700;font-size:13px;flex-shrink:0;width:20px;">${t.split('.')[0]}</div>
+      <div><div style="font-weight:600;font-size:13.5px;margin-bottom:3px;">${t.split('. ')[1]}</div><div style="font-size:12.5px;color:var(--text-dim);line-height:1.55;">${d}</div></div>
+    </div>
+  `).join('');
+
+  function refreshStats(){
+    const dpi = parseFloat(document.getElementById('inDpi').value)||1;
+    const sn = parseFloat(document.getElementById('inSens').value)||0;
+    document.getElementById('statEdpi').textContent = fmt(calcEdpi(dpi,sn),0);
+    document.getElementById('statCm').textContent = fmt(calcCm360(dpi,sn),1);
+    document.getElementById('statIn').textContent = fmt(calcIn360(dpi,sn),1);
+  }
+  document.getElementById('inDpi').addEventListener('input', refreshStats);
+  document.getElementById('inSens').addEventListener('input', refreshStats);
+  document.getElementById('saveSensBtn').addEventListener('click', ()=>{
+    App.sens = {
+      dpi: parseFloat(document.getElementById('inDpi').value)||800,
+      sens: parseFloat(document.getElementById('inSens').value)||0.35,
+      mouse: document.getElementById('inMouse').value.trim(),
+      pad: document.getElementById('inPad').value.trim()
+    };
+    saveSens();
+    toast('Setup saved');
+    renderOverview();
+  });
+
+  function refreshConv(){
+    const cm = parseFloat(document.getElementById('convCm').value)||0;
+    const dpi = parseFloat(document.getElementById('convDpi').value)||800;
+    const sens = (2.54*360)/(dpi*cm*VALORANT_YAW);
+    document.getElementById('convResult').textContent = fmt(sens,4);
+    App._convSens = sens; App._convDpi = dpi;
+  }
+  document.getElementById('convCm').addEventListener('input', refreshConv);
+  document.getElementById('convDpi').addEventListener('input', refreshConv);
+  document.getElementById('convApplyBtn').addEventListener('click', ()=>{
+    refreshConv();
+    document.getElementById('inDpi').value = App._convDpi;
+    document.getElementById('inSens').value = fmt(App._convSens,4);
+    refreshStats();
+    toast('Applied — hit Save Setup to keep it');
+  });
+  refreshConv();
+
+  el.querySelectorAll('[data-loadprosens]').forEach(b=>b.addEventListener('click', ()=>{
+    const p = PROS.find(x=>x.id===b.dataset.loadprosens);
+    if(!p) return;
+    document.getElementById('inDpi').value = p.dpi;
+    document.getElementById('inSens').value = p.sens;
+    refreshStats();
+    toast(`Loaded ${p.name}'s sensitivity — hit Save Setup to keep it`);
+  }));
+}
+
+/* ---------------- Aim Routines ---------------- */
+function totalMinutes(drills){ return drills.reduce((a,d)=>a+Number(d.minutes||0),0); }
+function catLabel(id){ const c = ROUTINE_CATS.find(x=>x.id===id); return c?c.label:id; }
+
+function renderRoutinesSection(){
+  const el = document.getElementById('sec-routines');
+  el.innerHTML = `
+    <div id="timerCard"></div>
+
+    <div class="grid-2" style="align-items:start;">
+      <div class="card">
+        <div class="card-title">Build a Routine</div>
+        <div class="field"><label>Drill name</label><input type="text" class="text-input" id="drillName" placeholder="e.g. Static grid precision"></div>
+        <div class="grid-2">
+          <div class="field"><label>Category</label>
+            <select class="text-input" id="drillCat">${ROUTINE_CATS.map(c=>`<option value="${c.id}">${c.label}</option>`).join('')}</select>
+          </div>
+          <div class="field"><label>Minutes</label><input type="number" class="text-input" id="drillMin" value="5" min="1"></div>
+        </div>
+        <div class="field"><label>Notes (optional)</label><input type="text" class="text-input" id="drillNotes" placeholder="What you're focusing on"></div>
+        <button class="btn btn-cyan btn-sm" id="addDrillBtn">+ Add Drill</button>
+
+        <div class="divider"></div>
+        <div id="builderList"></div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-top:12px;" id="builderFoot"></div>
+      </div>
+
+      <div>
+        <div class="card">
+          <div class="card-title">Pro-Style Presets</div>
+          <p style="font-size:12px;margin-bottom:12px;">Structured after publicly known warm-up patterns and role logic for each player — a starting template, not a verified minute-by-minute log of their real routine.</p>
+          <div id="presetList"></div>
+        </div>
+        <div class="card">
+          <div class="card-title">Saved Routines</div>
+          <div id="savedRoutines"></div>
+        </div>
+      </div>
+    </div>
+  `;
+
+  document.getElementById('addDrillBtn').addEventListener('click', ()=>{
+    const name = document.getElementById('drillName').value.trim();
+    if(!name){ toast('Name the drill first'); return; }
+    const cat = document.getElementById('drillCat').value;
+    const min = Math.max(1, parseInt(document.getElementById('drillMin').value)||5);
+    const notes = document.getElementById('drillNotes').value.trim();
+    App.builder.push(newDrill(name, cat, min, notes));
+    document.getElementById('drillName').value=''; document.getElementById('drillNotes').value='';
+    renderBuilderList();
+  });
+
+  renderBuilderList();
+  renderPresetList();
+  renderSavedRoutines();
+  renderTimerCard();
+}
+
+function renderBuilderList(){
+  const wrap = document.getElementById('builderList');
+  const foot = document.getElementById('builderFoot');
+  if(!App.builder.length){
+    wrap.innerHTML = `<div class="empty">No drills yet — add one above, or load a preset from the right.</div>`;
+    foot.innerHTML = '';
+    return;
+  }
+  wrap.innerHTML = App.builder.map((d,i)=>`
+    <div style="display:flex;align-items:center;gap:10px;padding:9px 0;border-top:1px solid var(--border);">
+      <span class="tag" style="flex-shrink:0;">${catLabel(d.cat)}</span>
+      <div style="flex:1;min-width:0;">
+        <div style="font-size:13px;font-weight:600;">${d.name}</div>
+        ${d.notes?`<div style="font-size:11px;color:var(--text-faint);">${d.notes}</div>`:''}
+      </div>
+      <div class="mono" style="font-size:12px;color:var(--text-dim);flex-shrink:0;">${d.minutes}m</div>
+      <button class="btn btn-ghost btn-sm" data-rmdrill="${i}">&times;</button>
+    </div>
+  `).join('');
+  wrap.querySelectorAll('[data-rmdrill]').forEach(b=>b.addEventListener('click', ()=>{
+    App.builder.splice(parseInt(b.dataset.rmdrill),1);
+    renderBuilderList();
+  }));
+  foot.innerHTML = `
+    <div style="font-size:12.5px;color:var(--text-dim);">Total: <b class="mono" style="color:var(--text)">${totalMinutes(App.builder)} min</b></div>
+    <div style="display:flex;gap:8px;">
+      <input type="text" class="text-input" id="routineNameInput" placeholder="Routine name" style="width:170px;">
+      <button class="btn btn-accent btn-sm" id="saveRoutineBtn">Save Routine</button>
+    </div>
+  `;
+  document.getElementById('saveRoutineBtn').addEventListener('click', ()=>{
+    const name = document.getElementById('routineNameInput').value.trim() || ('Routine '+(App.routines.length+1));
+    App.routines.push({id:uid(), name, drills:JSON.parse(JSON.stringify(App.builder)), ts:Date.now()});
+    saveRoutines();
+    App.builder = [];
+    renderBuilderList();
+    renderSavedRoutines();
+    toast('Saved "'+name+'"');
+  });
+}
+
+function renderPresetList(){
+  const wrap = document.getElementById('presetList');
+  wrap.innerHTML = PRESET_ROUTINES.map(r=>`
+    <div style="padding:11px 0;border-top:1px solid var(--border);">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-size:13.5px;font-weight:600;">${r.name}</div>
+          <div style="font-size:11px;color:var(--text-faint);">${r.drills.length} drills &middot; ${r.totalNote}</div>
+        </div>
+        <button class="btn btn-sm" data-loadpreset="${r.id}">Load</button>
+      </div>
+    </div>
+  `).join('');
+  wrap.querySelectorAll('[data-loadpreset]').forEach(b=>b.addEventListener('click', ()=>{
+    const r = PRESET_ROUTINES.find(x=>x.id===b.dataset.loadpreset);
+    App.builder = JSON.parse(JSON.stringify(r.drills));
+    renderBuilderList();
+    toast('Loaded "'+r.name+'" into the builder — edit freely, then save');
+    window.scrollTo({top:0,behavior:'smooth'});
+  }));
+}
+
+function renderSavedRoutines(){
+  const wrap = document.getElementById('savedRoutines');
+  if(!App.routines.length){ wrap.innerHTML = `<div class="empty">No saved routines yet.</div>`; return; }
+  wrap.innerHTML = App.routines.slice().reverse().map(r=>`
+    <div style="padding:11px 0;border-top:1px solid var(--border);">
+      <div style="display:flex;justify-content:space-between;align-items:center;">
+        <div>
+          <div style="font-size:13.5px;font-weight:600;">${r.name}</div>
+          <div style="font-size:11px;color:var(--text-faint);">${r.drills.length} drills &middot; ${totalMinutes(r.drills)} min</div>
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-cyan btn-sm" data-startroutine="${r.id}">Start</button>
+          <button class="btn btn-ghost btn-sm" data-delroutine="${r.id}">&times;</button>
+        </div>
+      </div>
+    </div>
+  `).join('');
+  wrap.querySelectorAll('[data-startroutine]').forEach(b=>b.addEventListener('click', ()=>startTimer(b.dataset.startroutine)));
+  wrap.querySelectorAll('[data-delroutine]').forEach(b=>b.addEventListener('click', ()=>{
+    App.routines = App.routines.filter(x=>x.id!==b.dataset.delroutine);
+    saveRoutines(); renderSavedRoutines();
+  }));
+}
+
+/* Simple sequential drill timer */
+function startTimer(routineId){
+  const r = App.routines.find(x=>x.id===routineId);
+  if(!r || !r.drills.length) return;
+  clearInterval(App.timer.handle);
+  App.timer = {running:true, idx:0, remaining:r.drills[0].minutes*60, handle:null, routine:r};
+  App.timer.handle = setInterval(tickTimer, 1000);
+  renderTimerCard();
+  window.scrollTo({top:0,behavior:'smooth'});
+}
+function tickTimer(){
+  const t = App.timer;
+  if(!t.running) return;
+  t.remaining--;
+  if(t.remaining < 0){
+    t.idx++;
+    if(t.idx >= t.routine.drills.length){
+      stopTimer(true);
+      return;
+    }
+    t.remaining = t.routine.drills[t.idx].minutes*60;
+  }
+  renderTimerCard();
+}
+function stopTimer(completed){
+  clearInterval(App.timer.handle);
+  const wasRoutine = App.timer.routine;
+  App.timer = {running:false, idx:0, remaining:0, handle:null, routine:null};
+  renderTimerCard();
+  if(completed && wasRoutine) toast('Session complete — nice work');
+}
+function pauseTimer(){ App.timer.running = !App.timer.running; renderTimerCard(); }
+function skipDrill(){
+  const t = App.timer;
+  if(!t.routine) return;
+  t.idx++;
+  if(t.idx >= t.routine.drills.length){ stopTimer(true); return; }
+  t.remaining = t.routine.drills[t.idx].minutes*60;
+  renderTimerCard();
+}
+function mmss(sec){ sec=Math.max(0,sec); const m=Math.floor(sec/60), s=sec%60; return m+':'+String(s).padStart(2,'0'); }
+
+function renderTimerCard(){
+  const card = document.getElementById('timerCard');
+  if(!card) return;
+  const t = App.timer;
+  if(!t.routine){ card.innerHTML=''; return; }
+  const drill = t.routine.drills[t.idx];
+  card.innerHTML = `
+    <div class="card" style="border-color:var(--cyan-dim);background:rgba(0,240,224,0.04);margin-bottom:16px;">
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:14px;">
+        <div>
+          <div class="tag tag-cyan" style="margin-bottom:8px;">${t.routine.name} &middot; Drill ${t.idx+1}/${t.routine.drills.length}</div>
+          <div style="font-family:var(--font-display);font-size:20px;">${drill.name}</div>
+          ${drill.notes?`<div style="font-size:12.5px;color:var(--text-dim);margin-top:3px;">${drill.notes}</div>`:''}
+        </div>
+        <div style="text-align:center;">
+          <div class="mono" style="font-size:34px;font-weight:700;color:${t.running?'var(--cyan)':'var(--text-faint)'};">${mmss(t.remaining)}</div>
+          <div style="display:flex;gap:8px;margin-top:8px;">
+            <button class="btn btn-sm" id="tPause">${t.running?'Pause':'Resume'}</button>
+            <button class="btn btn-sm" id="tSkip">Skip &rarr;</button>
+            <button class="btn btn-ghost btn-sm" id="tStop">Stop</button>
+          </div>
+        </div>
+      </div>
+    </div>
+  `;
+  document.getElementById('tPause').addEventListener('click', pauseTimer);
+  document.getElementById('tSkip').addEventListener('click', skipDrill);
+  document.getElementById('tStop').addEventListener('click', ()=>stopTimer(false));
+}
+
+/* ---------------- Pro Vault ---------------- */
+function renderVaultSection(){
+  const el = document.getElementById('sec-vault');
+  el.innerHTML = `
+    <div class="card" style="padding:16px 20px;">
+      <p style="margin:0;font-size:13px;">Five pro loadouts, fully cross-referenced. Load any piece — crosshair, sensitivity, or a style-inspired routine — straight into your own build. Codes are copied verbatim from public pro-settings trackers, mid-2026.</p>
+    </div>
+    <div class="grid-2" style="margin-top:16px;">
+      ${PROS.map(p=>{
+        const edpi = calcEdpi(p.dpi,p.sens), cm = calcCm360(p.dpi,p.sens);
+        return `<div class="card">
+          <div style="display:flex;gap:16px;">
+            <canvas width="120" height="120" data-vaultcanvas="${p.id}" style="width:88px;height:88px;border-radius:8px;background:#2b2f38;flex-shrink:0;"></canvas>
+            <div style="flex:1;min-width:0;">
+              <div style="display:flex;justify-content:space-between;align-items:baseline;">
+                <div style="font-family:var(--font-display);font-size:17px;">${p.name}</div>
+                <span class="tag">${p.team}</span>
+              </div>
+              <div style="font-size:11.5px;color:var(--text-faint);margin-bottom:8px;">${p.role} &middot; ${p.real}</div>
+              <div style="display:flex;gap:14px;font-size:12px;" class="mono">
+                <span><span style="color:var(--text-faint);">DPI</span> ${p.dpi}</span>
+                <span><span style="color:var(--text-faint);">Sens</span> ${p.sens}</span>
+                <span><span style="color:var(--cyan);">${fmt(edpi,0)} eDPI</span></span>
+              </div>
+            </div>
+          </div>
+          <p style="font-size:12px;margin-top:10px;">${p.note}</p>
+          <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
+            <button class="btn btn-sm" data-vloadcx="${p.id}">Load Crosshair</button>
+            <button class="btn btn-sm" data-vloadsens="${p.id}">Load Sens</button>
+            <button class="btn btn-sm" data-vloadroutine="${p.id}">Load Routine</button>
+          </div>
+        </div>`;
+      }).join('')}
+    </div>
+  `;
+  PROS.forEach(p=>{
+    const c = el.querySelector(`[data-vaultcanvas="${p.id}"]`);
+    if(c){ const {cx} = decodeCrosshair(p.code); renderCrosshairBg(c, cx, 3.2, '#2b2f38'); }
+  });
+  el.querySelectorAll('[data-vloadcx]').forEach(b=>b.addEventListener('click', ()=>{
+    const p = PROS.find(x=>x.id===b.dataset.vloadcx);
+    const {cx} = decodeCrosshair(p.code);
+    App.cx = cx; saveCx();
+    go('crosshair');
+    toast(`Loaded ${p.name}'s crosshair`);
+  }));
+  el.querySelectorAll('[data-vloadsens]').forEach(b=>b.addEventListener('click', ()=>{
+    const p = PROS.find(x=>x.id===b.dataset.vloadsens);
+    App.sens = Object.assign({}, App.sens, {dpi:p.dpi, sens:p.sens});
+    saveSens();
+    go('sensitivity');
+    toast(`Loaded ${p.name}'s sensitivity`);
+  }));
+  el.querySelectorAll('[data-vloadroutine]').forEach(b=>b.addEventListener('click', ()=>{
+    const p = PROS.find(x=>x.id===b.dataset.vloadroutine);
+    const r = PRESET_ROUTINES.find(x=>x.id===p.routine);
+    if(r){ App.builder = JSON.parse(JSON.stringify(r.drills)); }
+    go('routines');
+    toast(`Loaded ${p.name}-style routine into the builder`);
+  }));
+}
+
+/* ---------------- Tips & Rules ---------------- */
+const RULES_CONTENT = [
+  { cat:'Crosshair Placement', items:[
+    ['Aim at head level, always', 'Your crosshair should already be sitting at where an enemy\'s head would appear if they walked around the corner — not on the floor, not on your own gun. Pre-aim, don\'t react-aim.'],
+    ['Pre-aim common angles', 'Before you peek any angle, know where the enemy is statistically likely to be standing and have your crosshair there before you\'re even visible to them.'],
+    ['Check off-angles deliberately', 'Common angles get pre-aimed by everyone. A rotation of even a few degrees off the obvious line can catch someone who only trained the "normal" spot.'],
+    ['Small crosshair, more discipline required', 'A tiny crosshair with outer lines off forces genuinely correct placement — it can\'t "cover" a bad guess the way a huge crosshair with outer lines can.']
+  ]},
+  { cat:'Sensitivity Philosophy', items:[
+    ['eDPI is a comparison unit, not a setting', 'It exists so two different DPI/sens combinations can be compared fairly. It is not something the game reads directly — cm/360 is the number that actually maps to physical arm movement.'],
+    ['Lower sens rewards precision, punishes slow reactions', 'Low eDPI (150–250) gives more control over small movements but demands more mouse space and faster reflexes for sudden flicks. Higher eDPI (350–500+) reacts faster to close-range surprises but punishes overcorrection.'],
+    ['Arm aim vs wrist aim', 'Lower sensitivities generally push you toward using your whole arm for big turns; higher sensitivities lean on wrist movement. Neither is "correct" — it\'s about what your desk space and grip actually support.'],
+    ['Changing sens resets your muscle memory', 'Every adjustment — even a small one — costs you real practice hours while your hand re-calibrates. That\'s the actual price of "just trying a new number," and it\'s why constant tweaking quietly caps your improvement.']
+  ]},
+  { cat:'Resolution & Crosshair Scaling', items:[
+    ['Crosshair size is set in raw screen pixels', 'VALORANT\'s thickness/length/offset values are literal pixels on your screen — not a percentage of it. Your monitor doesn\'t know or care what resolution you were on when you tuned it.'],
+    ['Higher resolution = physically smaller crosshair', 'The same settings occupy a smaller fraction of your view at 1440p than at 1080p, and smaller still at 4K, purely because there are more pixels packed into the same physical screen.'],
+    ['This is why "TenZ\'s crosshair looks different for me"', 'If TenZ plays at 1080p and you\'re on 1440p, importing his exact code gives you a visibly smaller crosshair relative to your screen, even though every number is identical. Use the Cross-Resolution Matcher in the Crosshair Lab to correct for it.'],
+    ['Sensitivity is not affected by this', 'Unlike crosshair size, your cm/360 stays constant across resolutions in VALORANT because FOV is locked at 103° regardless of resolution or aspect ratio — only the crosshair rendering is resolution-dependent.']
+  ]},
+  { cat:'Practice Discipline', items:[
+    ['Lock settings for a minimum of 2–4 weeks', 'Every real improvement study on aim training points the same direction: consistency beats optimization. A "good enough" setup you never touch outperforms a "perfect" one you\'re constantly adjusting.'],
+    ['Quality over quantity', '20 focused minutes with a clear goal per drill beats 2 hours of mindless deathmatch. If you can\'t tell what you\'re training, you\'re not training it.'],
+    ['Review your own VODs, not just clips of pros', 'Watching a pro\'s highlight reel teaches you what\'s possible. Watching your own last few ranked games teaches you what\'s actually wrong.'],
+    ['Separate mechanical practice from rank grinding', 'Ranked games are for applying skills under real pressure, not for building them. Build the skill in Range/Deathmatch first, where a miss costs nothing.']
+  ]},
+  { cat:'Common Mistakes', items:[
+    ['Copying a pro\'s exact eDPI with a different desk setup', 'A pro training in a full-size gaming setup with a huge mousepad and a low sens genuinely cannot be replicated on a cramped desk. Match the philosophy (low/mid/high), not the literal number.'],
+    ['Overloaded, "cool-looking" crosshairs', 'Extra outer lines, high opacity, bright colors and heavy dots all add visual noise. Almost every top-tier player runs something small, low-opacity, and boring on purpose.'],
+    ['Chasing rank instead of fixing the actual weak link', 'If your aim is the bottleneck, more games without deliberate drilling won\'t fix it — it just repeats the same habit under pressure until it\'s reinforced.'],
+    ['Tilt-adjusting sensitivity mid-session', 'Changing your sens right after a bad game is almost always an emotional decision, not a mechanical one. Sleep on it — if it still feels wrong tomorrow, then test it properly.']
+  ]}
+];
+
+function renderRulesSection(){
+  const el = document.getElementById('sec-rules');
+  el.innerHTML = `
+    <div class="card" style="padding:16px 20px;">
+      <p style="margin:0;font-size:13px;">Reference material, organized by topic. This is the "why" behind every default in the Crosshair Lab and Sensitivity Finder.</p>
+    </div>
+    ${RULES_CONTENT.map(section=>`
+      <div class="hr-label">${section.cat}</div>
+      <div class="card">
+        ${section.items.map(([t,d],i)=>`
+          <div style="${i>0?'border-top:1px solid var(--border);padding-top:13px;margin-top:13px;':''}">
+            <div style="font-size:14px;font-weight:600;margin-bottom:4px;">${t}</div>
+            <div style="font-size:13px;color:var(--text-dim);line-height:1.6;">${d}</div>
+          </div>
+        `).join('')}
+      </div>
+    `).join('')}
+  `;
+}
+
+/* ---------------- Game Library ---------------- */
+function renderGamesSection(){
+  const el = document.getElementById('sec-games');
+  el.innerHTML = `
+    <div class="card" style="padding:16px 20px;">
+      <p style="margin:0;font-size:13px;">The Tunnel is built game-by-game. VALORANT is fully live — Aim Lab and CS2 are next up.</p>
+    </div>
+    <div class="grid-3" style="margin-top:16px;">
+      <div class="card" style="border-color:var(--accent-dim);">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div style="font-family:var(--font-display);font-size:18px;">VALORANT</div>
+          <span class="tag tag-accent">Active</span>
+        </div>
+        <p style="font-size:12.5px;">Crosshair Lab, Sensitivity Finder, Aim Routines and Pro Vault are all fully built for this game.</p>
+        <button class="btn btn-accent btn-block btn-sm" data-goto="crosshair">Open Tools</button>
+      </div>
+      <div class="card" style="opacity:0.7;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div style="font-family:var(--font-display);font-size:18px;">Aim Lab</div>
+          <span class="nav-badge">Phase 2</span>
+        </div>
+        <p style="font-size:12.5px;">Task-linked routines and playlist tracking. Structure is already in place in Aim Routines — this adds direct scenario mapping.</p>
+        <button class="btn btn-block btn-sm" disabled>Coming Soon</button>
+      </div>
+      <div class="card" style="opacity:0.7;">
+        <div style="display:flex;justify-content:space-between;align-items:center;margin-bottom:10px;">
+          <div style="font-family:var(--font-display);font-size:18px;">Counter-Strike 2</div>
+          <span class="nav-badge">Phase 2</span>
+        </div>
+        <p style="font-size:12.5px;">Different crosshair command syntax (cl_crosshair convars instead of an import code) and a different sensitivity formula — needs its own module, not a reskin of this one.</p>
+        <button class="btn btn-block btn-sm" disabled>Coming Soon</button>
+      </div>
+    </div>
+  `;
+  el.querySelectorAll('[data-goto]').forEach(b=>b.addEventListener('click', ()=>go(b.dataset.goto)));
+}
+
+/* ---------------- Navigation ---------------- */
+const SECTION_META = {
+  overview:   {title:'Overview', crumb:'Home'},
+  crosshair:  {title:'Crosshair Lab', crumb:'Build'},
+  sensitivity:{title:'Sensitivity Finder', crumb:'Build'},
+  routines:   {title:'Aim Routines', crumb:'Build'},
+  vault:      {title:'Pro Vault', crumb:'Reference'},
+  rules:      {title:'Tips & Rules', crumb:'Reference'},
+  games:      {title:'Game Library', crumb:'Games'}
+};
+const RENDERERS = {
+  overview: renderOverview,
+  crosshair: renderCrosshairSection,
+  sensitivity: renderSensitivitySection,
+  routines: renderRoutinesSection,
+  vault: renderVaultSection,
+  rules: renderRulesSection,
+  games: renderGamesSection
+};
+
+function go(section){
+  document.querySelectorAll('.section').forEach(s=>s.classList.remove('active'));
+  const target = document.getElementById('sec-'+section);
+  if(target) target.classList.add('active');
+  document.querySelectorAll('.nav-item').forEach(n=>n.classList.toggle('active', n.dataset.section===section));
+  const meta = SECTION_META[section] || {title:section, crumb:''};
+  document.getElementById('topbarTitle').textContent = meta.title;
+  document.getElementById('crumbLabel').textContent = meta.crumb;
+  if(RENDERERS[section]) RENDERERS[section]();
+  window.scrollTo({top:0, behavior:'instant' in window ? 'instant' : 'auto'});
+  try{ location.hash = section; }catch(e){}
+}
+
+document.querySelectorAll('.nav-item[data-section]').forEach(n=>{
+  n.addEventListener('click', ()=>go(n.dataset.section));
+});
+
+/* ---------------- Init ---------------- */
+window.addEventListener('DOMContentLoaded', ()=>{
+  const startHash = (location.hash||'').replace('#','');
+  const start = SECTION_META[startHash] ? startHash : 'overview';
+  go(start);
+});
+</script>
+</body>
+</html>
