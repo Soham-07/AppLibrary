@@ -1,0 +1,736 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Print Of Your Wall</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Unbounded:wght@500;600;700;800&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@500&display=swap" rel="stylesheet">
+<script src="https://cdnjs.cloudflare.com/ajax/libs/jspdf/2.5.1/jspdf.umd.min.js"></script>
+<style>
+  :root{
+    --bg:#150B0D;
+    --bg-2:#1B0F12;
+    --surface:#1D1114;
+    --raised-hi: rgba(255,255,255,0.045);
+    --raised-lo: rgba(0,0,0,0.55);
+    --sunk-hi: rgba(0,0,0,0.5);
+    --sunk-lo: rgba(255,60,80,0.05);
+    --border: rgba(255,80,100,0.08);
+    --red:#FF2952;
+    --red-2:#FF5B7C;
+    --red-deep:#7A0C24;
+    --amber:#FFB020;
+    --text:#F6E9EB;
+    --text-dim:#B98D93;
+    --text-faint:#6E4B51;
+    --radius:20px;
+  }
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;}
+  body{
+    background:
+      radial-gradient(circle at 12% -5%, rgba(255,41,82,0.16), transparent 42%),
+      radial-gradient(circle at 90% 105%, rgba(122,12,36,0.22), transparent 45%),
+      var(--bg);
+    background-attachment:fixed;
+    color:var(--text);
+    font-family:'Inter',sans-serif;
+    min-height:100vh;
+    overflow-x:hidden;
+  }
+  .bg-lines{
+    position:fixed; inset:0; pointer-events:none; z-index:0;
+    background-image: linear-gradient(rgba(255,60,85,0.05) 1px, transparent 1px), linear-gradient(90deg, rgba(255,60,85,0.05) 1px, transparent 1px);
+    background-size: 44px 44px;
+    mask-image: radial-gradient(ellipse 80% 60% at 50% 20%, black, transparent);
+    animation: gridDrift 24s linear infinite;
+  }
+  @keyframes gridDrift{ 0%{background-position:0 0;} 100%{background-position:44px 44px;} }
+  .orb{ position:fixed; border-radius:50%; filter:blur(70px); pointer-events:none; z-index:0; animation: float 15s ease-in-out infinite; opacity:.8;}
+  .orb1{ width:380px; height:380px; top:-120px; left:-100px; background:rgba(255,41,82,0.22);}
+  .orb2{ width:300px; height:300px; bottom:-90px; right:-70px; background:rgba(122,12,36,0.3); animation-delay:-7s;}
+  @keyframes float{ 0%,100%{ transform:translate(0,0) scale(1);} 50%{ transform:translate(28px,-22px) scale(1.08);} }
+
+  .wrap{position:relative; z-index:1; max-width:1240px; margin:0 auto; padding:40px 24px 40px;}
+
+  header{margin-bottom:30px;}
+  .eyebrow{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:'JetBrains Mono',monospace; font-size:12px; letter-spacing:0.08em;
+    color:var(--red-2); text-transform:uppercase; margin-bottom:12px;
+    opacity:0; animation: riseIn .6s ease forwards;
+  }
+  .eyebrow::before{content:''; width:7px; height:7px; border-radius:50%; background:var(--red); box-shadow:0 0 10px var(--red); animation: pulse 1.8s ease-in-out infinite;}
+  @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:.3;} }
+  h1{
+    font-family:'Unbounded',sans-serif; font-weight:700;
+    font-size:clamp(30px,4.4vw,46px); line-height:1.06; margin:0 0 12px; letter-spacing:-0.01em;
+    background:linear-gradient(120deg,#FFFFFF 10%, var(--red-2) 55%, var(--red) 100%);
+    -webkit-background-clip:text; background-clip:text; color:transparent;
+    opacity:0; animation: riseIn .7s .05s ease forwards;
+  }
+  header p{color:var(--text-dim); font-size:15px; max-width:600px; line-height:1.6; margin:0;
+    opacity:0; animation: riseIn .7s .12s ease forwards;}
+  @keyframes riseIn{ from{opacity:0; transform:translateY(10px);} to{opacity:1; transform:translateY(0);} }
+
+  .layout{display:grid; grid-template-columns:340px 1fr; gap:24px; align-items:start;}
+  @media (max-width:860px){ .layout{grid-template-columns:1fr;} }
+
+  /* ---------- Neumorphism core ---------- */
+  .card{
+    background:var(--surface); border-radius:var(--radius); padding:24px;
+    box-shadow: 9px 9px 20px var(--raised-lo), -7px -7px 18px var(--raised-hi);
+    border:1px solid var(--border);
+    opacity:0; transform:translateY(18px);
+    animation: cardIn .6s cubic-bezier(.22,1,.36,1) forwards;
+  }
+  .card:nth-of-type(1){ animation-delay:.06s; }
+  .card:nth-of-type(2){ animation-delay:.16s; }
+  .card:nth-of-type(3){ animation-delay:.26s; }
+  .card:nth-of-type(4){ animation-delay:.06s; }
+  @keyframes cardIn{ to{ opacity:1; transform:translateY(0); } }
+  .card + .card{margin-top:20px;}
+  .card h2{
+    font-family:'Unbounded',sans-serif; font-size:13px; font-weight:600;
+    text-transform:uppercase; letter-spacing:0.06em; color:var(--text-dim); margin:0 0 18px;
+  }
+
+  .neu-in{
+    border-radius:14px; background:var(--bg-2);
+    box-shadow: inset 5px 5px 12px var(--sunk-hi), inset -4px -4px 10px var(--sunk-lo);
+    border:1px solid var(--border);
+  }
+  .neu-out{
+    border-radius:14px; background:var(--surface);
+    box-shadow: 5px 5px 12px var(--raised-lo), -4px -4px 10px var(--raised-hi);
+    border:1px solid var(--border);
+  }
+
+  .dropzone{
+    padding:28px 16px; text-align:center; cursor:pointer; transition:.25s; position:relative; overflow:hidden;
+  }
+  .dropzone:hover{ box-shadow: inset 6px 6px 14px var(--sunk-hi), inset -5px -5px 11px var(--sunk-lo); }
+  .dropzone.drag{ box-shadow: inset 7px 7px 16px var(--sunk-hi), inset -6px -6px 13px var(--sunk-lo); }
+  .dropzone svg{margin-bottom:10px; transition:.25s;}
+  .dropzone:hover svg{ transform:translateY(-3px); }
+  .dropzone .main{font-size:14px; font-weight:500;}
+  .dropzone .sub{font-size:12px; color:var(--text-faint); margin-top:4px;}
+  .dropzone input{display:none;}
+  .thumb-preview{width:100%; max-height:120px; object-fit:contain; border-radius:10px; margin-bottom:10px; animation: cardIn .4s ease forwards;}
+
+  .field{margin-bottom:20px;}
+  .field:last-child{margin-bottom:0;}
+  .field label{display:flex; justify-content:space-between; font-size:13px; color:var(--text-dim); margin-bottom:9px;}
+  .field label b{color:var(--red-2); font-weight:600; font-family:'JetBrains Mono',monospace;}
+
+  .chip-row{display:flex; gap:9px; flex-wrap:wrap;}
+  .chip{
+    padding:9px 15px; border-radius:12px; color:var(--text-dim); font-size:12.5px; cursor:pointer;
+    transition: all .22s cubic-bezier(.22,1,.36,1); font-family:'Inter',sans-serif; font-weight:500;
+    background:var(--surface); box-shadow: 4px 4px 9px var(--raised-lo), -3px -3px 8px var(--raised-hi);
+    border:1px solid var(--border);
+  }
+  .chip:hover{ color:var(--text); transform:translateY(-1px); }
+  .chip.active{
+    color:#fff; font-weight:700;
+    background:linear-gradient(135deg,var(--red),var(--red-deep));
+    box-shadow: inset 3px 3px 7px rgba(0,0,0,0.4), 0 0 14px rgba(255,41,82,0.35);
+    transform:translateY(0);
+  }
+
+  .custom-dims{
+    display:grid; grid-template-columns:1fr 1fr; gap:10px; margin-top:14px;
+    max-height:0; opacity:0; overflow:hidden;
+    transition: max-height .35s ease, opacity .3s ease, margin-top .35s ease;
+  }
+  .custom-dims.open{ max-height:80px; opacity:1; }
+  .custom-dims input{
+    width:100%; padding:10px 11px; border-radius:11px; border:none; color:var(--text); font-size:13px;
+    font-family:'JetBrains Mono',monospace; background:var(--bg-2);
+    box-shadow: inset 4px 4px 9px var(--sunk-hi), inset -3px -3px 8px var(--sunk-lo);
+  }
+  .custom-dims input:focus{ outline:none; box-shadow: inset 4px 4px 9px var(--sunk-hi), inset -3px -3px 8px var(--sunk-lo), 0 0 0 1.5px var(--red); }
+  .custom-dims label{font-size:11px; color:var(--text-faint); display:block; margin-bottom:5px;}
+
+  /* Stepper */
+  .stepper{display:flex; align-items:center; gap:10px;}
+  .stepper button{
+    width:36px; height:36px; border-radius:11px; border:none; color:var(--text); font-size:18px; cursor:pointer;
+    display:flex; align-items:center; justify-content:center; transition:.15s; user-select:none;
+    background:var(--surface); box-shadow: 4px 4px 9px var(--raised-lo), -3px -3px 8px var(--raised-hi);
+  }
+  .stepper button:hover{ color:var(--red-2); }
+  .stepper button:active, .stepper button.pressed{
+    box-shadow: inset 3px 3px 7px var(--sunk-hi), inset -2px -2px 6px var(--sunk-lo);
+    transform:scale(.96); color:var(--red-2);
+  }
+  .stepper .val{
+    flex:1; text-align:center; font-family:'Unbounded',sans-serif; font-weight:700; font-size:18px;
+    transition: transform .22s cubic-bezier(.34,1.56,.64,1);
+  }
+  .stepper .val.bump{ transform:scale(1.3); color:var(--red-2); }
+
+  input[type=range]{
+    -webkit-appearance:none; width:100%; height:6px; border-radius:3px;
+    background:linear-gradient(90deg,var(--red-deep),var(--red)); outline:none;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:18px; height:18px; border-radius:50%;
+    background:#1D1114; border:3px solid var(--red); cursor:pointer;
+    box-shadow:0 0 0 5px rgba(255,41,82,0.18), 0 0 10px rgba(255,41,82,0.5);
+    transition: transform .18s ease;
+  }
+  input[type=range]:active::-webkit-slider-thumb{ transform:scale(1.2); }
+
+  .toggle-row{display:flex; gap:9px;}
+  .toggle-row button{
+    flex:1; padding:10px 6px; border-radius:12px; border:none; color:var(--text-dim); font-size:12.5px; cursor:pointer;
+    transition:.2s; font-family:'Inter',sans-serif; font-weight:500;
+    background:var(--surface); box-shadow: 4px 4px 9px var(--raised-lo), -3px -3px 8px var(--raised-hi);
+  }
+  .toggle-row button:hover{ color:var(--text); }
+  .toggle-row button.active{
+    color:#fff; font-weight:700;
+    background:linear-gradient(135deg,var(--red),var(--red-deep));
+    box-shadow: inset 3px 3px 7px rgba(0,0,0,0.4), 0 0 14px rgba(255,41,82,0.3);
+  }
+  .toggle-row button.auto-flag{ position:relative; }
+  .toggle-row button.auto-flag::after{
+    content:'auto'; position:absolute; top:-8px; right:2px; font-family:'JetBrains Mono',monospace;
+    font-size:8.5px; color:var(--amber); background:var(--bg); padding:1px 5px; border-radius:6px;
+    border:1px solid rgba(255,176,32,0.4); opacity:0; transform:translateY(3px); transition:.25s;
+  }
+  .toggle-row button.auto-flag.show-auto::after{ opacity:1; transform:translateY(0); }
+
+  .stat-strip{display:flex; gap:14px; margin-top:4px; flex-wrap:wrap;}
+  .stat{
+    flex:1; min-width:90px; border-radius:13px; padding:12px 13px;
+    background:var(--bg-2); box-shadow: inset 4px 4px 9px var(--sunk-hi), inset -3px -3px 8px var(--sunk-lo);
+    transition:.2s;
+  }
+  .stat .n{font-family:'Unbounded',sans-serif; font-weight:700; font-size:20px; color:var(--red-2);}
+  .stat .l{font-size:11px; color:var(--text-faint); text-transform:uppercase; letter-spacing:0.04em; margin-top:3px;}
+
+  .btn{
+    width:100%; padding:14px 16px; border-radius:14px; border:none; cursor:pointer;
+    font-family:'Unbounded',sans-serif; font-weight:600; font-size:14px;
+    display:flex; align-items:center; justify-content:center; gap:8px;
+    transition: transform .16s ease, filter .16s ease, box-shadow .16s ease;
+  }
+  .btn-primary{
+    background:linear-gradient(135deg,var(--red),var(--red-deep)); color:#fff;
+    box-shadow: 6px 6px 14px rgba(0,0,0,0.45), -3px -3px 10px rgba(255,80,100,0.06), 0 0 16px rgba(255,41,82,0.25);
+  }
+  .btn-primary:hover{filter:brightness(1.1); transform:translateY(-2px);}
+  .btn-primary:active{ transform:translateY(0) scale(.98); box-shadow: inset 3px 3px 8px rgba(0,0,0,0.4);}
+  .btn-ghost{
+    background:var(--surface); color:var(--text); margin-top:10px;
+    box-shadow: 5px 5px 12px var(--raised-lo), -4px -4px 10px var(--raised-hi);
+  }
+  .btn-ghost:hover{ color:var(--red-2); transform:translateY(-2px); }
+  .btn-ghost:active{ transform:translateY(0) scale(.98); box-shadow: inset 3px 3px 8px var(--sunk-hi); }
+  .btn:disabled{opacity:.35; cursor:not-allowed; transform:none; box-shadow:none;}
+
+  .preview-head{display:flex; justify-content:space-between; align-items:center; margin-bottom:18px; flex-wrap:wrap; gap:10px;}
+  .preview-head h2{margin:0;}
+  .legend{display:flex; gap:16px; font-size:12px; color:var(--text-faint); flex-wrap:wrap;}
+  .legend span{display:inline-flex; align-items:center; gap:6px;}
+  .legend i{width:14px; height:2px; display:inline-block; background:var(--red-2);}
+
+  .empty-state{ text-align:center; padding:64px 20px; color:var(--text-faint); }
+  .empty-state svg{opacity:.4; margin-bottom:14px; animation: floatIcon 3.5s ease-in-out infinite;}
+  @keyframes floatIcon{ 0%,100%{transform:translateY(0);} 50%{transform:translateY(-8px);} }
+  .empty-state p{font-size:14px; max-width:320px; margin:0 auto;}
+
+  #posterGrid{
+    display:grid; gap:4px; background:#000;
+    border-radius:14px; padding:4px; overflow:hidden;
+    box-shadow: inset 4px 4px 10px var(--sunk-hi), inset -3px -3px 9px var(--sunk-lo);
+  }
+  #posterGrid .tile-wrap{
+    position:relative; overflow:hidden; border-radius:3px;
+    opacity:0; transform:scale(.9);
+    animation: tileIn .45s cubic-bezier(.22,1,.36,1) forwards;
+  }
+  @keyframes tileIn{ to{ opacity:1; transform:scale(1); } }
+  #posterGrid .tile-wrap img{display:block; width:100%; height:100%; object-fit:cover;}
+  #posterGrid .tile-tag{
+    position:absolute; top:5px; left:5px; background:rgba(21,11,13,0.8); backdrop-filter:blur(4px);
+    color:var(--red-2); font-family:'JetBrains Mono',monospace; font-size:10px; padding:2px 6px; border-radius:6px;
+    border:1px solid rgba(255,41,82,0.35);
+  }
+
+  .note{
+    display:flex; gap:10px; align-items:flex-start; margin-top:18px; padding:14px 15px;
+    background:rgba(255,176,32,0.06); border:1px solid rgba(255,176,32,0.22); border-radius:12px;
+    font-size:12.5px; color:#F0CD8F; line-height:1.55;
+  }
+  .note b{color:var(--amber);}
+  .note.tip{ background:rgba(255,41,82,0.06); border-color:rgba(255,41,82,0.22); color:#F0AEB9; }
+  .note.tip b{ color:var(--red-2); }
+
+  footer{
+    text-align:center; margin-top:44px; padding-top:22px;
+    border-top:1px solid var(--border);
+    font-family:'JetBrains Mono',monospace; font-size:12px; color:var(--text-faint);
+    opacity:0; animation: riseIn .7s .4s ease forwards;
+  }
+  footer b{ color:var(--red-2); font-weight:500; }
+  footer .heart{ color:var(--red); display:inline-block; animation: beat 1.4s ease-in-out infinite; }
+  @keyframes beat{ 0%,100%{transform:scale(1);} 30%{transform:scale(1.25);} }
+
+  #printArea{display:none;}
+  @media print{
+    body > *{ visibility:hidden; }
+    #printArea, #printArea *{ visibility:visible; }
+    #printArea{ display:block; position:absolute; top:0; left:0; }
+    .print-page{ position:relative; overflow:hidden; }
+    .print-page:last-child{ page-break-after:auto; }
+  }
+</style>
+</head>
+<body>
+<div class="bg-lines"></div>
+<div class="orb orb1"></div>
+<div class="orb orb2"></div>
+<style id="dynamicPageStyle"></style>
+
+<div class="wrap">
+
+  <header>
+    <div class="eyebrow">Any Printer → Any Wall</div>
+    <h1>Print Of Your Wall</h1>
+    <p>Upload any image, pick a paper size and grid — this tool splits it across multiple sheets with overlap and cutting guides, ready to tape together into one big poster.</p>
+  </header>
+
+  <div class="layout">
+    <!-- LEFT CONTROLS -->
+    <div>
+      <div class="card">
+        <h2>1 · Image</h2>
+        <div class="dropzone neu-in" id="dropzone">
+          <img id="thumbPreview" class="thumb-preview" style="display:none;">
+          <svg id="uploadIcon" width="30" height="30" viewBox="0 0 24 24" fill="none" stroke="#FF5B7C" stroke-width="1.5"><path d="M12 16V4M12 4l-4 4M12 4l4 4" stroke-linecap="round" stroke-linejoin="round"/><path d="M4 16v2a2 2 0 002 2h12a2 2 0 002-2v-2" stroke-linecap="round"/></svg>
+          <div class="main" id="dzText">Drop a photo here or click to upload</div>
+          <div class="sub">JPG, PNG — higher resolution prints sharper</div>
+          <input type="file" id="fileInput" accept="image/*">
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>2 · Paper &amp; Grid</h2>
+        <div class="field">
+          <label>Paper size</label>
+          <div class="chip-row" id="paperChips">
+            <div class="chip active" data-paper="A4">A4</div>
+            <div class="chip" data-paper="A3">A3</div>
+            <div class="chip" data-paper="A5">A5</div>
+            <div class="chip" data-paper="LETTER">Letter</div>
+            <div class="chip" data-paper="LEGAL">Legal</div>
+            <div class="chip" data-paper="CUSTOM">Custom</div>
+          </div>
+          <div class="custom-dims" id="customDims">
+            <div>
+              <label>Width (mm)</label>
+              <input type="number" id="customW" value="210" min="20" max="2000">
+            </div>
+            <div>
+              <label>Height (mm)</label>
+              <input type="number" id="customH" value="297" min="20" max="2000">
+            </div>
+          </div>
+        </div>
+        <div class="field">
+          <label>Orientation <b id="orientAutoLabel" style="display:none;">auto-detected from image</b></label>
+          <div class="toggle-row">
+            <button id="orientPortrait" class="active auto-flag">Portrait</button>
+            <button id="orientLandscape" class="auto-flag">Landscape</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Columns (sheets across) <b id="colsVal">2</b></label>
+          <div class="stepper">
+            <button id="colsMinus" type="button">−</button>
+            <div class="val" id="colsBar">2</div>
+            <button id="colsPlus" type="button">+</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Rows (sheets down) <b id="rowsVal">2</b></label>
+          <div class="stepper">
+            <button id="rowsMinus" type="button">−</button>
+            <div class="val" id="rowsBar">2</div>
+            <button id="rowsPlus" type="button">+</button>
+          </div>
+        </div>
+        <div class="field">
+          <label>Overlap (glue/tape margin) <b id="overlapVal">15mm</b></label>
+          <input type="range" id="overlapSlider" min="5" max="30" value="15" step="1">
+        </div>
+        <div class="field">
+          <label>Image fit</label>
+          <div class="toggle-row">
+            <button id="fitCover" class="active">Fill (crop)</button>
+            <button id="fitContain">Fit (no crop)</button>
+          </div>
+        </div>
+      </div>
+
+      <div class="card">
+        <h2>3 · Poster size</h2>
+        <div class="stat-strip">
+          <div class="stat"><div class="n" id="statTiles">4</div><div class="l">Sheets</div></div>
+          <div class="stat"><div class="n" id="statW">39cm</div><div class="l">Width</div></div>
+          <div class="stat"><div class="n" id="statH">55cm</div><div class="l">Height</div></div>
+        </div>
+        <button class="btn btn-primary" id="generateBtn" style="margin-top:18px;" disabled>Generate poster</button>
+        <button class="btn btn-ghost" id="printBtn" disabled>🖨️ Print</button>
+        <button class="btn btn-ghost" id="pdfBtn" disabled>⬇️ Download PDF</button>
+        <div class="note" style="margin-top:16px;">
+          <span>⚠️</span>
+          <span><b>To avoid a white border when printing:</b> set Margins → "None", Scale → "100" (not "Fit to page"), and keep "Background graphics" on. If your printer supports borderless printing, enable that too.</span>
+        </div>
+      </div>
+    </div>
+
+    <!-- RIGHT PREVIEW -->
+    <div class="card" id="previewCard">
+      <div class="preview-head">
+        <h2 style="margin-bottom:0;">Preview — this is how it looks joined together</h2>
+        <div class="legend">
+          <span><i></i> Corner crop mark (included on print)</span>
+        </div>
+      </div>
+      <div class="empty-state" id="emptyState">
+        <svg width="52" height="52" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.3" style="color:var(--text-faint)"><rect x="3" y="3" width="7" height="7" rx="1.5"/><rect x="14" y="3" width="7" height="7" rx="1.5"/><rect x="3" y="14" width="7" height="7" rx="1.5"/><rect x="14" y="14" width="7" height="7" rx="1.5"/></svg>
+        <p>Upload a photo and set your grid, then click "Generate poster" — the preview will appear here.</p>
+      </div>
+      <div id="posterGrid" style="display:none;"></div>
+      <div class="note tip" id="howToNote" style="display:none;">
+        <span>✂️</span>
+        <span><b>Assembly tip:</b> Every sheet has corner crop-marks — trim the outer white edge along them. Overlap each sheet onto the next by the amount set in the slider, then glue or tape. The R1C1-style label is shown only in this preview to help you keep track of the order — it will not appear on the printed sheets.</span>
+      </div>
+    </div>
+  </div>
+
+  <footer>Website developed by <b>Akshay Mishra</b> <span class="heart">♥</span></footer>
+</div>
+
+<div id="printArea"></div>
+
+<script>
+(function(){
+  const PX_PER_MM = 118/25.4; // ~118 DPI — sharp enough for a poster, light enough for the print spooler
+  const BLEED_MM = 3; // extra image drawn beyond the page edge on every side,
+                       // to absorb small residual margins some printers add
+
+  const PAPER_SIZES = {
+    A3: {w:297, h:420},
+    A4: {w:210, h:297},
+    A5: {w:148, h:210},
+    LETTER: {w:215.9, h:279.4},
+    LEGAL: {w:215.9, h:355.6},
+    CUSTOM: {w:210, h:297}
+  };
+
+  let img = null;
+  let paperKey = 'A4', orientation = 'portrait';
+  let customW = 210, customH = 297;
+  let rows = 2, cols = 2, overlapMM = 15, fitMode = 'cover';
+  let cleanTiles = [], printTiles = [], previewTiles = [];
+  let previewAspect = 210/297;
+
+  const $ = id => document.getElementById(id);
+  const on = (id, evt, fn) => { const el = $(id); if(el) el.addEventListener(evt, fn); };
+
+  // ---------- Upload ----------
+  const dropzone = $('dropzone'), fileInput = $('fileInput'), thumbPreview = $('thumbPreview'), dzText = $('dzText'), uploadIcon = $('uploadIcon');
+  on('dropzone','click', ()=>fileInput.click());
+  dropzone.addEventListener('dragover', e=>{e.preventDefault(); dropzone.classList.add('drag');});
+  dropzone.addEventListener('dragleave', ()=>dropzone.classList.remove('drag'));
+  dropzone.addEventListener('drop', e=>{
+    e.preventDefault(); dropzone.classList.remove('drag');
+    if(e.dataTransfer.files[0]) loadFile(e.dataTransfer.files[0]);
+  });
+  fileInput.addEventListener('change', e=>{ if(e.target.files[0]) loadFile(e.target.files[0]); });
+
+  function loadFile(file){
+    const reader = new FileReader();
+    reader.onload = e=>{
+      const image = new Image();
+      image.onload = ()=>{
+        img = image;
+        thumbPreview.src = e.target.result;
+        thumbPreview.style.display = 'block';
+        uploadIcon.style.display = 'none';
+        dzText.textContent = file.name;
+        $('generateBtn').disabled = false;
+        autoDetectOrientation(image);
+        updateStats();
+      };
+      image.src = e.target.result;
+    };
+    reader.readAsDataURL(file);
+  }
+
+  // ---------- Auto orientation detection ----------
+  // As soon as an image is uploaded, read its own width/height and flip the
+  // page orientation to match — a portrait photo gets a portrait page grid,
+  // a landscape photo gets a landscape page grid. The person can still
+  // override it manually afterwards with the toggle below.
+  function autoDetectOrientation(image){
+    const detected = image.width >= image.height ? 'landscape' : 'portrait';
+    setOrientation(detected);
+    $('orientAutoLabel').style.display = 'inline';
+    $('orientPortrait').classList.add('show-auto');
+    $('orientLandscape').classList.add('show-auto');
+    setTimeout(()=>{
+      $('orientPortrait').classList.remove('show-auto');
+      $('orientLandscape').classList.remove('show-auto');
+    }, 2600);
+  }
+
+  function setOrientation(val){
+    orientation = val;
+    $('orientPortrait').classList.toggle('active', val==='portrait');
+    $('orientLandscape').classList.toggle('active', val==='landscape');
+  }
+
+  // ---------- Paper size ----------
+  document.querySelectorAll('#paperChips .chip').forEach(chip=>{
+    chip.addEventListener('click', ()=>{
+      document.querySelectorAll('#paperChips .chip').forEach(c=>c.classList.remove('active'));
+      chip.classList.add('active');
+      paperKey = chip.dataset.paper;
+      $('customDims').classList.toggle('open', paperKey==='CUSTOM');
+      updateStats();
+    });
+  });
+  on('customW','input', e=>{ customW = Math.max(20, parseFloat(e.target.value)||210); updateStats(); });
+  on('customH','input', e=>{ customH = Math.max(20, parseFloat(e.target.value)||297); updateStats(); });
+
+  on('orientPortrait','click', ()=>{ setOrientation('portrait'); updateStats(); });
+  on('orientLandscape','click', ()=>{ setOrientation('landscape'); updateStats(); });
+
+  function getPageSize(){
+    const base = PAPER_SIZES[paperKey];
+    let w = paperKey==='CUSTOM' ? customW : base.w;
+    let h = paperKey==='CUSTOM' ? customH : base.h;
+    if(orientation==='landscape'){ const t=w; w=h; h=t; }
+    return { w, h };
+  }
+
+  // ---------- Grid controls (columns / rows steppers) ----------
+  function clamp(v,min,max){ return Math.max(min, Math.min(max, v)); }
+  function bump(el){
+    if(!el) return;
+    el.classList.remove('bump');
+    void el.offsetWidth; // restart animation
+    el.classList.add('bump');
+  }
+
+  on('colsPlus','click', ()=>{ cols = clamp(cols+1,1,6); syncGrid(); });
+  on('colsMinus','click', ()=>{ cols = clamp(cols-1,1,6); syncGrid(); });
+  on('rowsPlus','click', ()=>{ rows = clamp(rows+1,1,6); syncGrid(); });
+  on('rowsMinus','click', ()=>{ rows = clamp(rows-1,1,6); syncGrid(); });
+
+  function syncGrid(){
+    $('colsVal').textContent = cols; $('colsBar').textContent = cols; bump($('colsBar'));
+    $('rowsVal').textContent = rows; $('rowsBar').textContent = rows; bump($('rowsBar'));
+    updateStats();
+  }
+
+  on('overlapSlider','input', e=>{
+    overlapMM = parseInt(e.target.value);
+    $('overlapVal').textContent = overlapMM+'mm';
+    updateStats();
+  });
+
+  on('fitCover','click', ()=>{ fitMode='cover'; $('fitCover').classList.add('active'); $('fitContain').classList.remove('active'); });
+  on('fitContain','click', ()=>{ fitMode='contain'; $('fitContain').classList.add('active'); $('fitCover').classList.remove('active'); });
+
+  function updateStats(){
+    const {w:pageW, h:pageH} = getPageSize();
+    const posterWmm = cols*pageW - (cols-1)*overlapMM;
+    const posterHmm = rows*pageH - (rows-1)*overlapMM;
+    $('statTiles').textContent = rows*cols;
+    $('statW').textContent = (posterWmm/10).toFixed(0)+'cm';
+    $('statH').textContent = (posterHmm/10).toFixed(0)+'cm';
+  }
+  updateStats();
+
+  // ---------- Clamped draw (handles contain-mode padding) ----------
+  function drawClamped(ctx, image, sx, sy, sw, sh, dw, dh){
+    const sx2 = Math.max(sx,0), sy2 = Math.max(sy,0);
+    const sxEnd = Math.min(sx+sw, image.width), syEnd = Math.min(sy+sh, image.height);
+    const sw2 = sxEnd-sx2, sh2 = syEnd-sy2;
+    if(sw2<=0||sh2<=0) return;
+    const dx = (sx2-sx)*(dw/sw), dy=(sy2-sy)*(dh/sh);
+    const dw2 = sw2*(dw/sw), dh2 = sh2*(dh/sh);
+    ctx.drawImage(image, sx2, sy2, sw2, sh2, dx, dy, dw2, dh2);
+  }
+
+  // ---------- Generate tiles ----------
+  on('generateBtn','click', generatePoster);
+
+  function generatePoster(){
+    if(!img) return;
+    cleanTiles = []; printTiles = []; previewTiles = [];
+
+    const {w:pageW, h:pageH} = getPageSize();
+    const PwPx = Math.round(pageW*PX_PER_MM), PhPx = Math.round(pageH*PX_PER_MM);
+    const BleedPx = Math.round(BLEED_MM*PX_PER_MM);
+    const OPx = overlapMM*PX_PER_MM;
+    const posterWpx = cols*PwPx - (cols-1)*OPx;
+    const posterHpx = rows*PhPx - (rows-1)*OPx;
+
+    const scale = fitMode==='cover'
+      ? Math.max(posterWpx/img.width, posterHpx/img.height)
+      : Math.min(posterWpx/img.width, posterHpx/img.height);
+    const dispW = img.width*scale, dispH = img.height*scale;
+    const offX = (posterWpx-dispW)/2, offY = (posterHpx-dispH)/2;
+
+    // Preview tiles are trimmed by half the overlap on EVERY edge so every
+    // tile ends up the same size and lines up seamlessly with its neighbours
+    // (the full overlap is only needed on the printed sheets, for gluing).
+    const previewWpx = PwPx - OPx, previewHpx = PhPx - OPx;
+    previewAspect = previewWpx/previewHpx;
+
+    for(let r=0;r<rows;r++){
+      for(let c=0;c<cols;c++){
+        const tileXpx = c*(PwPx-OPx);
+        const tileYpx = r*(PhPx-OPx);
+        const sx = (tileXpx-offX)/scale, sy=(tileYpx-offY)/scale;
+        const sw = PwPx/scale, sh = PhPx/scale;
+
+        // Print version (full tile + bleed on every side, with guides — used for print & PDF)
+        const pW = PwPx + 2*BleedPx, pH = PhPx + 2*BleedPx;
+        const sxBleed = sx - BleedPx/scale, syBleed = sy - BleedPx/scale;
+        const swBleed = sw + (2*BleedPx)/scale, shBleed = sh + (2*BleedPx)/scale;
+        const pCanvas = document.createElement('canvas');
+        pCanvas.width = pW; pCanvas.height = pH;
+        const pCtx = pCanvas.getContext('2d');
+        pCtx.fillStyle = '#fff'; pCtx.fillRect(0,0,pW,pH);
+        drawClamped(pCtx, img, sxBleed, syBleed, swBleed, shBleed, pW, pH);
+        drawGuides(pCtx, pW, pH, OPx, r, c, rows, cols, BleedPx);
+        printTiles.push(pCanvas.toDataURL('image/jpeg',0.85));
+
+        // Preview version (overlap trimmed symmetrically -> seamless mosaic)
+        const halfO = OPx/2;
+        const sxP = sx + halfO/scale, syP = sy + halfO/scale;
+        const swP = sw - OPx/scale, shP = sh - OPx/scale;
+        const prCanvas = document.createElement('canvas');
+        prCanvas.width = previewWpx; prCanvas.height = previewHpx;
+        const prCtx = prCanvas.getContext('2d');
+        prCtx.fillStyle = '#fff'; prCtx.fillRect(0,0,previewWpx,previewHpx);
+        drawClamped(prCtx, img, sxP, syP, swP, shP, previewWpx, previewHpx);
+        previewTiles.push(prCanvas.toDataURL('image/jpeg',0.93));
+      }
+    }
+
+    renderPreview();
+    $('printBtn').disabled = false;
+    $('pdfBtn').disabled = false;
+  }
+
+  function drawGuides(ctx, w, h, OPx, r, c, rows, cols, bleedPx){
+    ctx.save();
+    bleedPx = bleedPx || 0;
+    const pageW = w - 2*bleedPx, pageH = h - 2*bleedPx;
+
+    // corner crop marks at the TRUE page corners — useful for trimming outer edges
+    const m = pageW*0.03; // mark length
+    ctx.strokeStyle = '#FF2952';
+    ctx.lineWidth = Math.max(2, pageW*0.0022);
+    const corners = [
+      [bleedPx, bleedPx, 1, 1],
+      [w-bleedPx, bleedPx, -1, 1],
+      [bleedPx, h-bleedPx, 1, -1],
+      [w-bleedPx, h-bleedPx, -1, -1]
+    ];
+    corners.forEach(([x,y,dx,dy])=>{
+      ctx.beginPath();
+      ctx.moveTo(x, y+dy*m*1.6); ctx.lineTo(x,y); ctx.lineTo(x+dx*m*1.6,y);
+      ctx.stroke();
+    });
+
+    // Note: no text label or "Sheet X/Y" footer is drawn here on purpose —
+    // that info is only shown as an on-screen overlay in the preview grid
+    // (see renderPreview's .tile-tag), so printed/PDF sheets stay clean.
+    ctx.restore();
+  }
+
+  // ---------- Preview render ----------
+  function renderPreview(){
+    $('emptyState').style.display = 'none';
+    $('howToNote').style.display = 'flex';
+    const grid = $('posterGrid');
+    grid.style.display = 'grid';
+    grid.style.gridTemplateColumns = `repeat(${cols}, 1fr)`;
+    grid.innerHTML = '';
+    let i=0;
+    for(let r=0;r<rows;r++){
+      for(let c=0;c<cols;c++){
+        const wrap = document.createElement('div');
+        wrap.className = 'tile-wrap';
+        wrap.style.aspectRatio = previewAspect;
+        wrap.style.animationDelay = (i*0.045)+'s';
+        const image = document.createElement('img');
+        image.src = previewTiles[i];
+        const tag = document.createElement('div');
+        tag.className = 'tile-tag';
+        tag.textContent = 'R'+(r+1)+'C'+(c+1);
+        wrap.appendChild(image); wrap.appendChild(tag);
+        grid.appendChild(wrap);
+        i++;
+      }
+    }
+  }
+
+  // ---------- Dynamic page CSS (paper size varies) ----------
+  function updatePageCSS(){
+    const {w:pageW, h:pageH} = getPageSize();
+    const styleTag = $('dynamicPageStyle');
+    styleTag.textContent = `
+      @page { size: ${pageW}mm ${pageH}mm; margin:0; }
+      .print-page{ width:${pageW}mm; height:${pageH}mm; page-break-after:always; }
+      .print-page img{ position:absolute; top:-${BLEED_MM}mm; left:-${BLEED_MM}mm; width:calc(100% + ${2*BLEED_MM}mm); height:calc(100% + ${2*BLEED_MM}mm); display:block; }
+    `;
+  }
+
+  // ---------- Print ----------
+  on('printBtn','click', ()=>{
+    updatePageCSS();
+    const area = $('printArea');
+    area.innerHTML = '';
+    printTiles.forEach(src=>{
+      const page = document.createElement('div');
+      page.className = 'print-page';
+      const image = document.createElement('img');
+      image.src = src;
+      page.appendChild(image);
+      area.appendChild(page);
+    });
+    setTimeout(()=>window.print(), 150);
+  });
+
+  // ---------- PDF ----------
+  on('pdfBtn','click', ()=>{
+    const {w:pageW, h:pageH} = getPageSize();
+    const { jsPDF } = window.jspdf;
+    const orient = pageW > pageH ? 'l' : 'p';
+    const doc = new jsPDF({ orientation:orient, unit:'mm', format:[pageW, pageH] });
+    printTiles.forEach((src, i)=>{
+      if(i>0) doc.addPage([pageW, pageH], orient);
+      doc.addImage(src, 'JPEG', -BLEED_MM, -BLEED_MM, pageW+2*BLEED_MM, pageH+2*BLEED_MM);
+    });
+    doc.save('poster.pdf');
+  });
+
+  // expose a couple of internals for automated testing only
+  window.__povwState = ()=>({cols, rows, orientation, paperKey});
+})();
+</script>
+</body>
+</html>
