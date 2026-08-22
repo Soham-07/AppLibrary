@@ -1,0 +1,987 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>OPX ROUTINE — Night Owl Edition</title>
+<link href="https://fonts.googleapis.com/css2?family=Bebas+Neue&family=Space+Mono:wght@400;700&family=DM+Sans:wght@300;400;500;600&display=swap" rel="stylesheet">
+<style>
+:root {
+  --bg: #080810;
+  --s1: #0f0f1a;
+  --s2: #151525;
+  --border: #1e1e32;
+  --border2: #2a2a45;
+  --acc: #c084fc;
+  --acc2: #818cf8;
+  --acc3: #34d399;
+  --acc4: #fb923c;
+  --acc5: #f472b6;
+  --acc6: #38bdf8;
+  --text: #e2e8f0;
+  --muted: #4a4a6a;
+  --muted2: #6b6b8a;
+}
+
+* { margin:0; padding:0; box-sizing:border-box; }
+
+body {
+  background: var(--bg);
+  color: var(--text);
+  font-family: 'DM Sans', sans-serif;
+  min-height: 100vh;
+  overflow-x: hidden;
+}
+
+/* star bg */
+body::before {
+  content: '';
+  position: fixed;
+  inset: 0;
+  background:
+    radial-gradient(1px 1px at 10% 15%, rgba(192,132,252,0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 30% 40%, rgba(129,140,248,0.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 55% 20%, rgba(192,132,252,0.2) 0%, transparent 100%),
+    radial-gradient(1px 1px at 70% 60%, rgba(129,140,248,0.3) 0%, transparent 100%),
+    radial-gradient(1px 1px at 85% 10%, rgba(192,132,252,0.4) 0%, transparent 100%),
+    radial-gradient(1px 1px at 20% 80%, rgba(129,140,248,0.2) 0%, transparent 100%),
+    radial-gradient(1px 1px at 90% 85%, rgba(192,132,252,0.3) 0%, transparent 100%),
+    radial-gradient(600px 600px at 80% 10%, rgba(129,140,248,0.04) 0%, transparent 70%),
+    radial-gradient(800px 800px at 10% 90%, rgba(192,132,252,0.04) 0%, transparent 70%);
+  pointer-events: none;
+  z-index: 0;
+}
+
+.wrap {
+  max-width: 980px;
+  margin: 0 auto;
+  padding: 48px 24px 80px;
+  position: relative;
+  z-index: 1;
+}
+
+/* HEADER */
+.header {
+  margin-bottom: 52px;
+  animation: up 0.7s ease both;
+}
+
+.eyebrow {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  letter-spacing: 4px;
+  color: var(--acc);
+  margin-bottom: 14px;
+  display: flex;
+  align-items: center;
+  gap: 10px;
+}
+.eyebrow::before { content:''; width:24px; height:1px; background:var(--acc); }
+
+h1 {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(56px, 10vw, 110px);
+  line-height: 0.88;
+  letter-spacing: 3px;
+  margin-bottom: 18px;
+}
+h1 .dim { color: var(--muted2); }
+h1 .bright { color: var(--acc); }
+
+.header-sub {
+  font-size: 13px;
+  color: var(--muted2);
+  font-family: 'Space Mono', monospace;
+  letter-spacing: 1px;
+  border-left: 2px solid var(--border2);
+  padding-left: 14px;
+  line-height: 1.8;
+}
+
+/* TRUTH BOX */
+.truth {
+  background: var(--s1);
+  border: 1px solid var(--border2);
+  border-left: 3px solid var(--acc);
+  padding: 22px 26px;
+  margin-bottom: 48px;
+  animation: up 0.6s 0.1s ease both;
+}
+.truth-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--acc);
+  margin-bottom: 10px;
+}
+.truth p {
+  font-size: 13.5px;
+  color: #9090b0;
+  line-height: 1.8;
+}
+.truth strong { color: var(--text); }
+
+/* SECTION LABEL */
+.sec {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 4px;
+  color: var(--muted);
+  text-transform: uppercase;
+  margin-bottom: 20px;
+  display: flex;
+  align-items: center;
+  gap: 12px;
+}
+.sec::after { content:''; flex:1; height:1px; background:var(--border); }
+
+/* TIMELINE */
+.timeline {
+  position: relative;
+  margin-bottom: 56px;
+}
+.tl-line {
+  position: absolute;
+  left: 108px;
+  top: 0; bottom: 0;
+  width: 1px;
+  background: linear-gradient(to bottom, transparent, var(--border2) 10%, var(--border2) 90%, transparent);
+}
+
+.block {
+  display: grid;
+  grid-template-columns: 108px 1fr;
+  margin-bottom: 3px;
+  animation: up 0.5s ease both;
+}
+.block:nth-child(2){animation-delay:.05s}
+.block:nth-child(3){animation-delay:.1s}
+.block:nth-child(4){animation-delay:.15s}
+.block:nth-child(5){animation-delay:.2s}
+.block:nth-child(6){animation-delay:.25s}
+.block:nth-child(7){animation-delay:.3s}
+.block:nth-child(8){animation-delay:.35s}
+.block:nth-child(9){animation-delay:.4s}
+.block:nth-child(10){animation-delay:.45s}
+.block:nth-child(11){animation-delay:.5s}
+
+.t-col {
+  padding: 18px 16px 18px 0;
+  text-align: right;
+}
+.t-main {
+  font-family: 'Space Mono', monospace;
+  font-size: 11px;
+  color: var(--muted2);
+  white-space: nowrap;
+  display: block;
+  margin-bottom: 2px;
+}
+.t-dur {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+}
+
+.c-col {
+  margin-left: 22px;
+  padding: 14px 18px;
+  background: var(--s1);
+  border-left: 2px solid transparent;
+  position: relative;
+  transition: background 0.2s, transform 0.2s;
+}
+.c-col::before {
+  content: '';
+  position: absolute;
+  left: -8px; top: 19px;
+  width: 7px; height: 7px;
+  border-radius: 50%;
+  background: var(--border2);
+  border: 2px solid var(--bg);
+  transition: background 0.2s;
+}
+.c-col:hover { background: var(--s2); transform: translateX(2px); }
+
+.bh { display:flex; align-items:center; gap:8px; margin-bottom:5px; flex-wrap:wrap; }
+
+.badge {
+  font-family: 'Space Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 2px;
+  padding: 2px 8px;
+  border-radius: 2px;
+  text-transform: uppercase;
+  font-weight: 700;
+  flex-shrink: 0;
+}
+
+.btitle { font-size: 13.5px; font-weight: 600; color: var(--text); }
+
+.bdesc {
+  font-size: 12px;
+  color: #5a5a7a;
+  line-height: 1.7;
+}
+.bdesc strong { color: #8888aa; }
+
+/* fixed block */
+.fixed .c-col { border-left-color: var(--muted); background: rgba(255,255,255,0.02); }
+.fixed .c-col::before { background: var(--muted); }
+.fixed .badge { background: rgba(100,100,120,0.15); color: var(--muted2); }
+.fixed .btitle { color: #7070a0; }
+
+/* color variants */
+.ca .c-col { border-left-color: var(--acc3); }
+.ca .c-col::before { background: var(--acc3); }
+.ca .badge { background: rgba(52,211,153,0.1); color: var(--acc3); }
+
+.cb .c-col { border-left-color: var(--acc); }
+.cb .c-col::before { background: var(--acc); }
+.cb .badge { background: rgba(192,132,252,0.1); color: var(--acc); }
+
+.cc .c-col { border-left-color: var(--acc2); }
+.cc .c-col::before { background: var(--acc2); }
+.cc .badge { background: rgba(129,140,248,0.1); color: var(--acc2); }
+
+.cd .c-col { border-left-color: var(--acc4); }
+.cd .c-col::before { background: var(--acc4); }
+.cd .badge { background: rgba(251,146,60,0.1); color: var(--acc4); }
+
+.ce .c-col { border-left-color: var(--acc5); }
+.ce .c-col::before { background: var(--acc5); }
+.ce .badge { background: rgba(244,114,182,0.1); color: var(--acc5); }
+
+.cf .c-col { border-left-color: var(--acc6); }
+.cf .c-col::before { background: var(--acc6); }
+.cf .badge { background: rgba(56,189,248,0.1); color: var(--acc6); }
+
+.night-header {
+  margin: 32px 0 4px;
+  padding: 10px 0 10px 130px;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 4px;
+  color: var(--acc);
+  position: relative;
+}
+.night-header::before {
+  content: '🌙';
+  margin-right: 8px;
+}
+
+/* ZONES GRID */
+.zones {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+  margin-bottom: 56px;
+}
+
+.zone {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  padding: 22px;
+  animation: up 0.5s ease both;
+  transition: border-color 0.2s;
+}
+.zone:hover { border-color: var(--border2); }
+
+.zone-icon { font-size: 22px; margin-bottom: 10px; }
+.zone-title {
+  font-size: 13px;
+  font-weight: 600;
+  color: var(--text);
+  margin-bottom: 6px;
+}
+.zone-time {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--acc);
+  margin-bottom: 10px;
+  letter-spacing: 1px;
+}
+.zone-list {
+  list-style: none;
+  font-size: 12px;
+  color: var(--muted2);
+  line-height: 1.9;
+}
+.zone-list li::before { content: '→ '; color: var(--border2); }
+
+/* PHONE RULES */
+.phone-section {
+  background: var(--s1);
+  border: 1px solid rgba(192,132,252,0.2);
+  padding: 28px;
+  margin-bottom: 56px;
+  animation: up 0.5s 0.2s ease both;
+}
+.phone-section h3 {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--acc);
+  margin-bottom: 20px;
+}
+.phone-grid {
+  display: grid;
+  grid-template-columns: 1fr 1fr 1fr;
+  gap: 16px;
+}
+.phone-slot {
+  border: 1px solid var(--border);
+  padding: 16px;
+}
+.ps-time {
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--muted2);
+  margin-bottom: 6px;
+}
+.ps-status {
+  font-size: 12px;
+  font-weight: 600;
+  margin-bottom: 6px;
+}
+.ps-note { font-size: 11px; color: var(--muted); line-height: 1.6; }
+.red { color: #f87171; }
+.yellow { color: var(--acc4); }
+.green { color: var(--acc3); }
+
+/* HABIT TRACKER */
+.tracker { margin-bottom: 56px; }
+
+.day-row-labels {
+  display: flex;
+  gap: 4px;
+  padding: 0 0 8px 260px;
+}
+.dlabel {
+  width: 30px;
+  text-align: center;
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+}
+
+.hrow {
+  display: flex;
+  align-items: center;
+  gap: 12px;
+  padding: 11px 0;
+  border-bottom: 1px solid var(--border);
+  animation: up 0.4s ease both;
+}
+.hname { font-size: 12.5px; color: var(--text); width: 220px; flex-shrink: 0; }
+.hfreq {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: var(--muted);
+  width: 28px;
+  flex-shrink: 0;
+}
+.hdots { display: flex; gap: 4px; }
+
+.dot {
+  width: 30px; height: 30px;
+  border-radius: 4px;
+  background: var(--s1);
+  border: 1px solid var(--border);
+  cursor: pointer;
+  transition: all 0.15s;
+  position: relative;
+  display: flex;
+  align-items: center;
+  justify-content: center;
+}
+.dot:hover { border-color: var(--acc); }
+.dot.done { background: var(--acc3); border-color: var(--acc3); }
+.dot.done::after { content: '✓'; font-size: 13px; font-weight: 700; color: #064e3b; }
+.dot.fail { background: rgba(248,113,113,0.15); border-color: #f87171; }
+.dot.fail::after { content: '✗'; font-size: 13px; color: #f87171; }
+
+/* SLEEP */
+.sleep-box {
+  background: var(--s1);
+  border: 1px solid var(--border2);
+  padding: 28px;
+  margin-bottom: 56px;
+  animation: up 0.5s ease both;
+}
+.sleep-box h3 {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 3px;
+  color: var(--acc6);
+  margin-bottom: 6px;
+}
+.sleep-box p {
+  font-size: 12px;
+  color: var(--muted2);
+  margin-bottom: 20px;
+  line-height: 1.6;
+}
+.sleep-track {
+  display: grid;
+  grid-template-columns: repeat(4, 1fr);
+  gap: 10px;
+}
+.sw {
+  border: 1px solid var(--border);
+  padding: 16px;
+  text-align: center;
+}
+.sw-label {
+  font-family: 'Space Mono', monospace;
+  font-size: 8px;
+  letter-spacing: 2px;
+  color: var(--muted);
+  margin-bottom: 6px;
+}
+.sw-sleep {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 26px;
+  color: var(--acc6);
+  line-height: 1;
+}
+.sw-wake {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  color: var(--muted2);
+  margin-top: 3px;
+}
+.sw.current { border-color: rgba(248,113,113,0.3); }
+.sw.current .sw-sleep { color: #f87171; }
+.sw.target { border-color: rgba(52,211,153,0.3); }
+.sw.target .sw-sleep { color: var(--acc3); }
+
+/* RULES */
+.rules {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 3px;
+  margin-bottom: 56px;
+}
+.rule {
+  background: var(--s1);
+  border: 1px solid var(--border);
+  padding: 18px 20px;
+  display: flex;
+  gap: 14px;
+  align-items: flex-start;
+  animation: up 0.4s ease both;
+  transition: border-color 0.2s;
+}
+.rule:hover { border-color: var(--border2); }
+.rnum {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: 36px;
+  color: var(--border2);
+  line-height: 1;
+  flex-shrink: 0;
+  width: 36px;
+  transition: color 0.2s;
+}
+.rule:hover .rnum { color: var(--muted); }
+.rtitle { font-size: 13px; font-weight: 600; color: var(--text); margin-bottom: 4px; }
+.rdesc { font-size: 11.5px; color: var(--muted2); line-height: 1.6; }
+
+/* MANTRA */
+.mantra {
+  text-align: center;
+  padding: 48px 32px;
+  border: 1px solid var(--border);
+  margin-bottom: 40px;
+  position: relative;
+  overflow: hidden;
+  animation: up 0.5s 0.3s ease both;
+}
+.mantra::before {
+  content: '';
+  position: absolute;
+  inset: 0;
+  background: radial-gradient(600px 400px at 50% 100%, rgba(192,132,252,0.04), transparent);
+  pointer-events: none;
+}
+.mantra-eyebrow {
+  font-family: 'Space Mono', monospace;
+  font-size: 9px;
+  letter-spacing: 4px;
+  color: var(--muted);
+  margin-bottom: 20px;
+}
+.mantra-text {
+  font-family: 'Bebas Neue', sans-serif;
+  font-size: clamp(22px, 4vw, 38px);
+  letter-spacing: 3px;
+  line-height: 1.3;
+  color: var(--text);
+}
+.mantra-text span { color: var(--acc); }
+
+.footer {
+  display: flex;
+  justify-content: space-between;
+  padding-top: 24px;
+  border-top: 1px solid var(--border);
+  font-family: 'Space Mono', monospace;
+  font-size: 10px;
+  color: var(--muted);
+}
+
+@keyframes up {
+  from { opacity:0; transform:translateY(14px); }
+  to   { opacity:1; transform:translateY(0); }
+}
+
+@media(max-width:680px){
+  .tl-line { left:80px; }
+  .block { grid-template-columns:80px 1fr; }
+  .zones, .rules { grid-template-columns:1fr; }
+  .phone-grid { grid-template-columns:1fr; }
+  .sleep-track { grid-template-columns:repeat(2,1fr); }
+  .day-row-labels { padding-left: 200px; }
+  .hname { width:170px; }
+  .night-header { padding-left:90px; }
+  h1 { font-size: 52px; }
+}
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="header">
+    <div class="eyebrow">OPX SYSTEM — NIGHT OWL BUILD</div>
+    <h1><span class="dim">THE</span><br><span class="bright">NIGHT</span><br><span class="dim">ARCHITECTURE</span></h1>
+    <div class="header-sub">
+      // BUILT FOR: KOLHAPUR · 12–2 BATCH · NIGHT PEAK HOURS<br>
+      // FIXED ANCHORS: BREAKFAST 10AM · CLASS 12–2 · LUNCH 2:30 · DINNER 8:30
+    </div>
+  </div>
+
+  <div class="truth">
+    <div class="truth-label">// THE HONEST DIAGNOSIS</div>
+    <p>Tere paas actually <strong>8+ usable hours per day</strong> hai. Problem yeh nahi hai ki time nahi hai. Problem yeh hai ki woh 8 hours "not fixed" hain — matlab brain ko decide karna padta hai har moment kya karna hai, aur woh decision aksar phone jeet leta hai. Yeh routine woh 8 hours ko <strong>structure deti hai without destroying your night</strong>. Tu night owl rahega. Bas teri raat productive bhi hogi.</p>
+  </div>
+
+  <!-- SCHEDULE -->
+  <div class="sec">Daily Schedule — Fixed + Structured</div>
+  <div class="timeline">
+    <div class="tl-line"></div>
+
+    <div class="block fixed">
+      <div class="t-col">
+        <span class="t-main">10:00 AM</span>
+        <span class="t-dur">60 min</span>
+      </div>
+      <div class="c-col">
+        <div class="bh"><span class="badge">FIXED</span><span class="btitle">Wake · Shower · Breakfast</span></div>
+        <div class="bdesc">Yeh already ho raha hai. Bas ek cheez add kar — <strong>pehle 15 min phone nahi.</strong> Paani pee, wash face, phir baaki sab. Breakfast mein protein hona chahiye — sirf roti nahi.</div>
+      </div>
+    </div>
+
+    <div class="block cb">
+      <div class="t-col">
+        <span class="t-main">11:00 AM</span>
+        <span class="t-dur">60 min</span>
+      </div>
+      <div class="c-col">
+        <div class="bh"><span class="badge">STRUCTURE</span><span class="btitle">Pre-Class Maya — 1 Hour</span></div>
+        <div class="bdesc">Yeh wala hour abhi phone/timepass mein ja raha hai. <strong>Yahi tujhe ek extra Maya hour daily dega without changing anything else.</strong> Apne dedicated space mein baith, phone doosre room mein. Koi naya cheez nahi seekhna — bas kal jo class mein hua tha usse open kar aur ek cheez refine kar. 60 min. Timer on.</div>
+      </div>
+    </div>
+
+    <div class="block fixed">
+      <div class="t-col">
+        <span class="t-main">12:00 PM</span>
+        <span class="t-dur">2 hr</span>
+      </div>
+      <div class="c-col">
+        <div class="bh"><span class="badge">FIXED</span><span class="btitle">Class — 12 to 2 PM</span></div>
+        <div class="bdesc">Class ke andar ek kaam karo — <strong>ek question poochho har class mein.</strong> Aur class khatam hone ke baad, 5 min mein likh do: aaj ka ek most important takeaway kya tha.</div>
+      </div>
+    </div>
+
+    <div class="block fixed">
+      <div class="t-col">
+        <span class="t-main">2:30 PM</span>
+        <span class="t-dur">60 min</span>
+      </div>
+      <div class="c-col">
+        <div class="bh"><span class="badge">FIXED</span><span class="btitle">Family Time + Lunch</span></div>
+        <div class="bdesc">Yeh fixed hai, isko touch nahi kar raha. Bas ek cheez — <strong>lunch mein roti aur rice ek saath mat kha.</strong> Ek choose kar. Post-lunch crash reduce hoga.</div>
+      </div>
+    </div>
+
+    <div class="block ca">
+      <div class="t-col">
+        <span class="t-main">3:30 PM</span>
+        <span class="t-dur">30 min</span>
+      </div>
+      <div class="c-col">
+        <div class="bh"><span class="badge">TRANSITION</span><span class="btitle">Decompress — Controlled</span></div>
+        <div class="bdesc"><strong>Yeh tere liye danger zone hai.</strong> Ghar aate hi phone haath mein le leta hai tu. Iski jagah: 15 min lait ja bina phone ke, ya 15 min walk kar building ke andar. Phir computer pe baith. Phone DND pe daal. Yeh 30 min ka transition tere baaki ke 5 hours bachata hai.</div>
+      </div>
+    </div>
+
+    <div class="block cb">
+      <div class="t-col">
+        <span class="t-main">4:00 PM</span>
+        <span class="t-dur">2.5 hr</span>
+      </div>
+      <div class="c-col">
+        <div class="bh"><span class="badge">DEEP WORK</span><span class="btitle">Maya Main Block — Afternoon</span></div>
+        <div class="bdesc"><strong>4:00 to 6:30. Yeh tere career ka main block hai.</strong> Structure: 50 min kaam → 10 min break → 50 min kaam → 10 min break → 30 min review/save. HOW: Jo aaj class mein hua usse build karo. Ek shot, ek principle. Phone doosre room mein. Lo-fi ya silence. Koi bhi YouTube background nahi — it will pull you in. Yeh 2.5 hours per day = 52 shots per year.</div>
+      </div>
+    </div>
+
+    <div class="block cd">
+      <div class="t-col">
+        <span class="t-main">6:30 PM</span>
+        <span class="t-dur">60 min</span>
+      </div>
+      <div class="c-col">
+        <div class="bh"><span class="badge">BODY</span><span class="btitle">Walk + Eye Reset</span></div>
+        <div class="bdesc"><strong>20–30 min walk — bahar nahi toh building mein.</strong> Tu 7-10 hours screen pe hai, sedentary hai, aur zero physical activity hai right now. Walk is the minimum baseline to keep your body functional long-term. Wapas aake: eye exercises (20-20-20, palming). Phir free time till dinner.</div>
+      </div>
+    </div>
+
+    <div class="block cc">
+      <div class="t-col">
+        <span class="t-main">7:30 PM</span>
+        <span class="t-dur">60 min</span>
+      </div>
+      <div class="c-col">
+        <div class="bh"><span class="badge">FREE ZONE</span><span class="btitle">Actual Free Time — No Guilt</span></div>
+        <div class="bdesc">Yeh tera earned free time hai. <strong>Phone use kar, reels dekh, kuch bhi kar — but timer set kar 45 min ka.</strong> Timer bajne ke baad dinner prep. Yeh slot clearly defined hai — issi liye baaki slots protected hain. Guilt-free enjoyment ek defined container mein.</div>
+      </div>
+    </div>
+
+    <div class="block fixed">
+      <div class="t-col">
+        <span class="t-main">8:30 PM</span>
+        <span class="t-dur">60 min</span>
+      </div>
+      <div class="c-col">
+        <div class="bh"><span class="badge">FIXED</span><span class="btitle">Dinner + Family</span></div>
+        <div class="bdesc">Fixed hai. No changes. Bas protein conscious rehna dinner mein bhi.</div>
+      </div>
+    </div>
+
+    <div class="night-header">NIGHT OWL ZONE BEGINS</div>
+
+    <div class="block cf">
+      <div class="t-col">
+        <span class="t-main">9:30 PM</span>
+        <span class="t-dur">90 min</span>
+      </div>
+      <div class="c-col">
+        <div class="bh"><span class="badge">PEAK HOUR 1</span><span class="btitle">Deep Maya / Creative Work</span></div>
+        <div class="bdesc"><strong>9:30 to 11:00 — yeh tera chronotype peak hai. Yahan teri best work hoti hai.</strong> Use it for the hardest, most creative Maya work. Character animation, shot refinement, reference study with full attention. WHAT: Exactly ek specific thing work in progress. WHY: Kyunki raat ki focus alag hoti hai — quieter, deeper. Yahan tu actually best perform karta hai — sirf isko protect karna hai.</div>
+      </div>
+    </div>
+
+    <div class="block ce">
+      <div class="t-col">
+        <span class="t-main">11:00 PM</span>
+        <span class="t-dur">60 min</span>
+      </div>
+      <div class="c-col">
+        <div class="bh"><span class="badge">PEAK HOUR 2</span><span class="btitle">Strategy + Vision Work</span></div>
+        <div class="bdesc"><strong>11 PM to 12 AM — planning, thinking, learning.</strong> Watch VFX breakdowns with full attention. Read animation theory. Plan next week's shots. Journal: 3 sentences about today, 3 tasks for tomorrow. WHO are the top animators you're studying this month? WHERE do you want your reel in 6 months? This is tere entrepreneurial ambition ka fuel time.</div>
+      </div>
+    </div>
+
+    <div class="block cc">
+      <div class="t-col">
+        <span class="t-main">12:00 AM</span>
+        <span class="t-dur">60 min</span>
+      </div>
+      <div class="c-col">
+        <div class="bh"><span class="badge">WIND DOWN</span><span class="btitle">Night Free Time — Then Sleep</span></div>
+        <div class="bdesc">12 AM se 1 AM — <strong>tera actual night owl chill time.</strong> Kuch bhi dekh, sun, read. But: <strong>compulsive habit is not allowed here.</strong> 1 AM pe phone doosre room mein. Light dim karo. 1 AM target sleep — yeh tera realistic sustainable target hai, 3-4 AM nahi. Raat ki quality fix hogi, length nahi churayi ja rahi.</div>
+      </div>
+    </div>
+
+  </div>
+
+  <!-- ZONE BREAKDOWN -->
+  <div class="sec">The 4 Power Zones — Your Day Mapped</div>
+  <div class="zones">
+    <div class="zone">
+      <div class="zone-icon">☀️</div>
+      <div class="zone-title">Morning Launch</div>
+      <div class="zone-time">10:00 AM – 12:00 PM</div>
+      <ul class="zone-list">
+        <li>Breakfast + physical start</li>
+        <li>1 hour focused Maya (currently wasted)</li>
+        <li>Phone ke bina pehla 1 hour</li>
+        <li>Class ke liye mentally ready</li>
+      </ul>
+    </div>
+    <div class="zone">
+      <div class="zone-icon">🎯</div>
+      <div class="zone-title">Afternoon Power Block</div>
+      <div class="zone-time">3:30 PM – 6:30 PM</div>
+      <ul class="zone-list">
+        <li>Transition (danger zone handled)</li>
+        <li>2.5 hour Maya main session</li>
+        <li>Walk + eye reset after</li>
+        <li>Phone DND throughout</li>
+      </ul>
+    </div>
+    <div class="zone">
+      <div class="zone-icon">🌙</div>
+      <div class="zone-title">Night Peak (Your Zone)</div>
+      <div class="zone-time">9:30 PM – 12:00 AM</div>
+      <ul class="zone-list">
+        <li>Best creative work here</li>
+        <li>Deep Maya or strategy work</li>
+        <li>Fully protected — no phone drift</li>
+        <li>Tu yahan best hai, issi liye yahan kaam</li>
+      </ul>
+    </div>
+    <div class="zone">
+      <div class="zone-icon">🎮</div>
+      <div class="zone-title">Free Zones (Earned)</div>
+      <div class="zone-time">7:30–8:30 PM · 12–1 AM</div>
+      <ul class="zone-list">
+        <li>Guilt-free, timer-based</li>
+        <li>Phone allowed here specifically</li>
+        <li>Reels, chill, whatever</li>
+        <li>Defined container = no overflow</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- PHONE RULES -->
+  <div class="phone-section">
+    <h3>// PHONE ACCESS MAP — TERI SABSE BADI PROBLEM KA SOLUTION</h3>
+    <div class="phone-grid">
+      <div class="phone-slot">
+        <div class="ps-time">10:00 – 11:00 AM</div>
+        <div class="ps-status yellow">⚡ Limited</div>
+        <div class="ps-note">Pehle 15 min nahi. Phir messages only. No reels. Morning brain protect karna hai.</div>
+      </div>
+      <div class="phone-slot">
+        <div class="ps-time">11:00 AM – 2:30 PM</div>
+        <div class="ps-status red">✗ Away</div>
+        <div class="ps-note">Maya + class time. Phone doosre room mein. DND on. Physically door.</div>
+      </div>
+      <div class="phone-slot">
+        <div class="ps-time">2:30 – 3:30 PM</div>
+        <div class="ps-status yellow">⚡ Family only</div>
+        <div class="ps-note">Family time mein phone okay. Lunch ke saath screen nahi. Transition pe DND.</div>
+      </div>
+      <div class="phone-slot">
+        <div class="ps-time">3:30 – 6:30 PM</div>
+        <div class="ps-status red">✗ Away</div>
+        <div class="ps-note">Tere career ka main block. Phone doosre room. No exceptions. Yeh block tujhe professional banayega.</div>
+      </div>
+      <div class="phone-slot">
+        <div class="ps-time">7:30 – 8:30 PM</div>
+        <div class="ps-status green">✓ Free Zone</div>
+        <div class="ps-note">45 min timer ke saath. Kuch bhi dekh. Earned free time. Timer bajne pe dinner.</div>
+      </div>
+      <div class="phone-slot">
+        <div class="ps-time">9:30 PM – 12:00 AM</div>
+        <div class="ps-status red">✗ Away</div>
+        <div class="ps-note">Night peak zone. Tera best time. Phone iss waqt sabse zyada steal karta hai yahan — guard it hard.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- SLEEP -->
+  <div class="sleep-box">
+    <h3>// SLEEP TARGET — NIGHT OWL REALISTIC VERSION</h3>
+    <p>Tu night owl hai, tujhe 6 AM nahi uthna. But 3–4 AM se 1 AM tak shift karna possible hai aur sustainable bhi. 30 min per week shift karo — slowly, sustainably.</p>
+    <div class="sleep-track">
+      <div class="sw current">
+        <div class="sw-label">ABHI</div>
+        <div class="sw-sleep">1–4 AM</div>
+        <div class="sw-wake">wake: 10+ AM</div>
+      </div>
+      <div class="sw">
+        <div class="sw-label">WEEK 1–2</div>
+        <div class="sw-sleep">1:30 AM</div>
+        <div class="sw-wake">wake: 10 AM</div>
+      </div>
+      <div class="sw">
+        <div class="sw-label">WEEK 3–4</div>
+        <div class="sw-sleep">1:00 AM</div>
+        <div class="sw-wake">wake: 9:30 AM</div>
+      </div>
+      <div class="sw target">
+        <div class="sw-label">TARGET</div>
+        <div class="sw-sleep">1:00 AM</div>
+        <div class="sw-wake">wake: 9:30–10 AM</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- HABIT TRACKER -->
+  <div class="sec">Weekly Habit Tracker — Click to Mark / Right-click to Mark Fail</div>
+  <div class="tracker">
+    <div class="day-row-labels">
+      <span class="dlabel">M</span><span class="dlabel">T</span><span class="dlabel">W</span>
+      <span class="dlabel">T</span><span class="dlabel">F</span><span class="dlabel">S</span><span class="dlabel">S</span>
+    </div>
+    <div class="hrow">
+      <span class="hname">11 AM Maya block done (1hr)</span>
+      <span class="hfreq">☀️</span>
+      <div class="hdots" data-h="morning_maya"></div>
+    </div>
+    <div class="hrow">
+      <span class="hname">3:30 PM transition handled</span>
+      <span class="hfreq">⚡</span>
+      <div class="hdots" data-h="transition"></div>
+    </div>
+    <div class="hrow">
+      <span class="hname">Afternoon Maya block (2.5hr)</span>
+      <span class="hfreq">🎯</span>
+      <div class="hdots" data-h="aft_maya"></div>
+    </div>
+    <div class="hrow">
+      <span class="hname">Evening walk (20 min)</span>
+      <span class="hfreq">🚶</span>
+      <div class="hdots" data-h="walk"></div>
+    </div>
+    <div class="hrow">
+      <span class="hname">Night Maya block (9:30–11)</span>
+      <span class="hfreq">🌙</span>
+      <div class="hdots" data-h="night_maya"></div>
+    </div>
+    <div class="hrow">
+      <span class="hname">Compulsive habit — clean day</span>
+      <span class="hfreq">🔒</span>
+      <div class="hdots" data-h="habit_clean"></div>
+    </div>
+    <div class="hrow">
+      <span class="hname">Phone away during work blocks</span>
+      <span class="hfreq">📵</span>
+      <div class="hdots" data-h="phone_away"></div>
+    </div>
+    <div class="hrow">
+      <span class="hname">Sleep by 1 AM</span>
+      <span class="hfreq">😴</span>
+      <div class="hdots" data-h="sleep_1am"></div>
+    </div>
+    <div class="hrow">
+      <span class="hname">Night journal (3 sentences)</span>
+      <span class="hfreq">📓</span>
+      <div class="hdots" data-h="journal"></div>
+    </div>
+  </div>
+
+  <!-- RULES -->
+  <div class="sec">The OPX Code — Non-Negotiables</div>
+  <div class="rules">
+    <div class="rule">
+      <div class="rnum">01</div>
+      <div>
+        <div class="rtitle">Phone physically doosre room mein work ke time</div>
+        <div class="rdesc">Silent nahi, DND nahi — alag room. Willpower weak hoti hai. Distance strong hoti hai.</div>
+      </div>
+    </div>
+    <div class="rule">
+      <div class="rnum">02</div>
+      <div>
+        <div class="rtitle">3:30 PM transition miss nahi hoga</div>
+        <div class="rdesc">Yeh tera highest-risk moment hai daily. Iss 30 min ka transition tere 5 afternoon hours bachata hai.</div>
+      </div>
+    </div>
+    <div class="rule">
+      <div class="rnum">03</div>
+      <div>
+        <div class="rtitle">Ek shot. Har hafte.</div>
+        <div class="rdesc">Reel complete karne ki tension nahi. Sirf ek shot per week. 52 weeks = 52 shots = reel ready.</div>
+      </div>
+    </div>
+    <div class="rule">
+      <div class="rnum">04</div>
+      <div>
+        <div class="rtitle">Night peak zone is sacred</div>
+        <div class="rdesc">9:30–11 PM mein phone nahi. Yeh teri naturally sharpest hours hain. Isko scroll mein waste karna crime hai.</div>
+      </div>
+    </div>
+    <div class="rule">
+      <div class="rnum">05</div>
+      <div>
+        <div class="rtitle">Free time earned hai — guilt-free</div>
+        <div class="rdesc">7:30–8:30 aur 12–1 AM tere genuine free slots hain. Unhe enjoy kar. Timer ke saath. Overflow nahi.</div>
+      </div>
+    </div>
+    <div class="rule">
+      <div class="rnum">06</div>
+      <div>
+        <div class="rtitle">Kal ke 3 tasks — aaj raat likhega</div>
+        <div class="rdesc">10 ka list nahi. Sirf 3. Specific. Completable. Yeh analysis paralysis ko kill karta hai before it starts.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- MANTRA -->
+  <div class="mantra">
+    <div class="mantra-eyebrow">// OPX DAILY QUESTION — RAAT KO POOCH KHUD SE</div>
+    <div class="mantra-text">
+      WHAT DID I BUILD TODAY?<br>
+      <span>WHY DID IT MATTER?</span><br>
+      HOW WILL TOMORROW BE DIFFERENT?
+    </div>
+  </div>
+
+  <div class="footer">
+    <span>OPX NIGHT OWL SYSTEM // KOLHAPUR</span>
+    <span>3D/VFX CAREER TRACK · BUILT HONEST</span>
+  </div>
+
+</div>
+
+<script>
+  // Habit tracker with localStorage
+  document.querySelectorAll('.hdots').forEach(container => {
+    const key = 'opx2_' + container.dataset.h;
+    let saved = [];
+    try { saved = JSON.parse(localStorage.getItem(key) || '[]'); } catch(e){}
+
+    for (let i = 0; i < 7; i++) {
+      const dot = document.createElement('div');
+      dot.className = 'dot';
+      if (saved[i] === 1) dot.classList.add('done');
+      if (saved[i] === -1) dot.classList.add('fail');
+
+      dot.addEventListener('click', () => {
+        if (dot.classList.contains('done')) {
+          dot.classList.remove('done');
+        } else {
+          dot.classList.remove('fail');
+          dot.classList.add('done');
+        }
+        save();
+      });
+
+      dot.addEventListener('contextmenu', (e) => {
+        e.preventDefault();
+        if (dot.classList.contains('fail')) {
+          dot.classList.remove('fail');
+        } else {
+          dot.classList.remove('done');
+          dot.classList.add('fail');
+        }
+        save();
+      });
+
+      container.appendChild(dot);
+
+      function save() {
+        const state = [...container.querySelectorAll('.dot')].map(d =>
+          d.classList.contains('done') ? 1 : d.classList.contains('fail') ? -1 : 0
+        );
+        localStorage.setItem(key, JSON.stringify(state));
+      }
+    }
+  });
+</script>
+</body>
+</html>
