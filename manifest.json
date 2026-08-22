@@ -42,6 +42,13 @@
     "addedAt": "2026-08-22T05:50:03.682Z"
   },
   {
+    "id": "0d9784be-dc40-44ba-9335-93fc641d64cd",
+    "name": "Opx Treasury Rv002",
+    "description": "",
+    "filename": "opx_treasury_rv002.html",
+    "addedAt": "2026-08-22T12:19:11.328Z"
+  },
+  {
     "id": "bdf727b1-b7f7-4244-85fc-14f5b90dc4fa",
     "name": "Believe",
     "description": "",
@@ -95,13 +102,6 @@
     "name": "Energy Handbook",
     "description": "",
     "filename": "energy_handbook.pdf",
-    "addedAt": "2026-08-22T12:19:11.328Z"
-  },
-  {
-    "id": "0d9784be-dc40-44ba-9335-93fc641d64cd",
-    "name": "Opx Treasury Rv002",
-    "description": "",
-    "filename": "opx_treasury_rv002.html",
     "addedAt": "2026-08-22T12:19:11.328Z"
   },
   {
