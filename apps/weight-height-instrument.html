@@ -1,0 +1,524 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Weight & Height Reference Instrument</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Source+Serif+4:opsz,wght@8..60,400;8..60,600&family=JetBrains+Mono:wght@400;500;600&display=swap');
+
+  :root{
+    --paper:#F7F6F3;
+    --ink:#1A1D1E;
+    --teal:#3D5A5C;
+    --teal-soft:#E8EDEC;
+    --brick:#B5533C;
+    --brick-soft:#F3E3DE;
+    --gray:#8A8680;
+    --line:#D8D5CE;
+    --amber:#A9822B;
+    --amber-soft:#F1E9D5;
+  }
+
+  *{box-sizing:border-box;}
+  html,body{margin:0;padding:0;background:var(--paper);color:var(--ink);}
+  body{
+    font-family:'Source Serif 4', serif;
+    -webkit-font-smoothing:antialiased;
+    padding:0;
+  }
+  .wrap{max-width:920px;margin:0 auto;padding:28px 22px 80px;}
+
+  /* ---------- Header ---------- */
+  .masthead{
+    display:flex; justify-content:space-between; align-items:flex-end;
+    border-bottom:2px solid var(--ink);
+    padding-bottom:14px; margin-bottom:22px;
+    flex-wrap:wrap; gap:10px;
+  }
+  .masthead h1{
+    font-family:'Space Grotesk', sans-serif;
+    font-size:22px; font-weight:700; margin:0; letter-spacing:-0.01em;
+  }
+  .masthead .tag{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px; color:var(--gray); text-transform:uppercase; letter-spacing:0.06em;
+  }
+
+  .disclaimer{
+    font-family:'JetBrains Mono', monospace;
+    font-size:11px; line-height:1.6; color:var(--gray);
+    background:var(--teal-soft); border-left:3px solid var(--teal);
+    padding:10px 14px; margin-bottom:28px;
+  }
+
+  /* ---------- Controls ---------- */
+  .controls{
+    display:grid; grid-template-columns:1fr 1fr; gap:22px;
+    margin-bottom:30px;
+  }
+  @media (max-width:600px){ .controls{grid-template-columns:1fr;} }
+
+  .control-block label{
+    display:block; font-family:'Space Grotesk',sans-serif; font-weight:600;
+    font-size:12px; text-transform:uppercase; letter-spacing:0.06em; color:var(--teal);
+    margin-bottom:8px;
+  }
+  .readout{
+    font-family:'JetBrains Mono', monospace; font-size:34px; font-weight:600;
+    line-height:1; margin-bottom:6px;
+  }
+  .readout .unit{font-size:16px; color:var(--gray); font-weight:400;}
+  input[type=range]{
+    width:100%; height:4px; -webkit-appearance:none; background:var(--line);
+    border-radius:2px; outline:none; margin-top:6px;
+  }
+  input[type=range]::-webkit-slider-thumb{
+    -webkit-appearance:none; width:18px; height:18px; border-radius:50%;
+    background:var(--teal); cursor:pointer; border:3px solid var(--paper);
+    box-shadow:0 0 0 1px var(--teal);
+  }
+  input[type=range]::-moz-range-thumb{
+    width:18px; height:18px; border-radius:50%; background:var(--teal);
+    cursor:pointer; border:3px solid var(--paper); box-shadow:0 0 0 1px var(--teal);
+  }
+
+  .sex-toggle{display:flex; gap:8px; margin-top:4px;}
+  .sex-toggle button{
+    flex:1; font-family:'Space Grotesk',sans-serif; font-weight:600; font-size:13px;
+    padding:10px; border:1.5px solid var(--ink); background:transparent; color:var(--ink);
+    cursor:pointer; border-radius:3px; transition:all .15s ease;
+  }
+  .sex-toggle button.active{background:var(--ink); color:var(--paper);}
+
+  /* ---------- BMI Instrument Strip (signature element) ---------- */
+  .instrument{
+    margin-bottom:34px; padding:20px 18px 16px;
+    background:#fff; border:1px solid var(--line); border-radius:4px;
+  }
+  .instrument-label{
+    font-family:'Space Grotesk',sans-serif; font-size:12px; font-weight:600;
+    text-transform:uppercase; letter-spacing:0.06em; color:var(--gray); margin-bottom:14px;
+    display:flex; justify-content:space-between; align-items:baseline;
+  }
+  .instrument-label .bmi-val{
+    font-family:'JetBrains Mono',monospace; font-size:20px; color:var(--ink); font-weight:600;
+  }
+  .strip-track{position:relative; height:46px; margin-top:6px;}
+  .strip-bands{
+    display:flex; height:14px; border-radius:2px; overflow:hidden;
+    border:1px solid var(--line);
+  }
+  .band{height:100%; position:relative;}
+  .band-under{background:#DCE4E0;}
+  .band-healthy{background:var(--teal-soft); border-left:1px solid var(--line); border-right:1px solid var(--line);}
+  .band-over{background:var(--amber-soft);}
+  .band-obese{background:var(--brick-soft);}
+  .strip-ticks{
+    display:flex; justify-content:space-between;
+    font-family:'JetBrains Mono',monospace; font-size:9px; color:var(--gray);
+    margin-top:4px;
+  }
+  .needle{
+    position:absolute; top:-8px; width:2px; height:30px; background:var(--ink);
+    transition:left .12s ease;
+  }
+  .needle::after{
+    content:''; position:absolute; top:-5px; left:-4px; width:10px; height:10px;
+    background:var(--ink); border-radius:50%;
+  }
+  .band-names{
+    display:flex; justify-content:space-between; margin-top:10px;
+    font-family:'Space Grotesk',sans-serif; font-size:10.5px; font-weight:600; color:var(--gray);
+    text-transform:uppercase; letter-spacing:0.03em;
+  }
+
+  /* ---------- Section headers ---------- */
+  .section{margin-bottom:30px;}
+  .section-head{
+    display:flex; align-items:baseline; gap:10px; margin-bottom:12px;
+    border-bottom:1px solid var(--line); padding-bottom:6px;
+  }
+  .section-head .eyebrow{
+    font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--teal);
+    text-transform:uppercase; letter-spacing:0.08em;
+  }
+  .section-head h2{
+    font-family:'Space Grotesk',sans-serif; font-size:16px; font-weight:700; margin:0;
+  }
+
+  .grid2{display:grid; grid-template-columns:1fr 1fr; gap:16px;}
+  @media (max-width:600px){ .grid2{grid-template-columns:1fr;} }
+
+  .card{
+    background:#fff; border:1px solid var(--line); border-radius:4px; padding:14px 16px;
+  }
+  .card .k{
+    font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--gray);
+    text-transform:uppercase; letter-spacing:0.05em; margin-bottom:4px;
+  }
+  .card .v{
+    font-family:'JetBrains Mono',monospace; font-size:20px; font-weight:600;
+  }
+  .card .sub{font-size:13px; color:var(--gray); margin-top:4px; font-family:'Source Serif 4',serif;}
+
+  ul.plain{margin:0; padding-left:18px;}
+  ul.plain li{margin-bottom:6px; font-size:14.5px; line-height:1.5;}
+
+  .risk-row{
+    display:flex; align-items:center; gap:10px; margin-bottom:8px; font-size:14px;
+  }
+  .risk-dot{width:9px; height:9px; border-radius:50%; flex-shrink:0;}
+  .risk-low{background:var(--teal);}
+  .risk-mod{background:var(--amber);}
+  .risk-high{background:var(--brick);}
+
+  .height-strip{overflow-x:auto; padding-bottom:6px;}
+  .height-table{width:100%; border-collapse:collapse; font-size:13px; min-width:640px;}
+  .height-table th{
+    font-family:'JetBrains Mono',monospace; font-size:10px; color:var(--gray);
+    text-transform:uppercase; text-align:left; padding:6px 8px; border-bottom:1px solid var(--ink);
+  }
+  .height-table td{padding:7px 8px; border-bottom:1px solid var(--line); font-family:'JetBrains Mono',monospace;}
+  .height-table tr.current td{background:var(--teal-soft); font-weight:600;}
+  .class-pill{
+    display:inline-block; padding:2px 8px; border-radius:10px; font-size:11px;
+    font-family:'Space Grotesk',sans-serif; font-weight:600;
+  }
+  .pill-under{background:#DCE4E0; color:#3D5A5C;}
+  .pill-healthy{background:var(--teal-soft); color:var(--teal);}
+  .pill-over{background:var(--amber-soft); color:var(--amber);}
+  .pill-obese{background:var(--brick-soft); color:var(--brick);}
+
+  .compare-cols{display:grid; grid-template-columns:1fr 1fr; gap:0; border:1px solid var(--line); border-radius:4px; overflow:hidden;}
+  .compare-cols > div{padding:14px 16px;}
+  .compare-cols .m{background:#fff; border-right:1px solid var(--line);}
+  .compare-cols .f{background:#FBFAF8;}
+  .compare-cols h3{
+    font-family:'Space Grotesk',sans-serif; font-size:12px; text-transform:uppercase;
+    letter-spacing:0.05em; margin:0 0 8px; color:var(--teal);
+  }
+  .compare-cols p{font-size:13.5px; margin:0 0 8px; line-height:1.5;}
+
+  .footer-note{
+    font-family:'JetBrains Mono',monospace; font-size:10.5px; color:var(--gray);
+    line-height:1.7; margin-top:36px; padding-top:16px; border-top:1px solid var(--line);
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <div class="masthead">
+    <h1>Weight &amp; Height Reference Instrument</h1>
+    <div class="tag">Evidence-based · Not diagnostic</div>
+  </div>
+
+  <div class="disclaimer">
+    THIS TOOL DERIVES BMI CLASSIFICATION, ESTIMATED ENERGY NEEDS, AND POPULATION-LEVEL RISK TRENDS FROM PUBLISHED WHO / CLINICAL REFERENCE RANGES.
+    IT DOES NOT DESCRIBE APPEARANCE, ATTRACTIVENESS, OR PSYCHOLOGICAL TRAITS BY WEIGHT — THOSE VARY BY INDIVIDUAL AND AREN'T MEDICALLY GENERALIZABLE.
+    BMI ITSELF IS A SCREENING TOOL, NOT A DIAGNOSIS — IT DOESN'T DISTINGUISH MUSCLE FROM FAT. USE THIS FOR ORIENTATION, NOT SELF-JUDGMENT.
+  </div>
+
+  <div class="controls">
+    <div class="control-block">
+      <label>Body Weight</label>
+      <div class="readout"><span id="wVal">70</span><span class="unit"> kg</span></div>
+      <input type="range" id="wSlider" min="40" max="200" value="70" step="1">
+    </div>
+    <div class="control-block">
+      <label>Height</label>
+      <div class="readout"><span id="hVal">170</span><span class="unit"> cm</span></div>
+      <input type="range" id="hSlider" min="140" max="210" value="170" step="1">
+      <div class="sex-toggle" style="margin-top:14px;">
+        <button id="btnM" class="active">Male reference</button>
+        <button id="btnF">Female reference</button>
+      </div>
+    </div>
+  </div>
+
+  <!-- SIGNATURE INSTRUMENT -->
+  <div class="instrument">
+    <div class="instrument-label">
+      <span>BMI Instrument — kg / m²</span>
+      <span class="bmi-val" id="bmiVal">24.2</span>
+    </div>
+    <div class="strip-track">
+      <div class="strip-bands">
+        <div class="band band-under" style="width:23.2%"></div>
+        <div class="band band-healthy" style="width:15.9%"></div>
+        <div class="band band-over" style="width:11.6%"></div>
+        <div class="band band-obese" style="width:49.3%"></div>
+      </div>
+      <div class="needle" id="needle" style="left:38%;"></div>
+    </div>
+    <div class="strip-ticks">
+      <span>15</span><span>18.5</span><span>25</span><span>30</span><span>45+</span>
+    </div>
+    <div class="band-names">
+      <span>Underweight</span><span>Healthy</span><span>Overweight</span><span>Obese</span>
+    </div>
+  </div>
+
+  <!-- CLASSIFICATION + CALORIES -->
+  <div class="section">
+    <div class="section-head"><span class="eyebrow">01</span><h2>Classification &amp; Energy</h2></div>
+    <div class="grid2">
+      <div class="card">
+        <div class="k">WHO Classification</div>
+        <div class="v" id="classVal">Healthy weight</div>
+        <div class="sub" id="classSub">BMI 18.5–24.9 — lowest population-level risk band.</div>
+      </div>
+      <div class="card">
+        <div class="k">Estimated Maintenance Calories</div>
+        <div class="v" id="calVal">2,100–2,600 kcal/day</div>
+        <div class="sub">Mifflin-St Jeor, moderate activity, ±30 age assumed. Varies with real activity level.</div>
+      </div>
+      <div class="card">
+        <div class="k">Protein (Body Recomposition)</div>
+        <div class="v" id="proVal">112–140 g/day</div>
+        <div class="sub">1.6–2.0 g/kg bodyweight — standard evidence-based range for muscle retention/gain.</div>
+      </div>
+      <div class="card">
+        <div class="k">Water (Baseline)</div>
+        <div class="v" id="waterVal">2.4–3.1 L/day</div>
+        <div class="sub">~35 ml/kg baseline; increases with heat, altitude, training volume.</div>
+      </div>
+    </div>
+  </div>
+
+  <!-- RISK TRENDS -->
+  <div class="section">
+    <div class="section-head"><span class="eyebrow">02</span><h2>Population-Level Risk Trends</h2></div>
+    <div class="card">
+      <div id="riskList"></div>
+      <div class="sub" style="margin-top:6px;">
+        These are population-level statistical associations at this BMI band, not predictions about any individual. Genetics, fitness level, body composition, and where fat is distributed matter more than the number alone.
+      </div>
+    </div>
+  </div>
+
+  <!-- HEIGHT IMPACT TABLE -->
+  <div class="section">
+    <div class="section-head"><span class="eyebrow">03</span><h2>Same Weight, Different Heights</h2></div>
+    <div class="height-strip">
+      <table class="height-table" id="heightTable"></table>
+    </div>
+  </div>
+
+  <!-- MALE VS FEMALE -->
+  <div class="section">
+    <div class="section-head"><span class="eyebrow">04</span><h2>Physiological Differences at This Weight</h2></div>
+    <div class="compare-cols">
+      <div class="m">
+        <h3>Male reference</h3>
+        <p id="maleNote">—</p>
+      </div>
+      <div class="f">
+        <h3>Female reference</h3>
+        <p id="femaleNote">—</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TRAINING GUIDANCE -->
+  <div class="section">
+    <div class="section-head"><span class="eyebrow">05</span><h2>Training &amp; Nutrition Priorities</h2></div>
+    <div class="card">
+      <ul class="plain" id="trainingList"></ul>
+    </div>
+  </div>
+
+  <div class="footer-note">
+    SOURCES: WHO BMI CLASSIFICATION (1995/2000/2004), MIFFLIN-ST JEOR EQUATION (1990), ISSN POSITION STAND ON PROTEIN (2018), NIH BODY COMPOSITION GUIDANCE.
+    THIS INSTRUMENT DOES NOT REPLACE A CLINICIAN. BMI DOES NOT ACCOUNT FOR MUSCLE MASS, FRAME, OR FAT DISTRIBUTION — AN ATHLETE AND A SEDENTARY PERSON AT THE SAME BMI CAN HAVE VERY DIFFERENT HEALTH PROFILES.
+  </div>
+
+</div>
+
+<script>
+const wSlider = document.getElementById('wSlider');
+const hSlider = document.getElementById('hSlider');
+const wVal = document.getElementById('wVal');
+const hVal = document.getElementById('hVal');
+const btnM = document.getElementById('btnM');
+const btnF = document.getElementById('btnF');
+
+let sex = 'M';
+
+function classify(bmi){
+  if(bmi < 18.5) return {label:'Underweight', pill:'pill-under', sub:'BMI below 18.5 — elevated risk of nutrient deficiency, low bone density, weakened immunity.'};
+  if(bmi < 25) return {label:'Healthy weight', pill:'pill-healthy', sub:'BMI 18.5–24.9 — lowest population-level risk band.'};
+  if(bmi < 30) return {label:'Overweight', pill:'pill-over', sub:'BMI 25–29.9 — moderately elevated risk; often reversible with consistent habit change.'};
+  if(bmi < 35) return {label:'Obese (Class I)', pill:'pill-obese', sub:'BMI 30–34.9 — meaningfully elevated risk of metabolic and cardiovascular conditions.'};
+  if(bmi < 40) return {label:'Obese (Class II)', pill:'pill-obese', sub:'BMI 35–39.9 — high risk; medical guidance strongly recommended.'};
+  return {label:'Obese (Class III)', pill:'pill-obese', sub:'BMI 40+ — very high risk; medical/surgical options often discussed with a physician.'};
+}
+
+function riskProfile(bmi){
+  // returns array of {level, text}
+  if(bmi < 18.5){
+    return [
+      {level:'mod', text:'Nutrient deficiency (iron, B12, calcium) — moderate risk'},
+      {level:'mod', text:'Reduced bone density over time — moderate risk'},
+      {level:'low', text:'Cardiovascular disease — generally low direct risk'},
+      {level:'mod', text:'Weakened immune response — moderate risk'},
+      {level:'mod', text:'Fertility/hormonal irregularities (especially female) — moderate risk'},
+    ];
+  }
+  if(bmi < 25){
+    return [
+      {level:'low', text:'Cardiovascular disease — low, population-baseline risk'},
+      {level:'low', text:'Type 2 diabetes — low risk'},
+      {level:'low', text:'Joint stress from load — low risk'},
+      {level:'low', text:'All-cause mortality — statistically lowest band'},
+    ];
+  }
+  if(bmi < 30){
+    return [
+      {level:'mod', text:'Type 2 diabetes — mildly to moderately elevated'},
+      {level:'mod', text:'Hypertension — mildly elevated'},
+      {level:'low', text:'Cardiovascular disease — slightly elevated, often reversible'},
+      {level:'mod', text:'Joint stress (knees, lower back) — moderate, load-dependent'},
+    ];
+  }
+  if(bmi < 35){
+    return [
+      {level:'high', text:'Type 2 diabetes — significantly elevated'},
+      {level:'high', text:'Hypertension — significantly elevated'},
+      {level:'mod', text:'Sleep apnea — moderately elevated'},
+      {level:'mod', text:'Cardiovascular disease — moderately elevated'},
+      {level:'mod', text:'Osteoarthritis (weight-bearing joints) — moderately elevated'},
+    ];
+  }
+  return [
+    {level:'high', text:'Type 2 diabetes — high risk'},
+    {level:'high', text:'Cardiovascular disease — high risk'},
+    {level:'high', text:'Sleep apnea — high risk'},
+    {level:'high', text:'Osteoarthritis and joint degeneration — high risk'},
+    {level:'mod', text:'Certain cancers (endometrial, breast, colon) — moderately to significantly elevated'},
+  ];
+}
+
+function trainingGuidance(bmi, w){
+  if(bmi < 18.5){
+    return [
+      'Prioritize a consistent calorie surplus (300–500 kcal/day above maintenance) over "eating more when you remember."',
+      'Resistance training 3–4x/week so the surplus builds muscle, not just fat — otherwise weight gain skews toward fat mass.',
+      'Track weekly weight trend, not daily fluctuation — aim for 0.25–0.5 kg/week gain.',
+      'Rule out underlying causes (thyroid, GI absorption issues) if weight gain stalls despite consistent surplus.'
+    ];
+  }
+  if(bmi < 25){
+    return [
+      'Focus shifts from "losing weight" to body composition and performance — this is a maintenance and optimization zone.',
+      'Resistance training 3–5x/week to preserve or build lean mass as the priority lever.',
+      'Protein intake matters more here than further calorie restriction — most people under-eat protein at this BMI.',
+      'Zone 2 cardio (conversational pace) 2–3x/week for long-term cardiovascular and metabolic health.'
+    ];
+  }
+  if(bmi < 30){
+    return [
+      'A moderate deficit (300–500 kcal/day) is more sustainable and preserves more muscle than aggressive cuts.',
+      'Resistance training becomes non-negotiable here — it is the main defense against losing muscle during fat loss.',
+      'Protein at 1.6–2.2 g/kg during a deficit specifically protects lean mass.',
+      'Expect realistic fat loss of 0.5–1% of bodyweight per week — faster is rarely sustainable.'
+    ];
+  }
+  return [
+    'Start with walking and low-impact cardio before high-impact training — joint load is the primary early constraint, not willpower.',
+    'A structured, moderate deficit (not crash dieting) with medical input, especially at Class II/III, produces better long-term retention than extreme approaches.',
+    'Resistance training, even light, preserves function and metabolic rate far more than cardio alone.',
+    'Sleep apnea and joint issues should be screened for early — they compound and make training harder if untreated.',
+    'Realistic timeline: sustainable fat loss is typically 0.5–1 kg/week; total transformation is measured in months to years, not weeks.'
+  ];
+}
+
+function heightRow(w, h_cm){
+  const h_m = h_cm/100;
+  const bmi = w/(h_m*h_m);
+  return bmi;
+}
+
+function update(){
+  const w = parseInt(wSlider.value);
+  const h = parseInt(hSlider.value);
+  wVal.textContent = w;
+  hVal.textContent = h;
+
+  const h_m = h/100;
+  const bmi = w/(h_m*h_m);
+  document.getElementById('bmiVal').textContent = bmi.toFixed(1);
+
+  // needle position on strip: map bmi 15-45 to 0-100%
+  let pct = ((bmi - 15) / (45 - 15)) * 100;
+  pct = Math.max(0, Math.min(100, pct));
+  document.getElementById('needle').style.left = pct + '%';
+
+  const cls = classify(bmi);
+  document.getElementById('classVal').textContent = cls.label;
+  document.getElementById('classSub').textContent = cls.sub;
+
+  // Mifflin-St Jeor estimate, assume age 30, moderate activity (x1.55), sex-adjusted constant
+  const age = 30;
+  let bmr;
+  if(sex === 'M'){
+    bmr = 10*w + 6.25*h - 5*age + 5;
+  } else {
+    bmr = 10*w + 6.25*h - 5*age - 161;
+  }
+  const low = Math.round((bmr*1.375)/10)*10;
+  const high = Math.round((bmr*1.55)/10)*10;
+  document.getElementById('calVal').textContent = low.toLocaleString()+'–'+high.toLocaleString()+' kcal/day';
+
+  const proteinLow = Math.round(w*1.6);
+  const proteinHigh = Math.round(w*2.0);
+  document.getElementById('proVal').textContent = proteinLow+'–'+proteinHigh+' g/day';
+
+  const waterLow = (w*0.033).toFixed(1);
+  const waterHigh = (w*0.045).toFixed(1);
+  document.getElementById('waterVal').textContent = waterLow+'–'+waterHigh+' L/day';
+
+  // risk list
+  const risks = riskProfile(bmi);
+  const riskHtml = risks.map(r => {
+    const cls = r.level === 'low' ? 'risk-low' : (r.level === 'mod' ? 'risk-mod' : 'risk-high');
+    return `<div class="risk-row"><span class="risk-dot ${cls}"></span>${r.text}</div>`;
+  }).join('');
+  document.getElementById('riskList').innerHTML = riskHtml;
+
+  // training
+  const training = trainingGuidance(bmi, w);
+  document.getElementById('trainingList').innerHTML = training.map(t => `<li>${t}</li>`).join('');
+
+  // height table
+  const heights = [150,155,160,165,170,175,180,185,190,195,200];
+  let rows = '<tr><th>Height</th><th>BMI at '+w+' kg</th><th>Classification</th></tr>';
+  heights.forEach(hh => {
+    const b = heightRow(w, hh);
+    const c = classify(b);
+    const isCurrent = hh === Math.round(h/5)*5 ? 'current' : '';
+    rows += `<tr class="${hh===h ? 'current':''}">
+      <td>${hh} cm</td>
+      <td>${b.toFixed(1)}</td>
+      <td><span class="class-pill ${c.pill}">${c.label}</span></td>
+    </tr>`;
+  });
+  document.getElementById('heightTable').innerHTML = rows;
+
+  // male/female physiological note (kept factual, not appearance-based)
+  const maleNote = `At ${w} kg / ${h} cm (BMI ${bmi.toFixed(1)}), male body composition reference ranges typically run 10–20% body fat at healthy BMI, rising with class. Fat tends to accumulate viscerally (abdominal), which independently raises cardiometabolic risk at a given BMI compared to peripheral fat storage. Baseline muscle mass and testosterone-driven protein synthesis mean equivalent training tends to build muscle faster than in female physiology at the same intake.`;
+  const femaleNote = `At ${w} kg / ${h} cm (BMI ${bmi.toFixed(1)}), female body composition reference ranges typically run 18–28% body fat at healthy BMI. Fat storage is more often gluteofemoral (hips/thighs), which is metabolically lower-risk than visceral storage at an equivalent BMI. Hormonal cycles (estrogen) influence fat distribution and can affect water retention and perceived weight fluctuation week to week — this is normal and not a true fat-mass change.`;
+  document.getElementById('maleNote').textContent = maleNote;
+  document.getElementById('femaleNote').textContent = femaleNote;
+}
+
+wSlider.addEventListener('input', update);
+hSlider.addEventListener('input', update);
+btnM.addEventListener('click', () => { sex='M'; btnM.classList.add('active'); btnF.classList.remove('active'); update(); });
+btnF.addEventListener('click', () => { sex='F'; btnF.classList.add('active'); btnM.classList.remove('active'); update(); });
+
+update();
+</script>
+</body>
+</html>
