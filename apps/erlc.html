@@ -1,0 +1,1154 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ERLC Field Manual</title>
+<link href="https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&family=Bebas+Neue&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --bg: #0a0c10;
+    --surface: #111318;
+    --surface2: #181c24;
+    --border: #1e2530;
+    --accent: #00aaff;
+    --accent2: #ff6b00;
+    --accent3: #00ff9d;
+    --warn: #ffcc00;
+    --danger: #ff2244;
+    --text: #cdd6e0;
+    --muted: #5a6a7a;
+    --police: #1a6aff;
+    --fire: #ff4400;
+    --ems: #00cc66;
+    --sheriff: #aa7700;
+  }
+  * { box-sizing: border-box; margin: 0; padding: 0; }
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* SCANLINE overlay */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(0deg, transparent, transparent 2px, rgba(0,0,0,0.08) 2px, rgba(0,0,0,0.08) 4px);
+    pointer-events: none;
+    z-index: 999;
+  }
+
+  header {
+    background: linear-gradient(135deg, #0a0f1a 0%, #0d1520 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 18px 24px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+  header::after {
+    content: 'LIBERTY COUNTY PD';
+    position: absolute;
+    right: 24px;
+    top: 50%;
+    transform: translateY(-50%);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--muted);
+    letter-spacing: 3px;
+  }
+  .badge {
+    width: 44px;
+    height: 44px;
+    background: var(--accent);
+    clip-path: polygon(50% 0%, 61% 35%, 98% 35%, 68% 57%, 79% 91%, 50% 70%, 21% 91%, 32% 57%, 2% 35%, 39% 35%);
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    flex-shrink: 0;
+  }
+  .title-block h1 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 4px;
+    color: #fff;
+    line-height: 1;
+  }
+  .title-block p {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    color: var(--accent);
+    letter-spacing: 2px;
+    margin-top: 2px;
+  }
+
+  /* STATUS BAR */
+  .status-bar {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    padding: 6px 24px;
+    display: flex;
+    gap: 20px;
+    align-items: center;
+    overflow-x: auto;
+  }
+  .status-item {
+    display: flex;
+    align-items: center;
+    gap: 6px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    white-space: nowrap;
+  }
+  .status-dot {
+    width: 7px; height: 7px;
+    border-radius: 50%;
+    background: var(--accent3);
+    animation: blink 2s infinite;
+  }
+  .status-dot.warn { background: var(--warn); }
+  .status-dot.off { background: var(--danger); animation: none; }
+  @keyframes blink { 0%,100%{opacity:1} 50%{opacity:0.3} }
+
+  /* NAV TABS */
+  .nav-tabs {
+    background: var(--surface);
+    border-bottom: 1px solid var(--border);
+    display: flex;
+    overflow-x: auto;
+    padding: 0 24px;
+  }
+  .nav-tab {
+    padding: 12px 20px;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    letter-spacing: 1.5px;
+    text-transform: uppercase;
+    color: var(--muted);
+    cursor: pointer;
+    border-bottom: 3px solid transparent;
+    transition: all 0.2s;
+    white-space: nowrap;
+    background: none;
+    border-top: none;
+    border-left: none;
+    border-right: none;
+  }
+  .nav-tab:hover { color: var(--text); }
+  .nav-tab.active { color: var(--accent); border-bottom-color: var(--accent); }
+  .nav-tab[data-tab="codes"].active { color: #a855f7; border-bottom-color: #a855f7; }
+  .nav-tab[data-tab="ranks"].active { color: var(--warn); border-bottom-color: var(--warn); }
+  .nav-tab[data-tab="roles"].active { color: var(--accent3); border-bottom-color: var(--accent3); }
+  .nav-tab[data-tab="commands"].active { color: var(--accent2); border-bottom-color: var(--accent2); }
+  .nav-tab[data-tab="radio"].active { color: var(--danger); border-bottom-color: var(--danger); }
+
+  /* MAIN */
+  main { padding: 24px; max-width: 900px; margin: 0 auto; }
+
+  .section { display: none; }
+  .section.active { display: block; animation: fadeIn 0.3s ease; }
+  @keyframes fadeIn { from{opacity:0;transform:translateY(8px)} to{opacity:1;transform:translateY(0)} }
+
+  /* SEARCH */
+  .search-wrap {
+    position: relative;
+    margin-bottom: 20px;
+  }
+  .search-wrap input {
+    width: 100%;
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 16px 10px 40px;
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    outline: none;
+    transition: border-color 0.2s;
+  }
+  .search-wrap input:focus { border-color: var(--accent); }
+  .search-wrap::before {
+    content: '⌕';
+    position: absolute;
+    left: 14px;
+    top: 50%;
+    transform: translateY(-50%);
+    color: var(--muted);
+    font-size: 18px;
+  }
+
+  /* CARDS GRID */
+  .cards-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(200px, 1fr));
+    gap: 12px;
+    margin-bottom: 20px;
+  }
+
+  /* CODE CARD */
+  .code-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    padding: 14px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+  .code-card::before {
+    content: '';
+    position: absolute;
+    left: 0; top: 0; bottom: 0;
+    width: 3px;
+    background: var(--accent);
+  }
+  .code-card.danger::before { background: var(--danger); }
+  .code-card.warn::before { background: var(--warn); }
+  .code-card.ok::before { background: var(--accent3); }
+  .code-card:hover {
+    border-color: var(--accent);
+    transform: translateY(-2px);
+    box-shadow: 0 4px 20px rgba(0,170,255,0.15);
+  }
+  .code-card.danger:hover { border-color: var(--danger); box-shadow: 0 4px 20px rgba(255,34,68,0.2); }
+  .code-card.warn:hover { border-color: var(--warn); box-shadow: 0 4px 20px rgba(255,204,0,0.15); }
+  .code-card.ok:hover { border-color: var(--accent3); box-shadow: 0 4px 20px rgba(0,255,157,0.15); }
+  .code-number {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 26px;
+    letter-spacing: 2px;
+    color: #fff;
+  }
+  .code-meaning {
+    font-size: 12px;
+    color: var(--muted);
+    letter-spacing: 0.5px;
+    margin-top: 2px;
+  }
+
+  /* DETAIL PANEL */
+  .detail-panel {
+    background: var(--surface2);
+    border: 1px solid var(--accent);
+    border-radius: 6px;
+    padding: 20px;
+    margin-top: 16px;
+    display: none;
+    animation: fadeIn 0.2s ease;
+    position: relative;
+  }
+  .detail-panel.visible { display: block; }
+  .detail-panel .close-btn {
+    position: absolute;
+    top: 12px; right: 12px;
+    background: var(--border);
+    border: none;
+    color: var(--muted);
+    width: 24px; height: 24px;
+    border-radius: 4px;
+    cursor: pointer;
+    font-size: 14px;
+    display: flex; align-items: center; justify-content: center;
+  }
+  .detail-panel .close-btn:hover { color: #fff; background: var(--danger); }
+  .detail-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 32px;
+    letter-spacing: 3px;
+    color: var(--accent);
+    margin-bottom: 4px;
+  }
+  .detail-panel.danger .detail-title { color: var(--danger); }
+  .detail-panel.warn .detail-title { color: var(--warn); }
+  .detail-panel.ok .detail-title { color: var(--accent3); }
+  .detail-sub {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    margin-bottom: 14px;
+  }
+  .detail-body {
+    font-size: 15px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+  .detail-example {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 4px;
+    padding: 10px 14px;
+    margin-top: 12px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: var(--accent3);
+  }
+  .detail-example span { color: var(--muted); display: block; font-size: 10px; margin-bottom: 4px; letter-spacing: 1px; }
+
+  /* RANK TABLE */
+  .rank-table { width: 100%; border-collapse: collapse; }
+  .rank-table th {
+    text-align: left;
+    padding: 10px 14px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--muted);
+    letter-spacing: 1px;
+    border-bottom: 2px solid var(--border);
+    background: var(--bg);
+  }
+  .rank-row {
+    border-bottom: 1px solid var(--border);
+    cursor: pointer;
+    transition: background 0.15s;
+  }
+  .rank-row:hover { background: rgba(255,255,255,0.03); }
+  .rank-row td {
+    padding: 12px 14px;
+    font-size: 14px;
+    vertical-align: top;
+  }
+  .rank-badge {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+  }
+  .xp-bar-wrap { margin-top: 4px; width: 100%; }
+  .xp-bar {
+    height: 3px;
+    background: var(--border);
+    border-radius: 2px;
+    overflow: hidden;
+  }
+  .xp-fill {
+    height: 100%;
+    background: linear-gradient(90deg, var(--accent), var(--accent3));
+    border-radius: 2px;
+  }
+
+  /* ROLE CARDS */
+  .role-card {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 6px;
+    margin-bottom: 12px;
+    overflow: hidden;
+    cursor: pointer;
+  }
+  .role-header {
+    padding: 14px 16px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    transition: background 0.2s;
+  }
+  .role-header:hover { background: rgba(255,255,255,0.03); }
+  .role-tag {
+    display: inline-block;
+    padding: 2px 8px;
+    border-radius: 3px;
+    font-size: 10px;
+    font-family: 'Share Tech Mono', monospace;
+    letter-spacing: 1px;
+  }
+  .role-body {
+    padding: 0 16px;
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.3s ease, padding 0.3s;
+  }
+  .role-body.open {
+    max-height: 600px;
+    padding: 0 16px 16px;
+  }
+  .role-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 20px;
+    letter-spacing: 2px;
+    color: #fff;
+    margin-right: 10px;
+  }
+  .chevron { color: var(--muted); transition: transform 0.3s; font-size: 12px; }
+  .role-card.open .chevron { transform: rotate(180deg); }
+  .role-item {
+    display: flex;
+    gap: 8px;
+    margin-bottom: 6px;
+    font-size: 14px;
+    align-items: flex-start;
+  }
+  .role-item::before { content: '▸'; color: var(--accent); flex-shrink: 0; margin-top: 1px; }
+  .gear-list {
+    display: flex;
+    flex-wrap: wrap;
+    gap: 6px;
+    margin-top: 10px;
+  }
+  .gear-chip {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    padding: 3px 8px;
+    font-size: 11px;
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--muted);
+  }
+
+  /* CMD GRID */
+  .cmd-category {
+    margin-bottom: 24px;
+  }
+  .cmd-category-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 16px;
+    letter-spacing: 3px;
+    color: var(--accent2);
+    border-bottom: 1px solid var(--border);
+    padding-bottom: 6px;
+    margin-bottom: 12px;
+  }
+  .cmd-row {
+    display: flex;
+    align-items: flex-start;
+    gap: 12px;
+    padding: 8px 0;
+    border-bottom: 1px solid rgba(255,255,255,0.04);
+    font-size: 14px;
+  }
+  .cmd-code {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 12px;
+    color: var(--accent3);
+    background: var(--bg);
+    padding: 3px 8px;
+    border-radius: 3px;
+    white-space: nowrap;
+    flex-shrink: 0;
+    border: 1px solid var(--border);
+  }
+  .cmd-desc { color: var(--text); flex: 1; }
+  .cmd-who {
+    font-size: 10px;
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--muted);
+    white-space: nowrap;
+    align-self: center;
+  }
+
+  /* RADIO */
+  .radio-panel {
+    background: var(--surface2);
+    border: 1px solid var(--border);
+    border-radius: 8px;
+    padding: 20px;
+    margin-bottom: 20px;
+  }
+  .radio-title {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 18px;
+    letter-spacing: 3px;
+    color: var(--danger);
+    margin-bottom: 14px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .radio-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: var(--border);
+  }
+  .quick-radio-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(140px, 1fr));
+    gap: 10px;
+  }
+  .qr-btn {
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 5px;
+    padding: 12px 10px;
+    text-align: center;
+    cursor: pointer;
+    transition: all 0.2s;
+    font-family: 'Rajdhani', sans-serif;
+    font-weight: 600;
+    font-size: 13px;
+    color: var(--text);
+    letter-spacing: 0.5px;
+  }
+  .qr-btn:hover { border-color: var(--accent); color: var(--accent); transform: translateY(-2px); box-shadow: 0 4px 16px rgba(0,170,255,0.1); }
+  .qr-btn.emergency { border-color: #ff222233; }
+  .qr-btn.emergency:hover { border-color: var(--danger); color: var(--danger); box-shadow: 0 4px 16px rgba(255,34,68,0.2); }
+  .qr-icon { font-size: 20px; display: block; margin-bottom: 4px; }
+
+  /* SECTION HEADER */
+  .section-header {
+    margin-bottom: 20px;
+  }
+  .section-header h2 {
+    font-family: 'Bebas Neue', sans-serif;
+    font-size: 28px;
+    letter-spacing: 4px;
+    color: #fff;
+    line-height: 1;
+  }
+  .section-header p {
+    font-size: 13px;
+    color: var(--muted);
+    margin-top: 4px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .filter-row {
+    display: flex;
+    gap: 8px;
+    flex-wrap: wrap;
+    margin-bottom: 16px;
+  }
+  .filter-btn {
+    padding: 5px 14px;
+    background: var(--bg);
+    border: 1px solid var(--border);
+    border-radius: 3px;
+    color: var(--muted);
+    font-size: 12px;
+    font-family: 'Share Tech Mono', monospace;
+    letter-spacing: 1px;
+    cursor: pointer;
+    transition: all 0.15s;
+  }
+  .filter-btn:hover, .filter-btn.active { border-color: var(--accent); color: var(--accent); }
+  .filter-btn.danger.active { border-color: var(--danger); color: var(--danger); }
+  .filter-btn.warn.active { border-color: var(--warn); color: var(--warn); }
+  .filter-btn.ok.active { border-color: var(--accent3); color: var(--accent3); }
+
+  .hidden { display: none !important; }
+
+  @media (max-width: 600px) {
+    header::after { display: none; }
+    .cards-grid { grid-template-columns: repeat(2, 1fr); }
+    main { padding: 16px; }
+  }
+</style>
+</head>
+<body>
+
+<header>
+  <div class="badge"></div>
+  <div class="title-block">
+    <h1>ERLC Field Manual</h1>
+    <p>EMERGENCY RESPONSE: LIBERTY COUNTY // REFERENCE GUIDE</p>
+  </div>
+</header>
+
+<div class="status-bar">
+  <div class="status-item"><span class="status-dot"></span> SYSTEM ONLINE</div>
+  <div class="status-item"><span class="status-dot warn"></span> MDT ACTIVE</div>
+  <div class="status-item"><span class="status-dot"></span> RADIO: CH-1</div>
+  <div class="status-item"><span class="status-dot off"></span> PRIORITY: CLEAR</div>
+</div>
+
+<nav class="nav-tabs">
+  <button class="nav-tab active" data-tab="codes">10-Codes</button>
+  <button class="nav-tab" data-tab="ranks">Ranks & XP</button>
+  <button class="nav-tab" data-tab="roles">Roles & Duties</button>
+  <button class="nav-tab" data-tab="commands">Commands</button>
+  <button class="nav-tab" data-tab="radio">Quick Radio</button>
+</nav>
+
+<main>
+
+  <!-- ═══════════════════════════ 10-CODES ═══════════════════════════ -->
+  <section class="section active" id="section-codes">
+    <div class="section-header">
+      <h2>Police 10-Codes</h2>
+      <p>CLICK ANY CODE TO SEE FULL DETAILS + USAGE EXAMPLE</p>
+    </div>
+
+    <div class="search-wrap">
+      <input type="text" id="code-search" placeholder="Search codes... (e.g. 10-4 or backup)" />
+    </div>
+
+    <div class="filter-row">
+      <button class="filter-btn active" data-filter="all">ALL</button>
+      <button class="filter-btn ok" data-filter="ok">ROUTINE</button>
+      <button class="filter-btn warn" data-filter="warn">CAUTION</button>
+      <button class="filter-btn danger" data-filter="danger">EMERGENCY</button>
+    </div>
+
+    <div class="cards-grid" id="codes-grid"></div>
+
+    <div class="detail-panel" id="code-detail">
+      <button class="close-btn" onclick="closeDetail('code-detail')">✕</button>
+      <div class="detail-title" id="cd-title"></div>
+      <div class="detail-sub" id="cd-sub"></div>
+      <div class="detail-body" id="cd-body"></div>
+      <div class="detail-example"><span>RADIO EXAMPLE</span><span id="cd-example"></span></div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════ RANKS ═══════════════════════════ -->
+  <section class="section" id="section-ranks">
+    <div class="section-header">
+      <h2>Ranks & Progression</h2>
+      <p>CLICK A RANK TO SEE WEAPONS, VEHICLES & PERKS</p>
+    </div>
+
+    <div class="search-wrap">
+      <input type="text" id="rank-search" placeholder="Search ranks or weapons..." />
+    </div>
+
+    <table class="rank-table">
+      <thead>
+        <tr>
+          <th>RANK</th>
+          <th>XP NEEDED</th>
+          <th>KEY UNLOCK</th>
+        </tr>
+      </thead>
+      <tbody id="rank-tbody"></tbody>
+    </table>
+
+    <div class="detail-panel" id="rank-detail" style="border-color: var(--warn);">
+      <button class="close-btn" onclick="closeDetail('rank-detail')">✕</button>
+      <div class="detail-title" id="rd-title" style="color:var(--warn)"></div>
+      <div class="detail-sub" id="rd-sub"></div>
+      <div class="detail-body" id="rd-body"></div>
+    </div>
+  </section>
+
+  <!-- ═══════════════════════════ ROLES ═══════════════════════════ -->
+  <section class="section" id="section-roles">
+    <div class="section-header">
+      <h2>Roles & Duties</h2>
+      <p>CLICK ANY ROLE TO EXPAND FULL DUTIES + GEAR</p>
+    </div>
+    <div id="roles-container"></div>
+  </section>
+
+  <!-- ═══════════════════════════ COMMANDS ═══════════════════════════ -->
+  <section class="section" id="section-commands">
+    <div class="section-header">
+      <h2>Chat Commands</h2>
+      <p>ALL COMMANDS SORTED BY CATEGORY</p>
+    </div>
+
+    <div class="search-wrap">
+      <input type="text" id="cmd-search" placeholder="Search commands..." />
+    </div>
+
+    <div id="cmd-container"></div>
+  </section>
+
+  <!-- ═══════════════════════════ RADIO ═══════════════════════════ -->
+  <section class="section" id="section-radio">
+    <div class="section-header">
+      <h2>Quick Radio Panel</h2>
+      <p>IN-GAME RADIO BUTTONS + WHAT THEY MEAN</p>
+    </div>
+
+    <div class="radio-panel">
+      <div class="radio-title">Quick Radio Buttons</div>
+      <div class="quick-radio-grid" id="qr-grid"></div>
+    </div>
+
+    <div class="radio-panel">
+      <div class="radio-title">Response Codes</div>
+      <div class="quick-radio-grid" id="rc-grid"></div>
+    </div>
+
+    <div class="radio-panel">
+      <div class="radio-title">Call Flow Example</div>
+      <div style="font-size:14px; line-height:2; font-family:'Share Tech Mono',monospace; color:var(--muted); font-size:12px;">
+        <div style="color:var(--accent3)">▸ You spot a speeder on I-95</div>
+        <div>&nbsp;&nbsp;→ Click <strong style="color:#fff">Enroute</strong> → Radio: <em style="color:var(--accent)">"10-76 suspect vehicle, I-95 northbound"</em></div>
+        <div style="color:var(--accent3)">▸ You pull them over</div>
+        <div>&nbsp;&nbsp;→ Click <strong style="color:#fff">On Scene</strong> → Radio: <em style="color:var(--accent)">"10-23 traffic stop, I-95 mile 12"</em></div>
+        <div style="color:var(--accent3)">▸ Suspect runs</div>
+        <div>&nbsp;&nbsp;→ Click <strong style="color:#fff">Req. Backup</strong> → Radio: <em style="color:var(--danger)">"10-99! Pursuit in progress, I-95!"</em></div>
+        <div style="color:var(--accent3)">▸ Suspect arrested, done</div>
+        <div>&nbsp;&nbsp;→ Click <strong style="color:#fff">Available</strong> → Radio: <em style="color:var(--accent)">"10-4 dispatch, 10-8"</em></div>
+      </div>
+    </div>
+  </section>
+
+</main>
+
+<script>
+// ═══════════════════════════════════════
+// DATA
+// ═══════════════════════════════════════
+
+const CODES = [
+  { code:"10-4", meaning:"Acknowledged / Copy", type:"ok", desc:"Means you heard and understood what was just said on the radio. Use it to confirm any message, order, or info from dispatch or other officers.", example:'"Unit 12, respond to gas station robbery." → "10-4 dispatch, en route."' },
+  { code:"10-7", meaning:"Out of Service", type:"warn", desc:"Signals you are no longer available for calls. Use this at end of shift or when stepping away. Dispatch will not assign you calls while 10-7.", example:'"Dispatch, Unit 12, going 10-7, end of shift."' },
+  { code:"10-8", meaning:"In Service / Available", type:"ok", desc:"You are back on duty and ready to take calls. Use after completing a call, finishing a break, or starting patrol.", example:'"10-4, Unit 12, show you 10-8, resume patrol."' },
+  { code:"10-23", meaning:"On Scene", type:"ok", desc:"You have arrived at the location of a call. Always radio this when you pull up so dispatch knows you're there and can track units.", example:'"Dispatch, Unit 12, 10-23 at the gas station, Liberty Ave."' },
+  { code:"10-24", meaning:"Clear Scene / Incident Closed", type:"ok", desc:"The call is handled and you are clearing the scene. Often used after an arrest, traffic stop completion, or fire is out.", example:'"Dispatch, 10-24, suspect in custody, 10-8."' },
+  { code:"10-76", meaning:"Emergency Response / En Route", type:"warn", desc:"You are responding to a call with lights and sirens. Use Code 3 driving. This signals you're moving fast to an active incident.", example:'"10-76, bank robbery in progress, River City downtown."' },
+  { code:"10-99", meaning:"Officer Needs Immediate Help", type:"danger", desc:"PANIC BUTTON. You are in danger and need backup NOW. Hit the Panic button in the Quick Radio panel. This is the most urgent call you can make — all available units should respond immediately.", example:'"10-99! 10-99! Unit 12, shots fired, suspect armed, need immediate backup at Park Ave!"' },
+  { code:"10-28", meaning:"Vehicle Registration Check", type:"ok", desc:"Request to run a vehicle's plates through MDT. Do this before approaching a stopped vehicle — always know who you're dealing with.", example:'"Dispatch, 10-28 on plate: RBLX-420."' },
+  { code:"10-29", meaning:"Check for Warrants / Wanted", type:"warn", desc:"Run a person or vehicle to see if they have active warrants. Do this during traffic stops or when questioning a suspect.", example:'"Dispatch, 10-29 on subject, DOB unknown, name: John Smith."' },
+  { code:"10-33", meaning:"Emergency — All Units Stand By", type:"danger", desc:"Clears all radio traffic for an emergency. Usually called by dispatch or a supervisor during a major incident. Stop transmitting unless it's related to the emergency.", example:'"10-33, 10-33 — active shooter, River City Bank. All non-essential traffic clear."' },
+];
+
+const RANKS = [
+  {
+    rank:"Recruit", xp:0, maxXp:500, color:"#6b7280",
+    weapons:["Shield 9 (Pistol)", "Pepper Spray"],
+    vehicles:["Basic Cruiser"],
+    perks:["Riot Shield"],
+    desc:"You just joined the department. Your job is to observe, learn procedures, follow orders, and grind XP. Stick with senior officers and watch how calls are handled."
+  },
+  {
+    rank:"Deputy", xp:500, maxXp:1200, color:"#3b82f6",
+    weapons:["Fabarm Shotgun", "Taser"],
+    vehicles:["Bullhorn Prancer"],
+    perks:["Stop Stick"],
+    desc:"You can now handle solo traffic stops and minor calls. Use the Taser wisely. Stop Sticks let you end pursuits. You're a real cop now."
+  },
+  {
+    rank:"Corporal", xp:1200, maxXp:2250, color:"#06b6d4",
+    weapons:["Glock 17"],
+    vehicles:["Falcon Interceptor"],
+    perks:["Citation Book"],
+    desc:"Step up in firepower with the Glock 17. The Falcon Interceptor is fast. Citation book means you can issue formal tickets in RP. You're a solid front-line officer."
+  },
+  {
+    rank:"Sergeant", xp:2250, maxXp:4000, color:"#f59e0b",
+    weapons:["M4A1 Rifle", "MP5 SMG"],
+    vehicles:["FREE Air Support"],
+    perks:["Spike Strips"],
+    desc:"Major milestone. You now lead squads and coordinate multi-unit responses. M4 and MP5 make you dangerous in serious situations. Air Support is a huge tactical advantage."
+  },
+  {
+    rank:"Lieutenant", xp:4000, maxXp:6500, color:"#f97316",
+    weapons:["Beanbag Shotgun", "FN Five-Seven"],
+    vehicles:["Chevlon Platoro"],
+    perks:["Scene Command"],
+    desc:"You run scenes and make tactical decisions. The Beanbag Shotgun gives you non-lethal options for crowd situations. At this rank, officers look to you for direction."
+  },
+  {
+    rank:"Captain", xp:6500, maxXp:9000, color:"#ef4444",
+    weapons:["Sauer P226"],
+    vehicles:["Ghost Package"],
+    perks:["Full Scene Authority"],
+    desc:"High-level command. The Ghost Package vehicle is elite. You're managing entire incidents and overseeing multiple sergeants. Respect is automatic at this rank."
+  },
+  {
+    rank:"Major", xp:9000, maxXp:13000, color:"#8b5cf6",
+    weapons:["Type 89 Rifle"],
+    vehicles:["Supervisor Livery"],
+    perks:["Supervisor Status"],
+    desc:"Department-level authority. The Type 89 is a powerful rifle. You're a senior supervisor overseeing large shifts and serious operations."
+  },
+  {
+    rank:"Colonel", xp:13000, maxXp:20000, color:"#ec4899",
+    weapons:["SPAS-12 Shotgun", "Drone"],
+    vehicles:["Chevlon Corbeta"],
+    perks:["Aerial Surveillance"],
+    desc:"Elite rank. The Drone gives you surveillance capability that most officers don't have. The SPAS-12 is a powerhouse. You're near the very top of the department."
+  },
+  {
+    rank:"Chief Deputy", xp:20000, maxXp:null, color:"#ffd700",
+    weapons:["Model 29 Revolver", "M&P 15"],
+    vehicles:["Mobile Command"],
+    perks:["Mobile Command Post", "Full Department Authority"],
+    desc:"The apex rank. Mobile Command lets you set up a forward command post anywhere on the map. You have full authority over the entire department. This is the top 0.1% of players."
+  },
+];
+
+const ROLES = [
+  {
+    title:"Recruit / Cadet",
+    agency:"Both RCPD & LCSO",
+    tag:"ENTRY LEVEL",
+    tagColor:"#6b7280",
+    duties:["Learn 10-codes, radio procedure, and basic RP rules","Do 10-9 calls (parked car violations) under supervision","Observe and shadow higher-rank officers on calls","Build XP toward Officer rank as fast as possible"],
+    gear:["Uniform","Flashlight","Basic Radio","Pepper Spray"],
+    tip:"Don't try to solo anything. Shadow a Corporal or Sergeant and absorb everything."
+  },
+  {
+    title:"Patrol Officer / Deputy",
+    agency:"RCPD / LCSO",
+    tag:"FRONT LINE",
+    tagColor:"#3b82f6",
+    duties:["Patrol your assigned beat — city streets (RCPD) or county roads (LCSO)","Handle traffic stops, citations, and minor crime calls","Run MDT checks (10-28 / 10-29) before approaching vehicles","Respond to 10-23 call-outs: theft, disturbance, petty crime","Assist Fire, EMS, and DOT at scenes when needed"],
+    gear:["Pistol","Taser","Pepper Spray","Handcuffs","Baton","Body Cam"],
+    tip:"MDT check EVERY car you pull over. It takes 5 seconds and could save your life in RP."
+  },
+  {
+    title:"Traffic / Highway Patrol",
+    agency:"Both Agencies",
+    tag:"SPECIALIZED",
+    tagColor:"#f59e0b",
+    duties:["Run speed traps and radar checks on highways","Conduct DUI checkpoints and vehicle inspections","Manage traffic flow at accident scenes","Chase speeding vehicles with 10-76 response"],
+    gear:["Radar","Traffic Cones","Stop Sticks","Standard Patrol Loadout"],
+    tip:"Best role if you love fast cars and open roads. I-95 and the highway grid are your territory."
+  },
+  {
+    title:"Downtown / City Patrol",
+    agency:"RCPD Primarily",
+    tag:"SPECIALIZED",
+    tagColor:"#06b6d4",
+    duties:["Patrol downtown, gas stations, stores, and back alleys","Handle shoplifts, vandalism, fights, loitering, obstruction","Respond to frequent call-outs in dense city grid","First on scene for most criminal activity in River City"],
+    gear:["Standard Patrol Loadout","Body Cam","MDT Access"],
+    tip:"Constant action. Never boring. If you want volume of calls and urban RP, this is it."
+  },
+  {
+    title:"Sergeant / Corporal",
+    agency:"Both Agencies",
+    tag:"FIELD SUPERVISOR",
+    tagColor:"#f97316",
+    duties:["Lead a squad of 2-4 officers at active scenes","Coordinate multi-unit responses to major incidents","Train and guide Recruits and Officers during calls","Maintain scene order at crimes, crashes, or robberies","Request backup, authorize spike strips or roadblocks"],
+    gear:["M4A1 or MP5","Spike Strips","Sergeant Loadout","Command Radio"],
+    tip:"Your job is to organize chaos. When multiple units show up to one scene, YOU decide who does what."
+  },
+  {
+    title:"Detective / Investigator",
+    agency:"Advanced RP Servers",
+    tag:"INVESTIGATION",
+    tagColor:"#8b5cf6",
+    duties:["Arrive AFTER patrol secures the scene","Interview witnesses and examine the crime scene","Build a case: track suspects, review evidence, establish charges","Handle robberies, home invasions, assaults, complex felonies","Write RP reports and coordinate with patrol for arrests"],
+    gear:["Standard Sidearm","Detective Badge","Evidence Kit","MDT Advanced Access"],
+    tip:"Only on serious RP servers. If you love the process over the chase, this is your role."
+  },
+  {
+    title:"Lieutenant → Chief Deputy",
+    agency:"Both Agencies",
+    tag:"COMMAND",
+    tagColor:"#ffd700",
+    duties:["Operational command over entire shifts and districts","Manage large-scale events: riots, hostage situations, major robberies","Control all radio traffic and prioritize call assignments","Authorize specialty unit deployment (SWAT, Air Support, Mobile Command)","Final say on tactical decisions during active incidents"],
+    gear:["Full Arsenal Access","Air Support","Mobile Command (Chief)","Supervisor Vehicle"],
+    tip:"You're not there to make arrests. You're there to make sure everyone else does their job correctly."
+  },
+  {
+    title:"SWAT / Tactical Officer",
+    agency:"Large RP Servers Only",
+    tag:"TACTICAL",
+    tagColor:"#ef4444",
+    duties:["Handle high-risk calls: armed suspects, barricades, hostages","Move in formation and clear buildings room by room","Deploy after patrol officers have contained and surrounded","Execute arrests when negotiations fail or suspect is dangerous"],
+    gear:["Rifle","Ballistic Vest","Breaching Tools","Tactical Radio"],
+    tip:"Patrol CONTAINS. SWAT CLOSES. Never let SWAT go in before the perimeter is set."
+  },
+];
+
+const COMMANDS = {
+  "Basic Chat": [
+    {cmd:"/msg [Player] [Message]", desc:"Private message another player", who:"All"},
+    {cmd:"/ooc [Message]", desc:"Out-of-character message (some servers)", who:"All"},
+    {cmd:"/local [Message]", desc:"Chat only to nearby players", who:"All"},
+    {cmd:"/me [Action]", desc:"Roleplay action text", who:"All", example:"/me handcuffs the suspect"},
+    {cmd:"/group [Message]", desc:"Chat to your squad or team", who:"All"},
+    {cmd:"/help", desc:"Show server help and rules", who:"All"},
+    {cmd:"!mod or !help", desc:"Call a moderator to your location", who:"All"},
+  ],
+  "Admin / Private Server": [
+    {cmd:":cmds", desc:"Show all available commands", who:"Admin"},
+    {cmd:":logs", desc:"View command history log", who:"Admin"},
+    {cmd:":ban [Player]", desc:"Permanently ban a player", who:"Admin"},
+    {cmd:":kick [Player] [Reason]", desc:"Kick with a reason shown", who:"Admin/Mod"},
+    {cmd:":m [Message]", desc:"Server-wide popup message to all", who:"Admin"},
+    {cmd:":h [Message]", desc:"Temporary hint shown at top of screen", who:"Admin"},
+    {cmd:":pm [Player] [Message]", desc:"Private popup to one specific player", who:"Admin"},
+  ],
+  "Teleport / Control": [
+    {cmd:":tp [Player1] [Player2]", desc:"Teleport Player1 to Player2", who:"Admin"},
+    {cmd:":to [Player]", desc:"Teleport yourself to a player", who:"Admin"},
+    {cmd:":bring [Player]", desc:"Teleport a player to you", who:"Admin"},
+    {cmd:":tocar", desc:"Teleport yourself to your car", who:"Admin"},
+    {cmd:":respawn [Player]", desc:"Respawn player at spawn point", who:"Admin"},
+    {cmd:":refresh [Player]", desc:"Respawn player at current position", who:"Admin"},
+  ],
+  "Combat / Status": [
+    {cmd:":kill [Player]", desc:"Kill or down a player", who:"Admin"},
+    {cmd:":pt [seconds]", desc:"Enable peace time (disable PVP)", who:"Admin"},
+    {cmd:":wanted [Player]", desc:"Mark a player as wanted", who:"Admin/Mod"},
+    {cmd:":unwanted [Player]", desc:"Clear wanted status", who:"Admin/Mod"},
+    {cmd:":jail [Player]", desc:"Imprison player for 5 minutes", who:"Admin/Mod"},
+  ],
+  "Environment": [
+    {cmd:':startfire ["building"/"brush"]', desc:"Start a fire at random location", who:"Admin"},
+    {cmd:':startnearfire ["type"]', desc:"Start a fire near you", who:"Admin"},
+    {cmd:":stopfire", desc:"Extinguish all active fires", who:"Admin"},
+    {cmd:":time [0-23]", desc:"Set time of day (0 = midnight, 12 = noon)", who:"Admin"},
+    {cmd:':weather ["rain"/"fog"/"clear"]', desc:"Change weather condition", who:"Admin"},
+    {cmd:":prty [seconds]", desc:"Start a priority timer for all players", who:"Admin"},
+  ],
+};
+
+const QUICK_RADIO = [
+  { label:"Available", icon:"✅", desc:"You're free and ready for calls. Hit this when you clear a scene.", emergency:false },
+  { label:"Enroute", icon:"🚗", desc:"You're heading to a call location. Pair with a 10-76 on radio.", emergency:false },
+  { label:"On Scene", icon:"📍", desc:"You've arrived at the location. Pair with 10-23 on radio.", emergency:false },
+  { label:"Req. Backup", icon:"🆘", desc:"You need more units. Hit this + explain on radio where and why.", emergency:false },
+  { label:"Panic", icon:"🚨", desc:"IMMEDIATE DANGER. Flashes your location to all units. Use in life-threatening situations only.", emergency:true },
+];
+
+const RESPONSE_CODES = [
+  { label:"Code 1", icon:"🔵", desc:"Routine response. No lights or sirens. Normal driving." },
+  { label:"Code 2", icon:"🟡", desc:"Elevated response. Lights optional. Expedited but controlled." },
+  { label:"Code 3", icon:"🔴", desc:"Emergency response. Full lights AND sirens. Maximum speed, clear traffic." },
+  { label:"10-33 Hold", icon:"📻", desc:"Radio silence. Only emergency traffic on the air. Called by dispatch." },
+];
+
+// ═══════════════════════════════════════
+// RENDER CODES
+// ═══════════════════════════════════════
+
+function renderCodes(filter="all", query="") {
+  const grid = document.getElementById("codes-grid");
+  grid.innerHTML = "";
+  CODES.filter(c => {
+    if(filter !== "all" && c.type !== filter) return false;
+    if(query) {
+      const q = query.toLowerCase();
+      return c.code.toLowerCase().includes(q) || c.meaning.toLowerCase().includes(q) || c.desc.toLowerCase().includes(q);
+    }
+    return true;
+  }).forEach(c => {
+    const div = document.createElement("div");
+    div.className = `code-card ${c.type}`;
+    div.innerHTML = `<div class="code-number">${c.code}</div><div class="code-meaning">${c.meaning}</div>`;
+    div.onclick = () => showCodeDetail(c);
+    grid.appendChild(div);
+  });
+}
+
+function showCodeDetail(c) {
+  const panel = document.getElementById("code-detail");
+  panel.className = `detail-panel visible ${c.type}`;
+  document.getElementById("cd-title").textContent = c.code + " — " + c.meaning;
+  document.getElementById("cd-sub").textContent = c.type === "danger" ? "⚠ EMERGENCY CODE" : c.type === "warn" ? "IMPORTANT CODE" : "ROUTINE CODE";
+  document.getElementById("cd-body").textContent = c.desc;
+  document.getElementById("cd-example").textContent = c.example;
+  panel.scrollIntoView({behavior:"smooth", block:"nearest"});
+}
+
+let codeFilter = "all";
+document.querySelectorAll(".filter-btn").forEach(btn => {
+  btn.addEventListener("click", () => {
+    document.querySelectorAll(".filter-btn").forEach(b => b.classList.remove("active"));
+    btn.classList.add("active");
+    codeFilter = btn.dataset.filter;
+    renderCodes(codeFilter, document.getElementById("code-search").value);
+  });
+});
+
+document.getElementById("code-search").addEventListener("input", e => {
+  renderCodes(codeFilter, e.target.value);
+});
+
+renderCodes();
+
+// ═══════════════════════════════════════
+// RENDER RANKS
+// ═══════════════════════════════════════
+
+function renderRanks(query="") {
+  const tbody = document.getElementById("rank-tbody");
+  tbody.innerHTML = "";
+  RANKS.filter(r => {
+    if(!query) return true;
+    const q = query.toLowerCase();
+    return r.rank.toLowerCase().includes(q) || r.weapons.join(" ").toLowerCase().includes(q) || r.desc.toLowerCase().includes(q);
+  }).forEach(r => {
+    const pct = r.maxXp ? Math.round((r.xp / 20000) * 100) : 100;
+    const tr = document.createElement("tr");
+    tr.className = "rank-row";
+    tr.innerHTML = `
+      <td>
+        <span class="rank-badge" style="background:${r.color}22;color:${r.color};border:1px solid ${r.color}44">${r.rank.toUpperCase()}</span>
+      </td>
+      <td>
+        <span style="font-family:'Share Tech Mono',monospace;font-size:13px;">${r.xp.toLocaleString()} XP</span>
+        <div class="xp-bar-wrap"><div class="xp-bar"><div class="xp-fill" style="width:${pct}%;background:${r.color}"></div></div></div>
+      </td>
+      <td style="color:var(--muted);font-size:13px;">${r.weapons[0]}</td>
+    `;
+    tr.onclick = () => showRankDetail(r);
+    tbody.appendChild(tr);
+  });
+}
+
+function showRankDetail(r) {
+  const panel = document.getElementById("rank-detail");
+  panel.style.borderColor = r.color;
+  panel.classList.add("visible");
+  document.getElementById("rd-title").textContent = r.rank.toUpperCase();
+  document.getElementById("rd-title").style.color = r.color;
+  document.getElementById("rd-sub").textContent = `${r.xp.toLocaleString()} XP REQUIRED`;
+  document.getElementById("rd-body").innerHTML = `
+    <p style="margin-bottom:12px;">${r.desc}</p>
+    <p style="font-weight:700;margin-bottom:6px;color:#fff;">WEAPONS</p>
+    <div class="gear-list">${r.weapons.map(w=>`<span class="gear-chip" style="border-color:${r.color}44;color:${r.color}">${w}</span>`).join("")}</div>
+    <p style="font-weight:700;margin:12px 0 6px;color:#fff;">VEHICLES</p>
+    <div class="gear-list">${r.vehicles.map(v=>`<span class="gear-chip">${v}</span>`).join("")}</div>
+    <p style="font-weight:700;margin:12px 0 6px;color:#fff;">PERKS</p>
+    <div class="gear-list">${r.perks.map(p=>`<span class="gear-chip" style="border-color:#ffffff22;color:var(--accent3)">${p}</span>`).join("")}</div>
+  `;
+  panel.scrollIntoView({behavior:"smooth", block:"nearest"});
+}
+
+document.getElementById("rank-search").addEventListener("input", e => renderRanks(e.target.value));
+renderRanks();
+
+// ═══════════════════════════════════════
+// RENDER ROLES
+// ═══════════════════════════════════════
+
+function renderRoles() {
+  const container = document.getElementById("roles-container");
+  container.innerHTML = "";
+  ROLES.forEach((r, i) => {
+    const card = document.createElement("div");
+    card.className = "role-card";
+    card.innerHTML = `
+      <div class="role-header" onclick="toggleRole(this)">
+        <div>
+          <span class="role-title">${r.title}</span>
+          <span class="role-tag" style="background:${r.tagColor}22;color:${r.tagColor};border:1px solid ${r.tagColor}44">${r.tag}</span>
+        </div>
+        <span class="chevron">▼</span>
+      </div>
+      <div class="role-body">
+        <p style="font-size:12px;color:var(--muted);margin-bottom:10px;font-family:'Share Tech Mono',monospace;">${r.agency.toUpperCase()}</p>
+        <p style="font-weight:700;font-size:13px;color:#fff;margin-bottom:8px;letter-spacing:1px;">DUTIES</p>
+        ${r.duties.map(d=>`<div class="role-item">${d}</div>`).join("")}
+        <p style="font-weight:700;font-size:13px;color:#fff;margin:12px 0 8px;letter-spacing:1px;">GEAR</p>
+        <div class="gear-list">${r.gear.map(g=>`<span class="gear-chip">${g}</span>`).join("")}</div>
+        <div style="margin-top:14px;padding:10px 14px;background:var(--bg);border-left:3px solid ${r.tagColor};border-radius:0 4px 4px 0;">
+          <span style="font-size:10px;font-family:'Share Tech Mono',monospace;color:var(--muted);display:block;margin-bottom:4px;">PRO TIP</span>
+          <span style="font-size:13px;">${r.tip}</span>
+        </div>
+      </div>
+    `;
+    container.appendChild(card);
+  });
+}
+
+function toggleRole(header) {
+  const card = header.parentElement;
+  const body = card.querySelector(".role-body");
+  const isOpen = card.classList.contains("open");
+  // close all
+  document.querySelectorAll(".role-card").forEach(c => {
+    c.classList.remove("open");
+    c.querySelector(".role-body").classList.remove("open");
+  });
+  if(!isOpen) {
+    card.classList.add("open");
+    body.classList.add("open");
+  }
+}
+
+renderRoles();
+
+// ═══════════════════════════════════════
+// RENDER COMMANDS
+// ═══════════════════════════════════════
+
+function renderCommands(query="") {
+  const container = document.getElementById("cmd-container");
+  container.innerHTML = "";
+  Object.entries(COMMANDS).forEach(([cat, cmds]) => {
+    const filtered = cmds.filter(c => {
+      if(!query) return true;
+      const q = query.toLowerCase();
+      return c.cmd.toLowerCase().includes(q) || c.desc.toLowerCase().includes(q);
+    });
+    if(!filtered.length) return;
+    const div = document.createElement("div");
+    div.className = "cmd-category";
+    div.innerHTML = `<div class="cmd-category-title">${cat}</div>` +
+      filtered.map(c => `
+        <div class="cmd-row">
+          <span class="cmd-code">${c.cmd}</span>
+          <span class="cmd-desc">${c.desc}${c.example?`<br><span style="font-size:11px;color:var(--muted)">e.g. ${c.example}</span>`:""}</span>
+          <span class="cmd-who">${c.who}</span>
+        </div>
+      `).join("");
+    container.appendChild(div);
+  });
+}
+
+document.getElementById("cmd-search").addEventListener("input", e => renderCommands(e.target.value));
+renderCommands();
+
+// ═══════════════════════════════════════
+// RENDER RADIO
+// ═══════════════════════════════════════
+
+function renderRadio() {
+  const qr = document.getElementById("qr-grid");
+  QUICK_RADIO.forEach(r => {
+    const btn = document.createElement("div");
+    btn.className = `qr-btn ${r.emergency ? "emergency" : ""}`;
+    btn.innerHTML = `<span class="qr-icon">${r.icon}</span>${r.label}`;
+    btn.title = r.desc;
+    btn.onclick = () => {
+      const existing = document.getElementById("qr-detail");
+      if(existing) existing.remove();
+      const d = document.createElement("div");
+      d.id = "qr-detail";
+      d.style.cssText = `margin-top:14px;padding:12px 16px;background:var(--bg);border:1px solid ${r.emergency?"var(--danger)":"var(--border)"};border-radius:5px;font-size:13px;animation:fadeIn 0.2s;grid-column:1/-1;`;
+      d.innerHTML = `<strong style="color:${r.emergency?"var(--danger)":"var(--accent)"}">${r.icon} ${r.label}</strong><br><span style="color:var(--muted);font-size:12px;">${r.desc}</span>`;
+      qr.appendChild(d);
+    };
+    qr.appendChild(btn);
+  });
+
+  const rc = document.getElementById("rc-grid");
+  RESPONSE_CODES.forEach(r => {
+    const btn = document.createElement("div");
+    btn.className = "qr-btn";
+    btn.innerHTML = `<span class="qr-icon">${r.icon}</span>${r.label}`;
+    btn.onclick = () => {
+      const existing = document.getElementById("rc-detail");
+      if(existing) existing.remove();
+      const d = document.createElement("div");
+      d.id = "rc-detail";
+      d.style.cssText = "margin-top:14px;padding:12px 16px;background:var(--bg);border:1px solid var(--border);border-radius:5px;font-size:13px;animation:fadeIn 0.2s;grid-column:1/-1;";
+      d.innerHTML = `<strong style="color:#fff">${r.icon} ${r.label}</strong><br><span style="color:var(--muted);font-size:12px;">${r.desc}</span>`;
+      rc.appendChild(d);
+    };
+    rc.appendChild(btn);
+  });
+}
+
+renderRadio();
+
+// ═══════════════════════════════════════
+// TAB SWITCHING
+// ═══════════════════════════════════════
+
+document.querySelectorAll(".nav-tab").forEach(tab => {
+  tab.addEventListener("click", () => {
+    document.querySelectorAll(".nav-tab").forEach(t => t.classList.remove("active"));
+    document.querySelectorAll(".section").forEach(s => s.classList.remove("active"));
+    tab.classList.add("active");
+    document.getElementById("section-" + tab.dataset.tab).classList.add("active");
+  });
+});
+
+function closeDetail(id) {
+  document.getElementById(id).classList.remove("visible");
+}
+</script>
+</body>
+</html>
