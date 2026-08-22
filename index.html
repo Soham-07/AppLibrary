@@ -526,13 +526,21 @@
     setStatus('pending', `docking ${filename}...`);
     try{
       const contentB64 = await fileToBase64(file);
-      await ghPut(`apps/${filename}`, contentB64, `Dock ${filename}`, cfg);
+      const existingFile = await ghGet(`apps/${filename}`, cfg);
+      await ghPut(`apps/${filename}`, contentB64, `Dock ${filename}`, cfg, existingFile ? existingFile.sha : undefined);
 
       const manifestFile = await ghGet('manifest.json', cfg);
       let list = [];
       let sha;
       if(manifestFile){ sha = manifestFile.sha; list = JSON.parse(b64DecodeUnicode(manifestFile.content)); }
-      list.push({ id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())), name: name || titleCase(filename), description: description || '', filename, addedAt: new Date().toISOString() });
+      const existingEntry = list.find(a => a.filename === filename);
+      if(existingEntry){
+        existingEntry.name = name || existingEntry.name;
+        existingEntry.description = description || existingEntry.description;
+        existingEntry.addedAt = new Date().toISOString();
+      } else {
+        list.push({ id: (crypto.randomUUID ? crypto.randomUUID() : String(Date.now())), name: name || titleCase(filename), description: description || '', filename, addedAt: new Date().toISOString() });
+      }
       await ghPut('manifest.json', b64EncodeUnicode(JSON.stringify(list, null, 2)), `Add ${filename} to manifest`, cfg, sha);
 
       setStatus('ok', `✓ synced · ${filename} docked at ${timeNow()}`);
