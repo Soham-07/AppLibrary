@@ -1,0 +1,566 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>3D Artist Salary Reality — India, 2026</title>
+<style>
+  :root{
+    --void:#0A0A0C;
+    --panel:#131316;
+    --panel-2:#1A1A1E;
+    --wire:#2B2E2C;
+    --wire-soft:#1F211F;
+    --bone:#F5F3EE;
+    --bone-dim:#B8B5AC;
+    --bone-faint:#6E6C66;
+    --hot:#FF6B35;
+    --hot-dim:#B84D26;
+    --cyan:#00D4C8;
+    --amber:#FFB627;
+    --red:#E85D4A;
+    --font-display:'Archivo','Arial Narrow',sans-serif;
+    --font-body:'Inter',-apple-system,sans-serif;
+    --font-mono:'JetBrains Mono','Courier New',monospace;
+  }
+
+  *{margin:0;padding:0;box-sizing:border-box;}
+  html{scroll-behavior:smooth;}
+
+  body{
+    background:var(--void);
+    color:var(--bone);
+    font-family:var(--font-body);
+    line-height:1.55;
+    font-variant-numeric:tabular-nums;
+    -webkit-font-smoothing:antialiased;
+    background-image:
+      linear-gradient(var(--wire-soft) 1px, transparent 1px),
+      linear-gradient(90deg, var(--wire-soft) 1px, transparent 1px);
+    background-size:64px 64px;
+    background-position:-1px -1px;
+  }
+
+  @media (prefers-reduced-motion: reduce){
+    *{animation-duration:0.01ms !important; transition-duration:0.01ms !important;}
+  }
+
+  ::selection{background:var(--hot); color:var(--void);}
+
+  ::-webkit-scrollbar{width:10px;}
+  ::-webkit-scrollbar-track{background:var(--void);}
+  ::-webkit-scrollbar-thumb{background:var(--wire); border-radius:0;}
+  ::-webkit-scrollbar-thumb:hover{background:var(--hot-dim);}
+
+  a{color:inherit;}
+  code{font-family:var(--font-mono); background:var(--panel-2); padding:1px 6px; color:var(--cyan); font-size:0.88em;}
+
+  /* ===================== HUD TOP BAR ===================== */
+  .hud{
+    position:sticky; top:0; z-index:50;
+    background:rgba(10,10,12,0.92);
+    backdrop-filter:blur(10px);
+    border-bottom:1px solid var(--wire);
+    display:flex;
+    align-items:center;
+    justify-content:space-between;
+    padding:0 28px;
+    height:56px;
+    font-family:var(--font-mono);
+  }
+  .hud-stats{
+    display:flex; gap:22px; align-items:center;
+    font-size:11px; color:var(--bone-faint); letter-spacing:0.03em;
+  }
+  .hud-stats span b{color:var(--cyan); font-weight:600;}
+  .hud-title{
+    font-family:var(--font-display); font-weight:800; font-size:13px;
+    letter-spacing:0.02em; color:var(--bone); display:flex; align-items:center; gap:8px;
+  }
+  .hud-title .rec{
+    width:7px; height:7px; border-radius:50%; background:var(--hot);
+    box-shadow:0 0 8px var(--hot);
+    animation:pulse 2s ease-in-out infinite;
+  }
+  @keyframes pulse{ 0%,100%{opacity:1;} 50%{opacity:0.35;} }
+
+  @media (max-width:760px){
+    .hud-stats{display:none;}
+  }
+
+  /* ===================== TOP NAV — "shading modes" ===================== */
+  .modebar{
+    position:sticky; top:56px; z-index:49;
+    display:flex;
+    overflow-x:auto;
+    background:var(--void);
+    border-bottom:1px solid var(--wire);
+    padding:0 12px;
+  }
+  .modebar::-webkit-scrollbar{height:0;}
+  .modebar a{
+    flex:none;
+    font-family:var(--font-mono);
+    font-size:11.5px;
+    letter-spacing:0.04em;
+    text-transform:uppercase;
+    color:var(--bone-faint);
+    text-decoration:none;
+    padding:13px 16px;
+    border-bottom:2px solid transparent;
+    white-space:nowrap;
+    transition:color 0.15s;
+  }
+  .modebar a .idx{color:var(--wire); margin-right:6px;}
+  .modebar a:hover{color:var(--bone);}
+  .modebar a.active{color:var(--hot); border-bottom-color:var(--hot);}
+  .modebar a.active .idx{color:var(--hot-dim);}
+
+  /* ===================== WIREFRAME DIVIDER (signature) ===================== */
+  .wiredivider{
+    display:block; width:100%; height:48px;
+    opacity:0.5;
+  }
+  .wiredivider path, .wiredivider line, .wiredivider polygon{
+    stroke:var(--wire); fill:none; stroke-width:1;
+  }
+
+  /* ===================== SECTIONS ===================== */
+  main{max-width:980px; margin:0 auto; padding:0 32px;}
+  @media (max-width:640px){ main{padding:0 18px;} }
+
+  .section{padding:64px 0; border-bottom:1px solid var(--wire); position:relative;}
+  .section:last-of-type{border-bottom:none;}
+
+  .tag{
+    display:inline-flex; align-items:center; gap:8px;
+    font-family:var(--font-mono); font-size:11px; letter-spacing:0.1em;
+    text-transform:uppercase; color:var(--hot); margin-bottom:16px;
+  }
+  .tag::before{content:''; width:16px; height:1px; background:var(--hot);}
+
+  h1{
+    font-family:var(--font-display); font-weight:800;
+    font-size:clamp(34px,6vw,58px);
+    line-height:0.98; letter-spacing:-0.02em; margin-bottom:20px;
+    text-transform:uppercase;
+  }
+  h1 .outline{
+    color:transparent;
+    -webkit-text-stroke:1.5px var(--bone-dim);
+  }
+  h2{
+    font-family:var(--font-display); font-weight:800;
+    font-size:clamp(24px,3.4vw,34px);
+    line-height:1.05; margin-bottom:16px; letter-spacing:-0.01em;
+    text-transform:uppercase;
+  }
+  h3{
+    font-family:var(--font-display); font-weight:700; font-size:16px;
+    margin:32px 0 12px; color:var(--bone); text-transform:uppercase; letter-spacing:0.02em;
+  }
+  p{color:var(--bone-dim); font-size:15.5px; max-width:66ch; margin-bottom:14px;}
+  strong{color:var(--bone); font-weight:600;}
+
+  .lede{
+    font-size:17px; color:var(--bone); max-width:62ch; margin:24px 0 8px;
+    padding-left:20px; border-left:2px solid var(--hot);
+  }
+
+  /* ===================== RENDER-QUALITY SYSTEM (signature) ===================== */
+  .quality-key{
+    display:flex; gap:0; flex-wrap:wrap;
+    border:1px solid var(--wire); margin:28px 0 8px;
+    font-family:var(--font-mono); font-size:12px;
+  }
+  .quality-key .qk-item{
+    flex:1; min-width:200px;
+    padding:14px 16px;
+    border-right:1px solid var(--wire);
+    color:var(--bone-dim);
+  }
+  .quality-key .qk-item:last-child{border-right:none;}
+  .qk-item b{display:block; font-size:11px; letter-spacing:0.06em; text-transform:uppercase; margin-bottom:4px;}
+  .qk-item.final b{color:var(--cyan);}
+  .qk-item.preview b{color:var(--amber);}
+  .qk-item.draft b{color:var(--red);}
+
+  .rq{
+    display:inline-flex; align-items:center; gap:5px;
+    font-family:var(--font-mono); font-size:9.5px; letter-spacing:0.5px;
+    text-transform:uppercase;
+    padding:3px 7px;
+    border:1px solid currentColor;
+    white-space:nowrap;
+  }
+  .rq.final{color:var(--cyan);}
+  .rq.preview{color:var(--amber);}
+  .rq.draft{color:var(--red);}
+
+  /* ===================== CALLOUTS ===================== */
+  .callout{
+    background:var(--panel);
+    border-left:3px solid var(--amber);
+    padding:18px 22px;
+    margin:24px 0;
+  }
+  .callout.hot{border-left-color:var(--hot);}
+  .callout .ct{
+    font-family:var(--font-mono); font-size:10.5px; text-transform:uppercase;
+    letter-spacing:0.08em; color:var(--amber); display:block; margin-bottom:8px;
+  }
+  .callout.hot .ct{color:var(--hot);}
+  .callout p{color:var(--bone); font-size:14.5px; margin-bottom:0; max-width:none;}
+
+  /* ===================== TABLES ===================== */
+  .table-wrap{overflow-x:auto; margin:20px 0 28px; border:1px solid var(--wire);}
+  table{width:100%; border-collapse:collapse; font-size:13.5px; min-width:600px;}
+  th{
+    text-align:left; font-family:var(--font-mono); font-weight:500; font-size:10.5px;
+    letter-spacing:0.06em; text-transform:uppercase; color:var(--bone-faint);
+    padding:13px 16px; background:var(--panel); border-bottom:1px solid var(--wire);
+    white-space:nowrap;
+  }
+  td{padding:12px 16px; border-bottom:1px solid var(--wire); color:var(--bone-dim); white-space:nowrap;}
+  td.figure{color:var(--bone); font-weight:600; font-family:var(--font-mono); font-size:13px;}
+  td.label{color:var(--bone); font-weight:600; white-space:normal; min-width:150px;}
+  tr:last-child td{border-bottom:none;}
+  tr:hover td{background:var(--panel-2);}
+
+  /* ===================== CARDS ===================== */
+  .grid-3{display:grid; grid-template-columns:repeat(3,1fr); gap:1px; background:var(--wire); margin:24px 0; border:1px solid var(--wire);}
+  .grid-2{display:grid; grid-template-columns:1fr 1fr; gap:1px; background:var(--wire); margin:24px 0; border:1px solid var(--wire);}
+  @media (max-width:680px){ .grid-2,.grid-3{grid-template-columns:1fr;} }
+
+  .card{background:var(--panel); padding:22px 22px;}
+  .card h4{font-family:var(--font-display); font-size:14px; font-weight:700; text-transform:uppercase; letter-spacing:0.02em; margin-bottom:8px; color:var(--bone);}
+  .card .big{font-family:var(--font-mono); font-size:24px; font-weight:700; color:var(--hot); margin:8px 0;}
+  .card p{font-size:13px; margin-bottom:0; max-width:none;}
+
+  /* ===================== TIMELINE — real sequence ===================== */
+  .timeline{margin:28px 0; position:relative;}
+  .timeline::before{
+    content:''; position:absolute; left:64px; top:0; bottom:0; width:1px; background:var(--wire);
+  }
+  @media (max-width:560px){ .timeline::before{left:44px;} }
+
+  .tl-row{display:grid; grid-template-columns:88px 1fr; gap:20px; padding:22px 0; position:relative;}
+  @media (max-width:560px){ .tl-row{grid-template-columns:64px 1fr;} }
+  .tl-row::before{
+    content:''; position:absolute; left:60px; top:28px; width:9px; height:9px;
+    background:var(--void); border:2px solid var(--hot); border-radius:50%;
+  }
+  @media (max-width:560px){ .tl-row::before{left:40px;} }
+
+  .tl-year{font-family:var(--font-mono); font-weight:700; font-size:14px; color:var(--hot); padding-top:2px;}
+  .tl-content h4{font-size:15px; margin-bottom:6px; font-family:var(--font-display); font-weight:700; text-transform:uppercase; display:flex; align-items:center; gap:10px; flex-wrap:wrap;}
+  .tl-content .range{font-family:var(--font-mono); color:var(--bone); font-size:15px; margin-bottom:6px;}
+  .tl-content p{font-size:13.5px; margin-bottom:0;}
+
+  ul.plain{margin:16px 0; padding-left:0; list-style:none;}
+  ul.plain li{color:var(--bone-dim); font-size:14.5px; padding:14px 0 14px 26px; border-bottom:1px solid var(--wire); position:relative;}
+  ul.plain li:last-child{border-bottom:none;}
+  ul.plain li::before{content:'▸'; position:absolute; left:0; color:var(--hot); font-size:12px; top:14px;}
+  ul.plain li strong{color:var(--bone);}
+
+  footer{padding:48px 0 64px; color:var(--bone-faint); font-size:12.5px; max-width:980px; margin:0 auto; padding-left:32px; padding-right:32px;}
+  footer p{max-width:none; font-size:12.5px; color:var(--bone-faint);}
+
+  .fine{font-size:12.5px; color:var(--bone-faint); margin-top:4px;}
+</style>
+</head>
+<body>
+
+<div class="hud">
+  <div class="hud-title"><span class="rec"></span>SALARY // REALITY.EXE</div>
+  <div class="hud-stats">
+    <span>REGION <b>IN</b></span>
+    <span>SUBJECT <b>3D_ARTIST</b></span>
+    <span>BUILD <b>2026.07</b></span>
+    <span>SOURCES <b>11</b></span>
+  </div>
+</div>
+
+<nav class="modebar" id="modebar">
+  <a href="#read-first" class="active"><span class="idx">00</span>READ FIRST</a>
+  <a href="#levels"><span class="idx">01</span>LEVELS</a>
+  <a href="#cities"><span class="idx">02</span>CITIES</a>
+  <a href="#industries"><span class="idx">03</span>INDUSTRIES</a>
+  <a href="#studios"><span class="idx">04</span>STUDIOS</a>
+  <a href="#freelance"><span class="idx">05</span>FREELANCE</a>
+  <a href="#factors"><span class="idx">06</span>FACTORS</a>
+  <a href="#timeline"><span class="idx">07</span>TIMELINE</a>
+  <a href="#verdict"><span class="idx">08</span>VERDICT</a>
+</nav>
+
+<main>
+
+  <!-- ============ 00 HERO ============ -->
+  <section class="section" id="read-first">
+    <div class="tag">Compensation reference — not a promise</div>
+    <h1>What 3D artists<br>in <span class="outline">India</span><br>actually get paid</h1>
+    <p class="lede">Every number below is either sourced from real salary data — AmbitionBox, PayScale, Glassdoor, ERI, studio-specific reports — or flagged as a rough estimate where the data disagreed with itself by 2–3×. That disagreement is normal in this field. The honest move is to show you the range and tell you why, not hand you a fake decimal point.</p>
+
+    <div class="quality-key">
+      <div class="qk-item final"><b>Final render — ●●●</b>Multiple independent sources agree. Narrow, trustworthy range.</div>
+      <div class="qk-item preview"><b>Preview — ●●○</b>Sources broadly agree. Range is wider, treat as directional.</div>
+      <div class="qk-item draft"><b>Draft — ●○○</b>Thin data. Ballpark only — don't anchor decisions to it.</div>
+    </div>
+
+    <div class="callout hot">
+      <span class="ct">Why the numbers look messy</span>
+      <p>Search results for "3D artist salary India" range from ₹28,000/year — a clearly broken Glassdoor scrape, since nobody earns ₹2,300/month — to ₹19 lakh/year, a thin sample skewed toward senior specialists. Job-portal aggregators aren't lying, they're just averaging tiny self-reported samples across wildly different roles. This guide discards the obviously broken numbers and keeps the ranges where independent sources actually converge.</p>
+    </div>
+  </section>
+
+  <!-- ============ 01 LEVELS ============ -->
+  <section class="section" id="levels">
+    <div class="tag">01 — Career levels</div>
+    <h2>Twelve real pay bands,<br>not thirty relabeled ones</h2>
+    <p>The market recognizes about a dozen real bands. "Associate Artist" and "Junior Artist" pay the same — inflating this to thirty titles wouldn't add information, just relabel the same six numbers thirty times.</p>
+
+    <div class="table-wrap">
+      <table>
+        <tr><th>Level</th><th>Experience</th><th>Annual (LPA)</th><th>Monthly</th><th>Render quality</th></tr>
+        <tr><td class="label">Learning / student</td><td>0 yrs (training)</td><td class="figure">₹0</td><td>—</td><td><span class="rq final">final</span></td></tr>
+        <tr><td class="label">Intern / trainee</td><td>0–6 mo</td><td class="figure">₹0.6–1.8L</td><td>₹5K–15K</td><td><span class="rq preview">preview</span></td></tr>
+        <tr><td class="label">Fresher</td><td>0–1 yr</td><td class="figure">₹2.5–4.8L</td><td>₹21K–40K</td><td><span class="rq final">final</span></td></tr>
+        <tr><td class="label">Junior artist</td><td>1–3 yrs</td><td class="figure">₹4.5–8.5L</td><td>₹37K–70K</td><td><span class="rq final">final</span></td></tr>
+        <tr><td class="label">Production artist</td><td>2–4 yrs</td><td class="figure">₹6–10L</td><td>₹50K–83K</td><td><span class="rq preview">preview</span></td></tr>
+        <tr><td class="label">Mid-level artist</td><td>3–6 yrs</td><td class="figure">₹9–16L</td><td>₹75K–1.3L</td><td><span class="rq final">final</span></td></tr>
+        <tr><td class="label">Senior artist</td><td>6–10 yrs</td><td class="figure">₹18–30L</td><td>₹1.5L–2.5L</td><td><span class="rq final">final</span></td></tr>
+        <tr><td class="label">Lead artist</td><td>8–12 yrs</td><td class="figure">₹22–35L</td><td>₹1.8L–2.9L</td><td><span class="rq preview">preview</span></td></tr>
+        <tr><td class="label">Technical artist / TD</td><td>5–10 yrs</td><td class="figure">₹15–35L</td><td>often project-based</td><td><span class="rq preview">preview</span></td></tr>
+        <tr><td class="label">Supervisor (CG/VFX)</td><td>10–15 yrs</td><td class="figure">₹25–45L</td><td>—</td><td><span class="rq preview">preview</span></td></tr>
+        <tr><td class="label">Art director</td><td>12–18 yrs</td><td class="figure">₹35–60L</td><td>—</td><td><span class="rq draft">draft</span></td></tr>
+        <tr><td class="label">Studio / creative director</td><td>18+ yrs</td><td class="figure">₹60L–1.5Cr+</td><td>—</td><td><span class="rq draft">draft</span></td></tr>
+      </table>
+    </div>
+
+    <div class="callout">
+      <span class="ct">The part that matters for you right now</span>
+      <p>You're pre-fresher. The jump from <strong>Fresher (₹3L) to Junior (₹6L) to Mid (₹12L)</strong> is driven almost entirely by <strong>portfolio quality and speed</strong>, not years passed. Two animators from the same batch can be 3× apart by year 3 purely on reel quality. Time served is a weak predictor here — output is the strong one.</p>
+    </div>
+  </section>
+
+  <!-- ============ 02 CITIES ============ -->
+  <section class="section" id="cities">
+    <div class="tag">02 — Cities</div>
+    <h2>Where the studios<br>actually are</h2>
+    <p>Of India's 28 states, real 3D/animation/VFX employment clusters in about six metro regions. A state-by-state table would mostly say "remote-only" thirty times. Here's what's real.</p>
+
+    <div class="table-wrap">
+      <table>
+        <tr><th>City</th><th>Fresher</th><th>Mid-level</th><th>Senior</th><th>Known for</th><th>Quality</th></tr>
+        <tr><td class="label">Mumbai</td><td class="figure">₹3–5L</td><td class="figure">₹9–16L</td><td class="figure">₹18–30L+</td><td>Bollywood VFX — DNEG, Prime Focus, Red Chillies</td><td><span class="rq final">final</span></td></tr>
+        <tr><td class="label">Bengaluru</td><td class="figure">₹3–5.5L</td><td class="figure">₹9–15L</td><td class="figure">₹16–28L</td><td>Gaming studios, tech-integrated VFX</td><td><span class="rq final">final</span></td></tr>
+        <tr><td class="label">Hyderabad</td><td class="figure">₹3–5L</td><td class="figure">₹8–14L</td><td class="figure">₹15–26L</td><td>Telugu film VFX (Baahubali/RRR ecosystem)</td><td><span class="rq final">final</span></td></tr>
+        <tr><td class="label">Pune</td><td class="figure">₹2.5–4.5L</td><td class="figure">₹7–12L</td><td class="figure">₹13–22L</td><td>Symbiosys, Technicolor ops, lower cost of living</td><td><span class="rq preview">preview</span></td></tr>
+        <tr><td class="label">Chennai</td><td class="figure">₹2.5–4.5L</td><td class="figure">₹7–12L</td><td class="figure">₹13–22L</td><td>Regional cinema VFX, roto/paint (BOT VFX)</td><td><span class="rq preview">preview</span></td></tr>
+        <tr><td class="label">Delhi NCR / Gurugram</td><td class="figure">₹3–5L</td><td class="figure">₹7–13L</td><td class="figure">₹14–24L</td><td>Product viz, advertising, corporate CGI</td><td><span class="rq preview">preview</span></td></tr>
+        <tr><td class="label">Kochi / Trivandrum</td><td class="figure">₹2.2–4L</td><td class="figure">₹6–10L</td><td class="figure">₹11–18L</td><td>Kerala film incentives, smaller scale</td><td><span class="rq draft">draft</span></td></tr>
+        <tr><td class="label">Tier-2 (Nagpur, Jaipur, Indore, Kolkata)</td><td class="figure">₹1.8–3.5L</td><td class="figure">₹4–8L</td><td class="figure">₹8–15L</td><td>Ad agencies, explainer work, lower COL</td><td><span class="rq draft">draft</span></td></tr>
+      </table>
+    </div>
+    <p class="fine">Your region isn't a studio hub itself — Pune and Mumbai are the realistic in-person options within relocation distance. Remote work for any of these cities, or international clients, is the other real path and doesn't require moving.</p>
+  </section>
+
+  <!-- ============ 03 INDUSTRIES ============ -->
+  <section class="section" id="industries">
+    <div class="tag">03 — Industries</div>
+    <h2>Film/VFX vs. product viz<br>vs. gaming</h2>
+    <p>You're weighing product animation against cinematic identity. Here's how they actually compare — this is the comparison that matters most for your decision.</p>
+
+    <div class="grid-3">
+      <div class="card">
+        <h4>Film / VFX</h4>
+        <div class="big">₹2.5–4.5L → ₹20L+</div>
+        <p>Highest ceiling, highest prestige, most competitive entry, least stable hours. Screen credit compounds reputation over time.</p>
+      </div>
+      <div class="card">
+        <h4>Gaming</h4>
+        <div class="big">~30% above avg</div>
+        <p>Real-time rendering complexity commands a premium over general animation/ad work. Steadier pipeline than film.</p>
+      </div>
+      <div class="card">
+        <h4>Product / automotive viz</h4>
+        <div class="big">₹3–9L range</div>
+        <p>Predictable hours, corporate clients, less creative glamour but strong freelance and international client access.</p>
+      </div>
+    </div>
+
+    <h3>Advertising &amp; commercial</h3>
+    <p>Steady volume of shorter projects, moderate pay (₹4–12L across levels), good for building speed and a diverse reel fast — often the practical entry point before specializing.</p>
+
+    <h3>OTT / television</h3>
+    <p>Similar band to film but slightly more stable due to episodic work; Netflix and Amazon Prime commissioning has meaningfully grown this segment.</p>
+
+    <div class="callout hot">
+      <span class="ct">On your specific dilemma</span>
+      <p>Product animation isn't a financial downgrade. The data doesn't support "cinematic pays more" as a blanket rule. What differs is <strong>variance</strong>: film has a much higher ceiling but far more competition and instability early on; product viz has a lower ceiling but a shorter path to steady income and easier freelance access to international clients. Neither is "correct" — they're different risk profiles.</p>
+    </div>
+  </section>
+
+  <!-- ============ 04 STUDIOS ============ -->
+  <section class="section" id="studios">
+    <div class="tag">04 — Named studios</div>
+    <h2>Real companies,<br>real approximate bands</h2>
+    <p>Studios that show up consistently across independent sources — not a padded list. Treat rupee figures as directional, not exact offers.</p>
+
+    <div class="table-wrap">
+      <table>
+        <tr><th>Studio</th><th>City</th><th>Known for</th><th>Artist band</th><th>Quality</th></tr>
+        <tr><td class="label">DNEG India</td><td>Mumbai, Hyderabad</td><td>Dune, Tenet, Oppenheimer</td><td class="figure">₹7–9L avg</td><td><span class="rq preview">preview</span></td></tr>
+        <tr><td class="label">MPC / Technicolor</td><td>Bengaluru</td><td>Jungle Book, Lion King</td><td class="figure">₹8–10L avg</td><td><span class="rq preview">preview</span></td></tr>
+        <tr><td class="label">Prime Focus</td><td>Mumbai</td><td>Avatar, Brahmastra — largest India-HQ VFX op</td><td class="figure">₹6–8L avg</td><td><span class="rq preview">preview</span></td></tr>
+        <tr><td class="label">Red Chillies VFX</td><td>Mumbai</td><td>Bollywood in-house (SRK productions)</td><td class="figure">₹5–8L est.</td><td><span class="rq draft">draft</span></td></tr>
+        <tr><td class="label">Symbiosys Entertainment</td><td>Pune</td><td>Animation + game design</td><td class="figure">₹5–7L avg</td><td><span class="rq preview">preview</span></td></tr>
+        <tr><td class="label">Xentrix Studios</td><td>Bengaluru</td><td>TV/OTT animation</td><td class="figure">₹4–7L est.</td><td><span class="rq draft">draft</span></td></tr>
+        <tr><td class="label">BOT VFX</td><td>Chennai, Coimbatore, Pune</td><td>Roto/paint, high-volume pipeline</td><td class="figure">₹3.6–5L junior</td><td><span class="rq preview">preview</span></td></tr>
+        <tr><td class="label">Green Gold Animation</td><td>Hyderabad</td><td>Chhota Bheem, original IP</td><td class="figure">₹3.5–6L est.</td><td><span class="rq draft">draft</span></td></tr>
+        <tr><td class="label">Digital Domain</td><td>Hyderabad</td><td>Titanic, Spider-Man VFX</td><td class="figure">₹7–10L est.</td><td><span class="rq draft">draft</span></td></tr>
+      </table>
+    </div>
+    <p class="fine">Most tier-1 studios run in-house training academies for freshers — often a better entry point than a generic diploma, since it's a direct hiring pipeline.</p>
+  </section>
+
+  <!-- ============ 05 FREELANCE ============ -->
+  <section class="section" id="freelance">
+    <div class="tag">05 — Freelance &amp; international remote</div>
+    <h2>Working for US/EU<br>clients from India</h2>
+    <p>The widest spread in this guide — and the one place where skill matters more than anywhere else, because there's no HR band to fall back on.</p>
+
+    <div class="grid-2">
+      <div class="card">
+        <h4>Freelance modeling (Archviz / product)</h4>
+        <div class="big">$15+/hr starting</div>
+        <p>Rates below this correlate with lower-quality output in the market. Games/manufacturing pay ~10% above archviz baseline; film/TV pays most.</p>
+      </div>
+      <div class="card">
+        <h4>Explainer / short commercial animation</h4>
+        <div class="big">₹25K–75K / piece</div>
+        <p>Priced per delivered 30-second piece rather than hourly — complexity-dependent, common on Upwork/Fiverr/direct outreach.</p>
+      </div>
+    </div>
+
+    <div class="callout">
+      <span class="ct">Honest framing</span>
+      <p>Freelance income data is the least reliable category in this guide — self-reported, inconsistent, dependent on niche and client-finding skill rather than raw ability. Treat every freelance figure as a floor-level anchor, not a target.</p>
+    </div>
+  </section>
+
+  <!-- ============ 06 FACTORS ============ -->
+  <section class="section" id="factors">
+    <div class="tag">06 — What actually moves your pay</div>
+    <h2>Ranked by real impact</h2>
+    <ul class="plain">
+      <li><strong>Portfolio / showreel quality</strong> — the single most cited factor everywhere. Recruiters weigh this above certificates or degree.</li>
+      <li><strong>Speed + reliability</strong> — clean keyframes, fewer errors, meeting deadlines. Separates fresher pay from junior pay faster than time served does.</li>
+      <li><strong>Software depth beyond the basics</strong> — Maya/Blender fluency is baseline now. Houdini, Nuke, Python, USD pipeline knowledge differentiate the ₹15L+ bracket.</li>
+      <li><strong>Specialization</strong> — generalists plateau earlier. FX simulation, rigging, compositing, and technical direction command premiums.</li>
+      <li><strong>City / studio tier</strong> — a bigger swing than expected: same skill can be worth 2× more at a Mumbai tier-1 studio vs. a tier-3 ad agency.</li>
+      <li><strong>English + client communication</strong> — matters disproportionately for freelance/international work, less for in-house roles.</li>
+      <li><strong>AI-tool fluency</strong> — emerging factor; studios increasingly value artists who use AI to speed up rote cleanup/roto work rather than resist it.</li>
+    </ul>
+  </section>
+
+  <!-- ============ 07 TIMELINE ============ -->
+  <section class="section" id="timeline">
+    <div class="tag">07 — A realistic timeline, not a fantasy one</div>
+    <h2>Year by year,<br>if you execute consistently</h2>
+    <p>Assumes steady portfolio work now, a real showreel by course-end, and consistent output after — a plausible trajectory grounded in the ranges above, not a guarantee.</p>
+
+    <div class="timeline">
+      <div class="tl-row">
+        <div class="tl-year">Y0</div>
+        <div class="tl-content">
+          <h4>Now — student <span class="rq final">final</span></h4>
+          <div class="range">₹0 · in training</div>
+          <p>Your only leverage right now is reel quality and consistency of practice. Highest-ROI period of the whole timeline, and it's unpaid — don't rush past it for an early paycheck.</p>
+        </div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-year">Y1</div>
+        <div class="tl-content">
+          <h4>Fresher <span class="rq final">final</span></h4>
+          <div class="range">₹2.5L – ₹4.8L</div>
+          <p>Modest pay is normal here — the real objective is screen credit and studio-quality workflow exposure, not the number.</p>
+        </div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-year">Y2–3</div>
+        <div class="tl-content">
+          <h4>Junior → production artist <span class="rq final">final</span></h4>
+          <div class="range">₹5L – ₹9L</div>
+          <p>Reel quality creates real divergence between peers here. Consistent, error-free delivery starts mattering more than raw flair.</p>
+        </div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-year">Y5</div>
+        <div class="tl-content">
+          <h4>Mid-level, possibly specializing <span class="rq preview">preview</span></h4>
+          <div class="range">₹9L – ₹16L</div>
+          <p>Decision point: generalize and stay flexible, or specialize — rigging, FX, product-viz pipeline — and command premium rates in a narrower lane.</p>
+        </div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-year">Y7–10</div>
+        <div class="tl-content">
+          <h4>Senior / lead <span class="rq preview">preview</span></h4>
+          <div class="range">₹18L – ₹30L+</div>
+          <p>Network and reputation now matter as much as raw skill — this is where "who you know" genuinely starts compounding your options.</p>
+        </div>
+      </div>
+      <div class="tl-row">
+        <div class="tl-year">Y15+</div>
+        <div class="tl-content">
+          <h4>Supervisor / director / own studio <span class="rq draft">draft</span></h4>
+          <div class="range">₹35L – ₹1Cr+ (wide variance)</div>
+          <p>You're no longer "a 3D artist with a salary" — you're running people, budgets, or a business. Data gets thin because the paths fully diverge: employed director vs. founder are different games.</p>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ============ 08 VERDICT ============ -->
+  <section class="section" id="verdict">
+    <div class="tag">08 — The actual verdict</div>
+    <h2>What this means<br>for you specifically</h2>
+    <p>You don't need thirty career levels or twenty-eight state tables to make your next decision. You need three things, and the data above answers all of them honestly:</p>
+
+    <ul class="plain">
+      <li><strong>Product animation is not a financial downgrade.</strong> Lower ceiling than film/cinematic VFX, but a shorter, steadier path to livable income and cleaner access to international freelance clients. The pull toward cinematic prestige is real and worth acknowledging — but it's an identity preference here, not a financially rational one based on this data.</li>
+      <li><strong>Your city matters less than your reel, until it suddenly matters a lot.</strong> Early career, portfolio beats geography. Once you're targeting tier-1 studios for senior roles, Mumbai/Bengaluru/Hyderabad presence or willingness to relocate becomes a real constraint.</li>
+      <li><strong>The single highest-leverage action right now is finishing one strong showreel piece</strong> — not more salary research, not comparing more career ladders. Everything above points back to the same lever.</li>
+    </ul>
+
+    <div class="callout hot">
+      <span class="ct">Smallest next action</span>
+      <p>Pick one specialization-adjacent piece for your reel this week — product render or a short character shot, whichever you're closer to finishing — and ship it, rather than expanding the research further. This document isn't the work. It's just the map.</p>
+    </div>
+  </section>
+
+  <footer>
+    <p><strong>Sources consulted:</strong> AmbitionBox, PayScale India, ERI SalaryExpert, Glassdoor (cross-checked, unreliable figures discarded), Naukri, plus industry write-ups from GUVI, ITM, MAAC, Vitrina, and Fueler. Genuine disagreement between sources is disclosed rather than averaged into false precision.</p>
+    <p style="margin-top:10px;">Compiled July 2026. Salary data drifts — treat anything older than 12–18 months as directional, not current, and re-check before a relocation or negotiation decision.</p>
+  </footer>
+
+</main>
+
+<script>
+  const links = document.querySelectorAll('.modebar a');
+  const sections = document.querySelectorAll('.section');
+
+  function onScroll(){
+    let current = sections[0].id;
+    sections.forEach(sec=>{
+      if(sec.getBoundingClientRect().top <= 140) current = sec.id;
+    });
+    links.forEach(a=> a.classList.toggle('active', a.getAttribute('href') === '#'+current));
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+</script>
+
+</body>
+</html>
