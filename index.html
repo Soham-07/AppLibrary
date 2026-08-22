@@ -591,6 +591,50 @@
   /* ---------------- load / dock / undock ---------------- */
   let currentList = [];
 
+  async function fetchAppsFolderList(cfg){
+    const headers = { Accept:'application/vnd.github+json' };
+    if(cfg.token) headers.Authorization = `Bearer ${cfg.token}`;
+    const res = await fetch(`https://api.github.com/repos/${cfg.owner}/${cfg.repo}/contents/apps`, { headers });
+    if(res.status === 404) return null; // folder doesn't exist yet — not the same as "confirmed empty"
+    if(!res.ok) throw new Error(`couldn't list apps folder (${res.status})`);
+    const data = await res.json();
+    return data.filter(f => f.type === 'file').map(f => f.name);
+  }
+
+  // Reconciles manifest.json against whatever files actually sit in apps/ —
+  // picks up anything uploaded straight through GitHub's own website, and
+  // drops entries for files that no longer exist. Only writes back to GitHub
+  // when a token is available; otherwise just reflects it for this view.
+  async function reconcileManifest(cfg, list){
+    let folderFiles;
+    try{ folderFiles = await fetchAppsFolderList(cfg); }
+    catch(e){ return { list, added:0, removed:0 }; }
+    if(folderFiles === null) return { list, added:0, removed:0 };
+
+    const known = new Set(list.map(a => a.filename));
+    const folderSet = new Set(folderFiles);
+    let newList = list.slice();
+    let added = 0;
+
+    folderFiles.forEach(fname => {
+      if(!known.has(fname)){
+        newList.push({ id:(crypto.randomUUID ? crypto.randomUUID() : String(Date.now()) + Math.random()), name: titleCase(fname), description:'', filename:fname, addedAt:new Date().toISOString() });
+        added++;
+      }
+    });
+    const beforeLen = newList.length;
+    newList = newList.filter(a => folderSet.has(a.filename));
+    const removed = beforeLen - newList.length;
+
+    if((added || removed) && cfg.token){
+      try{
+        const manifestFile = await ghGet('manifest.json', cfg);
+        await ghPut('manifest.json', b64EncodeUnicode(JSON.stringify(newList, null, 2)), 'Auto-reconcile manifest with apps folder', cfg, manifestFile ? manifestFile.sha : undefined);
+      }catch(e){ /* not persisted this round, will retry reconciling next load */ }
+    }
+    return { list:newList, added, removed };
+  }
+
   async function loadApps(){
     const cfg = getConfig();
     if(!cfg.owner || !cfg.repo){
@@ -604,10 +648,22 @@
       let list = [];
       if(res.ok) list = await res.json();
       else if(res.status !== 404) throw new Error('manifest fetch failed');
+
+      const reconciled = await reconcileManifest(cfg, list);
+      list = reconciled.list;
+
       currentList = list;
       renderGrid(list);
       renderManageList(list);
-      setStatus('ok', `hangar online · ${list.length} tool${list.length===1?'':'s'} docked · last sync ${timeNow()}`);
+
+      if(reconciled.added || reconciled.removed){
+        const parts = [];
+        if(reconciled.added) parts.push(`+${reconciled.added} found in repo`);
+        if(reconciled.removed) parts.push(`-${reconciled.removed} missing`);
+        setStatus('ok', `✓ synced · reconciled (${parts.join(', ')}) · ${timeNow()}`);
+      } else {
+        setStatus('ok', `hangar online · ${list.length} tool${list.length===1?'':'s'} docked · last sync ${timeNow()}`);
+      }
     }catch(e){
       setStatus('error', `connection failed · check settings · ${e.message}`);
       renderNotConnected();
