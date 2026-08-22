@@ -1,0 +1,1037 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>ERLC DOT Guide</title>
+<style>
+  @import url('https://fonts.googleapis.com/css2?family=Rajdhani:wght@400;500;600;700&family=Share+Tech+Mono&display=swap');
+
+  :root {
+    --bg: #0a0c10;
+    --panel: #0f1318;
+    --border: #1e2830;
+    --accent: #f5a623;
+    --accent2: #e8522a;
+    --blue: #3b82f6;
+    --green: #22c55e;
+    --red: #ef4444;
+    --text: #c8d6e0;
+    --dim: #4a5a68;
+    --glow: rgba(245,166,35,0.15);
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    background: var(--bg);
+    color: var(--text);
+    font-family: 'Rajdhani', sans-serif;
+    min-height: 100vh;
+    overflow-x: hidden;
+  }
+
+  /* SCANLINE EFFECT */
+  body::before {
+    content: '';
+    position: fixed;
+    inset: 0;
+    background: repeating-linear-gradient(
+      0deg,
+      transparent,
+      transparent 2px,
+      rgba(0,0,0,0.03) 2px,
+      rgba(0,0,0,0.03) 4px
+    );
+    pointer-events: none;
+    z-index: 9999;
+  }
+
+  .header {
+    background: linear-gradient(135deg, #0f1318 0%, #141a22 100%);
+    border-bottom: 2px solid var(--accent);
+    padding: 20px 30px;
+    display: flex;
+    align-items: center;
+    gap: 16px;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .header::after {
+    content: '';
+    position: absolute;
+    bottom: 0; left: 0; right: 0;
+    height: 1px;
+    background: linear-gradient(90deg, transparent, var(--accent), transparent);
+    animation: sweep 3s infinite;
+  }
+
+  @keyframes sweep {
+    0% { transform: translateX(-100%); }
+    100% { transform: translateX(100%); }
+  }
+
+  .badge {
+    background: var(--accent);
+    color: #000;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    padding: 4px 10px;
+    letter-spacing: 2px;
+    clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+  }
+
+  .header h1 {
+    font-size: 28px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    color: #fff;
+    text-transform: uppercase;
+  }
+
+  .header h1 span { color: var(--accent); }
+
+  .status-dot {
+    width: 8px; height: 8px;
+    background: var(--green);
+    border-radius: 50%;
+    margin-left: auto;
+    box-shadow: 0 0 8px var(--green);
+    animation: pulse 2s infinite;
+  }
+
+  @keyframes pulse {
+    0%, 100% { opacity: 1; }
+    50% { opacity: 0.4; }
+  }
+
+  .status-label {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--green);
+    letter-spacing: 1px;
+  }
+
+  /* NAV */
+  .nav {
+    display: flex;
+    gap: 2px;
+    padding: 16px 30px 0;
+    background: #0c1015;
+    border-bottom: 1px solid var(--border);
+    overflow-x: auto;
+    scrollbar-width: none;
+  }
+
+  .nav::-webkit-scrollbar { display: none; }
+
+  .nav-btn {
+    background: none;
+    border: none;
+    color: var(--dim);
+    font-family: 'Rajdhani', sans-serif;
+    font-size: 13px;
+    font-weight: 600;
+    letter-spacing: 2px;
+    text-transform: uppercase;
+    padding: 10px 20px;
+    cursor: pointer;
+    position: relative;
+    transition: color 0.2s;
+    white-space: nowrap;
+    border-radius: 4px 4px 0 0;
+  }
+
+  .nav-btn:hover { color: var(--text); background: rgba(255,255,255,0.03); }
+
+  .nav-btn.active {
+    color: var(--accent);
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-bottom: none;
+  }
+
+  .nav-btn.active::after {
+    content: '';
+    position: absolute;
+    bottom: -1px; left: 0; right: 0;
+    height: 2px;
+    background: var(--panel);
+  }
+
+  /* CONTENT */
+  .content {
+    padding: 30px;
+    max-width: 900px;
+    margin: 0 auto;
+  }
+
+  .section { display: none; animation: fadeIn 0.3s ease; }
+  .section.active { display: block; }
+
+  @keyframes fadeIn {
+    from { opacity: 0; transform: translateY(8px); }
+    to { opacity: 1; transform: translateY(0); }
+  }
+
+  .section-title {
+    font-size: 13px;
+    font-weight: 700;
+    letter-spacing: 4px;
+    color: var(--accent);
+    text-transform: uppercase;
+    margin-bottom: 20px;
+    display: flex;
+    align-items: center;
+    gap: 12px;
+  }
+
+  .section-title::after {
+    content: '';
+    flex: 1;
+    height: 1px;
+    background: linear-gradient(90deg, var(--border), transparent);
+  }
+
+  /* INFO CARDS */
+  .card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--accent);
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    position: relative;
+    transition: border-color 0.2s, box-shadow 0.2s;
+  }
+
+  .card:hover {
+    border-color: var(--accent);
+    box-shadow: 0 0 20px var(--glow);
+  }
+
+  .card h3 {
+    font-size: 16px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    color: #fff;
+    margin-bottom: 8px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .card p {
+    font-size: 14px;
+    line-height: 1.6;
+    color: var(--text);
+  }
+
+  .card ul {
+    list-style: none;
+    margin-top: 10px;
+  }
+
+  .card ul li {
+    font-size: 14px;
+    color: var(--text);
+    padding: 4px 0;
+    padding-left: 16px;
+    position: relative;
+  }
+
+  .card ul li::before {
+    content: '▸';
+    position: absolute;
+    left: 0;
+    color: var(--accent);
+  }
+
+  .tag {
+    display: inline-block;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 10px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 2px 8px;
+    border-radius: 2px;
+    text-transform: uppercase;
+  }
+
+  .tag-green { background: rgba(34,197,94,0.15); color: var(--green); border: 1px solid rgba(34,197,94,0.3); }
+  .tag-orange { background: rgba(245,166,35,0.15); color: var(--accent); border: 1px solid rgba(245,166,35,0.3); }
+  .tag-red { background: rgba(239,68,68,0.15); color: var(--red); border: 1px solid rgba(239,68,68,0.3); }
+  .tag-blue { background: rgba(59,130,246,0.15); color: var(--blue); border: 1px solid rgba(59,130,246,0.3); }
+
+  /* ROLE GRID */
+  .role-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(260px, 1fr));
+    gap: 14px;
+    margin-bottom: 20px;
+  }
+
+  .role-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 18px;
+    cursor: pointer;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .role-card::before {
+    content: '';
+    position: absolute;
+    top: 0; left: 0;
+    width: 3px;
+    height: 100%;
+    background: var(--dim);
+    transition: background 0.2s;
+  }
+
+  .role-card:hover, .role-card.selected {
+    border-color: var(--accent);
+    box-shadow: 0 0 16px var(--glow);
+  }
+
+  .role-card:hover::before, .role-card.selected::before {
+    background: var(--accent);
+  }
+
+  .role-card h4 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+  }
+
+  .role-card p {
+    font-size: 12px;
+    color: var(--dim);
+    line-height: 1.4;
+  }
+
+  .role-detail {
+    display: none;
+    background: var(--panel);
+    border: 1px solid var(--accent);
+    border-left: 3px solid var(--accent);
+    padding: 24px;
+    margin-top: 8px;
+    animation: fadeIn 0.2s ease;
+    box-shadow: 0 0 30px var(--glow);
+  }
+
+  .role-detail.active { display: block; }
+
+  .role-detail h3 {
+    font-size: 18px;
+    font-weight: 700;
+    color: var(--accent);
+    letter-spacing: 2px;
+    margin-bottom: 14px;
+  }
+
+  /* CODES */
+  .codes-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(180px, 1fr));
+    gap: 10px;
+    margin-bottom: 24px;
+  }
+
+  .code-btn {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    color: var(--text);
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 13px;
+    padding: 12px 16px;
+    cursor: pointer;
+    text-align: left;
+    transition: all 0.2s;
+    position: relative;
+    overflow: hidden;
+  }
+
+  .code-btn::before {
+    content: '';
+    position: absolute;
+    inset: 0;
+    background: var(--glow);
+    opacity: 0;
+    transition: opacity 0.2s;
+  }
+
+  .code-btn:hover::before, .code-btn.active::before { opacity: 1; }
+
+  .code-btn:hover, .code-btn.active {
+    border-color: var(--accent);
+    color: var(--accent);
+  }
+
+  .code-label {
+    font-size: 10px;
+    color: var(--dim);
+    display: block;
+    margin-bottom: 2px;
+    letter-spacing: 1px;
+    text-transform: uppercase;
+  }
+
+  .code-panel {
+    display: none;
+    background: #07090c;
+    border: 1px solid var(--accent);
+    padding: 20px 24px;
+    margin-bottom: 16px;
+    animation: fadeIn 0.2s ease;
+  }
+
+  .code-panel.active { display: block; }
+
+  .code-panel h3 {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 16px;
+    color: var(--accent);
+    margin-bottom: 14px;
+    letter-spacing: 2px;
+  }
+
+  .code-list {
+    list-style: none;
+  }
+
+  .code-list li {
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+    padding: 8px 0;
+    border-bottom: 1px solid var(--border);
+    font-size: 14px;
+  }
+
+  .code-list li:last-child { border-bottom: none; }
+
+  .code-num {
+    font-family: 'Share Tech Mono', monospace;
+    color: var(--accent);
+    min-width: 60px;
+    font-weight: 700;
+  }
+
+  .code-desc { color: var(--text); }
+
+  /* COMMAND BOX */
+  .cmd-box {
+    background: #07090c;
+    border: 1px solid var(--border);
+    border-left: 3px solid var(--blue);
+    padding: 16px 20px;
+    margin-bottom: 12px;
+    font-family: 'Share Tech Mono', monospace;
+  }
+
+  .cmd-box .cmd-title {
+    font-size: 11px;
+    color: var(--blue);
+    letter-spacing: 2px;
+    margin-bottom: 10px;
+    text-transform: uppercase;
+  }
+
+  .cmd-box code {
+    display: block;
+    font-size: 13px;
+    color: #7dd3fc;
+    margin: 4px 0;
+    padding: 2px 0;
+  }
+
+  .cmd-box code span {
+    color: var(--dim);
+    font-size: 11px;
+    margin-left: 8px;
+  }
+
+  /* VEHICLE TIER */
+  .tier {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 16px 20px;
+    margin-bottom: 10px;
+    display: flex;
+    gap: 16px;
+    align-items: flex-start;
+  }
+
+  .tier-badge {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    font-weight: 700;
+    letter-spacing: 1px;
+    padding: 4px 10px;
+    clip-path: polygon(6px 0%, 100% 0%, calc(100% - 6px) 100%, 0% 100%);
+    white-space: nowrap;
+    margin-top: 2px;
+  }
+
+  .tier-light { background: rgba(34,197,94,0.2); color: var(--green); }
+  .tier-mid { background: rgba(245,166,35,0.2); color: var(--accent); }
+  .tier-heavy { background: rgba(239,68,68,0.2); color: var(--red); }
+
+  /* GRIND */
+  .grind-step {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    padding: 18px 22px;
+    margin-bottom: 10px;
+    display: flex;
+    gap: 20px;
+    align-items: flex-start;
+    transition: border-color 0.2s;
+  }
+
+  .grind-step:hover { border-color: var(--accent); }
+
+  .step-num {
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 28px;
+    font-weight: 700;
+    color: var(--accent);
+    opacity: 0.4;
+    line-height: 1;
+    min-width: 40px;
+  }
+
+  .step-content h4 {
+    font-size: 15px;
+    font-weight: 700;
+    color: #fff;
+    margin-bottom: 6px;
+    letter-spacing: 1px;
+  }
+
+  .step-content p { font-size: 13px; color: var(--text); line-height: 1.5; }
+
+  /* DIVIDER */
+  .divider {
+    height: 1px;
+    background: linear-gradient(90deg, var(--border), transparent);
+    margin: 24px 0;
+  }
+
+  /* FOOTER */
+  .footer {
+    text-align: center;
+    padding: 20px;
+    font-family: 'Share Tech Mono', monospace;
+    font-size: 11px;
+    color: var(--dim);
+    letter-spacing: 2px;
+    border-top: 1px solid var(--border);
+  }
+
+  /* SCROLLBAR */
+  ::-webkit-scrollbar { width: 4px; height: 4px; }
+  ::-webkit-scrollbar-track { background: var(--bg); }
+  ::-webkit-scrollbar-thumb { background: var(--border); }
+  ::-webkit-scrollbar-thumb:hover { background: var(--dim); }
+
+  /* TIPS */
+  .tip-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(240px, 1fr)); gap: 12px; }
+
+  .tip-card {
+    background: var(--panel);
+    border: 1px solid var(--border);
+    border-top: 2px solid var(--green);
+    padding: 14px 18px;
+  }
+
+  .tip-card p { font-size: 13px; color: var(--text); line-height: 1.5; }
+  .tip-card .tip-icon { font-size: 20px; margin-bottom: 8px; }
+</style>
+</head>
+<body>
+
+<div class="header">
+  <div class="badge">ERLC</div>
+  <h1>D<span>O</span>T <span>FIELD</span> GUIDE</h1>
+  <div style="display:flex;align-items:center;gap:8px;margin-left:auto;">
+    <div class="status-dot"></div>
+    <span class="status-label">SYSTEM ONLINE</span>
+  </div>
+</div>
+
+<div class="nav" id="nav">
+  <button class="nav-btn active" onclick="showSection('overview', this)">Overview</button>
+  <button class="nav-btn" onclick="showSection('roles', this)">Roles</button>
+  <button class="nav-btn" onclick="showSection('vehicles', this)">Vehicles</button>
+  <button class="nav-btn" onclick="showSection('codes', this)">10-Codes</button>
+  <button class="nav-btn" onclick="showSection('commands', this)">Commands</button>
+  <button class="nav-btn" onclick="showSection('grind', this)">Grind Plan</button>
+  <button class="nav-btn" onclick="showSection('tips', this)">Tips</button>
+</div>
+
+<div class="content">
+
+  <!-- OVERVIEW -->
+  <div class="section active" id="overview">
+    <div class="section-title">DOT Overview</div>
+
+    <div class="card">
+      <h3>🚧 What is DOT?</h3>
+      <p>Department of Transportation handles <strong>road maintenance, cleanup, and traffic control</strong> in Liberty County. You respond to real calls like debris, oil spills, downed trees, potholes, and vehicle towing.</p>
+    </div>
+
+    <div class="card">
+      <h3>📍 Office Location</h3>
+      <p>Spawn at <strong>DOT Office on Cline Street</strong>, near the Power Plant and River City Police Department.</p>
+    </div>
+
+    <div class="card">
+      <h3>🎮 How to Start</h3>
+      <ul>
+        <li>Spawn as Civilian</li>
+        <li>Click Menu → Team → DOT</li>
+        <li>Type a call sign (e.g. 1-2-3 or BUN) → Confirm</li>
+        <li>Spawn at DOT office on Cline St</li>
+        <li>Open V/MDT to see active calls → Start responding!</li>
+      </ul>
+    </div>
+
+    <div class="card" style="border-left-color: var(--green)">
+      <h3>🔑 Key Controls</h3>
+      <ul>
+        <li><span class="tag tag-orange">E</span> &nbsp; Interact — use tools on calls</li>
+        <li><span class="tag tag-blue">V / MDT</span> &nbsp; View all active calls</li>
+        <li><span class="tag tag-green">Radio</span> &nbsp; Coordinate with other DOTs</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- ROLES -->
+  <div class="section" id="roles">
+    <div class="section-title">DOT Roles</div>
+
+    <div class="role-grid">
+      <div class="role-card" onclick="showRole('trainee', this)">
+        <div style="margin-bottom:6px"><span class="tag tag-green">BEGINNER</span></div>
+        <h4>Trainee DOT Worker</h4>
+        <p>Learn the basics of DOT calls and gear</p>
+      </div>
+      <div class="role-card" onclick="showRole('operator', this)">
+        <div style="margin-bottom:6px"><span class="tag tag-blue">MID</span></div>
+        <h4>DOT Operator</h4>
+        <p>All-round daily calls, most common role</p>
+      </div>
+      <div class="role-card" onclick="showRole('tow', this)">
+        <div style="margin-bottom:6px"><span class="tag tag-blue">MID</span></div>
+        <h4>Tow Operator</h4>
+        <p>Specialize in towing crashed/obstructed vehicles</p>
+      </div>
+      <div class="role-card" onclick="showRole('sweeper', this)">
+        <div style="margin-bottom:6px"><span class="tag tag-orange">UTILITY</span></div>
+        <h4>Street Sweeper</h4>
+        <p>Road cleaning, no lights/siren, chill role</p>
+      </div>
+      <div class="role-card" onclick="showRole('tech', this)">
+        <div style="margin-bottom:6px"><span class="tag tag-orange">ADVANCED</span></div>
+        <h4>Technician / Senior Operator</h4>
+        <p>Big repairs, intersections, signal lights</p>
+      </div>
+      <div class="role-card" onclick="showRole('super', this)">
+        <div style="margin-bottom:6px"><span class="tag tag-red">COMMAND</span></div>
+        <h4>Supervisor / Senior Tech</h4>
+        <p>Lead DOT ops, assign sectors, big-scene control</p>
+      </div>
+    </div>
+
+    <!-- ROLE DETAILS (hidden by default) -->
+    <div class="role-detail" id="role-trainee">
+      <h3>TRAINEE DOT WORKER</h3>
+      <ul class="code-list">
+        <li><span class="code-num">WORK</span><span class="code-desc">Learn calls: road debris, potholes, oil spills, broken street lamps</span></li>
+        <li><span class="code-num">GEAR</span><span class="code-desc">Broom, traffic cones, warning lights, uniform, flashlight, radio</span></li>
+        <li><span class="code-num">GOAL</span><span class="code-desc">Practice calls, understand DOT workflow, earn Trainee XP</span></li>
+        <li><span class="code-num">TIP</span><span class="code-desc">Join calls near DOT office first. Use V/MDT constantly. Assist higher ranks on big scenes</span></li>
+      </ul>
+    </div>
+
+    <div class="role-detail" id="role-operator">
+      <h3>DOT OPERATOR (ALL-ROUND)</h3>
+      <ul class="code-list">
+        <li><span class="code-num">WORK</span><span class="code-desc">Respond to all DOT calls in your area — debris, potholes, broken lamps, downed trees</span></li>
+        <li><span class="code-num">GEAR</span><span class="code-desc">Pickup truck, broom truck, basic tools</span></li>
+        <li><span class="code-num">GOAL</span><span class="code-desc">Most common DOT role. Handle everyday jobs. Good XP grinder</span></li>
+        <li><span class="code-num">TIP</span><span class="code-desc">Use a fast car to respond to oldest calls first (more XP)</span></li>
+      </ul>
+    </div>
+
+    <div class="role-detail" id="role-tow">
+      <h3>TOW OPERATOR</h3>
+      <ul class="code-list">
+        <li><span class="code-num">WORK</span><span class="code-desc">Tow cars from crashes, obstructions, and accident scenes</span></li>
+        <li><span class="code-num">GEAR</span><span class="code-desc">Tow truck, wrecker rig, chains</span></li>
+        <li><span class="code-num">GOAL</span><span class="code-desc">Specialize in obstruction calls. Tow fast = earn XP fast</span></li>
+        <li><span class="code-num">TIP</span><span class="code-desc">Spawn a fast DOT car first. Join tow calls near you. Work with other DOTs on multi-car scenes</span></li>
+      </ul>
+    </div>
+
+    <div class="role-detail" id="role-sweeper">
+      <h3>STREET SWEEPER</h3>
+      <ul class="code-list">
+        <li><span class="code-num">WORK</span><span class="code-desc">Sweep roads using sweeper truck. Clear debris, leaves, and trash from streets</span></li>
+        <li><span class="code-num">GEAR</span><span class="code-desc">Street sweeper truck, warning lights (NO lights/siren during sweep)</span></li>
+        <li><span class="code-num">GOAL</span><span class="code-desc">Keep roads clean. No police/EMS interaction needed. Chill and consistent</span></li>
+        <li><span class="code-num">TIP</span><span class="code-desc">Great for passive XP. Low stress. Good for learning the map</span></li>
+      </ul>
+    </div>
+
+    <div class="role-detail" id="role-tech">
+      <h3>TECHNICIAN / SENIOR OPERATOR</h3>
+      <ul class="code-list">
+        <li><span class="code-num">WORK</span><span class="code-desc">Handle big jobs: intersection maintenance, road signs, signal lights, heavy repairs</span></li>
+        <li><span class="code-num">GEAR</span><span class="code-desc">Heavy trucks, ladders, road tools</span></li>
+        <li><span class="code-num">GOAL</span><span class="code-desc">Expert DOT. Coordinate with other DOTs on big scenes. Train beginners</span></li>
+        <li><span class="code-num">TIP</span><span class="code-desc">Join calls far from DOT office. Use all tools: traffic lights, road signs, cones. Create complex scenes</span></li>
+      </ul>
+    </div>
+
+    <div class="role-detail" id="role-super">
+      <h3>SUPERVISOR / SENIOR TECHNICIAN</h3>
+      <ul class="code-list">
+        <li><span class="code-num">WORK</span><span class="code-desc">Lead DOT operations, assign sectors, coordinate all calls</span></li>
+        <li><span class="code-num">RANKS</span><span class="code-desc">Senior Technician → Supervisor</span></li>
+        <li><span class="code-num">GOAL</span><span class="code-desc">Command DOT units. Big-scene control. Ensure all DOTs follow safety procedures</span></li>
+        <li><span class="code-num">TIP</span><span class="code-desc">Use radio constantly. Full DOT mastery needed. Choose any vehicle or tool freely</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- VEHICLES -->
+  <div class="section" id="vehicles">
+    <div class="section-title">DOT Vehicles</div>
+
+    <div class="tier">
+      <span class="tier-badge tier-light">LIGHT</span>
+      <div>
+        <p style="font-size:14px;line-height:1.6;"><strong style="color:#fff;">Pickup Truck</strong> — Fast starter, daily calls<br>
+        <strong style="color:#fff;">Broom Truck</strong> — Road clearing<br>
+        <strong style="color:#fff;">Electric Utility Truck</strong> — Budget DOT starter</p>
+      </div>
+    </div>
+
+    <div class="tier">
+      <span class="tier-badge tier-mid">MEDIUM</span>
+      <div>
+        <p style="font-size:14px;line-height:1.6;"><strong style="color:#fff;">Tow Truck</strong> — Core tow calls<br>
+        <strong style="color:#fff;">Cone Truck</strong> — Scene setup and blocking<br>
+        <strong style="color:#fff;">Salt Truck</strong> — Specialized road treatment<br>
+        <strong style="color:#fff;">Dodge Ram Bucket Truck</strong> — Mid-range upgrade</p>
+      </div>
+    </div>
+
+    <div class="tier">
+      <span class="tier-badge tier-heavy">HEAVY</span>
+      <div>
+        <p style="font-size:14px;line-height:1.6;"><strong style="color:#fff;">Wrecker</strong> — Heavy tow ops<br>
+        <strong style="color:#fff;">Large Dump Truck</strong> — Heavy debris removal<br>
+        <strong style="color:#fff;">Heavy Wrecker</strong> — Premium DOT vehicle, big crashes</p>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="card" style="border-left-color:var(--green)">
+      <h3>💡 Vehicle Strategy</h3>
+      <ul>
+        <li>Start with Light — get calls fast, learn the map</li>
+        <li>Move to Medium when doing tow/obstruction calls</li>
+        <li>Heavy only for big scenes or senior rank ops</li>
+        <li>Always use a fast car to respond first = more XP</li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- 10-CODES -->
+  <div class="section" id="codes">
+    <div class="section-title">10-Codes Reference</div>
+    <p style="font-size:13px;color:var(--dim);margin-bottom:18px;font-family:'Share Tech Mono',monospace;">CLICK A CODE CATEGORY TO EXPAND</p>
+
+    <div class="codes-grid">
+      <button class="code-btn" onclick="showCode('status', this)">
+        <span class="code-label">Category</span>
+        📡 Status Codes
+      </button>
+      <button class="code-btn" onclick="showCode('traffic', this)">
+        <span class="code-label">Category</span>
+        🚗 Traffic Codes
+      </button>
+      <button class="code-btn" onclick="showCode('emergency', this)">
+        <span class="code-label">Category</span>
+        🚨 Emergency Codes
+      </button>
+      <button class="code-btn" onclick="showCode('dot_codes', this)">
+        <span class="code-label">Category</span>
+        🚧 DOT Specific
+      </button>
+      <button class="code-btn" onclick="showCode('location', this)">
+        <span class="code-label">Category</span>
+        📍 Location Codes
+      </button>
+      <button class="code-btn" onclick="showCode('general', this)">
+        <span class="code-label">Category</span>
+        📻 General Radio
+      </button>
+    </div>
+
+    <div class="code-panel" id="code-status">
+      <h3>📡 STATUS CODES</h3>
+      <ul class="code-list">
+        <li><span class="code-num">10-4</span><span class="code-desc">Acknowledged / Copy that / Roger</span></li>
+        <li><span class="code-num">10-6</span><span class="code-desc">Busy — standby</span></li>
+        <li><span class="code-num">10-7</span><span class="code-desc">Out of service</span></li>
+        <li><span class="code-num">10-8</span><span class="code-desc">In service / Available</span></li>
+        <li><span class="code-num">10-9</span><span class="code-desc">Repeat last message</span></li>
+        <li><span class="code-num">10-23</span><span class="code-desc">Arrived at scene</span></li>
+        <li><span class="code-num">10-42</span><span class="code-desc">End of tour / Off duty</span></li>
+      </ul>
+    </div>
+
+    <div class="code-panel" id="code-traffic">
+      <h3>🚗 TRAFFIC CODES</h3>
+      <ul class="code-list">
+        <li><span class="code-num">10-50</span><span class="code-desc">Traffic accident</span></li>
+        <li><span class="code-num">10-55</span><span class="code-desc">Intoxicated driver</span></li>
+        <li><span class="code-num">10-80</span><span class="code-desc">Vehicle pursuit in progress</span></li>
+        <li><span class="code-num">10-97</span><span class="code-desc">Check signals (traffic lights)</span></li>
+        <li><span class="code-num">10-38</span><span class="code-desc">Vehicle stop</span></li>
+      </ul>
+    </div>
+
+    <div class="code-panel" id="code-emergency">
+      <h3>🚨 EMERGENCY CODES</h3>
+      <ul class="code-list">
+        <li><span class="code-num">10-33</span><span class="code-desc">Emergency — all units stand by</span></li>
+        <li><span class="code-num">10-13</span><span class="code-desc">Officer / unit needs assistance</span></li>
+        <li><span class="code-num">10-52</span><span class="code-desc">Ambulance needed</span></li>
+        <li><span class="code-num">10-70</span><span class="code-desc">Fire alarm / fire in progress</span></li>
+        <li><span class="code-num">Code 3</span><span class="code-desc">Respond with lights and sirens (emergency)</span></li>
+        <li><span class="code-num">Code 4</span><span class="code-desc">All clear — no further assistance needed</span></li>
+      </ul>
+    </div>
+
+    <div class="code-panel" id="code-dot_codes">
+      <h3>🚧 DOT SPECIFIC CODES</h3>
+      <ul class="code-list">
+        <li><span class="code-num">DOT-1</span><span class="code-desc">Road debris call — clear the obstruction</span></li>
+        <li><span class="code-num">DOT-2</span><span class="code-desc">Oil spill on roadway — cleanup needed</span></li>
+        <li><span class="code-num">DOT-3</span><span class="code-desc">Downed tree blocking road</span></li>
+        <li><span class="code-num">DOT-4</span><span class="code-desc">Pothole repair needed</span></li>
+        <li><span class="code-num">DOT-5</span><span class="code-desc">Broken street lamp</span></li>
+        <li><span class="code-num">DOT-6</span><span class="code-desc">Road sign down or missing</span></li>
+        <li><span class="code-num">DOT-7</span><span class="code-desc">Tow request — obstructed vehicle</span></li>
+        <li><span class="code-num">DOT-8</span><span class="code-desc">Intersection signal maintenance</span></li>
+      </ul>
+    </div>
+
+    <div class="code-panel" id="code-location">
+      <h3>📍 LOCATION CODES</h3>
+      <ul class="code-list">
+        <li><span class="code-num">10-20</span><span class="code-desc">What is your location?</span></li>
+        <li><span class="code-num">10-21</span><span class="code-desc">Call by telephone</span></li>
+        <li><span class="code-num">10-25</span><span class="code-desc">Report to / meet at (location)</span></li>
+        <li><span class="code-num">10-76</span><span class="code-desc">En route to scene</span></li>
+        <li><span class="code-num">10-77</span><span class="code-desc">ETA (estimated time of arrival)</span></li>
+      </ul>
+    </div>
+
+    <div class="code-panel" id="code-general">
+      <h3>📻 GENERAL RADIO CODES</h3>
+      <ul class="code-list">
+        <li><span class="code-num">10-1</span><span class="code-desc">Signal weak / poor reception</span></li>
+        <li><span class="code-num">10-2</span><span class="code-desc">Signal good / loud and clear</span></li>
+        <li><span class="code-num">10-3</span><span class="code-desc">Stop transmitting</span></li>
+        <li><span class="code-num">10-10</span><span class="code-desc">Fight in progress</span></li>
+        <li><span class="code-num">10-16</span><span class="code-desc">Pick up (person/package)</span></li>
+        <li><span class="code-num">10-19</span><span class="code-desc">Return to / go to station</span></li>
+        <li><span class="code-num">10-36</span><span class="code-desc">Correct time</span></li>
+        <li><span class="code-num">10-99</span><span class="code-desc">Mission complete / assignment done</span></li>
+      </ul>
+    </div>
+  </div>
+
+  <!-- COMMANDS -->
+  <div class="section" id="commands">
+    <div class="section-title">Chat Commands</div>
+
+    <div class="cmd-box">
+      <div class="cmd-title">Messaging Commands</div>
+      <code>/msg [player] [message] <span>— Direct private message to a player</span></code>
+      <code>/me [action] <span>— Roleplay action in local chat</span></code>
+      <code>/local [message] <span>— Message to nearby players only</span></code>
+      <code>/group [message] <span>— Message to your DOT team group</span></code>
+    </div>
+
+    <div class="cmd-box" style="border-left-color: var(--accent);">
+      <div class="cmd-title" style="color:var(--accent);">DOT Interaction Keys</div>
+      <code>E <span>— Interact with tools and calls on scene</span></code>
+      <code>V or MDT <span>— Open MDT — view all active calls, join oldest for XP</span></code>
+      <code>Radio <span>— Coordinate with other DOT units</span></code>
+    </div>
+
+    <div class="cmd-box" style="border-left-color: var(--green);">
+      <div class="cmd-title" style="color:var(--green);">Starting DOT Session</div>
+      <code>1. Spawn Civilian <span>— Default start</span></code>
+      <code>2. Menu → Team → DOT <span>— Switch to DOT department</span></code>
+      <code>3. Type callsign (e.g. 1-2-3, BUN) <span>— Your DOT identifier on radio</span></code>
+      <code>4. Spawn at Cline St DOT Office <span>— Near Power Plant</span></code>
+      <code>5. Open V/MDT → Join oldest call <span>— Max XP strategy</span></code>
+    </div>
+  </div>
+
+  <!-- GRIND PLAN -->
+  <div class="section" id="grind">
+    <div class="section-title">Daily Grind Plan</div>
+
+    <div style="margin-bottom:20px;">
+      <span class="tag tag-green">BEGINNER</span>
+      <span style="font-size:12px;color:var(--dim);margin-left:8px;font-family:'Share Tech Mono',monospace;">TRAINEE → OPERATOR PATH</span>
+    </div>
+
+    <div class="grind-step">
+      <div class="step-num">01</div>
+      <div class="step-content">
+        <h4>Round 1 — Learn the Calls</h4>
+        <p>Do 10–15 DOT calls near the DOT office. Debris, oil spills, small trees. Use V/MDT constantly. Focus on understanding call workflow.</p>
+      </div>
+    </div>
+
+    <div class="grind-step">
+      <div class="step-num">02</div>
+      <div class="step-content">
+        <h4>Round 2 — Tow and Big Clears</h4>
+        <p>Spawn a tow truck. Join crash and obstruction calls. Tow vehicles, clear debris. Combine with other DOTs on big scenes.</p>
+      </div>
+    </div>
+
+    <div class="grind-step">
+      <div class="step-num">03</div>
+      <div class="step-content">
+        <h4>Round 3 — Senior Scene Work</h4>
+        <p>Join calls far from DOT office. Use all tools: cones, traffic lights, road signs. Create full scene setups. Coordinate via radio.</p>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div style="margin-bottom:20px;">
+      <span class="tag tag-orange">ADVANCED</span>
+      <span style="font-size:12px;color:var(--dim);margin-left:8px;font-family:'Share Tech Mono',monospace;">TECHNICIAN → SUPERVISOR PATH</span>
+    </div>
+
+    <div class="grind-step">
+      <div class="step-num">04</div>
+      <div class="step-content">
+        <h4>Max XP Strategy</h4>
+        <p>Always join the OLDEST calls first from MDT. Use a fast vehicle to get there first. Join 2–3 DOTs to one big call. Join active DOT servers for bonus XP and more vehicles.</p>
+      </div>
+    </div>
+
+    <div class="grind-step">
+      <div class="step-num">05</div>
+      <div class="step-content">
+        <h4>Supervisor Grind</h4>
+        <p>Lead big-scene DOT ops. Assign sectors to other DOTs. Radio coordination on complex calls. Full mastery of all tools and vehicles needed.</p>
+      </div>
+    </div>
+  </div>
+
+  <!-- TIPS -->
+  <div class="section" id="tips">
+    <div class="section-title">Pro Tips</div>
+
+    <div class="tip-grid">
+      <div class="tip-card">
+        <div class="tip-icon">📋</div>
+        <p><strong style="color:#fff;">Oldest calls = most XP.</strong> Always sort MDT by oldest and hit those first before others grab them.</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-icon">🚗</div>
+        <p><strong style="color:#fff;">Speed is XP.</strong> Always spawn a fast DOT vehicle so you reach calls before other DOTs.</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-icon">👥</div>
+        <p><strong style="color:#fff;">Stack up on big calls.</strong> 2–3 DOTs on one big scene = more XP for everyone. Team up.</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-icon">🚦</div>
+        <p><strong style="color:#fff;">Cones always go first.</strong> Set up traffic cones to block roads before working any call. Safety = RP points.</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-icon">🌐</div>
+        <p><strong style="color:#fff;">Join DOT-specific servers.</strong> Dedicated DOT servers give extra XP, more vehicles, and active co-workers.</p>
+      </div>
+      <div class="tip-card">
+        <div class="tip-icon">📻</div>
+        <p><strong style="color:#fff;">Radio is your best friend.</strong> Coordinate constantly. Announce your location and ETA to avoid overlaps.</p>
+      </div>
+    </div>
+
+    <div class="divider"></div>
+
+    <div class="card" style="border-left-color:var(--accent2)">
+      <h3>⚡ Role Progression Path</h3>
+      <p style="font-family:'Share Tech Mono',monospace;font-size:13px;line-height:2;color:var(--text);">
+        <span style="color:var(--green)">Trainee</span> → <span style="color:var(--blue)">DOT Operator</span> → <span style="color:var(--blue)">Tow Operator</span> → <span style="color:var(--accent)">Technician</span> → <span style="color:var(--red)">Supervisor</span>
+      </p>
+      <p style="font-size:13px;margin-top:8px;">Parallel path: <span style="color:var(--green)">Street Sweeper</span> anytime for chill passive XP</p>
+    </div>
+  </div>
+
+</div>
+
+<div class="footer">ERLC DOT FIELD GUIDE &nbsp;|&nbsp; LIBERTY COUNTY &nbsp;|&nbsp; ALL UNITS STANDBY</div>
+
+<script>
+  function showSection(id, btn) {
+    document.querySelectorAll('.section').forEach(s => s.classList.remove('active'));
+    document.querySelectorAll('.nav-btn').forEach(b => b.classList.remove('active'));
+    document.getElementById(id).classList.add('active');
+    btn.classList.add('active');
+    // reset code panels when switching
+    document.querySelectorAll('.code-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.code-btn').forEach(b => b.classList.remove('active'));
+    document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+    document.querySelectorAll('.role-detail').forEach(d => d.classList.remove('active'));
+  }
+
+  function showRole(id, card) {
+    const wasSelected = card.classList.contains('selected');
+    document.querySelectorAll('.role-card').forEach(c => c.classList.remove('selected'));
+    document.querySelectorAll('.role-detail').forEach(d => d.classList.remove('active'));
+    if (!wasSelected) {
+      card.classList.add('selected');
+      document.getElementById('role-' + id).classList.add('active');
+      document.getElementById('role-' + id).scrollIntoView({ behavior: 'smooth', block: 'nearest' });
+    }
+  }
+
+  function showCode(id, btn) {
+    const wasActive = btn.classList.contains('active');
+    document.querySelectorAll('.code-panel').forEach(p => p.classList.remove('active'));
+    document.querySelectorAll('.code-btn').forEach(b => b.classList.remove('active'));
+    if (!wasActive) {
+      btn.classList.add('active');
+      document.getElementById('code-' + id).classList.add('active');
+    }
+  }
+</script>
+
+</body>
+</html>
