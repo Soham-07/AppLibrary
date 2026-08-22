@@ -1,0 +1,16 @@
+{
+  "name": "The Hangar — Opx",
+  "short_name": "Hangar",
+  "start_url": "./index.html",
+  "scope": "./",
+  "display": "standalone",
+  "background_color": "#08060F",
+  "theme_color": "#08060F",
+  "icons": [
+    {
+      "src": "data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' viewBox='0 0 24 24'%3E%3Crect width='24' height='24' fill='%2308060F'/%3E%3Cpolygon points='12,3 19.79,7.5 19.79,16.5 12,21 4.21,16.5 4.21,7.5' fill='none' stroke='%23FF2E93' stroke-width='2'/%3E%3C/svg%3E",
+      "sizes": "any",
+      "type": "image/svg+xml"
+    }
+  ]
+}
