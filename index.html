@@ -213,7 +213,13 @@
   .manage-row .info{ min-width:0; flex:1; }
   .manage-row .info b{ font-family:var(--font-body); font-weight:700; font-size:15px; display:block; }
   .manage-row .info span{ font-family:var(--font-mono); font-size:11px; color:var(--text-faint); }
-  .confirm{ display:flex; align-items:center; gap:8px; }
+  .confirm{ display:flex; align-items:center; gap:8px; flex-wrap:wrap; }
+  .rename-input{
+    background:var(--bg-alt); border:1px solid var(--border); border-radius:4px;
+    padding:7px 10px; font-size:13px; color:var(--text); font-family:var(--font-body);
+    flex:1; min-width:120px;
+  }
+  .rename-input:focus{ border-color:var(--cyan); }
   .confirm span{ font-size:12px; color:var(--text-dim); }
 
   details.guide{ margin-bottom:20px; }
@@ -563,6 +569,7 @@
         </div>
         <div class="info"><b>${escapeHtml(app.name)}</b><span>${escapeHtml(app.filename)}</span></div>
         <div class="actions">
+          <button class="btn btn-ghost rename-btn">Rename</button>
           <button class="btn btn-danger btn-ghost undock-btn">Undock</button>
         </div>
       </div>
@@ -575,8 +582,30 @@
       });
       input.addEventListener('keydown', e => { if(e.key === 'Enter') input.blur(); });
     });
+    el.querySelectorAll('.rename-btn').forEach(btn => {
+      btn.addEventListener('click', () => confirmRename(btn, list.find(a => a.id === btn.closest('.manage-row').dataset.id)));
+    });
     el.querySelectorAll('.undock-btn').forEach(btn => {
       btn.addEventListener('click', () => confirmUndock(btn, list.find(a => a.id === btn.closest('.manage-row').dataset.id)));
+    });
+  }
+  function confirmRename(btn, app){
+    const row = btn.closest('.actions');
+    row.innerHTML = `<div class="confirm">
+      <input type="text" class="rename-input" value="${escapeHtml(app.name)}" aria-label="New name for ${escapeHtml(app.name)}" maxlength="60">
+      <button class="btn btn-primary" id="renameSave">Save</button>
+      <button class="btn btn-ghost" id="renameCancel">Cancel</button>
+    </div>`;
+    const input = row.querySelector('.rename-input');
+    input.focus(); input.select();
+    row.querySelector('#renameSave').addEventListener('click', () => {
+      const val = input.value.trim();
+      if(val) renameApp(app, val); else loadApps();
+    });
+    row.querySelector('#renameCancel').addEventListener('click', () => loadApps());
+    input.addEventListener('keydown', e => {
+      if(e.key === 'Enter') row.querySelector('#renameSave').click();
+      if(e.key === 'Escape') loadApps();
     });
   }
   function confirmUndock(btn, app){
@@ -717,6 +746,25 @@
         await ghPut('manifest.json', b64EncodeUnicode(JSON.stringify(list, null, 2)), `Remove ${app.filename} from manifest`, cfg, manifestFile.sha);
       }
       setStatus('ok', `✓ synced · ${app.filename} removed at ${timeNow()}`);
+      await loadApps();
+    }catch(e){
+      setStatus('error', `✗ sync failed · ${e.message}`);
+    }
+  }
+
+  async function renameApp(app, newName){
+    const cfg = getConfig();
+    if(!cfg.owner || !cfg.repo || !cfg.token){ setStatus('error','not connected · open settings first'); return; }
+    setStatus('pending', `renaming ${app.filename}...`);
+    try{
+      const manifestFile = await ghGet('manifest.json', cfg);
+      if(!manifestFile) throw new Error('manifest not found');
+      let list = JSON.parse(b64DecodeUnicode(manifestFile.content));
+      const entry = list.find(a => a.id === app.id);
+      if(!entry) throw new Error('entry not found');
+      entry.name = newName;
+      await ghPut('manifest.json', b64EncodeUnicode(JSON.stringify(list, null, 2)), `Rename ${app.filename} to ${newName}`, cfg, manifestFile.sha);
+      setStatus('ok', `✓ synced · renamed to ${newName} at ${timeNow()}`);
       await loadApps();
     }catch(e){
       setStatus('error', `✗ sync failed · ${e.message}`);
