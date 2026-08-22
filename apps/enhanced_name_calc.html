@@ -1,0 +1,638 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Name → Number Calculator</title>
+
+<style>
+    * {
+        margin: 0;
+        padding: 0;
+        box-sizing: border-box;
+    }
+
+    body {
+        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        min-height: 100vh;
+        padding: 20px;
+        color: #222;
+    }
+
+    .particles {
+        position: fixed;
+        top: 0;
+        left: 0;
+        width: 100%;
+        height: 100%;
+        pointer-events: none;
+        z-index: 0;
+    }
+
+    .particle {
+        position: absolute;
+        width: 4px;
+        height: 4px;
+        background: rgba(255,255,255,0.3);
+        border-radius: 50%;
+        animation: float 6s infinite;
+    }
+
+    @keyframes float {
+        0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
+        50% { opacity: 1; }
+    }
+
+    .container {
+        max-width: 900px;
+        margin: auto;
+        background: rgba(255,255,255,0.95);
+        backdrop-filter: blur(10px);
+        padding: 40px;
+        border-radius: 24px;
+        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
+        position: relative;
+        z-index: 1;
+        animation: slideIn 0.6s ease-out;
+    }
+
+    @keyframes slideIn {
+        from { opacity: 0; transform: translateY(-30px); }
+        to { opacity: 1; transform: translateY(0); }
+    }
+
+    h1 {
+        text-align: center;
+        font-size: 2.5em;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        -webkit-background-clip: text;
+        -webkit-text-fill-color: transparent;
+        background-clip: text;
+        margin-bottom: 10px;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        gap: 15px;
+    }
+
+    .subtitle {
+        text-align: center;
+        color: #666;
+        margin-bottom: 30px;
+        font-size: 1.1em;
+    }
+
+    label {
+        display: block;
+        margin-top: 20px;
+        margin-bottom: 8px;
+        font-weight: 600;
+        color: #444;
+        font-size: 0.95em;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+    }
+
+    input, select {
+        width: 100%;
+        padding: 15px;
+        margin-top: 5px;
+        font-size: 16px;
+        border: 2px solid #e0e0e0;
+        border-radius: 12px;
+        transition: all 0.3s;
+        background: #fafafa;
+    }
+
+    input:focus, select:focus {
+        outline: none;
+        border-color: #667eea;
+        background: white;
+        box-shadow: 0 0 0 4px rgba(102,126,234,0.1);
+    }
+
+    button {
+        width: 100%;
+        padding: 16px;
+        margin-top: 25px;
+        font-size: 18px;
+        font-weight: 700;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        border: none;
+        border-radius: 12px;
+        cursor: pointer;
+        transition: all 0.3s;
+        text-transform: uppercase;
+        letter-spacing: 1px;
+        box-shadow: 0 4px 15px rgba(102,126,234,0.4);
+    }
+
+    button:hover {
+        transform: translateY(-2px);
+        box-shadow: 0 6px 20px rgba(102,126,234,0.6);
+    }
+
+    button:active {
+        transform: translateY(0);
+    }
+
+    .section {
+        margin-top: 30px;
+        padding: 25px;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        border-radius: 16px;
+        animation: fadeIn 0.5s ease-out;
+        border-left: 5px solid #667eea;
+    }
+
+    @keyframes fadeIn {
+        from { opacity: 0; transform: scale(0.95); }
+        to { opacity: 1; transform: scale(1); }
+    }
+
+    h2 {
+        color: #667eea;
+        margin-bottom: 15px;
+        font-size: 1.6em;
+        display: flex;
+        align-items: center;
+        gap: 10px;
+    }
+
+    h3 {
+        color: #764ba2;
+        margin-top: 20px;
+        margin-bottom: 10px;
+        font-size: 1.4em;
+    }
+
+    table {
+        width: 100%;
+        border-collapse: separate;
+        border-spacing: 0;
+        margin-top: 15px;
+        margin-bottom: 15px;
+        overflow: hidden;
+        border-radius: 12px;
+        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+    }
+
+    th, td {
+        padding: 14px;
+        text-align: center;
+        border: none;
+    }
+
+    th {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        font-weight: 600;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        font-size: 0.9em;
+    }
+
+    td {
+        background: white;
+        border-bottom: 1px solid #f0f0f0;
+        font-size: 1.1em;
+    }
+
+    tr:last-child td {
+        border-bottom: none;
+    }
+
+    tr:hover td {
+        background: #f8f9ff;
+    }
+
+    .total-box {
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        color: white;
+        padding: 25px;
+        border-radius: 16px;
+        text-align: center;
+        margin: 20px 0;
+        box-shadow: 0 8px 25px rgba(102,126,234,0.4);
+    }
+
+    .total-box h3 {
+        color: white;
+        margin: 0 0 10px 0;
+        font-size: 1.2em;
+        opacity: 0.9;
+    }
+
+    .total-number {
+        font-size: 4em;
+        font-weight: 900;
+        margin: 10px 0;
+        text-shadow: 0 4px 10px rgba(0,0,0,0.2);
+    }
+
+    .profile-card {
+        background: white;
+        padding: 25px;
+        border-radius: 16px;
+        margin-top: 20px;
+        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
+        border: 2px solid #f0f0f0;
+    }
+
+    .profile-header {
+        display: flex;
+        align-items: center;
+        gap: 15px;
+        margin-bottom: 20px;
+        padding-bottom: 15px;
+        border-bottom: 2px solid #f0f0f0;
+    }
+
+    .profile-icon {
+        width: 60px;
+        height: 60px;
+        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        border-radius: 50%;
+        display: flex;
+        align-items: center;
+        justify-content: center;
+        color: white;
+        font-size: 2em;
+        font-weight: 900;
+        box-shadow: 0 4px 15px rgba(102,126,234,0.3);
+    }
+
+    .profile-title {
+        flex: 1;
+    }
+
+    .profile-title h3 {
+        margin: 0;
+        color: #667eea;
+    }
+
+    .profile-subtitle {
+        color: #888;
+        font-size: 0.9em;
+        margin-top: 3px;
+    }
+
+    ul {
+        margin: 15px 0;
+        padding-left: 20px;
+    }
+
+    li {
+        margin: 8px 0;
+        line-height: 1.6;
+        color: #555;
+    }
+
+    strong {
+        color: #333;
+        font-weight: 700;
+    }
+
+    .info-block {
+        background: #f8f9ff;
+        padding: 15px;
+        border-radius: 10px;
+        margin: 15px 0;
+        border-left: 4px solid #667eea;
+    }
+
+    .risk-block {
+        background: #fff3cd;
+        padding: 15px;
+        border-radius: 10px;
+        margin: 15px 0;
+        border-left: 4px solid #ffc107;
+    }
+
+    .char-grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
+        gap: 12px;
+        margin: 20px 0;
+    }
+
+    .char-card {
+        background: white;
+        padding: 15px;
+        border-radius: 12px;
+        text-align: center;
+        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
+        transition: all 0.3s;
+        border: 2px solid #f0f0f0;
+    }
+
+    .char-card:hover {
+        transform: translateY(-5px);
+        box-shadow: 0 6px 20px rgba(102,126,234,0.3);
+        border-color: #667eea;
+    }
+
+    .char-letter {
+        font-size: 2em;
+        font-weight: 900;
+        color: #667eea;
+        margin-bottom: 5px;
+    }
+
+    .char-value {
+        font-size: 1.2em;
+        color: #888;
+        font-weight: 600;
+    }
+
+    .icon {
+        display: inline-block;
+        width: 24px;
+        height: 24px;
+    }
+
+    @media (max-width: 768px) {
+        .container {
+            padding: 25px;
+        }
+        
+        h1 {
+            font-size: 2em;
+        }
+
+        .total-number {
+            font-size: 3em;
+        }
+    }
+</style>
+</head>
+
+<body>
+
+<div class="particles" id="particles"></div>
+
+<div class="container">
+    <h1>
+        <span>✨</span>
+        Name → Number Calculator
+        <span>🔢</span>
+    </h1>
+    <p class="subtitle">Transform names into meaningful numbers</p>
+
+    <label>Enter Name (letters and numbers allowed)</label>
+    <input type="text" id="nameInput" placeholder="Type your name here...">
+
+    <label>Select Mode</label>
+    <select id="mode">
+        <option value="">-- Select a mode --</option>
+        <option value="normal">🔤 Normal Alphabet Math</option>
+        <option value="numerology">🔮 Numerology Style</option>
+        <option value="both">✨ Both Modes</option>
+    </select>
+
+    <button onclick="calculate()">Calculate Now</button>
+
+    <div id="output"></div>
+</div>
+
+<script>
+// Create floating particles
+const particlesContainer = document.getElementById('particles');
+for(let i = 0; i < 30; i++) {
+    const particle = document.createElement('div');
+    particle.className = 'particle';
+    particle.style.left = Math.random() * 100 + '%';
+    particle.style.top = Math.random() * 100 + '%';
+    particle.style.animationDelay = Math.random() * 6 + 's';
+    particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
+    particlesContainer.appendChild(particle);
+}
+
+const numerologyMap = {
+    A:1,J:1,S:1,
+    B:2,K:2,T:2,
+    C:3,L:3,U:3,
+    D:4,M:4,V:4,
+    E:5,N:5,W:5,
+    F:6,O:6,X:6,
+    G:7,P:7,Y:7,
+    H:8,Q:8,Z:8,
+    I:9,R:9
+};
+
+const numberProfiles = {
+  0:{title:"The Amplifier",what:"Potential, emptiness, magnifier",does:"Boosts whatever it touches",
+    use:["Starting fresh","Wanting flexibility","Supporting another number"],
+    avoid:["You need stability","You feel lost or ungrounded"],
+    risk:"0 has no direction. It only amplifies."},
+
+  1:{title:"The Initiator",what:"Leadership, ego, beginnings",does:"Pushes action and identity",
+    use:["Starting something new","Building confidence","Taking control"],
+    avoid:["You're angry or impulsive","Teamwork is required"],
+    risk:"Ego clashes, loneliness"},
+
+  2:{title:"The Harmonizer",what:"Balance, emotions, partnership",does:"Softens situations",
+    use:["Relationships matter","Negotiation is needed","Healing emotional tension"],
+    avoid:["Decisive action is required","You feel emotionally weak"],
+    risk:"Overthinking, dependence"},
+
+  3:{title:"The Communicator",what:"Creativity, ideas, expression",does:"Improves flow and mood",
+    use:["Learning","Content creation","Social visibility"],
+    avoid:["You need discipline","Long boring tasks exist"],
+    risk:"Distraction, unfinished work"},
+
+  4:{title:"The Foundation",what:"Structure, order, systems",does:"Builds slowly but solidly",
+    use:["Building routines","Studying","Creating discipline"],
+    avoid:["You feel stuck or depressed","Creativity is needed"],
+    risk:"Rigidity, boredom"},
+
+  5:{title:"The Explorer",what:"Change, movement, curiosity",does:"Breaks patterns",
+    use:["You feel stagnant","Exploring options","Short-term growth"],
+    avoid:["You need consistency","Making long-term commitments"],
+    risk:"Chaos, impulsive mistakes"},
+
+  6:{title:"The Builder",what:"Responsibility, care, harmony",does:"Stabilizes life",
+    use:["Creating comfort","Long-term work","Improving daily life"],
+    avoid:["You already feel burdened","You're being taken for granted"],
+    risk:"Over-giving, burnout"},
+
+  7:{title:"The Thinker",what:"Analysis, depth, solitude",does:"Sharpens insight",
+    use:["Researching","Self-reflection","Skill mastery"],
+    avoid:["Social engagement is required","You're already isolated"],
+    risk:"Overthinking, detachment"},
+
+  8:{title:"The Powerhouse",what:"Authority, money, execution",does:"Converts effort into results",
+    use:["Career focus","Business","Long-term ambition"],
+    avoid:["You're emotionally unstable","You crave freedom"],
+    risk:"Stress, control issues"},
+
+  9:{title:"The Transformer",what:"Endings, wisdom, service",does:"Forces growth through release",
+    use:["Ending cycles","Healing","Personal transformation"],
+    avoid:["Building foundations","Seeking stability"],
+    risk:"Emotional exhaustion"},
+
+  11:{title:"Master Intuitive",what:"Vision, intuition, inspiration",does:"Connects insight with purpose",
+    use:["Spiritual growth","Creative vision"],
+    avoid:["Grounded execution needed"],
+    risk:"Mental overload"},
+
+  22:{title:"Master Builder",what:"Large-scale vision, structure",does:"Turns dreams into systems",
+    use:["Long-term creation","Leadership"],
+    avoid:["Short-term thinking"],
+    risk:"Pressure and burnout"}
+};
+
+function reduceNumber(num){
+    while(num > 9 && num !== 11 && num !== 22){
+        num = num.toString().split('').reduce((a,b)=>a+Number(b),0);
+    }
+    return num;
+}
+
+function renderProfile(n){
+    const p = numberProfiles[n];
+    if(!p) return "";
+    return `
+    <div class="profile-card">
+        <div class="profile-header">
+            <div class="profile-icon">${n}</div>
+            <div class="profile-title">
+                <h3>${p.title}</h3>
+                <p class="profile-subtitle">${p.what}</p>
+            </div>
+        </div>
+
+        <div class="info-block">
+            <p><strong>What it does:</strong> ${p.does}</p>
+        </div>
+
+        <p><strong>Use ${n} when:</strong></p>
+        <ul>${p.use.map(i=>`<li>${i}</li>`).join("")}</ul>
+
+        <p><strong>Avoid ${n} when:</strong></p>
+        <ul>${p.avoid.map(i=>`<li>${i}</li>`).join("")}</ul>
+
+        <div class="risk-block">
+            <p><strong>⚠️ Risk / Truth:</strong> ${p.risk}</p>
+        </div>
+
+        <div class="info-block">
+            <p><strong>💡 Contextual Use:</strong><br>
+            Identity/Career: 8 • Creativity/Learning: 3 • Relationships: 2 or 6 • Change phase: 5 • Reset/Growth: 9
+            </p>
+        </div>
+    </div>`;
+}
+
+function calculate(){
+    const name = document.getElementById("nameInput").value;
+    const mode = document.getElementById("mode").value;
+    const out = document.getElementById("output");
+    out.innerHTML = "";
+
+    if(!name || !mode){
+        out.innerHTML = "<div class='section'><p>⚠️ Please enter a name and select a mode.</p></div>";
+        return;
+    }
+
+    const chars = name.toUpperCase().split('').filter(c=>/[A-Z0-9]/.test(c));
+
+    if(mode==="normal"||mode==="both") out.innerHTML += normal(chars,name);
+    if(mode==="numerology"||mode==="both") out.innerHTML += numerology(chars,name);
+}
+
+function normal(chars,name){
+    let sum=0;
+    const charData = chars.map(c => {
+        const v = /[A-Z]/.test(c)? c.charCodeAt(0)-64 : Number(c);
+        sum+=v;
+        return {char: c, value: v};
+    });
+    
+    const reduced = reduceNumber(sum);
+    
+    return `
+    <div class="section">
+        <h2>🔤 MODE 1: NORMAL ALPHABET MATH</h2>
+        <div class="info-block">
+            <p><strong>INPUT:</strong> ${name}</p>
+        </div>
+        
+        <div class="char-grid">
+            ${charData.map(d => `
+                <div class="char-card">
+                    <div class="char-letter">${d.char}</div>
+                    <div class="char-value">${d.value}</div>
+                </div>
+            `).join('')}
+        </div>
+
+        <table>
+            <tr><th>Character</th><th>Value</th></tr>
+            ${charData.map(d => `<tr><td>${d.char}</td><td>${d.value}</td></tr>`).join('')}
+        </table>
+
+        <div class="total-box">
+            <h3>TOTAL SUM</h3>
+            <div class="total-number">${sum}</div>
+            <p style="opacity: 0.9; margin-top: 10px;">${charData.map(d=>d.value).join(' + ')}</p>
+        </div>
+
+        <div class="total-box" style="background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);">
+            <h3>REDUCED TO</h3>
+            <div class="total-number">${reduced}</div>
+        </div>
+    </div>`;
+}
+
+function numerology(chars,name){
+    let sum=0;
+    const charData = chars.map(c => {
+        const v = /[A-Z]/.test(c)? numerologyMap[c] : Number(c);
+        sum+=v;
+        return {char: c, value: v};
+    });
+    
+    const finalNum = reduceNumber(sum);
+    
+    return `
+    <div class="section">
+        <h2>🔮 MODE 2: NUMEROLOGY STYLE</h2>
+        <div class="info-block">
+            <p><strong>INPUT:</strong> ${name}</p>
+        </div>
+        
+        <div class="char-grid">
+            ${charData.map(d => `
+                <div class="char-card">
+                    <div class="char-letter">${d.char}</div>
+                    <div class="char-value">${d.value}</div>
+                </div>
+            `).join('')}
+        </div>
+
+        <table>
+            <tr><th>Character</th><th>Value</th></tr>
+            ${charData.map(d => `<tr><td>${d.char}</td><td>${d.value}</td></tr>`).join('')}
+        </table>
+
+        <div class="total-box">
+            <h3>TOTAL SUM</h3>
+            <div class="total-number">${sum}</div>
+            <p style="opacity: 0.9; margin-top: 10px;">${charData.map(d=>d.value).join(' + ')}</p>
+        </div>
+
+        <div class="total-box" style="background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);">
+            <h3>FINAL NUMBER</h3>
+            <div class="total-number">${finalNum}</div>
+        </div>
+
+        ${renderProfile(finalNum)}
+    </div>`;
+}
+</script>
+
+</body>
+</html>
