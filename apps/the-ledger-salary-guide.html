@@ -1,0 +1,2033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Ledger — A Professional's Guide to Salary, Tax & Career</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Source+Serif+4:opsz,wght@8..60,400;8..60,600;8..60,700&family=Inter:wght@400;500;600;700&family=JetBrains+Mono:wght@400;500;700&display=swap" rel="stylesheet">
+<style>
+  :root {
+    --ledger-green: #0F3D2E;
+    --ledger-green-light: #1A5940;
+    --paper: #F0EBE0;
+    --paper-dark: #E5DDCC;
+    --ink: #1A2332;
+    --ink-light: #4A5265;
+    --amber: #C17817;
+    --amber-light: #E8A94F;
+    --rule: #8A8578;
+    --rule-light: #C9C3B4;
+    --white: #FDFCF9;
+    --red-stamp: #8B2E2E;
+
+    --font-display: 'Source Serif 4', serif;
+    --font-body: 'Inter', sans-serif;
+    --font-mono: 'JetBrains Mono', monospace;
+  }
+
+  * { margin: 0; padding: 0; box-sizing: border-box; }
+
+  body {
+    font-family: var(--font-body);
+    background: var(--paper);
+    color: var(--ink);
+    line-height: 1.6;
+    -webkit-font-smoothing: antialiased;
+  }
+
+  ::selection { background: var(--amber-light); color: var(--ink); }
+
+  a { color: inherit; }
+
+  /* ===== SCROLLBAR ===== */
+  ::-webkit-scrollbar { width: 10px; }
+  ::-webkit-scrollbar-track { background: var(--paper); }
+  ::-webkit-scrollbar-thumb { background: var(--rule); border-radius: 0; }
+
+  /* ===== TOP BAR ===== */
+  .topbar {
+    position: sticky;
+    top: 0;
+    z-index: 100;
+    background: var(--ledger-green);
+    color: var(--paper);
+    padding: 14px 24px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    border-bottom: 3px double var(--amber);
+  }
+
+  .topbar-brand {
+    font-family: var(--font-display);
+    font-size: 1.25rem;
+    font-weight: 600;
+    letter-spacing: 0.02em;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+
+  .topbar-brand .stamp-mark {
+    width: 28px; height: 28px;
+    border: 2px solid var(--amber);
+    border-radius: 50%;
+    display: flex; align-items: center; justify-content: center;
+    font-size: 0.7rem;
+    font-family: var(--font-mono);
+    color: var(--amber);
+    flex-shrink: 0;
+  }
+
+  .search-wrap {
+    position: relative;
+    flex: 0 1 340px;
+  }
+
+  #searchInput {
+    width: 100%;
+    padding: 9px 14px 9px 36px;
+    border: 1px solid var(--ledger-green-light);
+    background: rgba(253,252,249,0.08);
+    color: var(--paper);
+    font-family: var(--font-body);
+    font-size: 0.9rem;
+    border-radius: 3px;
+    outline: none;
+    transition: background 0.2s, border-color 0.2s;
+  }
+  #searchInput::placeholder { color: rgba(240,235,224,0.5); }
+  #searchInput:focus { background: rgba(253,252,249,0.14); border-color: var(--amber); }
+
+  .search-icon {
+    position: absolute;
+    left: 12px; top: 50%; transform: translateY(-50%);
+    font-size: 0.85rem;
+    opacity: 0.6;
+    pointer-events: none;
+  }
+
+  #searchResults {
+    display: none;
+    position: absolute;
+    top: calc(100% + 6px);
+    left: 0; right: 0;
+    background: var(--white);
+    border: 1px solid var(--rule-light);
+    border-radius: 4px;
+    max-height: 400px;
+    overflow-y: auto;
+    box-shadow: 0 12px 32px rgba(0,0,0,0.25);
+    z-index: 200;
+  }
+  #searchResults.active { display: block; }
+  .search-result-item {
+    padding: 10px 14px;
+    border-bottom: 1px solid var(--paper-dark);
+    cursor: pointer;
+    color: var(--ink);
+    font-size: 0.88rem;
+  }
+  .search-result-item:hover { background: var(--paper); }
+  .search-result-item .sr-chapter {
+    font-size: 0.72rem;
+    color: var(--ledger-green);
+    font-family: var(--font-mono);
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    display: block;
+    margin-bottom: 2px;
+  }
+  .search-result-item:last-child { border-bottom: none; }
+
+  /* ===== LAYOUT SHELL ===== */
+  .shell {
+    display: grid;
+    grid-template-columns: 260px 1fr;
+    min-height: calc(100vh - 60px);
+  }
+
+  /* ===== SIDEBAR — LEDGER TABS ===== */
+  .sidebar {
+    background: var(--paper-dark);
+    border-right: 2px solid var(--rule-light);
+    padding: 20px 0;
+    position: sticky;
+    top: 61px;
+    height: calc(100vh - 61px);
+    overflow-y: auto;
+  }
+
+  .sidebar-group {
+    margin-bottom: 4px;
+  }
+
+  .sidebar-item {
+    display: flex;
+    align-items: baseline;
+    gap: 10px;
+    padding: 10px 20px;
+    cursor: pointer;
+    border-left: 3px solid transparent;
+    font-size: 0.88rem;
+    color: var(--ink-light);
+    transition: all 0.15s;
+    text-decoration: none;
+  }
+
+  .sidebar-item .tab-num {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    color: var(--rule);
+    flex-shrink: 0;
+    width: 20px;
+  }
+
+  .sidebar-item:hover {
+    background: rgba(15,61,46,0.06);
+    color: var(--ink);
+    border-left-color: var(--rule);
+  }
+
+  .sidebar-item.active {
+    background: var(--ledger-green);
+    color: var(--paper);
+    border-left-color: var(--amber);
+    font-weight: 500;
+  }
+  .sidebar-item.active .tab-num { color: var(--amber-light); }
+
+  .sidebar-progress-track {
+    margin: 16px 20px 20px;
+    padding-top: 16px;
+    border-top: 1px solid var(--rule-light);
+  }
+
+  .progress-label {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--rule);
+    margin-bottom: 6px;
+  }
+
+  .progress-bar-bg {
+    height: 6px;
+    background: var(--paper);
+    border: 1px solid var(--rule-light);
+    border-radius: 3px;
+    overflow: hidden;
+  }
+  .progress-bar-fill {
+    height: 100%;
+    background: var(--amber);
+    width: 4%;
+    transition: width 0.4s;
+  }
+  #progressText { font-family: var(--font-mono); font-size: 0.72rem; color: var(--ink-light); margin-top: 4px; }
+
+  /* ===== MAIN CONTENT ===== */
+  main {
+    padding: 0;
+    max-width: 900px;
+  }
+
+  .chapter {
+    display: none;
+    padding: 48px 56px 80px;
+    animation: fadeIn 0.3s ease;
+  }
+  .chapter.active { display: block; }
+
+  @keyframes fadeIn { from { opacity: 0; transform: translateY(8px); } to { opacity: 1; transform: translateY(0); } }
+
+  .chapter-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    text-transform: uppercase;
+    letter-spacing: 0.08em;
+    color: var(--amber);
+    margin-bottom: 10px;
+    display: flex;
+    align-items: center;
+    gap: 10px;
+  }
+  .chapter-eyebrow::before {
+    content: '';
+    width: 24px; height: 1px;
+    background: var(--amber);
+  }
+
+  .chapter-title {
+    font-family: var(--font-display);
+    font-size: 2.4rem;
+    font-weight: 700;
+    color: var(--ledger-green);
+    margin-bottom: 12px;
+    line-height: 1.15;
+  }
+
+  .chapter-intro {
+    font-size: 1.05rem;
+    color: var(--ink-light);
+    max-width: 640px;
+    margin-bottom: 36px;
+    padding-bottom: 28px;
+    border-bottom: 2px solid var(--rule-light);
+  }
+
+  /* ===== TOPIC CARD (ledger entry) ===== */
+  .topic {
+    margin-bottom: 8px;
+    border: 1px solid var(--rule-light);
+    background: var(--white);
+    border-radius: 4px;
+    overflow: hidden;
+  }
+
+  .topic-head {
+    padding: 16px 20px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    cursor: pointer;
+    user-select: none;
+  }
+  .topic-head:hover { background: var(--paper); }
+
+  .topic-name {
+    font-family: var(--font-display);
+    font-size: 1.15rem;
+    font-weight: 600;
+    color: var(--ink);
+  }
+
+  .topic-toggle {
+    font-family: var(--font-mono);
+    color: var(--rule);
+    font-size: 1rem;
+    transition: transform 0.2s;
+    flex-shrink: 0;
+    margin-left: 12px;
+  }
+  .topic.open .topic-toggle { transform: rotate(45deg); color: var(--amber); }
+
+  .topic-body {
+    max-height: 0;
+    overflow: hidden;
+    transition: max-height 0.35s ease;
+  }
+  .topic.open .topic-body { max-height: 4000px; }
+
+  .topic-body-inner {
+    padding: 4px 20px 24px;
+    border-top: 1px solid var(--paper-dark);
+  }
+
+  .wwh-grid {
+    display: grid;
+    grid-template-columns: 90px 1fr;
+    gap: 6px 16px;
+    margin: 16px 0;
+  }
+  .wwh-label {
+    font-family: var(--font-mono);
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ledger-green);
+    font-weight: 700;
+    padding-top: 2px;
+  }
+  .wwh-value { font-size: 0.94rem; color: var(--ink); padding-bottom: 10px; }
+
+  .callout {
+    margin: 14px 0;
+    padding: 12px 16px;
+    border-left: 3px solid var(--amber);
+    background: #FBF3E4;
+    font-size: 0.9rem;
+    border-radius: 0 4px 4px 0;
+  }
+  .callout-label {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+    color: var(--amber);
+    font-weight: 700;
+    display: block;
+    margin-bottom: 4px;
+  }
+
+  .callout.trap { border-left-color: var(--red-stamp); background: #FAECEC; }
+  .callout.trap .callout-label { color: var(--red-stamp); }
+
+  .callout.right { border-left-color: var(--ledger-green); background: #EAF2ED; }
+  .callout.right .callout-label { color: var(--ledger-green); }
+
+  /* payslip line item table */
+  .calc-table {
+    width: 100%;
+    border-collapse: collapse;
+    margin: 14px 0;
+    font-family: var(--font-mono);
+    font-size: 0.86rem;
+  }
+  .calc-table th {
+    text-align: left;
+    padding: 8px 10px;
+    background: var(--ledger-green);
+    color: var(--paper);
+    font-weight: 500;
+    font-size: 0.72rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+  }
+  .calc-table td {
+    padding: 7px 10px;
+    border-bottom: 1px solid var(--paper-dark);
+  }
+  .calc-table tr:last-child td {
+    border-top: 2px solid var(--ink);
+    border-bottom: none;
+    font-weight: 700;
+    color: var(--ledger-green);
+  }
+  .calc-table td.num { text-align: right; }
+
+  .tag-row { display: flex; gap: 8px; flex-wrap: wrap; margin: 10px 0; }
+  .tag {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    text-transform: uppercase;
+    letter-spacing: 0.04em;
+    padding: 3px 9px;
+    border-radius: 10px;
+    background: var(--paper-dark);
+    color: var(--ink-light);
+  }
+  .tag.mandatory { background: #FAECEC; color: var(--red-stamp); }
+  .tag.optional { background: #EAF2ED; color: var(--ledger-green); }
+  .tag.taxable { background: #FEF3E2; color: var(--amber); }
+  .tag.taxfree { background: #E8F0E9; color: var(--ledger-green-light); }
+
+  /* Chapter summary block */
+  .chapter-summary {
+    margin-top: 40px;
+    padding: 24px 28px;
+    background: var(--ledger-green);
+    color: var(--paper);
+    border-radius: 6px;
+    position: relative;
+  }
+  .chapter-summary::before {
+    content: 'SUMMARY';
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    letter-spacing: 0.1em;
+    color: var(--amber-light);
+    display: block;
+    margin-bottom: 10px;
+  }
+  .chapter-summary ul { padding-left: 20px; }
+  .chapter-summary li { margin-bottom: 6px; font-size: 0.92rem; }
+
+  .nav-buttons {
+    display: flex;
+    justify-content: space-between;
+    margin-top: 32px;
+    padding-top: 24px;
+    border-top: 2px solid var(--rule-light);
+  }
+  .nav-btn {
+    font-family: var(--font-mono);
+    font-size: 0.82rem;
+    padding: 10px 18px;
+    background: var(--white);
+    border: 1px solid var(--ledger-green);
+    color: var(--ledger-green);
+    border-radius: 4px;
+    cursor: pointer;
+    transition: all 0.2s;
+  }
+  .nav-btn:hover { background: var(--ledger-green); color: var(--paper); }
+  .nav-btn:disabled { opacity: 0.3; cursor: default; }
+  .nav-btn:disabled:hover { background: var(--white); color: var(--ledger-green); }
+
+  /* ===== HERO / CHAPTER 0 ===== */
+  .hero {
+    padding: 56px 56px 40px;
+  }
+  .hero-eyebrow {
+    font-family: var(--font-mono);
+    font-size: 0.8rem;
+    color: var(--amber);
+    text-transform: uppercase;
+    letter-spacing: 0.1em;
+    margin-bottom: 16px;
+  }
+  .hero-title {
+    font-family: var(--font-display);
+    font-size: 3rem;
+    font-weight: 700;
+    color: var(--ledger-green);
+    line-height: 1.1;
+    margin-bottom: 20px;
+  }
+  .hero-sub {
+    font-size: 1.1rem;
+    color: var(--ink-light);
+    max-width: 600px;
+    margin-bottom: 40px;
+  }
+
+  /* Interactive CTC breakdown - signature element */
+  .ctc-machine {
+    background: var(--white);
+    border: 2px solid var(--ink);
+    border-radius: 8px;
+    padding: 28px;
+    margin-bottom: 40px;
+    position: relative;
+  }
+  .ctc-machine::before {
+    content: 'LIVE CALCULATOR';
+    position: absolute;
+    top: -11px; left: 24px;
+    background: var(--amber);
+    color: var(--white);
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    letter-spacing: 0.06em;
+    padding: 3px 10px;
+    border-radius: 3px;
+  }
+  .ctc-input-row {
+    display: flex;
+    align-items: center;
+    gap: 14px;
+    margin-bottom: 20px;
+    flex-wrap: wrap;
+  }
+  .ctc-input-row label {
+    font-family: var(--font-mono);
+    font-size: 0.85rem;
+    color: var(--ink-light);
+  }
+  #ctcInput {
+    font-family: var(--font-mono);
+    font-size: 1.3rem;
+    font-weight: 700;
+    padding: 8px 14px;
+    border: 2px solid var(--ledger-green);
+    border-radius: 4px;
+    width: 200px;
+    color: var(--ledger-green);
+  }
+  #ctcSlider { flex: 1; min-width: 180px; accent-color: var(--amber); }
+
+  .regime-toggle {
+    display: flex;
+    gap: 0;
+    border: 1px solid var(--ledger-green);
+    border-radius: 4px;
+    overflow: hidden;
+    margin-left: auto;
+  }
+  .regime-btn {
+    font-family: var(--font-mono);
+    font-size: 0.78rem;
+    padding: 7px 14px;
+    background: var(--white);
+    color: var(--ledger-green);
+    cursor: pointer;
+    border: none;
+  }
+  .regime-btn.active { background: var(--ledger-green); color: var(--paper); }
+
+  #payslipOutput { margin-top: 20px; }
+
+  .ctc-bar {
+    display: flex;
+    height: 40px;
+    border-radius: 4px;
+    overflow: hidden;
+    margin-bottom: 16px;
+    border: 1px solid var(--ink);
+  }
+  .ctc-bar-seg {
+    display: flex;
+    align-items: center;
+    justify-content: center;
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: white;
+    overflow: hidden;
+    white-space: nowrap;
+    transition: width 0.3s;
+  }
+
+  .payslip-grid {
+    display: grid;
+    grid-template-columns: 1fr 1fr;
+    gap: 24px;
+  }
+  @media (max-width: 640px) { .payslip-grid { grid-template-columns: 1fr; } }
+
+  .payslip-col-title {
+    font-family: var(--font-mono);
+    font-size: 0.7rem;
+    text-transform: uppercase;
+    letter-spacing: 0.05em;
+    color: var(--ledger-green);
+    border-bottom: 2px solid var(--ledger-green);
+    padding-bottom: 6px;
+    margin-bottom: 8px;
+  }
+  .payslip-col-title.ded { color: var(--red-stamp); border-bottom-color: var(--red-stamp); }
+
+  .payslip-line {
+    display: flex;
+    justify-content: space-between;
+    font-family: var(--font-mono);
+    font-size: 0.84rem;
+    padding: 5px 0;
+    border-bottom: 1px dotted var(--rule-light);
+  }
+  .payslip-line.total {
+    font-weight: 700;
+    border-bottom: none;
+    border-top: 2px solid var(--ink);
+    margin-top: 6px;
+    padding-top: 8px;
+  }
+
+  .takehome-stamp {
+    margin-top: 20px;
+    padding: 18px 24px;
+    background: var(--ledger-green);
+    border-radius: 6px;
+    display: flex;
+    align-items: center;
+    justify-content: space-between;
+    flex-wrap: wrap;
+    gap: 12px;
+  }
+  .takehome-label { font-family: var(--font-mono); font-size: 0.78rem; color: var(--paper); text-transform: uppercase; letter-spacing: 0.05em; }
+  .takehome-value { font-family: var(--font-mono); font-size: 1.6rem; font-weight: 700; color: var(--amber-light); }
+
+  .roadmap-cards {
+    display: grid;
+    grid-template-columns: repeat(auto-fit, minmax(240px, 1fr));
+    gap: 16px;
+    margin-top: 8px;
+  }
+  .roadmap-card {
+    background: var(--white);
+    border: 1px solid var(--rule-light);
+    border-left: 4px solid var(--ledger-green);
+    padding: 18px 20px;
+    border-radius: 4px;
+    cursor: pointer;
+    transition: transform 0.15s, box-shadow 0.15s;
+  }
+  .roadmap-card:hover { transform: translateY(-2px); box-shadow: 0 8px 20px rgba(15,61,46,0.12); }
+  .roadmap-card .rc-phase {
+    font-family: var(--font-mono);
+    font-size: 0.68rem;
+    color: var(--amber);
+    text-transform: uppercase;
+    letter-spacing: 0.06em;
+  }
+  .roadmap-card h4 {
+    font-family: var(--font-display);
+    font-size: 1.1rem;
+    color: var(--ledger-green);
+    margin: 6px 0 6px;
+  }
+  .roadmap-card p { font-size: 0.85rem; color: var(--ink-light); }
+
+  /* Mobile */
+  @media (max-width: 860px) {
+    .shell { grid-template-columns: 1fr; }
+    .sidebar {
+      position: static;
+      height: auto;
+      display: flex;
+      overflow-x: auto;
+      padding: 10px;
+      white-space: nowrap;
+    }
+    .sidebar-item { border-left: none; border-bottom: 3px solid transparent; flex-shrink: 0; }
+    .sidebar-item.active { border-left: none; border-bottom-color: var(--amber); }
+    .sidebar-progress-track { display: none; }
+    .chapter { padding: 32px 20px 60px; }
+    .hero { padding: 32px 20px 20px; }
+    .hero-title { font-size: 2.1rem; }
+    .search-wrap { flex: 1; }
+    .topbar { flex-wrap: wrap; gap: 10px; }
+  }
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <div class="topbar-brand"><span class="stamp-mark">₹</span> THE LEDGER</div>
+  <div class="search-wrap">
+    <span class="search-icon">⌕</span>
+    <input type="text" id="searchInput" placeholder="Search any topic — HRA, notice period, TDS...">
+    <div id="searchResults"></div>
+  </div>
+</div>
+
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main id="mainContent"></main>
+</div>
+
+<script>
+// ============================================================
+// THE LEDGER — Content Data
+// Structure: CHAPTERS[] each with { id, tabLabel, eyebrow, title, intro, topics[] }
+// Each topic: { name, tags[], wwh: {What, Why, How, When/Where, Who}, calc(optional table),
+//               callouts[] {type: 'trap'|'right'|'note', label, text} }
+// ============================================================
+
+const CHAPTERS = [];
+
+// ---------- CHAPTER 1: SALARY FUNDAMENTALS ----------
+CHAPTERS.push({
+  id: "fundamentals",
+  tabLabel: "Salary Fundamentals",
+  eyebrow: "Chapter 1 — Foundations",
+  title: "What Your Salary Actually Is",
+  intro: "Before you can negotiate, save, or plan anything, you need to understand the difference between the number a company promises you and the number that lands in your bank account. This gap confuses almost every fresher — and companies count on that confusion.",
+  topics: [
+    {
+      name: "CTC — Cost to Company",
+      tags: ["Foundational"],
+      wwh: {
+        "What": "CTC is the total amount a company spends on you in a year — not just what they pay you, but everything: your salary, their contribution to your PF, insurance premiums they pay on your behalf, gratuity provisions, and perks like a company laptop or cab service.",
+        "Why": "Companies use CTC because it lets them quote one big, impressive number in the offer letter while the actual cash you receive is meaningfully lower. It's also genuinely useful for them internally — it's their real cost of employing you, used for budgeting.",
+        "How": "CTC = Basic + HRA + Allowances + Employer's PF contribution + Gratuity + Insurance premiums + Bonuses + Perks/reimbursements. Every one of these is added up into one number.",
+        "Where": "Used in offer letters, appointment letters, and internal HR/finance planning across almost every company in India."
+      },
+      calc: {
+        headers: ["Component", "Annual (₹)"],
+        rows: [
+          ["Basic Salary", "6,00,000"],
+          ["HRA", "3,00,000"],
+          ["Special Allowance", "2,10,000"],
+          ["Employer PF (12% of Basic)", "72,000"],
+          ["Gratuity Provision", "28,846"],
+          ["Insurance Premium", "15,000"],
+          ["Total CTC", "12,25,846"]
+        ]
+      },
+      callouts: [
+        { type: "trap", label: "The trap", text: "A ₹12 LPA offer sounds like ₹1 lakh a month. It isn't. Roughly 25-35% of CTC never touches your bank account — it goes to PF, gratuity, and insurance that you either can't access now or don't receive as cash." },
+        { type: "right", label: "What to actually do", text: "Never compare two job offers by CTC alone. Always ask for a detailed breakup and calculate estimated take-home before deciding." }
+      ]
+    },
+    {
+      name: "Gross Salary",
+      tags: ["Foundational"],
+      wwh: {
+        "What": "Gross salary is your CTC minus the components that never come to you directly as cash in a payslip — mainly employer's PF contribution, gratuity, and employer-paid insurance. It's the sum of all salary heads before any deductions are taken out.",
+        "Why": "It exists as a mid-point number: bigger than take-home (because taxes and employee-side deductions haven't been removed yet), smaller than CTC (because employer-only contributions are excluded).",
+        "How": "Gross Salary = Basic + HRA + all Allowances + Bonuses. It does NOT include employer's PF or gratuity.",
+        "Where": "This is the number printed at the top of your monthly payslip before the deductions table."
+      },
+      callouts: [
+        { type: "note", label: "Remember", text: "Gross ≠ Take home. Income tax, employee's own PF contribution, and professional tax still get deducted from gross." }
+      ]
+    },
+    {
+      name: "Net Salary / Take-Home Salary",
+      tags: ["Foundational"],
+      wwh: {
+        "What": "This is the actual amount credited to your bank account every month — what's left after every deduction.",
+        "Why": "This is the only number that matters for your day-to-day budgeting. Everything else (CTC, Gross) is accounting language; take-home is real, spendable money.",
+        "How": "Net Salary = Gross Salary − (Income Tax/TDS + Employee PF contribution + Professional Tax + ESI if applicable + any loan/advance recoveries).",
+        "Where": "Shown at the bottom of your payslip, usually labeled 'Net Pay' or 'Amount Payable'."
+      },
+      calc: {
+        headers: ["", "₹/month"],
+        rows: [
+          ["Gross Salary", "91,167"],
+          ["(−) Employee PF", "3,600"],
+          ["(−) Professional Tax", "200"],
+          ["(−) TDS (estimated)", "6,500"],
+          ["Net / Take-Home", "80,867"]
+        ]
+      },
+      callouts: [
+        { type: "trap", label: "Fresher mistake", text: "Planning your rent, EMI, or lifestyle around your CTC/12 instead of your actual take-home. This is the single most common financial mistake new employees make in their first year." }
+      ]
+    },
+    {
+      name: "Fixed Pay vs Variable Pay",
+      tags: ["Foundational"],
+      wwh: {
+        "What": "Fixed pay is guaranteed every month regardless of performance — your Basic, HRA, and allowances. Variable pay is conditional — bonuses, incentives, or performance pay that depends on you or the company hitting targets.",
+        "Why": "Companies use variable pay to control costs during bad years and to motivate performance without permanently raising your fixed cost. From your side, it's risk: variable pay can be 0 in a bad year.",
+        "How": "Variable pay is usually expressed as a % of fixed pay (e.g., 'up to 15% variable') and paid quarterly or annually based on individual + company performance ratings.",
+        "When": "Common in sales, consulting, IT services, and most mid-to-senior corporate roles. Rare in government and some manufacturing/blue-collar jobs where pay is fully fixed."
+      },
+      callouts: [
+        { type: "trap", label: "The trap", text: "Recruiters sometimes quote CTC including 100% of variable pay as if it's guaranteed. Ask explicitly: 'What % of variable did the team actually receive last year?' Their answer tells you more than the policy document." }
+      ]
+    },
+    {
+      name: "Payroll & Pay Cycle",
+      tags: ["Foundational"],
+      wwh: {
+        "What": "Payroll is the entire process — calculating salary, deductions, taxes, and generating payslips — that a company runs every month to pay its employees. The pay cycle is the recurring period (usually monthly, 1st-to-last-day) this runs on.",
+        "Why": "It exists because paying dozens or thousands of employees correctly, on time, and compliant with tax law is complex enough to need a dedicated process — usually run by HR + Finance, sometimes outsourced to specialized payroll companies (like ADP, Keka, or Zoho Payroll).",
+        "How": "Attendance/leave data flows in → salary is computed per employee → deductions and TDS applied → payslip generated → salary disbursed to bank accounts, usually between the 1st and 7th of the following month or the last working day of the current month.",
+        "Who": "Run by the Payroll/HR team, often verified by Finance, and increasingly automated through payroll software."
+      }
+    },
+    {
+      name: "Offer Letter vs Appointment Letter",
+      tags: ["Documents"],
+      wwh: {
+        "What": "An offer letter is the company's initial proposal — 'we'd like to hire you at this CTC, this role, subject to conditions.' An appointment letter is issued after you join and formally confirms your employment terms — it's the actual legal contract governing your job.",
+        "Why": "The offer letter exists to lock in your acceptance before onboarding logistics (paperwork, background checks) are complete. The appointment letter exists because Indian labor law and courts recognize it — not the offer letter — as the primary evidence of employment terms in disputes.",
+        "How": "Offer letter → you accept → background verification → you join → appointment letter issued and signed on Day 1, usually superseding the offer letter's terms if there's any difference.",
+        "When": "Offer letter: before joining. Appointment letter: on or shortly after your joining date."
+      },
+      callouts: [
+        { type: "right", label: "What to actually do", text: "Always read your appointment letter fully — not just skim it — because notice period, bond clauses, and confidentiality terms here are what's legally binding, even if they differ slightly from what the offer letter or recruiter told you verbally." }
+      ]
+    }
+  ]
+});
+
+// ---------- CHAPTER 2: SALARY COMPONENTS ----------
+CHAPTERS.push({
+  id: "components",
+  tabLabel: "Salary Components",
+  eyebrow: "Chapter 2 — Anatomy of a Payslip",
+  title: "Every Line on Your Payslip, Explained",
+  intro: "A payslip looks like a random list of abbreviations until you understand why each one exists. Some components exist purely to save you tax. Others exist to save the company money on PF contributions. None of it is arbitrary.",
+  topics: [
+    {
+      name: "Basic Salary",
+      tags: ["Mandatory", "Taxable"],
+      wwh: {
+        "What": "The core, fixed part of your salary before any allowances are added. Usually 35-50% of CTC.",
+        "Why": "Basic is the base on which almost everything else is calculated — PF, gratuity, HRA exemption limits, and even some bonuses. It exists as an anchor number.",
+        "How": "Set as a % of CTC by company policy (commonly 40-50%). Fully taxable — no exemptions apply to Basic itself.",
+        "Where": "Every payslip in India, and in nearly every country with structured payroll."
+      },
+      callouts: [
+        { type: "trap", label: "The trap", text: "A LOWER basic sounds nice on paper (less PF deducted = higher take-home now) but means lower PF corpus at retirement, lower gratuity, and lower HRA exemption. Some companies deliberately keep basic low to shrink their own PF contribution liability — this benefits them more than you." }
+      ]
+    },
+    {
+      name: "House Rent Allowance (HRA)",
+      tags: ["Optional", "Tax-exempt (conditional)"],
+      wwh: {
+        "What": "An allowance meant to help cover the cost of renting a home. Typically 40-50% of Basic.",
+        "Why": "The government wants to encourage formal record-keeping of rent payments (which surfaces landlord income for tax purposes) so it rewards employees who pay rent with a tax exemption on HRA.",
+        "How": "HRA exemption = minimum of: (1) actual HRA received, (2) rent paid minus 10% of basic, (3) 50% of basic (metro) or 40% of basic (non-metro). Only the LOWEST of these three is tax-free; the rest is taxed as income.",
+        "When": "Only claimable if you actually pay rent and can prove it (rent receipts + landlord PAN if rent > ₹1 lakh/year)."
+      },
+      calc: {
+        headers: ["HRA Exemption Calc (Metro)", "₹/year"],
+        rows: [
+          ["Actual HRA received", "3,00,000"],
+          ["Rent paid − 10% of Basic (₹4,20,000 − ₹60,000)", "3,60,000"],
+          ["50% of Basic", "3,00,000"],
+          ["Exempt HRA (lowest of the three)", "3,00,000"]
+        ]
+      },
+      callouts: [
+        { type: "trap", label: "Common myth", text: "'I own a house so I can't claim HRA.' False — if you rent in the city you work in while owning property elsewhere, you can still claim HRA. What you can't do is claim HRA while living in a house you own in the same city." },
+        { type: "right", label: "What to actually do", text: "If you live with parents, you can still claim HRA by paying them rent and having them declare it as rental income on their return — perfectly legal if done properly." }
+      ]
+    },
+    {
+      name: "Dearness Allowance (DA)",
+      tags: ["Mandatory (Govt)", "Taxable"],
+      wwh: {
+        "What": "An allowance to offset inflation, revised periodically (usually every 6 months) based on the Consumer Price Index.",
+        "Why": "Originally created for government employees so their real purchasing power doesn't erode as prices rise. It's essentially inflation-indexing built into salary.",
+        "How": "Calculated as a % of Basic, revised by government notification. Fully taxable.",
+        "Where": "Common in government jobs, PSUs, and banks. Rare in private-sector IT/corporate jobs, where 'Special Allowance' plays a similar role without the formal DA structure."
+      }
+    },
+    {
+      name: "Special Allowance",
+      tags: ["Optional", "Fully Taxable"],
+      wwh: {
+        "What": "A catch-all, fully taxable component that absorbs whatever's left after Basic, HRA, and other named allowances are decided — essentially a balancing figure.",
+        "Why": "It exists because companies design a CTC structure top-down (decide total CTC first) then work backward — after allocating Basic, HRA, and PF, whatever remains gets dumped into Special Allowance since it needs no specific justification and offers no exemption.",
+        "How": "Special Allowance = Total Fixed Pay − (Basic + HRA + other named allowances). Fully taxed at your slab rate, no exemptions."
+      },
+      callouts: [{ type: "note", label: "Remember", text: "This is the least tax-efficient part of your salary. If your special allowance is unusually large relative to Basic/HRA, ask HR if the structure can be optimized — some companies allow restructuring via Flexible Benefit Plans." }]
+    },
+    {
+      name: "Leave Travel Allowance (LTA)",
+      tags: ["Optional", "Tax-exempt (conditional)"],
+      wwh: {
+        "What": "A reimbursement for domestic travel costs (not hotels, not food — only transport fare) incurred when you take leave and travel within India.",
+        "Why": "A tax incentive to encourage employees to actually take vacations and travel domestically, while giving a modest tax break.",
+        "How": "Exempt up to actual travel cost or the LTA amount in your CTC, whichever is lower — only for 2 journeys in a block of 4 calendar years, and only for the shortest route to the destination.",
+        "When": "Must be claimed with proof of travel (tickets/boarding passes); unclaimed LTA is added back to taxable salary."
+      },
+      callouts: [{ type: "trap", label: "Common myth", text: "'LTA covers my whole holiday.' It doesn't — hotels, food, and local sightseeing are NOT covered, only transport fare to and from the destination." }]
+    },
+    {
+      name: "Provident Fund (PF / EPF)",
+      tags: ["Mandatory", "Tax-exempt"],
+      wwh: {
+        "What": "A mandatory retirement savings scheme where both you and your employer contribute 12% of your Basic salary every month into a fund that earns interest (currently ~8.25% p.a., government-set).",
+        "Why": "Created by the EPF Act, 1952 to force long-term savings discipline for retirement, since most people wouldn't voluntarily save enough on their own.",
+        "How": "You contribute 12% of Basic. Employer also contributes 12% — but of that, 8.33% actually goes to your Pension Scheme (EPS), and only 3.67% goes to your PF account. Managed by EPFO (Employees' Provident Fund Organisation).",
+        "Who": "Mandatory for any establishment with 20+ employees, for employees earning up to ₹15,000 basic (mandatorily) — most companies extend it to everyone regardless of salary."
+      },
+      calc: {
+        headers: ["PF Split (Basic = ₹50,000/month)", "₹/month"],
+        rows: [
+          ["Employee contribution (12%)", "6,000"],
+          ["Employer → EPS (8.33% of ₹15,000 cap)", "1,250"],
+          ["Employer → EPF (remaining)", "4,750"],
+          ["Total monthly PF credit", "10,750"]
+        ]
+      },
+      callouts: [
+        { type: "trap", label: "Fresher mistake", text: "Withdrawing your entire PF the moment you switch jobs. Don't — you lose out on compounding, and if withdrawn before 5 years of continuous service, it becomes taxable. Transfer it to your new employer instead using the UAN (Universal Account Number)." },
+        { type: "right", label: "Employee right", text: "Your UAN stays the same for life across all employers. You never need to open a 'new' PF account — just get your new employer to link it." }
+      ]
+    },
+    {
+      name: "Employee Pension Scheme (EPS)",
+      tags: ["Mandatory", "Tax-exempt"],
+      wwh: {
+        "What": "A pension scheme funded entirely from the employer's PF contribution (8.33%, capped at ₹15,000 basic = max ₹1,250/month) — you don't contribute to it separately.",
+        "Why": "Designed to give organized-sector employees a monthly pension after retirement (age 58), on top of their PF lump sum.",
+        "How": "You need minimum 10 years of contribution to be eligible for pension at 58. If you leave before 10 years, you can withdraw the EPS amount or transfer it.",
+        "When": "Pension payout begins at 58 (reduced pension possible from 50 with penalty)."
+      }
+    },
+    {
+      name: "Gratuity",
+      tags: ["Mandatory", "Tax-exempt (up to limit)"],
+      wwh: {
+        "What": "A lump-sum reward paid by the employer for continuous service, but only once you complete 5 years at that company (with some exceptions like death/disability).",
+        "Why": "Mandated by the Payment of Gratuity Act, 1972 as a way of recognizing long-term loyalty and giving a financial cushion when you eventually leave.",
+        "How": "Gratuity = (Last drawn Basic + DA) × 15/26 × Number of years of service. The 15/26 represents 15 days' wages for every year, based on a 26-day working month.",
+        "When": "Paid at resignation, retirement, or termination — only after 5 years of continuous service (exception: death or disability, where the 5-year rule is waived)."
+      },
+      calc: {
+        headers: ["Gratuity Example (7 years, Basic ₹40,000)", "₹"],
+        rows: [
+          ["Formula: 40,000 × 15/26 × 7", "1,61,538"]
+        ]
+      },
+      callouts: [{ type: "trap", label: "The trap", text: "Companies show gratuity as part of CTC even though you'll only ever see it if you stay 5+ years. If you plan to switch jobs every 2 years, that 'gratuity' line in your CTC is essentially fictional money for you." }]
+    },
+    {
+      name: "National Pension System (NPS)",
+      tags: ["Optional", "Tax-exempt (extra ₹50k)"],
+      wwh: {
+        "What": "A voluntary, market-linked retirement investment scheme regulated by PFRDA, where your money is invested in a mix of equity and debt and grows until retirement.",
+        "Why": "Introduced to give both government and private employees a market-linked alternative/supplement to EPF, with better potential returns since it partially invests in equities.",
+        "How": "You can contribute voluntarily and claim deduction up to ₹50,000 under Section 80CCD(1B) — over and above the ₹1.5 lakh limit of Section 80C. Employer contributions (up to 10% of Basic+DA) are also tax-exempt separately.",
+        "Where": "Available to all Indian citizens 18-70, not just employees with structured payroll."
+      },
+      callouts: [{ type: "right", label: "What to actually do", text: "The extra ₹50,000 NPS deduction under 80CCD(1B) is one of the most underused tax-saving tools by young professionals — it's separate from your 80C limit, meaning it's essentially a free additional deduction bucket." }]
+    },
+    {
+      name: "Employee State Insurance (ESI)",
+      tags: ["Mandatory (below threshold)", "Tax-exempt"],
+      wwh: {
+        "What": "A self-financed health insurance and social security scheme for lower-wage employees, covering medical care, sickness benefits, maternity benefits, and more.",
+        "Why": "Created under the ESI Act, 1948, to give factory and lower-income workers access to healthcare and income protection without relying entirely on employer goodwill.",
+        "How": "Applicable if gross monthly salary is ≤ ₹21,000. Employee contributes 0.75% of gross, employer contributes 3.25% of gross.",
+        "Who": "Mandatory for establishments with 10+ employees, only for employees under the wage threshold. Once your salary crosses ₹21,000, you exit ESI (and usually move to a private health insurance plan)."
+      }
+    },
+    {
+      name: "Health / Life / Accident Insurance (Employer-provided)",
+      tags: ["Optional", "Tax-exempt (mostly)"],
+      wwh: {
+        "What": "Group insurance policies most mid-to-large companies provide — health cover (GMC), life cover (GTLI), and accident cover (GPA) — usually extending to your family too.",
+        "Why": "Cheaper for companies to buy in bulk (group rates) than for you to buy individually, and it's a strong retention/attraction tool since health insurance in India is otherwise expensive to buy privately at a young age.",
+        "How": "Premium paid entirely or partly by employer; the value of premium is generally not taxable in your hands if it's a group policy, unlike a cash allowance.",
+        "When": "Coverage is usually active only while you're employed there — it typically ends the day you resign, unless you convert to an individual policy (porting)."
+      },
+      callouts: [{ type: "trap", label: "Fresher mistake", text: "Relying ONLY on employer health insurance and not buying a personal health policy. If you lose your job or switch companies with a gap, you have zero cover during that gap — and pre-existing condition waiting periods reset if you don't have continuous personal coverage." }]
+    },
+    {
+      name: "Joining Bonus / Sign-on Bonus",
+      tags: ["Optional", "Taxable"],
+      wwh: {
+        "What": "A one-time payment offered to get you to accept an offer, often used to compensate for a bonus or ESOPs you're forfeiting by leaving your current company.",
+        "Why": "Companies use it as a negotiation lever that doesn't permanently raise your fixed CTC — it's a one-time cost to them, unlike a higher base salary which compounds every future year (increments are usually % of base).",
+        "How": "Usually comes with a 'clawback' clause — if you leave before a certain period (commonly 1 year), you must return it, sometimes on a pro-rata basis.",
+        "When": "Paid either with your first salary or first few months, per company policy."
+      },
+      callouts: [{ type: "trap", label: "The trap", text: "Always read the clawback clause. If you take a ₹1L joining bonus and leave in month 8 of a 12-month bond, you may need to repay it — sometimes the company deducts it directly from your full & final settlement, sometimes they demand it separately." }]
+    },
+    {
+      name: "Performance Bonus / Variable Pay",
+      tags: ["Optional", "Taxable"],
+      wwh: {
+        "What": "Bonus tied to your individual performance rating and/or company/business unit performance, usually paid quarterly or annually.",
+        "Why": "Aligns your incentives with company results — companies want to pay more when they're doing well and less when they aren't, without permanently committing to higher fixed costs.",
+        "How": "Typically: Payout % = Target Bonus × Individual Rating Multiplier × Company Performance Multiplier. A 'meets expectations' rating with 100% company performance usually gets you 100% of target; underperformance on either axis reduces it, sometimes to zero.",
+        "When": "Quarterly (common in sales) or annual (common in IT services/product companies), tied to appraisal cycles."
+      }
+    },
+    {
+      name: "ESOPs / RSUs (Stock Options)",
+      tags: ["Optional", "Taxable (2 events)"],
+      wwh: {
+        "What": "ESOPs (Employee Stock Options) give you the right to buy company shares at a fixed price later. RSUs (Restricted Stock Units) are shares granted outright once you meet a vesting condition (usually time-based).",
+        "Why": "Startups and tech companies use these to attract talent while conserving cash, and to align your long-term interest with the company's growth (you benefit more if the company's valuation rises).",
+        "How": "Both usually 'vest' over time (e.g., 25% per year over 4 years — a 'cliff' then 'vesting schedule'). Taxed TWICE in India: once as a perquisite (income) when shares vest/are exercised, and again as capital gains when you eventually sell them.",
+        "When": "Vesting schedules typically run 3-4 years; taxation triggers happen at vesting (income tax) and at sale (capital gains tax)."
+      },
+      callouts: [
+        { type: "trap", label: "The trap", text: "Startup ESOPs are only worth something if the company eventually has a liquidity event (IPO or acquisition). Many employees treat unlisted ESOP value in their CTC as real money — it isn't until it's actually liquid." },
+        { type: "note", label: "Remember", text: "You're taxed on ESOPs at vesting even if you haven't sold anything yet and the company is still private, meaning you can owe tax on money you don't actually have in hand — a real cash-flow trap." }
+      ]
+    },
+    {
+      name: "Reimbursements (Internet, Phone, Books, Fuel)",
+      tags: ["Optional", "Tax-exempt (with bills)"],
+      wwh: {
+        "What": "A part of your CTC set aside for you to claim back against actual bills for specific work-related expenses — internet, mobile bill, books/periodicals, fuel, etc.",
+        "Why": "This is a pure tax-efficiency tool. Money paid as 'salary' is fully taxed; money reimbursed against a genuine bill for one of these approved categories is tax-free, so companies let you restructure part of your CTC into these buckets to legally reduce your tax.",
+        "How": "You submit actual bills (mobile bill, ISP invoice, book purchase receipt) each month/quarter up to the allotted limit; only the amount you can substantiate with bills gets the tax exemption — unclaimed amounts are usually paid out as taxable salary or lapse, depending on policy.",
+        "Where": "Usually part of a 'Flexible Benefit Plan (FBP)' where you choose how to split a portion of your CTC across these categories."
+      },
+      callouts: [{ type: "right", label: "What to actually do", text: "Always fully utilize your FBP reimbursement buckets if you have genuine expenses in those categories — it's free tax savings that most freshers forget to claim every month, leaving money on the table." }]
+    }
+  ]
+});
+
+// ---------- CHAPTER 3: DEDUCTIONS ----------
+CHAPTERS.push({
+  id: "deductions",
+  tabLabel: "Salary Deductions",
+  eyebrow: "Chapter 3 — Where the Money Goes",
+  title: "Understanding Every Deduction",
+  intro: "Deductions aren't all the same. Some protect your future (PF), some fund your state (Professional Tax), some are legally required (TDS), and some are just recoveries for something that went wrong (LOP, loan recovery). Knowing which is which stops you from panicking — or from accepting an incorrect deduction.",
+  topics: [
+    {
+      name: "TDS — Tax Deducted at Source",
+      tags: ["Mandatory"],
+      wwh: {
+        "What": "Your employer estimates your total annual tax liability and deducts a portion of it every month from your salary, depositing it directly with the government on your behalf.",
+        "Why": "The government prefers collecting tax throughout the year rather than waiting for you to pay it all at once in a lump sum after the year ends — this improves compliance and cash flow for the exchequer.",
+        "How": "Employer estimates your annual taxable income (based on your declared investments and salary structure) → calculates annual tax → divides by remaining months → deducts that amount monthly, adjusting as the year progresses.",
+        "When": "Every month, reflected in your payslip and later consolidated in Form 16 at year-end."
+      },
+      callouts: [{ type: "right", label: "What to actually do", text: "Submit your investment declarations (80C, HRA proofs, etc.) on time in January/February when your company asks — if you don't, they'll assume zero deductions and deduct maximum TDS, and you'll have to claim the refund yourself later while filing your ITR." }]
+    },
+    {
+      name: "Professional Tax",
+      tags: ["Mandatory (state-specific)"],
+      wwh: {
+        "What": "A small tax levied by state governments (not the central government) on salaried individuals and professionals, capped by law at ₹2,500/year.",
+        "Why": "It's a revenue source for state governments — since income tax goes entirely to the central government, this gives states their own small slice from working professionals.",
+        "How": "Deducted monthly based on a slab set by each state (rates and thresholds vary by state — Maharashtra, Karnataka, West Bengal have it; some states like Delhi, Haryana don't levy it at all).",
+        "Where": "Varies state to state — check your specific state's PT slab; it's usually ₹150-300/month for mid-range salaries."
+      },
+      callouts: [{ type: "note", label: "Remember", text: "This is genuinely different from Income Tax — it's small, mandatory, non-negotiable, and has nothing to do with your Income Tax Return." }]
+    },
+    {
+      name: "Employee PF Contribution",
+      tags: ["Mandatory"],
+      wwh: {
+        "What": "Your own 12% of Basic salary contribution toward your retirement fund (covered in detail in Chapter 2).",
+        "Why": "Forced retirement savings — see the PF entry in Chapter 2 for full context.",
+        "How": "Deducted automatically every month; you cannot opt out if your company mandates PF (barring some exceptions for very high earners at the time of joining, called 'PF exclusion')."
+      }
+    },
+    {
+      name: "Loss of Pay (LOP) / Leave Without Pay (LWP)",
+      tags: ["Conditional"],
+      wwh: {
+        "What": "A deduction applied when you take leave beyond your allotted paid leave balance, or are absent without approved leave.",
+        "Why": "Salary is compensation for time worked (or approved paid leave) — if you exceed both, the company isn't obligated to pay for that day.",
+        "How": "LOP per day = (Gross Monthly Salary ÷ Number of days in that month) × Number of unpaid leave days taken. This full daily rate — not just Basic — gets deducted.",
+        "When": "Whenever your leave balance goes negative or you're absent without approval."
+      },
+      calc: {
+        headers: ["LOP Example (Gross ₹60,000, 30-day month, 2 LOP days)", "₹"],
+        rows: [
+          ["Per-day rate: 60,000 ÷ 30", "2,000"],
+          ["LOP deduction (2 days)", "4,000"]
+        ]
+      },
+      callouts: [{ type: "trap", label: "Common myth", text: "'LOP only deducts my basic.' False in most companies — it typically deducts based on your full gross salary per day, which hurts more than people expect." }]
+    },
+    {
+      name: "Notice Period Buyout / Recovery",
+      tags: ["Conditional"],
+      wwh: {
+        "What": "If you resign and don't serve your full notice period, the company can deduct pay for the unserved days — this is called a 'buyout' or 'notice pay recovery.'",
+        "Why": "Your notice period exists so the company has time to find a replacement or transition your work. If you leave early, you're compensating them for the gap.",
+        "How": "Recovery = (Gross monthly salary ÷ 30) × number of unserved notice days. Some companies allow you to 'buy out' the remaining notice by paying this upfront to leave immediately.",
+        "When": "At resignation, if you and the company mutually agree to reduce/waive the notice period, or if you leave early unilaterally (with consequences)."
+      },
+      callouts: [{ type: "right", label: "Employee right", text: "Many companies allow a mutual reduction of notice period if your new employer needs you sooner — always negotiate this directly with your manager/HR rather than assuming the full notice is fixed in stone." }]
+    },
+    {
+      name: "Bond / Training Cost Recovery",
+      tags: ["Conditional", "Legal grey zone"],
+      wwh: {
+        "What": "Some companies (especially those investing heavily in your training, like certain IT services or aviation companies) require you to sign a bond committing to stay for a minimum period, or repay a specified training cost if you leave early.",
+        "Why": "Companies want to recover their training investment if you leave shortly after receiving expensive, specialized training that makes you more valuable to competitors.",
+        "How": "Bond amount is specified in your appointment letter/bond agreement; typically pro-rated (i.e., leaving after half the bond period usually means repaying half the amount, though this varies by contract).",
+        "When": "Common in freshers hired directly out of college for roles requiring extensive initial training."
+      },
+      callouts: [{ type: "trap", label: "The trap", text: "Bonds are enforceable in India ONLY if the amount is a genuine, reasonable pre-estimate of actual training cost incurred — courts have struck down bonds that are essentially punitive with no real cost justification. If you're unsure, this is worth a real conversation with a lawyer before signing, not something to just accept as 'normal.'" }]
+    }
+  ]
+});
+
+// ---------- CHAPTER 4: TAXES ----------
+CHAPTERS.push({
+  id: "taxes",
+  tabLabel: "Taxes",
+  eyebrow: "Chapter 4 — The Government's Cut",
+  title: "Income Tax, Demystified",
+  intro: "Tax feels complicated because people learn it backwards — starting with forms and sections instead of the underlying logic. Once you understand WHY slabs exist and WHY two regimes exist, the rest is just arithmetic.",
+  topics: [
+    {
+      name: "Income Tax Slabs — The Core Logic",
+      tags: ["Foundational"],
+      wwh: {
+        "What": "India uses a progressive tax system — you pay a higher % tax rate only on the portion of income that falls into a higher bracket, not on your entire income.",
+        "Why": "Progressive taxation exists on the principle that people with higher incomes can afford to contribute a larger share, while protecting lower earners from being taxed into hardship.",
+        "How": "Example under the New Regime (FY 2025-26 structure): ₹0-3L = 0%, ₹3-7L = 5%, ₹7-10L = 10%, ₹10-12L = 15%, ₹12-15L = 20%, above ₹15L = 30%. Each slice of income is taxed at its own rate — not your whole income at the highest rate you touch.",
+        "Where": "Set annually by the Union Budget; always verify current-year slabs since they do change."
+      },
+      calc: {
+        headers: ["₹12,00,000 taxable income — New Regime", "Tax"],
+        rows: [
+          ["0-3L @ 0%", "0"],
+          ["3-7L @ 5% (on 4L)", "20,000"],
+          ["7-10L @ 10% (on 3L)", "30,000"],
+          ["10-12L @ 15% (on 2L)", "30,000"],
+          ["Total tax (before cess)", "80,000"]
+        ]
+      },
+      callouts: [{ type: "trap", label: "Common myth", text: "'If I earn ₹1 more and cross into the next slab, all my income gets taxed at the higher rate.' Completely false — only the portion above the threshold is taxed at the higher rate. This misunderstanding causes people to irrationally avoid raises or bonuses near slab boundaries." }]
+    },
+    {
+      name: "Old Regime vs New Regime",
+      tags: ["Foundational", "Decision"],
+      wwh: {
+        "What": "India currently offers two parallel tax systems: the Old Regime (higher rates, but lets you claim many deductions/exemptions like 80C, HRA, LTA) and the New Regime (lower rates, but almost no deductions allowed).",
+        "Why": "The New Regime was introduced to simplify taxation and reduce the paperwork burden of tracking dozens of deductions — trading simplicity for fewer tax-saving levers.",
+        "How": "Old Regime suits people with high deductions (large HRA claims, home loan interest, heavy 80C/80D investments). New Regime suits people with few investments/deductions, especially early-career professionals who haven't built up loans or big investment portfolios yet.",
+        "When": "You can choose your regime every year (salaried individuals) — recalculate this at the start of each financial year, don't assume last year's choice is optimal forever."
+      },
+      callouts: [{ type: "right", label: "What to actually do", text: "Don't guess — actually calculate your tax under both regimes using your real numbers (or ask your company's payroll/finance tool to show both) before declaring your choice. The 'better' regime depends entirely on your specific deductions, and it can flip as your life changes (e.g., once you take a home loan)." }]
+    },
+    {
+      name: "Section 80C",
+      tags: ["Old Regime only", "Deduction"],
+      wwh: {
+        "What": "The most well-known deduction section — lets you reduce taxable income by up to ₹1,50,000/year by investing in specified instruments.",
+        "Why": "Created to nudge citizens toward long-term savings and investment (retirement funds, insurance, children's education) by rewarding it with tax relief.",
+        "How": "Eligible investments include: PF (your own contribution), PPF, ELSS mutual funds, life insurance premiums, 5-year tax-saving FDs, principal repayment on home loans, children's tuition fees, Sukanya Samriddhi Yojana.",
+        "Where": "Only available if you opt for the Old Tax Regime — the New Regime does not allow 80C deductions at all."
+      },
+      callouts: [{ type: "right", label: "What to actually do", text: "Your own EPF contribution (12% of Basic) already counts toward this ₹1.5L limit automatically — many freshers don't realize this and think they have the full ₹1.5L available for fresh investments, when a chunk is already used up by PF." }]
+    },
+    {
+      name: "Section 80D",
+      tags: ["Old Regime only", "Deduction"],
+      wwh: {
+        "What": "A deduction for health insurance premiums paid for yourself, your family, and your parents.",
+        "Why": "Encourages people to buy health insurance rather than relying entirely on employer cover (which disappears the moment you leave the job) or, worse, having no cover at all.",
+        "How": "Up to ₹25,000 for self/family premiums (₹50,000 if you're a senior citizen), plus an additional ₹25,000-50,000 for parents' premiums depending on their age.",
+        "Who": "Anyone paying health insurance premiums under the Old Regime."
+      }
+    },
+    {
+      name: "Form 16",
+      tags: ["Document"],
+      wwh: {
+        "What": "An annual certificate your employer issues showing your total salary paid, TDS deducted, and deposited with the government during the financial year.",
+        "Why": "It's your proof that tax was actually deducted and deposited on your behalf — required for filing your Income Tax Return (ITR) accurately.",
+        "How": "Has two parts: Part A (TDS summary, from TRACES/government records) and Part B (detailed salary breakup, allowances, deductions claimed).",
+        "When": "Issued annually, typically by mid-June, after the financial year ends (April-March cycle)."
+      }
+    },
+    {
+      name: "Form 26AS / AIS",
+      tags: ["Document"],
+      wwh: {
+        "What": "Form 26AS is your consolidated tax statement — showing all TDS deducted by any deductor (employer, bank, etc.) against your PAN. AIS (Annual Information Statement) is a more detailed version showing almost all financial transactions the government has on record for you.",
+        "Why": "These exist so you (and the tax department) can cross-verify that the tax deducted actually matches what's deposited under your PAN — a safeguard against fraud or clerical errors.",
+        "How": "Both are accessible on the Income Tax e-filing portal; always cross-check Form 26AS/AIS against your Form 16 before filing your return.",
+        "Where": "incometax.gov.in — under 'e-File' → 'Income Tax Return' → 'View Form 26AS'."
+      },
+      callouts: [{ type: "right", label: "What to actually do", text: "Always check AIS before filing — it now captures things like interest on savings accounts, mutual fund transactions, and even high-value credit card spending. If you forget to report something showing on AIS, you're more likely to get a tax notice." }]
+    },
+    {
+      name: "ITR — Income Tax Return",
+      tags: ["Annual filing"],
+      wwh: {
+        "What": "The annual return you file declaring your total income, deductions, and tax paid, which reconciles what was deducted via TDS against your actual tax liability.",
+        "Why": "TDS is only an estimate spread across the year — the ITR is where the final, accurate calculation happens, resulting in either a refund (if excess TDS was cut) or additional tax payable (if not enough was cut).",
+        "How": "Choose the correct ITR form (ITR-1 for most salaried individuals with simple income), fill in salary/other income, claim deductions, verify tax computed vs TDS paid, and submit electronically.",
+        "When": "Due by July 31st for most individuals (salaried, no audit required) for the financial year ending March 31st — always confirm the current year's deadline as it occasionally gets extended."
+      },
+      callouts: [{ type: "trap", label: "Fresher mistake", text: "Assuming 'my company deducted TDS, so I don't need to file ITR.' Filing is still mandatory if your income exceeds the basic exemption limit, regardless of whether TDS was already deducted — and skipping it can mean penalties plus losing out on a refund you're owed." }]
+    },
+    {
+      name: "Advance Tax",
+      tags: ["Applicable if tax > 10,000"],
+      wwh: {
+        "What": "Tax paid in installments during the year itself (rather than in one lump sum after year-end) for income where TDS doesn't fully cover your tax liability — freelance income, capital gains, rental income, etc.",
+        "Why": "Same principle as TDS — the government wants a steady flow of tax revenue through the year, not a single payment at the end.",
+        "How": "Due in 4 installments (15% by June 15, 45% by Sept 15, 75% by Dec 15, 100% by March 15) if your total tax liability (after TDS) exceeds ₹10,000 in a year.",
+        "Who": "Mainly relevant for freelancers, those with significant capital gains, or side income beyond salary — most purely salaried employees with only salary income don't need to worry about this since employer TDS covers it."
+      }
+    },
+    {
+      name: "Capital Gains Tax",
+      tags: ["Investment income"],
+      wwh: {
+        "What": "Tax on profit made from selling an asset — stocks, mutual funds, property, gold — for more than you bought it.",
+        "Why": "Profit from selling an asset is still income, so it's taxed, though often at different (sometimes more favorable) rates than salary income to encourage investment.",
+        "How": "Split into Short-Term (STCG) and Long-Term (LTCG) based on holding period, each taxed differently. For listed equity/mutual funds: held under 1 year = STCG (taxed at 20%); held over 1 year = LTCG (taxed at 12.5% on gains above ₹1.25L/year, as of recent rules — always verify current rates as they change in Budget announcements).",
+        "When": "Triggered at the point of sale, not while you're just holding the asset."
+      },
+      callouts: [{ type: "note", label: "Remember", text: "Rates and exemption limits for capital gains change relatively often in Union Budgets — don't rely on old numbers you heard a few years ago; always verify the current year's rate before making investment decisions." }]
+    }
+  ]
+});
+
+// ---------- CHAPTER 5: EMPLOYEE BENEFITS ----------
+CHAPTERS.push({
+  id: "benefits",
+  tabLabel: "Employee Benefits",
+  eyebrow: "Chapter 5 — Beyond the Paycheck",
+  title: "Leave, Perks & Everything Non-Cash",
+  intro: "Benefits are compensation too — they just don't show up as a number in your bank account. Understanding leave policy and perks properly can be worth lakhs a year in value you'd otherwise pay for yourself.",
+  topics: [
+    {
+      name: "Types of Leave — CL, SL, EL/PL",
+      tags: ["Foundational"],
+      wwh: {
+        "What": "Casual Leave (CL) covers short, unplanned personal needs. Sick Leave (SL) covers illness. Earned/Privilege Leave (EL/PL) accumulates over time (e.g., 1.5 days/month) and can often be carried forward or encashed.",
+        "Why": "Different leave types exist because different situations need different rules — sick leave might need a medical certificate beyond a few days, while earned leave is treated more like a benefit you've built up and can bank.",
+        "How": "Policy-dependent, but a common structure: 12 CL + 12 SL + 15-18 EL per year, with EL carrying forward (often capped) and sometimes encashable at resignation/retirement.",
+        "Where": "Governed partly by the Shops & Establishments Act of each state, with company policy building on top of the statutory minimum."
+      }
+    },
+    {
+      name: "Leave Encashment",
+      tags: ["Optional/Policy-based", "Taxable (with limits)"],
+      wwh: {
+        "What": "Converting unused earned leave into cash, either during employment (per company policy) or at the time of resignation/retirement.",
+        "Why": "Exists so accumulated leave doesn't just vanish or force companies to carry indefinite leave liabilities — it gives both sides a way to settle unused leave in monetary terms.",
+        "How": "Encashment value = (Basic + DA) ÷ 30 × number of leave days encashed. For government employees, encashment at retirement is fully tax-exempt up to a limit; for private employees it's exempt only up to a much lower government-specified limit, with the rest taxable.",
+        "When": "At resignation/retirement (most common) or sometimes annually if the policy allows encashing leave beyond a certain accumulated cap."
+      }
+    },
+    {
+      name: "Maternity & Paternity Leave",
+      tags: ["Mandatory (Maternity)", "Policy-based (Paternity)"],
+      wwh: {
+        "What": "Maternity Leave is paid leave for childbirth/adoption. Paternity Leave is (usually shorter) leave for fathers, though it isn't mandated by central law the way maternity leave is.",
+        "Why": "The Maternity Benefit Act, 1961 (amended 2017) legally mandates this to protect women's job security and health around childbirth. Paternity leave exists purely through company policy/culture, not a central law requirement (though some states and PSUs do mandate it).",
+        "How": "26 weeks of paid maternity leave for the first two children (12 weeks for the third onward), fully paid at your average daily wage. Paternity leave varies widely by company — anywhere from 5 days to a few weeks.",
+        "Who": "Applies to establishments with 10+ employees under the Maternity Benefit Act."
+      },
+      callouts: [{ type: "note", label: "Employee right", text: "Maternity leave under this Act cannot be denied, and you cannot be terminated during this period for reasons connected to your pregnancy — this is a legal protection, not a favor from your employer." }]
+    },
+    {
+      name: "Compensatory Off (Comp-Off)",
+      tags: ["Policy-based"],
+      wwh: {
+        "What": "A day off granted in lieu of having worked on a weekend, public holiday, or significantly beyond normal hours.",
+        "Why": "Recognizes that some roles require occasional weekend/holiday work, and compensates for it with time rather than (or sometimes in addition to) money.",
+        "How": "Usually has a validity window (e.g., must be used within 30-90 days of being earned) — unlike Earned Leave, Comp-Off often expires if unused, so check your policy."
+      },
+      callouts: [{ type: "trap", label: "Common myth", text: "'My comp-off carries forward like earned leave.' Often false — many companies expire unused comp-off after a short window. Use it or lose it, check your specific policy." }]
+    },
+    {
+      name: "Work From Home / Hybrid / Remote",
+      tags: ["Policy-based"],
+      wwh: {
+        "What": "Different work-location arrangements: WFH (occasional home days), Hybrid (fixed mix of office + home days), Remote (no requirement to be in office at all).",
+        "Why": "Post-2020, companies balance real estate costs, talent access (remote lets them hire beyond one city), and collaboration/culture needs (which many companies feel in-person work supports better) — the resulting policies are a genuine trade-off between these forces, not arbitrary.",
+        "How": "Varies enormously — some companies mandate specific in-office days, some leave it fully to manager discretion, some (especially certain tech companies) offer fully remote roles as a structural policy."
+      }
+    },
+    {
+      name: "Learning & Certification Budget",
+      tags: ["Optional perk"],
+      wwh: {
+        "What": "A yearly allowance for courses, certifications, conferences, or books related to your professional growth.",
+        "Why": "Companies benefit from a more skilled workforce and use this as a relatively cheap retention/development tool — it's usually a small cost to them but genuinely valuable to you if used.",
+        "How": "Amount and process vary — some give a fixed annual budget you claim against receipts, others require manager approval for specific courses/certifications tied to your role."
+      },
+      callouts: [{ type: "right", label: "What to actually do", text: "Given your field (3D/VFX), if your future employer offers this, use it for recognized industry certifications (Autodesk, Foundry, etc.) — this is close to free money that directly compounds your career value." }]
+    }
+  ]
+});
+
+// ---------- CHAPTER 6: CORPORATE DOCUMENTS ----------
+CHAPTERS.push({
+  id: "documents",
+  tabLabel: "Corporate Documents",
+  eyebrow: "Chapter 6 — The Paper Trail",
+  title: "Every Document You'll Sign or Receive",
+  intro: "Every stage of your employment generates paperwork — and each document exists to protect a specific interest (yours, the company's, or both). Knowing what each one actually does prevents you from signing something you don't understand.",
+  topics: [
+    {
+      name: "Offer Letter",
+      tags: ["Pre-employment"],
+      wwh: {
+        "What": "The company's formal proposal of employment — role, CTC, start date — typically with conditions attached (background check, document verification).",
+        "Why": "Locks in mutual intent before either side commits fully — you accept the offer, but the actual employment relationship legally begins only later, on your joining date.",
+        "How": "Usually issued after final interview rounds, with an acceptance deadline; conditional on successful background verification and document checks."
+      }
+    },
+    {
+      name: "Appointment Letter",
+      tags: ["Legal document"],
+      wwh: {
+        "What": "The binding employment contract issued on/after your joining date — this, not the offer letter, is what governs your actual employment terms.",
+        "Why": "Courts and labor authorities treat this as the primary legal record of your employment relationship, since it's signed after both parties have fully committed (you've joined, they've onboarded you).",
+        "How": "Should specify: role, reporting manager, CTC breakup, notice period, probation terms, confidentiality/non-compete clauses, and termination conditions.",
+        "When": "Signed on or shortly after your first day."
+      },
+      callouts: [{ type: "right", label: "What to actually do", text: "Read this document fully before signing — not after. If notice period, bond terms, or confidentiality clauses differ from what was verbally discussed, this document is what legally applies, not the conversation you had." }]
+    },
+    {
+      name: "Experience Letter vs Relieving Letter",
+      tags: ["Post-employment"],
+      wwh: {
+        "What": "An Experience Letter certifies your role, tenure, and sometimes performance at a company. A Relieving Letter specifically confirms you've been formally released from your duties and have no pending obligations.",
+        "Why": "Future employers use these to verify your claimed work history during background checks — without them, your resume claims are just claims, not verified facts.",
+        "How": "Issued by HR after your Full & Final settlement is complete, usually after your last working day, sometimes with a delay if there are pending clearances (laptop return, no-dues, etc.).",
+        "When": "Requested during your next job's background verification — delays here can genuinely hold up your next offer's onboarding."
+      },
+      callouts: [{ type: "trap", label: "The trap", text: "If you leave a company on bad terms or without serving notice properly, they can delay or refuse to issue this letter, which can seriously complicate your next job's background check. Always try to exit cleanly, regardless of how you feel about the company." }]
+    },
+    {
+      name: "Full & Final (F&F) Settlement",
+      tags: ["Post-employment"],
+      wwh: {
+        "What": "The final calculation and payment made to you after resignation/termination — covering last month's salary, unused leave encashment, any pending bonus/reimbursements, minus any recoveries owed (loans, notice period shortfall, asset non-return).",
+        "Why": "Ensures a clean financial closure between you and the company — nothing owed on either side after this settlement.",
+        "How": "Typically processed 30-45 days after your last working day (can vary by company), after all clearances (IT asset return, no-dues from finance/admin) are completed.",
+        "When": "After your last working day, once all department clearances are done."
+      }
+    },
+    {
+      name: "Non-Disclosure Agreement (NDA)",
+      tags: ["Legal", "Standard"],
+      wwh: {
+        "What": "A contract preventing you from sharing the company's confidential information — trade secrets, client data, internal processes — with outside parties, both during and after your employment.",
+        "Why": "Protects the company's competitive information from leaking to competitors or the public, which could cause real business harm.",
+        "How": "Usually signed at the time of appointment, and its confidentiality obligations typically survive even after you leave the company (unlike a non-compete, an NDA about confidential info generally remains enforceable indefinitely)."
+      }
+    },
+    {
+      name: "Non-Compete Clauses",
+      tags: ["Legal grey zone in India"],
+      wwh: {
+        "What": "A clause restricting you from joining a competitor or starting a competing business, sometimes for a period after you leave.",
+        "Why": "Companies want to prevent you from taking specialized knowledge straight to a direct competitor immediately after leaving.",
+        "How": "Important nuance for India: post-employment non-compete clauses are generally NOT enforceable under Indian law (Section 27 of the Indian Contract Act voids agreements that restrain someone from carrying on a lawful profession) — though non-competes DURING employment are enforceable.",
+        "Where": "This differs significantly from countries like the US, where non-competes (subject to state law) can be enforceable post-employment."
+      },
+      callouts: [{ type: "right", label: "Employee right", text: "If a company tries to stop you from joining a competitor after you've already left using a signed non-compete, Indian courts have generally sided with the employee's right to work — this is one of the more employee-friendly aspects of Indian contract law, though NDAs about confidential information are still very much enforceable." }]
+    }
+  ]
+});
+
+// ---------- CHAPTER 7: PROFESSIONAL CAREER KNOWLEDGE ----------
+CHAPTERS.push({
+  id: "career",
+  tabLabel: "Career Knowledge",
+  eyebrow: "Chapter 7 — Playing the Long Game",
+  title: "How Careers Actually Move Forward",
+  intro: "Promotions, appraisals, and negotiations aren't random — they follow patterns that most people only learn by making expensive mistakes. This chapter is the shortcut.",
+  topics: [
+    {
+      name: "Salary Negotiation — The Real Mechanics",
+      tags: ["High-leverage skill"],
+      wwh: {
+        "What": "The process of discussing and settling on compensation before joining a company, or during an internal promotion/appraisal.",
+        "Why": "Companies almost always have more budget flexibility than their first offer suggests — the first number is a starting position, not their final capacity. Negotiation exists because information is asymmetric: they know their budget range, you often don't.",
+        "How": "Never give your expected number first if you can avoid it. Anchor with market data (Glassdoor, Levels.fyi, AmbitionBox, peer benchmarks), express enthusiasm for the role separately from compensation discussion, and negotiate the full package (base + variable + joining bonus + ESOPs) — not just one number.",
+        "When": "Best leverage point is after you have a written offer but before you've accepted — this is when the company has already decided they want you and sunk cost/urgency works in your favor."
+      },
+      callouts: [
+        { type: "trap", label: "Fresher mistake", text: "Accepting the first number out of gratitude or fear of seeming greedy. Companies expect negotiation — the first offer is rarely their absolute ceiling." },
+        { type: "right", label: "What to actually do", text: "Even a polite 'I'm excited about this role — is there flexibility on the base salary given [specific market data/skill]?' opens the door respectfully. The worst outcome is usually just 'no,' not a withdrawn offer." }
+      ]
+    },
+    {
+      name: "Appraisal Cycle, KPI, KRA, OKR",
+      tags: ["Foundational"],
+      wwh: {
+        "What": "KRA (Key Result Area) = the broad areas you're responsible for. KPI (Key Performance Indicator) = specific measurable metrics within those areas. OKR (Objectives and Key Results) = a goal-setting framework linking ambitious objectives to measurable key results. The Appraisal Cycle is the recurring period (usually annual) where performance against these is reviewed.",
+        "Why": "Without structured measurement, performance evaluation becomes purely subjective and political. These frameworks exist to create (imperfect but real) objectivity in deciding raises, bonuses, and promotions.",
+        "How": "Goals set at cycle start, tracked through the year (sometimes with mid-year check-ins), self-assessment plus manager assessment at cycle end, calibration across teams, rating assigned, then linked to increment and bonus payout.",
+        "When": "Most Indian companies run annual cycles (often April-March, aligned with financial year); some run bi-annual reviews."
+      },
+      callouts: [{ type: "right", label: "What to actually do", text: "Keep a running document of your achievements throughout the year, not just before appraisal season — memory is unreliable, and specific, quantified accomplishments ('reduced render time by 20%' vs 'worked hard') are what actually move ratings." }]
+    },
+    {
+      name: "Probation Period",
+      tags: ["Foundational"],
+      wwh: {
+        "What": "An initial period (commonly 3-6 months) where both you and the employer can evaluate fit, with typically shorter notice periods and sometimes reduced benefits.",
+        "Why": "Gives the company a lower-commitment window to confirm you're actually right for the role before extending full benefits and standard notice protections — and gives you the same option to leave with less friction if the role isn't what you expected.",
+        "How": "At the end of probation, you're either 'confirmed' (moved to permanent status with full benefits) or, rarely, the probation is extended if performance is borderline.",
+        "When": "Usually starts Day 1 of employment; confirmation typically requires a formal review and written letter — don't assume you're confirmed just because the date passed without incident."
+      }
+    },
+    {
+      name: "Notice Period",
+      tags: ["Foundational"],
+      wwh: {
+        "What": "The advance warning period you're required to give before leaving a job (or the company before terminating you), specified in your appointment letter.",
+        "Why": "Gives both sides time to transition — you to find or join a new role at an agreed date, the company to find or prepare a replacement and hand over your responsibilities.",
+        "How": "Common ranges: 15-30 days during probation, 30-90 days post-confirmation, varying heavily by seniority and industry (IT services sometimes require 60-90 days for experienced roles).",
+        "When": "Begins the day you formally submit your resignation in writing — a verbal resignation typically doesn't count."
+      }
+    },
+    {
+      name: "Resignation vs Termination vs Layoff",
+      tags: ["Foundational"],
+      wwh: {
+        "What": "Resignation: you choose to leave. Termination: the company ends your employment, usually for cause (performance, conduct). Layoff or retrenchment: the company ends your employment for business reasons unrelated to your performance (cost-cutting, restructuring).",
+        "Why": "The distinction matters legally and financially — layoffs often come with severance obligations under labor law, while termination for cause typically doesn't; this also affects how you can accurately describe the transition to future employers.",
+        "How": "Layoffs of 'workmen' (a specific legal category) are regulated under the Industrial Disputes Act, requiring notice or compensation in lieu, and government permission above certain employee-count thresholds. For employees who don't fall under this legal category, protections rely more on your specific contract terms.",
+        "Who": "Legal protections vary significantly based on whether you're classified as a 'workman' under labor law — a classification that depends on the nature of your work, not your job title."
+      },
+      callouts: [{ type: "note", label: "Remember", text: "Whether you're a legally-defined 'workman' affects which protections apply to you. This is worth understanding if you're ever facing termination, ideally with actual legal advice rather than assumptions." }]
+    },
+    {
+      name: "Absconding",
+      tags: ["Risk"],
+      wwh: {
+        "What": "Leaving a job without formally resigning or serving any notice — simply stopping showing up.",
+        "Why": "Companies can mark your record as 'absconding' in background verification systems, which can seriously damage your credibility with future employers, sometimes worse than a bad reference.",
+        "How": "Avoid it always, even in a toxic workplace — a poorly handled resignation with reduced notice is virtually always better than absconding. If a situation is genuinely unsafe, document everything and involve HR or legal support rather than disappearing."
+      },
+      callouts: [{ type: "trap", label: "The trap", text: "Even a couple of unexplained absent days before a formal resignation can get flagged in some companies' exit records. Always resign formally and in writing, even if you plan to negotiate a shorter notice period afterward." }]
+    },
+    {
+      name: "Moonlighting",
+      tags: ["Legal grey zone"],
+      wwh: {
+        "What": "Taking on paid work for another company (often a competitor or in the same domain) while still employed full-time elsewhere, without your primary employer's knowledge or consent.",
+        "Why": "Employers argue it creates conflicts of interest, IP leakage risk, and reduced focus; employees argue their personal time should be theirs to use, especially in remote setups where hours are less visible.",
+        "How": "Legality is genuinely unsettled in India for most private-sector roles, but most standard appointment letters include exclusivity clauses that make it a contractual violation, and grounds for termination, even where it isn't independently illegal.",
+        "Where": "Became a major public debate in India after several large IT companies explicitly banned it and terminated employees found doing it."
+      },
+      callouts: [{ type: "note", label: "Remember", text: "Check your appointment letter's exclusivity clause before assuming this is safe. Most Indian appointment letters restrict it, and 'no law explicitly bans it' doesn't protect you from being fired for breach of contract." }]
+    },
+    {
+      name: "Startup vs MNC vs Government Job",
+      tags: ["Career decision"],
+      wwh: {
+        "What": "Three broad categories of employer with fundamentally different trade-offs: startups (high risk and reward, fast learning, less structure, equity upside), MNCs (structured growth, better pay stability, slower individual visibility), government (highest job security, slower pay growth, strong non-cash benefits like pension).",
+        "Why": "Each optimizes for a different thing — startups for speed and equity upside at the cost of stability, government for security at the cost of pace, MNCs sit in between with process and brand value.",
+        "How": "The right choice depends entirely on your risk tolerance, life stage, and what you're optimizing for — learning speed, stability, or pure earning potential. There's no universally correct answer, only a correct one for your specific situation."
+      },
+      callouts: [{ type: "right", label: "What to actually do", text: "For a creative and technical field like animation, working at an established studio early gives you process discipline and mentorship that's hard to get at a scrappy startup. A startup or freelance path later, once you have strong fundamentals, can accelerate creative ownership and income faster." }]
+    }
+  ]
+});
+
+// ---------- CHAPTER 8: PERSONAL FINANCE FOR EMPLOYEES ----------
+CHAPTERS.push({
+  id: "personalfinance",
+  tabLabel: "Personal Finance",
+  eyebrow: "Chapter 8 — Making the Money Work",
+  title: "What To Do With What's Left",
+  intro: "Earning well and managing money well are completely different skills. Most of what matters here is not clever tricks — it's a few boring principles applied consistently for a very long time.",
+  topics: [
+    {
+      name: "Emergency Fund",
+      tags: ["Foundational", "Do this first"],
+      wwh: {
+        "What": "A pool of easily accessible cash, in a savings account or liquid mutual fund, kept aside purely to cover unexpected expenses or income loss.",
+        "Why": "Without this, any job loss, medical emergency, or major unexpected expense forces you into debt or into liquidating long-term investments at a bad time. An emergency fund is what makes the rest of your financial plan resilient.",
+        "How": "Target 3-6 months of essential expenses, not your full lifestyle spend. Keep it in a savings account or liquid fund, never in stocks or anything that can lose value right when you need it.",
+        "When": "Build this before you start investing seriously. It's the foundation everything else sits on."
+      },
+      callouts: [{ type: "right", label: "What to actually do", text: "If you're just starting your career, this is genuinely the first financial goal, before mutual funds, before stocks, before anything else. It's not exciting, but it's what stops one bad month from wrecking years of progress." }]
+    },
+    {
+      name: "Budgeting — the 50/30/20 idea",
+      tags: ["Foundational"],
+      wwh: {
+        "What": "A framework for allocating take-home income across categories. A common starting template: 50% Needs, 30% Wants, 20% Savings and Investments.",
+        "Why": "Without any structure, spending naturally expands to match income, a pattern called lifestyle inflation. A budget framework, even a rough one, forces intentional allocation instead of passive drift.",
+        "How": "Track your actual spending for a month or two first to know your real numbers, then adjust the ratio to fit your life stage. Early career with low fixed costs can often push savings well above 20%.",
+        "Where": "A simple spreadsheet works as well as any app. The tool matters far less than the consistency of tracking."
+      }
+    },
+    {
+      name: "Investing Basics — Stocks, Mutual Funds, Index Funds",
+      tags: ["Foundational"],
+      wwh: {
+        "What": "Stocks are direct ownership in a company. Mutual funds are pooled money professionally managed across many stocks or bonds. Index funds are a type of mutual fund that simply tracks a market index like Nifty 50, without active stock-picking.",
+        "Why": "Money sitting idle loses value to inflation every year. Investing exists to grow wealth faster than inflation erodes it, using compounding over long periods.",
+        "How": "For most beginners without deep market expertise, low-cost index funds or well-chosen diversified mutual funds, invested through a monthly SIP, offer a simpler and historically reasonable path than picking individual stocks.",
+        "When": "The earlier you start, the more compounding works in your favor. Money invested at 22 has far more growth runway than the same amount invested at 32, even at the same rate of return."
+      },
+      callouts: [{ type: "trap", label: "Common myth", text: "'I need a lot of money to start investing.' False — SIPs can start from as little as ₹500 a month. The amount matters far less at the start than building the habit and giving time in the market a chance to work." }]
+    },
+    {
+      name: "Credit Score",
+      tags: ["Foundational"],
+      wwh: {
+        "What": "A number, roughly 300-900 in India, that represents your creditworthiness — how likely you are to repay borrowed money, based on your credit history.",
+        "Why": "Lenders use this to decide whether to lend you money and at what interest rate. A poor score means higher interest or outright rejection; a strong score gets you better terms on future loans and cards.",
+        "How": "Built by responsibly using and repaying credit — cards paid in full and on time, loan EMIs paid without default, and keeping the percentage of available credit you use relatively low.",
+        "When": "Worth building consciously from your first job onward, even with a single well-managed credit card, since it compounds in value over years and matters hugely for future loans."
+      },
+      callouts: [{ type: "right", label: "What to actually do", text: "Pay your full credit card bill every month, not just the minimum due. Minimum-due payments trigger steep interest, often 3-4% a month, on the remaining balance — one of the most expensive forms of debt available to consumers." }]
+    },
+    {
+      name: "Financial Independence & Net Worth",
+      tags: ["Long-term thinking"],
+      wwh: {
+        "What": "Net worth is everything you own minus everything you owe. Financial independence is the point where your investments generate enough passive income to cover your living expenses without needing active work income.",
+        "Why": "Salary alone always has a ceiling tied to your time and effort. Net worth and passive income are what actually compound and eventually loosen that ceiling.",
+        "How": "Tracked over time rather than as a single snapshot — the trend matters more than any single number. Built through a combination of high savings rate, reasonable investment returns, and time.",
+        "When": "Worth calculating and reviewing at least once a year, even roughly, just to see the direction of travel."
+      }
+    },
+    {
+      name: "Asset vs Liability — the real distinction",
+      tags: ["Mindset shift"],
+      wwh: {
+        "What": "An asset puts money in your pocket over time, like investments or income-generating property. A liability takes money out of your pocket over time, like most consumer purchases or anything that only depreciates and costs money to maintain.",
+        "Why": "This distinction reframes spending decisions. A common trap is calling something an 'investment,' like a car or a gadget, when it's really a liability that simply feels justified.",
+        "How": "Before a major purchase, honestly ask whether it generates income or appreciates in value, or whether it just costs money to own and use. Both kinds of purchases can be reasonable — the trap is only in confusing which one you're making."
+      }
+    }
+  ]
+});
+
+// ---------- CHAPTER 9: HIDDEN CORPORATE TRUTHS ----------
+CHAPTERS.push({
+  id: "hidden",
+  tabLabel: "Hidden Truths",
+  eyebrow: "Chapter 9 — What HR Doesn't Explain",
+  title: "How Compensation Decisions Actually Get Made",
+  intro: "None of this is secret exactly — it's just not explained to you, because explaining it would sometimes weaken the company's negotiating position. This is the view from the other side of the table.",
+  topics: [
+    {
+      name: "Salary Bands & Benchmarking",
+      tags: ["Internal mechanics"],
+      wwh: {
+        "What": "Companies define a salary 'band' (a min-mid-max range) for every role/level, based on market benchmarking data purchased from firms like Mercer, AON, or Deloitte, showing what competitors pay for similar roles.",
+        "Why": "Bands exist to keep pay decisions somewhat consistent and defensible internally, and to stay competitive enough to attract talent without wildly overpaying compared to the market.",
+        "How": "Your actual offer usually lands somewhere in the band based on your experience, negotiation, and how badly the team needs to fill the role right now — the band's midpoint isn't a guarantee, just a reference point.",
+        "Who": "Set by Compensation & Benefits teams (often within HR), reviewed periodically as market data updates."
+      },
+      callouts: [{ type: "right", label: "What to actually do", text: "When negotiating, sites like Glassdoor, AmbitionBox, and Levels.fyi give you a rough sense of the band for your role/level at similar companies — use this as your anchor instead of guessing." }]
+    },
+    {
+      name: "Internal Parity",
+      tags: ["Internal mechanics"],
+      wwh: {
+        "What": "The principle (and constraint) that a company tries to avoid paying two people in the same role/level dramatically different amounts, to prevent internal resentment and legal risk.",
+        "Why": "Large pay gaps between peers, if discovered (and they usually eventually are, informally), damage morale and trust badly — so HR often caps how much a new hire's offer can exceed existing team members' pay, even if the candidate could command more externally.",
+        "How": "This is often the REAL reason a recruiter says 'we can't match that number' — not necessarily because the budget doesn't exist, but because approving it would break internal parity and create a headache with existing employees."
+      },
+      callouts: [{ type: "note", label: "Remember", text: "This is also why switching companies is often the fastest way to a big salary jump — a new company has no internal parity constraint holding your offer down the way your current company does." }]
+    },
+    {
+      name: "Why Job-Switching Pays More Than Staying",
+      tags: ["Career strategy"],
+      wwh: {
+        "What": "The well-documented pattern that switching companies typically gets you a 20-40% salary jump, while staying and taking annual increments typically gets you 8-15% per year.",
+        "Why": "Internal parity (above) caps how much your current company can raise your pay without disrupting the whole team's pay structure. A new company has no such constraint and is pricing you purely against the external market rate for your skills right now.",
+        "How": "This doesn't mean switch every year recklessly — frequent short stints can hurt your credibility and depth of experience. But staying purely out of loyalty for 5+ years without any external benchmarking, hoping increments will compound to market rate, usually doesn't work out mathematically."
+      },
+      callouts: [{ type: "right", label: "What to actually do", text: "Even if you don't plan to switch, occasionally interviewing elsewhere (every 2-3 years) keeps you calibrated to your real market value and gives you leverage in internal conversations, even if you ultimately stay." }]
+    },
+    {
+      name: "Counter Offers",
+      tags: ["Negotiation psychology"],
+      wwh: {
+        "What": "When you resign, your current company sometimes comes back with an improved offer to retain you.",
+        "Why": "Replacing you has real costs (hiring time, onboarding, lost productivity during the gap) — sometimes it's simply cheaper for them to match or beat your new offer than to replace you, especially if you're hard to replace quickly.",
+        "How": "Counter offers are a legitimate negotiation tool, but be cautious: the underlying reasons you were looking to leave (growth stagnation, team dynamics, work itself) rarely get solved just by a pay bump, and being seen as a 'flight risk' can subtly affect how you're viewed afterward.",
+        "When": "Usually offered within days of your resignation, once your manager escalates to retain you."
+      },
+      callouts: [{ type: "trap", label: "The trap", text: "If the ONLY thing that improves is the number, and the actual reasons you wanted to leave (role, growth, manager, culture) remain unchanged, a counter offer often just delays the same exit by 6-12 months." }]
+    },
+    {
+      name: "Hiring Freezes & Business Cycles",
+      tags: ["Macro awareness"],
+      wwh: {
+        "What": "Periods where a company pauses new hiring (and sometimes internal promotions/increments) due to broader financial caution — often tied to economic slowdowns, missed revenue targets, or over-hiring corrections.",
+        "Why": "Companies manage headcount cost carefully; when growth slows or uncertainty rises, hiring is one of the easiest costs to pause quickly without immediate operational disruption.",
+        "How": "These cycles are largely outside any individual's control, but being aware of the broader industry/economic climate helps you time job searches and negotiations more realistically — job-hunting during a sector-wide freeze is genuinely harder, and that's not a reflection of your worth."
+      }
+    }
+  ]
+});
+
+// ---------- CHAPTER 10: MASTER GLOSSARY ----------
+CHAPTERS.push({
+  id: "glossary",
+  tabLabel: "Master Glossary",
+  eyebrow: "Chapter 10 — The Vocabulary",
+  title: "Corporate & Financial Terms, Quick Reference",
+  intro: "Terms you'll hear constantly but rarely get a clean definition for. Not exhaustive depth like earlier chapters — this is a fast lookup layer for when a term comes up in a meeting or interview and you just need the gist immediately.",
+  topics: [
+    {
+      name: "Reporting Manager / Skip-Level Manager",
+      tags: ["Org structure"],
+      wwh: {
+        "What": "Your Reporting Manager is who you directly report to. Your Skip-Level Manager is your manager's manager — one level up.",
+        "Why": "Skip-level conversations exist so senior leadership can get an unfiltered read on team health and your growth, and so you have an escalation path if there's a genuine issue with your direct manager."
+      }
+    },
+    {
+      name: "HRBP (HR Business Partner)",
+      tags: ["Org structure"],
+      wwh: {
+        "What": "An HR person aligned to a specific business unit or team, acting as the bridge between company-wide HR policy and your specific team's day-to-day people needs.",
+        "Why": "Large companies need HR people who understand a specific team's context deeply, rather than one generic HR desk trying to serve the whole company equally."
+      }
+    },
+    {
+      name: "Stakeholder Management",
+      tags: ["Soft skill"],
+      wwh: {
+        "What": "The practice of managing expectations, communication, and relationships with everyone who has an interest in your work's outcome — managers, clients, other teams.",
+        "Why": "Most workplace friction isn't about technical ability, it's about misaligned expectations. This skill is what prevents 'but I thought you meant X' conversations."
+      }
+    },
+    {
+      name: "Conflict of Interest",
+      tags: ["Ethics"],
+      wwh: {
+        "What": "A situation where your personal interest (financial or otherwise) could improperly influence your professional decisions or duties.",
+        "Why": "Companies require disclosure of these (e.g., a close relative works at a vendor you're evaluating) to protect the integrity of business decisions and protect you from being wrongly suspected of favoritism."
+      }
+    },
+    {
+      name: "Bandwidth (corporate jargon)",
+      tags: ["Jargon"],
+      wwh: {
+        "What": "Corporate shorthand for available time/capacity — 'I don't have bandwidth for this right now' means 'I don't have time.'",
+        "Why": "Jargon like this spreads because it sounds efficient and slightly technical, even when plain language would work just as well — worth recognizing so you can decode meetings quickly without overthinking the vocabulary."
+      }
+    },
+    {
+      name: "Circle Back / Sync / Align",
+      tags: ["Jargon"],
+      wwh: {
+        "What": "'Circle back' = revisit this later. 'Sync' = a short meeting to share updates. 'Align' = get everyone agreeing on the same plan.",
+        "Why": "Recognizing this vocabulary quickly helps you participate fluently in corporate conversations without being thrown off by jargon that sounds more complex than the underlying idea actually is."
+      }
+    }
+  ]
+});
+
+// ---------- ROADMAP DATA (for hero page) ----------
+const ROADMAP = [
+  { phase: "Phase 1 — Weeks 1-2", title: "Foundations & Components", desc: "Chapters 1-2. Understand CTC vs Gross vs Take-Home cold, then every payslip line item.", chapters: ["fundamentals", "components"] },
+  { phase: "Phase 2 — Weeks 3-4", title: "Deductions & Tax", desc: "Chapters 3-4. Know exactly where your money goes and how to legally minimize what leaves.", chapters: ["deductions", "taxes"] },
+  { phase: "Phase 3 — Week 5", title: "Benefits & Paperwork", desc: "Chapters 5-6. Leave policy, perks, and every document you'll sign — read before you sign, not after.", chapters: ["benefits", "documents"] },
+  { phase: "Phase 4 — Weeks 6-7", title: "Career Mechanics", desc: "Chapter 7. Negotiation, appraisals, notice periods — the moves that actually shape your trajectory.", chapters: ["career"] },
+  { phase: "Phase 5 — Week 8", title: "Personal Finance", desc: "Chapter 8. Turn take-home salary into long-term wealth, starting with the boring stuff that actually works.", chapters: ["personalfinance"] },
+  { phase: "Phase 6 — Ongoing", title: "Hidden Truths & Glossary", desc: "Chapters 9-10. The insider view, and a fast-reference vocabulary layer for meetings and interviews.", chapters: ["hidden", "glossary"] }
+];
+
+</script>
+<script>
+// ============================================================
+// THE LEDGER — App Logic
+// ============================================================
+
+let currentChapterIdx = 0; // 0 = hero
+let visitedChapters = new Set();
+
+function init() {
+  renderSidebar();
+  renderHero();
+  renderAllChapters();
+  showChapter(0);
+  setupSearch();
+}
+
+function renderSidebar() {
+  const sidebar = document.getElementById('sidebar');
+  let html = `<div class="sidebar-item ${currentChapterIdx === 0 ? 'active' : ''}" data-idx="0" onclick="showChapter(0)">
+    <span class="tab-num">00</span><span>Start Here</span>
+  </div>`;
+  CHAPTERS.forEach((ch, i) => {
+    const num = String(i + 1).padStart(2, '0');
+    html += `<div class="sidebar-item" data-idx="${i + 1}" onclick="showChapter(${i + 1})">
+      <span class="tab-num">${num}</span><span>${ch.tabLabel}</span>
+    </div>`;
+  });
+  html += `<div class="sidebar-progress-track">
+    <div class="progress-label">Your Progress</div>
+    <div class="progress-bar-bg"><div class="progress-bar-fill" id="progressFill"></div></div>
+    <div id="progressText">0 / ${CHAPTERS.length} chapters visited</div>
+  </div>`;
+  sidebar.innerHTML = html;
+}
+
+function updateProgress() {
+  const pct = Math.round((visitedChapters.size / CHAPTERS.length) * 100);
+  const fill = document.getElementById('progressFill');
+  const text = document.getElementById('progressText');
+  if (fill) fill.style.width = pct + '%';
+  if (text) text.textContent = `${visitedChapters.size} / ${CHAPTERS.length} chapters visited`;
+}
+
+function showChapter(idx) {
+  currentChapterIdx = idx;
+  document.querySelectorAll('.sidebar-item').forEach(el => {
+    el.classList.toggle('active', parseInt(el.dataset.idx) === idx);
+  });
+  document.querySelectorAll('.chapter, #heroSection').forEach(el => el.classList.remove('active'));
+  if (idx === 0) {
+    document.getElementById('heroSection').classList.add('active');
+  } else {
+    const ch = CHAPTERS[idx - 1];
+    document.getElementById('chapter-' + ch.id).classList.add('active');
+    visitedChapters.add(ch.id);
+    updateProgress();
+  }
+  window.scrollTo({ top: 0, behavior: 'instant' });
+}
+
+function goToChapterById(id) {
+  const i = CHAPTERS.findIndex(c => c.id === id);
+  if (i >= 0) showChapter(i + 1);
+}
+
+// ===== HERO / START HERE =====
+function renderHero() {
+  const main = document.getElementById('mainContent');
+  const heroDiv = document.createElement('div');
+  heroDiv.id = 'heroSection';
+  heroDiv.className = 'chapter active';
+  heroDiv.innerHTML = `
+    <div class="hero">
+      <div class="hero-eyebrow">The Complete Reference — 0.1% Professional Standard</div>
+      <h1 class="hero-title">Everything Your Salary<br>Isn't Telling You.</h1>
+      <p class="hero-sub">CTC is not your salary. Your payslip is not your net worth. This is a working reference built for someone starting a career in India — go chapter by chapter, or jump straight to whatever you need right now via search.</p>
+
+      <div class="ctc-machine">
+        <div class="ctc-input-row">
+          <label for="ctcInput">Annual CTC (₹)</label>
+          <input type="number" id="ctcInput" value="1200000" step="50000">
+          <input type="range" id="ctcSlider" min="300000" max="5000000" step="10000" value="1200000">
+          <div class="regime-toggle">
+            <button class="regime-btn active" data-regime="new" onclick="setRegime('new')">New Regime</button>
+            <button class="regime-btn" data-regime="old" onclick="setRegime('old')">Old Regime</button>
+          </div>
+        </div>
+        <div id="payslipOutput"></div>
+      </div>
+
+      <h3 style="font-family:var(--font-display); color:var(--ledger-green); margin-bottom:14px; font-size:1.4rem;">Your Learning Path</h3>
+      <div class="roadmap-cards">
+        ${ROADMAP.map(r => `
+          <div class="roadmap-card" onclick="goToChapterById('${r.chapters[0]}')">
+            <div class="rc-phase">${r.phase}</div>
+            <h4>${r.title}</h4>
+            <p>${r.desc}</p>
+          </div>
+        `).join('')}
+      </div>
+    </div>
+  `;
+  main.appendChild(heroDiv);
+
+  document.getElementById('ctcInput').addEventListener('input', syncCtcFromInput);
+  document.getElementById('ctcSlider').addEventListener('input', syncCtcFromSlider);
+  renderPayslip();
+}
+
+let currentRegime = 'new';
+function setRegime(r) {
+  currentRegime = r;
+  document.querySelectorAll('.regime-btn').forEach(b => b.classList.toggle('active', b.dataset.regime === r));
+  renderPayslip();
+}
+function syncCtcFromInput() {
+  const val = document.getElementById('ctcInput').value;
+  document.getElementById('ctcSlider').value = val;
+  renderPayslip();
+}
+function syncCtcFromSlider() {
+  const val = document.getElementById('ctcSlider').value;
+  document.getElementById('ctcInput').value = val;
+  renderPayslip();
+}
+
+function calcTaxNewRegime(taxableIncome) {
+  // FY 2025-26 style new regime slabs (approx, for illustration)
+  const slabs = [
+    [300000, 0], [700000, 0.05], [1000000, 0.10],
+    [1200000, 0.15], [1500000, 0.20], [Infinity, 0.30]
+  ];
+  let tax = 0, prev = 0;
+  for (const [limit, rate] of slabs) {
+    if (taxableIncome > prev) {
+      const slice = Math.min(taxableIncome, limit) - prev;
+      tax += slice * rate;
+      prev = limit;
+    } else break;
+  }
+  // rebate under 87A roughly for income <= 7L in new regime
+  if (taxableIncome <= 700000) tax = 0;
+  return tax * 1.04; // 4% cess
+}
+
+function calcTaxOldRegime(taxableIncome) {
+  const slabs = [
+    [250000, 0], [500000, 0.05], [1000000, 0.20], [Infinity, 0.30]
+  ];
+  let tax = 0, prev = 0;
+  for (const [limit, rate] of slabs) {
+    if (taxableIncome > prev) {
+      const slice = Math.min(taxableIncome, limit) - prev;
+      tax += slice * rate;
+      prev = limit;
+    } else break;
+  }
+  if (taxableIncome <= 500000) tax = 0;
+  return tax * 1.04;
+}
+
+function renderPayslip() {
+  const ctc = parseFloat(document.getElementById('ctcInput').value) || 0;
+  if (ctc <= 0) return;
+
+  // Simplified realistic structure
+  const basic = ctc * 0.42;
+  const hra = basic * 0.5;
+  const employerPF = Math.min(basic, 180000) * 0.12; // capped-ish ballpark
+  const gratuity = basic * (15/26)/12 * 12; // annualized provision approx
+  const insurance = ctc * 0.012;
+  const specialAllowance = ctc - basic - hra - employerPF - gratuity - insurance;
+
+  const grossAnnual = basic + hra + Math.max(specialAllowance, 0);
+  const employeePF = Math.min(basic, 180000) * 0.12;
+  const professionalTax = 2500;
+
+  // Standard deduction + rough taxable income estimate
+  const standardDeduction = currentRegime === 'new' ? 75000 : 50000;
+  let taxableIncome = grossAnnual - standardDeduction;
+  if (currentRegime === 'old') {
+    // assume some 80C utilization reduces taxable income a bit for illustration
+    taxableIncome -= Math.min(150000, employeePF + 50000);
+    taxableIncome = Math.max(taxableIncome, 0);
+  }
+  const annualTax = currentRegime === 'new' ? calcTaxNewRegime(taxableIncome) : calcTaxOldRegime(taxableIncome);
+
+  const annualDeductions = employeePF + (professionalTax) + annualTax;
+  const netAnnual = grossAnnual - annualDeductions;
+  const netMonthly = netAnnual / 12;
+
+  const fmt = n => '₹' + Math.round(n).toLocaleString('en-IN');
+
+  const barSegs = [
+    { label: 'Basic', val: basic, color: '#0F3D2E' },
+    { label: 'HRA', val: hra, color: '#1A5940' },
+    { label: 'Special', val: Math.max(specialAllowance,0), color: '#4A5265' },
+    { label: 'PF (Employer)', val: employerPF, color: '#8A8578' },
+    { label: 'Gratuity', val: gratuity, color: '#C17817' },
+    { label: 'Insurance', val: insurance, color: '#E8A94F' }
+  ];
+  const total = barSegs.reduce((s,x) => s + x.val, 0) || 1;
+
+  const html = `
+    <div class="ctc-bar">
+      ${barSegs.map(s => `<div class="ctc-bar-seg" style="width:${(s.val/total*100).toFixed(1)}%; background:${s.color};" title="${s.label}: ${fmt(s.val)}">${(s.val/total*100) > 8 ? s.label : ''}</div>`).join('')}
+    </div>
+    <div class="payslip-grid">
+      <div>
+        <div class="payslip-col-title">Earnings (Annual)</div>
+        <div class="payslip-line"><span>Basic Salary</span><span>${fmt(basic)}</span></div>
+        <div class="payslip-line"><span>HRA</span><span>${fmt(hra)}</span></div>
+        <div class="payslip-line"><span>Special Allowance</span><span>${fmt(Math.max(specialAllowance,0))}</span></div>
+        <div class="payslip-line total"><span>Gross Salary</span><span>${fmt(grossAnnual)}</span></div>
+      </div>
+      <div>
+        <div class="payslip-col-title ded">Deductions (Annual)</div>
+        <div class="payslip-line"><span>Employee PF</span><span>${fmt(employeePF)}</span></div>
+        <div class="payslip-line"><span>Professional Tax</span><span>${fmt(professionalTax)}</span></div>
+        <div class="payslip-line"><span>Income Tax (est., ${currentRegime === 'new' ? 'New' : 'Old'} Regime)</span><span>${fmt(annualTax)}</span></div>
+        <div class="payslip-line total"><span>Total Deductions</span><span>${fmt(annualDeductions)}</span></div>
+      </div>
+    </div>
+    <div class="takehome-stamp">
+      <span class="takehome-label">Estimated Monthly Take-Home</span>
+      <span class="takehome-value">${fmt(netMonthly)}</span>
+    </div>
+  `;
+  document.getElementById('payslipOutput').innerHTML = html;
+}
+
+// ===== RENDER CHAPTERS =====
+function renderAllChapters() {
+  const main = document.getElementById('mainContent');
+  CHAPTERS.forEach(ch => {
+    const div = document.createElement('div');
+    div.className = 'chapter';
+    div.id = 'chapter-' + ch.id;
+    div.innerHTML = renderChapterContent(ch);
+    main.appendChild(div);
+  });
+}
+
+function renderChapterContent(ch) {
+  const idx = CHAPTERS.findIndex(c => c.id === ch.id);
+  const topicsHtml = ch.topics.map((t, ti) => renderTopic(t, ch.id, ti)).join('');
+
+  const prevDisabled = idx === 0 ? '' : '';
+  const nextChapterId = idx < CHAPTERS.length - 1 ? CHAPTERS[idx + 1].id : null;
+
+  return `
+    <div class="chapter-eyebrow">${ch.eyebrow}</div>
+    <h1 class="chapter-title">${ch.title}</h1>
+    <p class="chapter-intro">${ch.intro}</p>
+    <div class="topics-list">${topicsHtml}</div>
+    <div class="chapter-summary">
+      <ul>${ch.topics.slice(0,5).map(t => `<li>${t.name} — know the difference between what's mandatory and what's optional, and whether it's taxable.</li>`).join('')}</ul>
+    </div>
+    <div class="nav-buttons">
+      <button class="nav-btn" onclick="showChapter(${idx})">&larr; ${idx === 0 ? 'Start Here' : CHAPTERS[idx-1].tabLabel}</button>
+      ${nextChapterId ? `<button class="nav-btn" onclick="goToChapterById('${nextChapterId}')">${CHAPTERS[idx+1].tabLabel} &rarr;</button>` : `<button class="nav-btn" disabled>You've reached the end &#10003;</button>`}
+    </div>
+  `;
+}
+
+function renderTopic(t, chapterId, ti) {
+  const topicId = `topic-${chapterId}-${ti}`;
+  const tagsHtml = (t.tags || []).map(tag => {
+    const lower = tag.toLowerCase();
+    let cls = '';
+    if (lower.includes('mandatory')) cls = 'mandatory';
+    else if (lower.includes('optional')) cls = 'optional';
+    else if (lower.includes('taxable') && !lower.includes('tax-exempt') && !lower.includes('non')) cls = 'taxable';
+    else if (lower.includes('exempt') || lower.includes('tax-free')) cls = 'taxfree';
+    return `<span class="tag ${cls}">${tag}</span>`;
+  }).join('');
+
+  const wwhHtml = Object.entries(t.wwh || {}).map(([label, val]) =>
+    `<div class="wwh-label">${label.toUpperCase()}</div><div class="wwh-value">${val}</div>`
+  ).join('');
+
+  let calcHtml = '';
+  if (t.calc) {
+    calcHtml = `<table class="calc-table">
+      <tr><th>${t.calc.headers[0]}</th><th style="text-align:right;">${t.calc.headers[1]}</th></tr>
+      ${t.calc.rows.map(r => `<tr><td>${r[0]}</td><td class="num">${r[1]}</td></tr>`).join('')}
+    </table>`;
+  }
+
+  const calloutsHtml = (t.callouts || []).map(c =>
+    `<div class="callout ${c.type}"><span class="callout-label">${c.label}</span>${c.text}</div>`
+  ).join('');
+
+  return `
+    <div class="topic" id="${topicId}">
+      <div class="topic-head" onclick="toggleTopic('${topicId}')">
+        <span class="topic-name">${t.name}</span>
+        <span class="topic-toggle">+</span>
+      </div>
+      <div class="topic-body">
+        <div class="topic-body-inner">
+          <div class="tag-row">${tagsHtml}</div>
+          <div class="wwh-grid">${wwhHtml}</div>
+          ${calcHtml}
+          ${calloutsHtml}
+        </div>
+      </div>
+    </div>
+  `;
+}
+
+function toggleTopic(id) {
+  document.getElementById(id).classList.toggle('open');
+}
+
+// ===== SEARCH =====
+let searchIndex = [];
+function buildSearchIndex() {
+  CHAPTERS.forEach((ch, ci) => {
+    ch.topics.forEach((t, ti) => {
+      const text = (t.name + ' ' + Object.values(t.wwh || {}).join(' ')).toLowerCase();
+      searchIndex.push({ chapterId: ch.id, chapterLabel: ch.tabLabel, chapterIdx: ci, topicIdx: ti, name: t.name, text });
+    });
+  });
+}
+
+function setupSearch() {
+  buildSearchIndex();
+  const input = document.getElementById('searchInput');
+  const results = document.getElementById('searchResults');
+
+  input.addEventListener('input', () => {
+    const q = input.value.trim().toLowerCase();
+    if (q.length < 2) { results.classList.remove('active'); return; }
+    const matches = searchIndex.filter(item => item.text.includes(q)).slice(0, 8);
+    if (matches.length === 0) {
+      results.innerHTML = `<div class="search-result-item" style="color:var(--rule);">No matches. Try a shorter term.</div>`;
+    } else {
+      results.innerHTML = matches.map(m =>
+        `<div class="search-result-item" onclick="jumpToTopic('${m.chapterId}', ${m.topicIdx})">
+          <span class="sr-chapter">${m.chapterLabel}</span>${m.name}
+        </div>`
+      ).join('');
+    }
+    results.classList.add('active');
+  });
+
+  document.addEventListener('click', (e) => {
+    if (!e.target.closest('.search-wrap')) results.classList.remove('active');
+  });
+}
+
+function jumpToTopic(chapterId, topicIdx) {
+  goToChapterById(chapterId);
+  document.getElementById('searchResults').classList.remove('active');
+  document.getElementById('searchInput').value = '';
+  setTimeout(() => {
+    const el = document.getElementById(`topic-${chapterId}-${topicIdx}`);
+    if (el) {
+      el.classList.add('open');
+      el.scrollIntoView({ behavior: 'smooth', block: 'center' });
+      el.style.transition = 'background 0.3s';
+      el.style.background = '#FBF3E4';
+      setTimeout(() => { el.style.background = ''; }, 1500);
+    }
+  }, 100);
+}
+
+init();
+
+</script>
+</body>
+</html>
