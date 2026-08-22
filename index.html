@@ -185,15 +185,30 @@
   .manage-row .info{ min-width:0; flex:1; }
   .manage-row .info b{ font-family:var(--font-display); font-size:14px; display:block; }
   .manage-row .info span{ font-family:var(--font-mono); font-size:11px; color:var(--text-faint); }
-  .reorder{ display:flex; flex-direction:column; gap:3px; flex:none; }
-  .btn-icon{
-    width:26px; height:21px; display:flex; align-items:center; justify-content:center;
-    border:1px solid var(--border); border-radius:6px; background:transparent; color:var(--text-dim);
-    cursor:pointer; transition:.15s ease; padding:0;
+  .pos{ flex:none; }
+  .pos-input{
+    width:38px; text-align:center; background:var(--bg-alt); border:1px solid var(--border);
+    border-radius:7px; padding:6px 2px; font-family:var(--font-mono); font-size:13px; color:var(--teal);
   }
-  .btn-icon svg{ width:12px; height:12px; }
-  .btn-icon:hover:not(:disabled){ border-color:var(--teal); color:var(--teal); }
-  .btn-icon:disabled{ opacity:.25; cursor:not-allowed; }
+  .pos-input:focus{ border-color:var(--teal); }
+
+  .hidden{ display:none !important; }
+  .modal-overlay{
+    position:fixed; inset:0; background:rgba(5,7,11,.72); backdrop-filter:blur(2px);
+    display:flex; align-items:center; justify-content:center; z-index:50; padding:20px;
+  }
+  .modal{
+    background:var(--surface); border:1px solid var(--border); border-radius:14px;
+    padding:26px; width:min(360px,100%); animation:rise .22s ease both;
+  }
+  .modal h3{ font-family:var(--font-display); font-size:16px; margin-bottom:6px; }
+  .modal .sub{ font-size:12.5px; color:var(--text-dim); margin-bottom:16px; line-height:1.55; }
+  .modal input{
+    width:100%; background:var(--bg-alt); border:1px solid var(--border); border-radius:8px;
+    padding:10px 12px; font-size:14px; color:var(--text); margin-bottom:10px;
+  }
+  .modal input:focus{ border-color:var(--teal); }
+  .pw-error{ font-size:12px; color:var(--red); margin:-2px 0 12px; }
   .confirm{ display:flex; align-items:center; gap:8px; }
   .confirm span{ font-size:12px; color:var(--text-dim); }
 
@@ -301,6 +316,7 @@
       <button class="btn" id="testBtn">Test connection</button>
       <button class="btn btn-primary" id="saveCfgBtn">Save</button>
       <button class="btn btn-ghost" id="forgetBtn">Forget token on this device</button>
+      <button class="btn btn-ghost" id="changePwBtn">Change admin password</button>
     </div>
   </div>
 
@@ -339,6 +355,20 @@
 </div>
 
 <footer>THE HANGAR · self-contained · runs on your own free GitHub repo</footer>
+
+<div id="pwModal" class="modal-overlay hidden">
+  <div class="modal">
+    <h3 id="pwModalTitle">Enter admin password</h3>
+    <p class="sub" id="pwModalSub">Keeps casual visitors out of admin mode on this device.</p>
+    <input type="password" id="pwInput" placeholder="Password" autocomplete="off">
+    <input type="password" id="pwConfirmInput" class="hidden" placeholder="Confirm password" autocomplete="off">
+    <p class="pw-error hidden" id="pwError"></p>
+    <div class="btn-row">
+      <button class="btn btn-primary" id="pwSubmit">Unlock</button>
+      <button class="btn btn-ghost" id="pwCancel">Cancel</button>
+    </div>
+  </div>
+</div>
 
 <script>
 (function(){
@@ -483,13 +513,8 @@
     if(!list.length){ el.innerHTML = `<p class="sub" style="margin:0">Nothing docked yet.</p>`; return; }
     el.innerHTML = list.map((app, i) => `
       <div class="manage-row" data-id="${app.id}">
-        <div class="reorder">
-          <button class="btn-icon up-btn" ${i===0 ? 'disabled' : ''} aria-label="Move ${escapeHtml(app.name)} up">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 15l6-6 6 6"/></svg>
-          </button>
-          <button class="btn-icon down-btn" ${i===list.length-1 ? 'disabled' : ''} aria-label="Move ${escapeHtml(app.name)} down">
-            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4" stroke-linecap="round" stroke-linejoin="round"><path d="M6 9l6 6 6-6"/></svg>
-          </button>
+        <div class="pos">
+          <input type="number" class="pos-input" min="1" max="${list.length}" value="${i+1}" aria-label="Position for ${escapeHtml(app.name)}">
         </div>
         <div class="info"><b>${escapeHtml(app.name)}</b><span>${escapeHtml(app.filename)}</span></div>
         <div class="actions">
@@ -497,8 +522,14 @@
         </div>
       </div>
     `).join('');
-    el.querySelectorAll('.up-btn').forEach((btn, i) => btn.addEventListener('click', () => reorderApp(i, -1)));
-    el.querySelectorAll('.down-btn').forEach((btn, i) => btn.addEventListener('click', () => reorderApp(i, 1)));
+    el.querySelectorAll('.pos-input').forEach((input, i) => {
+      input.addEventListener('change', () => {
+        const val = parseInt(input.value, 10);
+        if(isNaN(val)){ input.value = i + 1; return; }
+        moveAppTo(list[i].id, val);
+      });
+      input.addEventListener('keydown', e => { if(e.key === 'Enter') input.blur(); });
+    });
     el.querySelectorAll('.undock-btn').forEach(btn => {
       btn.addEventListener('click', () => confirmUndock(btn, list.find(a => a.id === btn.closest('.manage-row').dataset.id)));
     });
@@ -591,13 +622,16 @@
     }
   }
 
-  async function reorderApp(index, direction){
+  async function moveAppTo(id, targetPos){
     const cfg = getConfig();
-    if(!cfg.owner || !cfg.repo || !cfg.token){ setStatus('error','not connected · open settings first'); return; }
-    const newIndex = index + direction;
-    if(newIndex < 0 || newIndex >= currentList.length) return;
+    if(!cfg.owner || !cfg.repo || !cfg.token){ setStatus('error','not connected · open settings first'); renderManageList(currentList); return; }
     const list = currentList.slice();
-    [list[index], list[newIndex]] = [list[newIndex], list[index]];
+    const fromIndex = list.findIndex(a => a.id === id);
+    if(fromIndex === -1) return;
+    const toIndex = Math.min(Math.max(0, targetPos - 1), list.length - 1);
+    if(toIndex === fromIndex){ renderManageList(list); return; }
+    const [item] = list.splice(fromIndex, 1);
+    list.splice(toIndex, 0, item);
     setStatus('pending', 'saving new order...');
     try{
       const manifestFile = await ghGet('manifest.json', cfg);
@@ -608,6 +642,7 @@
       setStatus('ok', `✓ synced · order saved at ${timeNow()}`);
     }catch(e){
       setStatus('error', `✗ sync failed · ${e.message}`);
+      renderManageList(currentList);
     }
   }
 
@@ -675,15 +710,87 @@
     setStatus('', 'token forgotten on this device');
   });
 
+  /* ---------------- admin password gate ---------------- */
+  async function sha256Hex(text){
+    if(!(window.crypto && window.crypto.subtle)) return 'plain:' + text;
+    const buf = await crypto.subtle.digest('SHA-256', new TextEncoder().encode(text));
+    return Array.from(new Uint8Array(buf)).map(b => b.toString(16).padStart(2,'0')).join('');
+  }
+  function hasAdminPassword(){ return !!localStorage.getItem('hangar_admin_hash'); }
+
+  const pwModal = document.getElementById('pwModal');
+  const pwTitle = document.getElementById('pwModalTitle');
+  const pwSub = document.getElementById('pwModalSub');
+  const pwInput = document.getElementById('pwInput');
+  const pwConfirm = document.getElementById('pwConfirmInput');
+  const pwError = document.getElementById('pwError');
+  let pwMode = 'check';
+
+  function openPwModal(mode){
+    pwMode = mode;
+    pwInput.value = ''; pwConfirm.value = '';
+    pwError.classList.add('hidden');
+    if(mode === 'set'){
+      pwTitle.textContent = hasAdminPassword() ? 'Change admin password' : 'Set an admin password';
+      pwSub.textContent = "Kept only in this browser. It keeps casual visitors out of admin mode on this device — your GitHub token is still the real lock on the repo itself.";
+      pwConfirm.classList.remove('hidden');
+      document.getElementById('pwSubmit').textContent = 'Save password';
+    } else {
+      pwTitle.textContent = 'Enter admin password';
+      pwSub.textContent = 'Keeps casual visitors out of admin mode on this device.';
+      pwConfirm.classList.add('hidden');
+      document.getElementById('pwSubmit').textContent = 'Unlock';
+    }
+    pwModal.classList.remove('hidden');
+    pwInput.focus();
+  }
+  function closePwModal(){ pwModal.classList.add('hidden'); }
+  function showPwError(msg){ pwError.textContent = msg; pwError.classList.remove('hidden'); }
+
+  async function submitPwModal(){
+    const val = pwInput.value;
+    if(!val){ showPwError('Enter a password.'); return; }
+    if(pwMode === 'set'){
+      if(val !== pwConfirm.value){ showPwError("Passwords don't match."); return; }
+      localStorage.setItem('hangar_admin_hash', await sha256Hex(val));
+      closePwModal();
+      revealAdminPanel();
+    } else {
+      const hash = await sha256Hex(val);
+      if(hash === localStorage.getItem('hangar_admin_hash')){
+        closePwModal();
+        revealAdminPanel();
+      } else {
+        showPwError('Incorrect password.');
+        pwInput.value = ''; pwInput.focus();
+      }
+    }
+  }
+  document.getElementById('pwSubmit').addEventListener('click', submitPwModal);
+  document.getElementById('pwCancel').addEventListener('click', closePwModal);
+  document.getElementById('changePwBtn').addEventListener('click', () => openPwModal('set'));
+  pwModal.addEventListener('keydown', e => {
+    if(e.key === 'Enter') submitPwModal();
+    if(e.key === 'Escape') closePwModal();
+  });
+
   /* ---------------- admin toggle ---------------- */
   const lockBtn = document.getElementById('lockBtn');
   const adminPanel = document.getElementById('adminPanel');
+  function revealAdminPanel(){
+    adminPanel.classList.remove('hidden');
+    lockBtn.classList.add('unlocked');
+    lockBtn.setAttribute('aria-pressed', 'true');
+    fillConfigForm();
+  }
   lockBtn.addEventListener('click', () => {
-    const isHidden = adminPanel.classList.contains('hidden');
-    adminPanel.classList.toggle('hidden');
-    lockBtn.classList.toggle('unlocked', isHidden);
-    lockBtn.setAttribute('aria-pressed', String(isHidden));
-    if(isHidden) fillConfigForm();
+    if(!adminPanel.classList.contains('hidden')){
+      adminPanel.classList.add('hidden');
+      lockBtn.classList.remove('unlocked');
+      lockBtn.setAttribute('aria-pressed', 'false');
+      return;
+    }
+    openPwModal(hasAdminPassword() ? 'check' : 'set');
   });
 
   /* ---------------- boot ---------------- */
