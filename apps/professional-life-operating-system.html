@@ -1,0 +1,1147 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>The Professional Life Operating System</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link href="https://fonts.googleapis.com/css2?family=Space+Grotesk:wght@400;500;600;700&family=Inter:wght@400;500;600;700;800&family=JetBrains+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --bg:#0A0E14;
+  --panel:#12161F;
+  --card:#1A2030;
+  --card-hi:#212940;
+  --border:#252C3D;
+  --border-hi:#38415A;
+  --text:#E8ECF1;
+  --text-dim:#9AA4B8;
+  --text-faint:#616B80;
+  --blue:#5B8CFF;
+  --blue-dim:#2E3F6B;
+  --amber:#F5A623;
+  --amber-dim:#5C4620;
+  --green:#3DD68C;
+  --green-dim:#1D4A38;
+  --red:#FF6B6B;
+  --red-dim:#5A2A2A;
+  --purple:#B18CFF;
+  --font-display:'Space Grotesk',sans-serif;
+  --font-body:'Inter',sans-serif;
+  --font-mono:'JetBrains Mono',monospace;
+  --radius:14px;
+  --radius-sm:8px;
+}
+*{box-sizing:border-box;margin:0;padding:0;}
+html{scroll-behavior:smooth;}
+body{
+  background:var(--bg);
+  color:var(--text);
+  font-family:var(--font-body);
+  font-size:15px;
+  line-height:1.6;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:var(--blue-dim);color:var(--text);}
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-track{background:var(--bg);}
+::-webkit-scrollbar-thumb{background:var(--border-hi);border-radius:10px;}
+::-webkit-scrollbar-thumb:hover{background:var(--text-faint);}
+
+a{color:var(--blue);text-decoration:none;}
+:focus-visible{outline:2px solid var(--blue);outline-offset:2px;}
+
+/* ===== BACKGROUND TEXTURE ===== */
+.bg-grid{
+  position:fixed;inset:0;z-index:0;pointer-events:none;
+  background-image:
+    linear-gradient(rgba(91,140,255,0.035) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(91,140,255,0.035) 1px, transparent 1px);
+  background-size:48px 48px;
+  mask-image:radial-gradient(ellipse 80% 60% at 50% 0%, black 40%, transparent 100%);
+}
+
+/* ===== STATUS BAR (signature element) ===== */
+.status-bar{
+  position:fixed;top:0;left:0;right:0;height:44px;z-index:100;
+  background:rgba(10,14,20,0.85);
+  backdrop-filter:blur(16px) saturate(140%);
+  border-bottom:1px solid var(--border);
+  display:flex;align-items:center;
+  padding:0 18px;gap:16px;
+  font-family:var(--font-mono);
+  font-size:11.5px;
+  color:var(--text-dim);
+}
+.status-dot{width:7px;height:7px;border-radius:50%;background:var(--green);box-shadow:0 0 8px var(--green);flex-shrink:0;
+  animation:pulse 2.4s ease-in-out infinite;}
+@keyframes pulse{0%,100%{opacity:1;}50%{opacity:0.4;}}
+.status-seg{display:flex;align-items:center;gap:8px;white-space:nowrap;}
+.status-sep{color:var(--border-hi);}
+.status-current{color:var(--blue);font-weight:600;}
+.status-bar .status-fill{flex:1;}
+.status-progress-track{width:120px;height:4px;background:var(--border);border-radius:4px;overflow:hidden;flex-shrink:0;}
+.status-progress-fill{height:100%;background:var(--blue);border-radius:4px;width:0%;transition:width .3s ease;}
+@media (max-width:900px){.status-bar{padding:0 12px;gap:10px;font-size:10px;}.status-progress-track{display:none;}.status-seg.hide-mobile{display:none;}}
+
+/* ===== LAYOUT ===== */
+.shell{display:flex;min-height:100vh;padding-top:44px;position:relative;z-index:1;}
+
+.sidebar{
+  width:264px;flex-shrink:0;
+  position:fixed;top:44px;bottom:0;left:0;
+  background:var(--panel);
+  border-right:1px solid var(--border);
+  overflow-y:auto;
+  padding:20px 12px 40px;
+  z-index:50;
+}
+.sidebar-brand{
+  padding:8px 10px 18px;
+  border-bottom:1px solid var(--border);
+  margin-bottom:14px;
+}
+.sidebar-brand-mark{
+  font-family:var(--font-mono);font-size:11px;color:var(--blue);letter-spacing:0.12em;
+}
+.sidebar-brand-title{
+  font-family:var(--font-display);font-size:15px;font-weight:700;color:var(--text);margin-top:4px;line-height:1.3;
+}
+.nav-group-label{
+  font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.1em;color:var(--text-faint);
+  padding:14px 10px 6px;
+}
+.nav-link{
+  display:flex;align-items:center;gap:10px;
+  padding:8px 10px;border-radius:var(--radius-sm);
+  color:var(--text-dim);font-size:13px;font-weight:500;
+  cursor:pointer;transition:background .15s,color .15s;
+  border:1px solid transparent;
+}
+.nav-link:hover{background:var(--card);color:var(--text);}
+.nav-link.active{background:var(--blue-dim);color:var(--blue);border-color:var(--border-hi);}
+.nav-num{font-family:var(--font-mono);font-size:10.5px;color:var(--text-faint);width:18px;flex-shrink:0;}
+.nav-link.active .nav-num{color:var(--blue);}
+
+.sidebar-toggle{
+  display:none;position:fixed;top:8px;right:12px;z-index:110;
+  background:var(--card);border:1px solid var(--border-hi);color:var(--text);
+  width:28px;height:28px;border-radius:8px;font-size:14px;align-items:center;justify-content:center;cursor:pointer;
+}
+@media (max-width:900px){
+  .sidebar{transform:translateX(-100%);transition:transform .25s ease;box-shadow:20px 0 40px rgba(0,0,0,0.5);}
+  .sidebar.open{transform:translateX(0);}
+  .sidebar-toggle{display:flex;}
+  .main{margin-left:0 !important;}
+}
+
+.main{margin-left:264px;flex:1;min-width:0;padding:0 0 120px;}
+.content-wrap{max-width:1180px;margin:0 auto;padding:0 40px;}
+@media (max-width:640px){.content-wrap{padding:0 18px;}}
+
+/* ===== HERO ===== */
+.hero{
+  padding:100px 40px 70px;
+  position:relative;
+  border-bottom:1px solid var(--border);
+  overflow:hidden;
+}
+.hero::before{
+  content:'';position:absolute;top:-200px;right:-200px;width:600px;height:600px;
+  background:radial-gradient(circle, rgba(91,140,255,0.10) 0%, transparent 70%);
+  pointer-events:none;
+}
+.hero-inner{max-width:1180px;margin:0 auto;position:relative;z-index:1;}
+.hero-eyebrow{
+  font-family:var(--font-mono);font-size:12px;color:var(--blue);letter-spacing:0.15em;text-transform:uppercase;
+  display:flex;align-items:center;gap:10px;margin-bottom:22px;
+}
+.hero-eyebrow::before{content:'';width:24px;height:1px;background:var(--blue);}
+.hero-title{
+  font-family:var(--font-display);font-weight:700;
+  font-size:clamp(34px,5.2vw,64px);line-height:1.05;letter-spacing:-0.01em;
+  color:var(--text);max-width:900px;
+}
+.hero-title span{color:var(--blue);}
+.hero-sub{
+  font-size:18px;color:var(--text-dim);margin-top:20px;max-width:640px;font-weight:400;
+}
+.hero-stats{display:flex;gap:0;margin-top:44px;flex-wrap:wrap;border-top:1px solid var(--border);}
+.hero-stat{padding:20px 32px 0;border-right:1px solid var(--border);flex:1;min-width:140px;}
+.hero-stat:last-child{border-right:none;}
+.hero-stat-num{font-family:var(--font-display);font-size:28px;font-weight:700;color:var(--blue);}
+.hero-stat-label{font-size:12px;color:var(--text-faint);margin-top:4px;text-transform:uppercase;letter-spacing:0.05em;}
+@media (max-width:640px){.hero{padding:80px 18px 40px;}.hero-stats{flex-direction:column;}.hero-stat{border-right:none;border-bottom:1px solid var(--border);padding-bottom:16px;}}
+
+/* ===== MODULE / SECTION ===== */
+.module{padding:64px 40px;border-bottom:1px solid var(--border);scroll-margin-top:60px;}
+.module:last-of-type{border-bottom:none;}
+@media (max-width:640px){.module{padding:44px 18px;}}
+.module-header{margin-bottom:36px;}
+.module-badge{
+  display:inline-flex;align-items:center;gap:8px;
+  font-family:var(--font-mono);font-size:11px;color:var(--blue);
+  background:var(--blue-dim);border:1px solid var(--border-hi);
+  padding:4px 10px;border-radius:100px;margin-bottom:16px;letter-spacing:0.05em;
+}
+.module-title{font-family:var(--font-display);font-size:clamp(24px,3vw,34px);font-weight:700;color:var(--text);letter-spacing:-0.01em;}
+.module-desc{font-size:15px;color:var(--text-dim);margin-top:10px;max-width:680px;}
+
+/* ===== GRID SYSTEMS ===== */
+.grid{display:grid;gap:16px;}
+.grid-2{grid-template-columns:repeat(2,1fr);}
+.grid-3{grid-template-columns:repeat(3,1fr);}
+.grid-4{grid-template-columns:repeat(4,1fr);}
+@media (max-width:900px){.grid-3{grid-template-columns:repeat(2,1fr);}.grid-4{grid-template-columns:repeat(2,1fr);}}
+@media (max-width:640px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}}
+
+/* ===== CARD ===== */
+.card{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:20px;transition:border-color .2s,transform .2s;
+}
+.card:hover{border-color:var(--border-hi);}
+.card-icon{font-size:20px;margin-bottom:10px;display:block;}
+.card-title{font-family:var(--font-display);font-size:15px;font-weight:600;color:var(--text);margin-bottom:6px;}
+.card-body{font-size:13px;color:var(--text-dim);line-height:1.55;}
+.card-tag{
+  display:inline-block;font-family:var(--font-mono);font-size:9.5px;text-transform:uppercase;letter-spacing:0.06em;
+  padding:2px 7px;border-radius:5px;margin-top:10px;
+}
+
+/* priority tag colors */
+.tag-critical{background:var(--red-dim);color:var(--red);}
+.tag-high{background:var(--amber-dim);color:var(--amber);}
+.tag-core{background:var(--blue-dim);color:var(--blue);}
+.tag-good{background:var(--green-dim);color:var(--green);}
+
+/* ===== SUBSECTION ===== */
+.subsection{margin-top:44px;}
+.subsection-title{
+  font-family:var(--font-display);font-size:18px;font-weight:600;color:var(--text);
+  display:flex;align-items:center;gap:10px;margin-bottom:18px;
+}
+.subsection-title::before{
+  content:'';width:3px;height:16px;background:var(--blue);border-radius:2px;flex-shrink:0;
+}
+.subsection-note{font-size:13px;color:var(--text-faint);margin-top:-10px;margin-bottom:18px;max-width:700px;}
+
+/* ===== TABLE ===== */
+.table-wrap{overflow-x:auto;border:1px solid var(--border);border-radius:var(--radius);}
+table{width:100%;border-collapse:collapse;font-size:13px;min-width:560px;}
+thead th{
+  background:var(--panel);font-family:var(--font-mono);font-size:10.5px;text-transform:uppercase;letter-spacing:0.05em;
+  color:var(--text-faint);text-align:left;padding:12px 16px;border-bottom:1px solid var(--border);white-space:nowrap;
+}
+tbody td{padding:12px 16px;border-bottom:1px solid var(--border);color:var(--text-dim);vertical-align:top;}
+tbody tr:last-child td{border-bottom:none;}
+tbody tr:hover{background:rgba(91,140,255,0.03);}
+td strong,td b{color:var(--text);font-weight:600;}
+.cell-mono{font-family:var(--font-mono);font-size:12px;color:var(--text);}
+
+/* ===== TIMELINE / FLOW ===== */
+.flow{display:flex;align-items:stretch;gap:0;overflow-x:auto;padding-bottom:8px;}
+.flow-step{
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius);
+  padding:16px;min-width:160px;flex:1;position:relative;
+}
+.flow-step-num{font-family:var(--font-mono);font-size:11px;color:var(--blue);margin-bottom:8px;}
+.flow-step-title{font-family:var(--font-display);font-weight:600;font-size:14px;color:var(--text);margin-bottom:4px;}
+.flow-step-desc{font-size:12px;color:var(--text-dim);}
+.flow-arrow{display:flex;align-items:center;justify-content:center;color:var(--text-faint);padding:0 6px;flex-shrink:0;font-size:18px;}
+@media (max-width:900px){.flow{flex-direction:column;}.flow-arrow{transform:rotate(90deg);padding:6px 0;align-self:center;}.flow-step{min-width:0;}}
+
+.vtimeline{position:relative;padding-left:28px;border-left:2px solid var(--border);}
+.vtimeline-item{position:relative;padding-bottom:26px;}
+.vtimeline-item:last-child{padding-bottom:0;}
+.vtimeline-item::before{
+  content:'';position:absolute;left:-34px;top:2px;width:11px;height:11px;border-radius:50%;
+  background:var(--bg);border:2px solid var(--blue);
+}
+.vtimeline-time{font-family:var(--font-mono);font-size:11px;color:var(--blue);margin-bottom:3px;}
+.vtimeline-title{font-weight:600;color:var(--text);font-size:14px;margin-bottom:3px;}
+.vtimeline-desc{font-size:13px;color:var(--text-dim);}
+
+/* ===== CHECKLIST ===== */
+.checklist{display:flex;flex-direction:column;gap:8px;}
+.check-item{
+  display:flex;align-items:flex-start;gap:10px;padding:10px 14px;
+  background:var(--card);border:1px solid var(--border);border-radius:var(--radius-sm);font-size:13.5px;color:var(--text-dim);
+}
+.check-box{
+  width:16px;height:16px;border:1.5px solid var(--border-hi);border-radius:4px;flex-shrink:0;margin-top:2px;
+  display:flex;align-items:center;justify-content:center;color:var(--green);font-size:10px;
+}
+
+/* ===== DECISION TREE ===== */
+.tree{display:flex;flex-direction:column;gap:0;}
+.tree-node{
+  background:var(--card);border:1px solid var(--border-hi);border-radius:var(--radius-sm);
+  padding:12px 16px;font-size:13px;position:relative;margin-bottom:4px;
+}
+.tree-q{color:var(--text);font-weight:600;}
+.tree-branch{display:flex;gap:12px;margin:8px 0 16px 24px;flex-wrap:wrap;}
+.tree-branch-item{
+  background:var(--panel);border:1px solid var(--border);border-radius:var(--radius-sm);padding:10px 14px;font-size:12.5px;
+  color:var(--text-dim);flex:1;min-width:200px;border-left:3px solid var(--blue);
+}
+.tree-branch-item b{color:var(--text);}
+
+/* ===== MATRIX (2x2) ===== */
+.matrix{display:grid;grid-template-columns:1fr 1fr;grid-template-rows:1fr 1fr;gap:10px;aspect-ratio:auto;}
+.matrix-cell{
+  border-radius:var(--radius);padding:18px;min-height:120px;
+  display:flex;flex-direction:column;gap:6px;
+}
+.matrix-q1{background:var(--green-dim);border:1px solid var(--green);}
+.matrix-q2{background:var(--blue-dim);border:1px solid var(--blue);}
+.matrix-q3{background:var(--amber-dim);border:1px solid var(--amber);}
+.matrix-q4{background:var(--red-dim);border:1px solid var(--red);}
+.matrix-label{font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.05em;opacity:0.85;}
+.matrix-title{font-family:var(--font-display);font-weight:700;font-size:15px;}
+.matrix-desc{font-size:12px;opacity:0.85;}
+@media (max-width:640px){.matrix{grid-template-columns:1fr;grid-template-rows:auto;}}
+
+/* ===== SOFTWARE STACK ROW ===== */
+.stack-row{
+  display:grid;grid-template-columns:180px 1fr 1fr 1.3fr;gap:14px;
+  padding:14px 16px;border-bottom:1px solid var(--border);align-items:start;
+}
+.stack-row:first-child{border-top:1px solid var(--border);}
+.stack-cat{font-family:var(--font-display);font-weight:600;font-size:13.5px;color:var(--text);}
+.stack-why{font-size:12px;color:var(--text-faint);}
+.stack-tools{display:flex;flex-direction:column;gap:4px;}
+.stack-pick{font-size:13px;color:var(--text);}
+.stack-pick b{color:var(--blue);}
+.stack-alt{font-size:11.5px;color:var(--text-faint);}
+@media (max-width:900px){.stack-row{grid-template-columns:1fr;gap:6px;}.stack-cat{padding-top:8px;}}
+
+/* ===== QUOTE / CALLOUT ===== */
+.callout{
+  border-left:3px solid var(--blue);background:var(--panel);border-radius:0 var(--radius) var(--radius) 0;
+  padding:16px 20px;font-size:14px;color:var(--text-dim);margin:24px 0;
+}
+.callout b{color:var(--text);}
+.callout.warn{border-left-color:var(--amber);}
+.callout.danger{border-left-color:var(--red);}
+.callout.good{border-left-color:var(--green);}
+
+/* ===== TEMPLATE BLOCK ===== */
+.template-block{
+  background:#0D1119;border:1px solid var(--border);border-radius:var(--radius);padding:18px 20px;
+  font-family:var(--font-mono);font-size:12.5px;color:var(--text-dim);line-height:1.7;white-space:pre-wrap;
+  position:relative;margin-top:10px;
+}
+.template-label{
+  font-family:var(--font-mono);font-size:10px;text-transform:uppercase;letter-spacing:0.06em;color:var(--text-faint);margin-bottom:8px;
+}
+
+/* ===== TOC / TABLE OF CONTENTS PILLS ===== */
+.toc-pills{display:flex;flex-wrap:wrap;gap:8px;margin-top:28px;}
+.toc-pill{
+  font-family:var(--font-mono);font-size:11.5px;color:var(--text-dim);
+  border:1px solid var(--border);background:var(--card);padding:6px 12px;border-radius:100px;
+  cursor:pointer;transition:all .15s;
+}
+.toc-pill:hover{border-color:var(--blue);color:var(--blue);}
+
+/* utility */
+.mt-0{margin-top:0;}
+.text-center{text-align:center;}
+.dim{color:var(--text-faint);}
+.small{font-size:12px;}
+h4.inline-head{font-family:var(--font-display);font-size:14px;font-weight:600;color:var(--text);margin:18px 0 8px;}
+
+footer{
+  padding:50px 40px;text-align:center;color:var(--text-faint);font-size:12px;font-family:var(--font-mono);
+}
+</style>
+</head>
+<body>
+<div class="bg-grid"></div>
+
+<div class="status-bar">
+  <span class="status-dot"></span>
+  <span class="status-seg">SYSTEM: <span class="status-current" id="statusModule">01 · MINDSET</span></span>
+  <span class="status-sep">/</span>
+  <span class="status-seg hide-mobile">STATUS: <span style="color:var(--green)">OPERATIONAL</span></span>
+  <div class="status-fill"></div>
+  <div class="status-progress-track"><div class="status-progress-fill" id="scrollProgress"></div></div>
+  <span class="status-seg hide-mobile" id="scrollPct">0%</span>
+</div>
+
+<button class="sidebar-toggle" id="sidebarToggle">☰</button>
+
+<div class="shell">
+  <nav class="sidebar" id="sidebar">
+    <div class="sidebar-brand">
+      <div class="sidebar-brand-mark">PLOS v1.0</div>
+      <div class="sidebar-brand-title">Professional Life<br>Operating System</div>
+    </div>
+    <div id="navContainer"></div>
+  </nav>
+
+  <main class="main">
+    <div id="mainContent">
+
+<section class="hero" id="hero">
+  <div class="hero-inner">
+    <div class="hero-eyebrow">System Architecture · v1.0</div>
+    <h1 class="hero-title">The Professional Life<br><span>Operating System</span></h1>
+    <p class="hero-sub">Everything required to become a world-class professional — mindset, communication, tools, money, career, and the daily discipline that ties it together. Eighteen modules. One system.</p>
+    <div class="hero-stats">
+      <div class="hero-stat"><div class="hero-stat-num">18</div><div class="hero-stat-label">Modules</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">150+</div><div class="hero-stat-label">Components</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">40+</div><div class="hero-stat-label">Tools Mapped</div></div>
+      <div class="hero-stat"><div class="hero-stat-num">0</div><div class="hero-stat-label">Fluff</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="module" id="m01" data-title="01 · MINDSET">
+  <div class="module-header">
+    <div class="module-badge">MODULE 01 / 18</div>
+    <h2 class="module-title">Professional Mindset</h2>
+    <p class="module-desc">Every skill downstream of this module is a multiplier on it. Get the mindset wrong and better tools, better English, better templates just make you fail faster and louder.</p>
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-title">The 17 Core Traits</div>
+    <div class="grid grid-3">
+      <div class="card"><span class="card-icon">📈</span><div class="card-title">Growth Mindset</div><div class="card-body">Skill is trained, not fixed. Every failure is data about the method, not a verdict on you.</div><span class="card-tag tag-critical">Foundation</span></div>
+      <div class="card"><span class="card-icon">🎯</span><div class="card-title">Ownership</div><div class="card-body">You hold the outcome even when the cause wasn't fully you. "That's not my fault" and "that's not my job to fix" both signal low ownership.</div><span class="card-tag tag-critical">Foundation</span></div>
+      <div class="card"><span class="card-icon">⚙️</span><div class="card-title">Discipline</div><div class="card-body">Doing the right thing when motivation is at zero. The entire system below is worthless without this one.</div><span class="card-tag tag-critical">Foundation</span></div>
+      <div class="card"><span class="card-icon">🛡️</span><div class="card-title">Integrity</div><div class="card-body">Same behavior whether or not you're being watched. This is what "reputation" is actually built from, over years, not one good week.</div><span class="card-tag tag-core">Core</span></div>
+      <div class="card"><span class="card-icon">🔁</span><div class="card-title">Reliability</div><div class="card-body">People can build plans on top of your word without checking twice. Rarer than talent, and worth more.</div><span class="card-tag tag-core">Core</span></div>
+      <div class="card"><span class="card-icon">📏</span><div class="card-title">Consistency</div><div class="card-body">Same quality on your worst day as your best. One brilliant week followed by three flat ones reads as unreliable, not talented.</div><span class="card-tag tag-core">Core</span></div>
+      <div class="card"><span class="card-icon">✅</span><div class="card-title">Accountability</div><div class="card-body">Naming the miss out loud before someone else finds it, then fixing it — not explaining why it happened.</div><span class="card-tag tag-core">Core</span></div>
+      <div class="card"><span class="card-icon">🌱</span><div class="card-title">Humility</div><div class="card-body">Assuming there's a gap in your knowledge before assuming the other person is wrong. Costs nothing, buys you everything.</div><span class="card-tag tag-good">Supporting</span></div>
+      <div class="card"><span class="card-icon">💪</span><div class="card-title">Confidence</div><div class="card-body">Calibrated to actual competence — the antidote to both silent self-doubt and unearned bravado. Built from reps, not affirmations.</div><span class="card-tag tag-good">Supporting</span></div>
+      <div class="card"><span class="card-icon">📚</span><div class="card-title">Learning Mentality</div><div class="card-body">Treating every project, client, and failure as a curriculum. The market rewards whoever compounds knowledge fastest.</div><span class="card-tag tag-good">Supporting</span></div>
+      <div class="card"><span class="card-icon">🔭</span><div class="card-title">Long-Term Thinking</div><div class="card-body">Choosing the slower path that compounds over the fast path that plateaus. Reputation, skill, and money all reward patience disproportionately.</div><span class="card-tag tag-good">Supporting</span></div>
+      <div class="card"><span class="card-icon">⚖️</span><div class="card-title">Professional Ethics</div><div class="card-body">The line you don't cross even when no one would catch you, and even when crossing it would clearly help you.</div><span class="card-tag tag-good">Supporting</span></div>
+      <div class="card"><span class="card-icon">🧩</span><div class="card-title">Decision Making</div><div class="card-body">Deciding with 70% of the information instead of waiting for 100% that never comes. Speed plus reversibility beats perfect plus slow.</div><span class="card-tag tag-good">Supporting</span></div>
+      <div class="card"><span class="card-icon">🔧</span><div class="card-title">Problem Solving</div><div class="card-body">Diagnosing the actual root cause before reaching for a fix. Most "solutions" just patch a symptom and the problem returns.</div><span class="card-tag tag-good">Supporting</span></div>
+      <div class="card"><span class="card-icon">🧠</span><div class="card-title">Critical Thinking</div><div class="card-body">Questioning the premise, not just the conclusion. Most bad decisions trace back to an unquestioned assumption.</div><span class="card-tag tag-good">Supporting</span></div>
+      <div class="card"><span class="card-icon">💼</span><div class="card-title">Business Thinking</div><div class="card-body">Understanding how your work turns into money for someone, somewhere. Every role exists because it moves that number.</div><span class="card-tag tag-good">Supporting</span></div>
+      <div class="card"><span class="card-icon">🤝</span><div class="card-title">Customer-First Thinking</div><div class="card-body">Optimizing for the person on the other end of the work, not for how clever the work makes you look.</div><span class="card-tag tag-good">Supporting</span></div>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-title">Mindset Decision Tree — "Something Went Wrong. Now What?"</div>
+    <div class="tree">
+      <div class="tree-node"><span class="tree-q">Q1 — Is this fixable right now, today?</span></div>
+      <div class="tree-branch">
+        <div class="tree-branch-item"><b>Yes →</b> Fix it first. Explain later. Nobody remembers a 20-minute delay that came with a solution attached.</div>
+        <div class="tree-branch-item"><b>No →</b> Go to Q2.</div>
+      </div>
+      <div class="tree-node"><span class="tree-q">Q2 — Does someone else need to know before it affects them?</span></div>
+      <div class="tree-branch">
+        <div class="tree-branch-item"><b>Yes →</b> Tell them now, with the fix plan attached. Silence is the actual crime, not the mistake itself.</div>
+        <div class="tree-branch-item"><b>No →</b> Go to Q3.</div>
+      </div>
+      <div class="tree-node"><span class="tree-q">Q3 — Was this a one-off or a pattern?</span></div>
+      <div class="tree-branch">
+        <div class="tree-branch-item"><b>One-off →</b> Log it, move on. Don't build a whole new system for a fluke.</div>
+        <div class="tree-branch-item"><b>Pattern →</b> Redesign the process, not just your effort. Trying harder at a broken process still fails.</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="module" id="m02" data-title="02 · PERSONAL BRAND">
+  <div class="module-header">
+    <div class="module-badge">MODULE 02 / 18</div>
+    <h2 class="module-title">Personal Brand</h2>
+    <p class="module-desc">Your brand is what people say about you when you're not in the room. Everything here just makes that story accurate and findable.</p>
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-title">The Identity Layer</div>
+    <div class="grid grid-4">
+      <div class="card"><span class="card-icon">👔</span><div class="card-title">How You Look</div><div class="card-body">Dress one notch above the room's baseline. Clean, fitted, unremarkable in a good way — the goal is that nobody notices your clothes, they notice you.</div></div>
+      <div class="card"><span class="card-icon">🗣️</span><div class="card-title">How You Speak</div><div class="card-body">Short sentences. Concrete nouns. Say the conclusion first, then the reasoning — nobody wants to sit through your derivation.</div></div>
+      <div class="card"><span class="card-icon">🧠</span><div class="card-title">How You Think</div><div class="card-body">Out loud, in front of others, structured: here's the problem, here's what I tried, here's what I recommend.</div></div>
+      <div class="card"><span class="card-icon">👋</span><div class="card-title">How You Introduce Yourself</div><div class="card-body">Name, what you do, one proof point. "I'm Opx, I do 3D/VFX, most recently on [X]." Under 10 seconds.</div></div>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-title">Brand Assets Checklist</div>
+    <div class="grid grid-2">
+      <div class="checklist">
+        <div class="check-item"><span class="check-box">✓</span><div><b style="color:var(--text)">Professional bio</b> — 3 versions: 1-line, 3-line, full paragraph. Reuse everywhere.</div></div>
+        <div class="check-item"><span class="check-box">✓</span><div><b style="color:var(--text)">Professional photo</b> — plain background, good light, shoulders up, recent within 2 years.</div></div>
+        <div class="check-item"><span class="check-box">✓</span><div><b style="color:var(--text)">Professional email</b> — firstname.lastname format. Never a nickname or number-suffix address.</div></div>
+        <div class="check-item"><span class="check-box">✓</span><div><b style="color:var(--text)">Professional signature</b> — name, title, one contact link. No quotes, no clutter.</div></div>
+      </div>
+      <div class="checklist">
+        <div class="check-item"><span class="check-box">✓</span><div><b style="color:var(--text)">Consistent username</b> — same handle across LinkedIn, GitHub/portfolio, email alias where possible.</div></div>
+        <div class="check-item"><span class="check-box">✓</span><div><b style="color:var(--text)">Portfolio / personal site</b> — 6–10 best pieces, not everything you've made. Curation is the skill.</div></div>
+        <div class="check-item"><span class="check-box">✓</span><div><b style="color:var(--text)">Resume + CV</b> — resume for jobs (1 page, achievement-based), CV for academia/grants (comprehensive).</div></div>
+        <div class="check-item"><span class="check-box">✓</span><div><b style="color:var(--text)">LinkedIn presence</b> — complete profile, active enough to show up in searches, not necessarily daily posting.</div></div>
+      </div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <b>Reputation math:</b> trust is built in drops and lost in buckets. One inconsistency after fifty good interactions can outweigh all fifty. This is why consistency (Module 01) is upstream of brand — brand is just consistency, observed by other people, over time.
+  </div>
+</section>
+
+<section class="module" id="m03" data-title="03 · COMMUNICATION">
+  <div class="module-header">
+    <div class="module-badge">MODULE 03 / 18</div>
+    <h2 class="module-title">Communication</h2>
+    <p class="module-desc">Skill without communication caps your ceiling at "the person who did the work" instead of "the person people want on their team." This is the highest-leverage module in the whole system.</p>
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-title">Channel-by-Channel Rules</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Channel</th><th>Response Time</th><th>Rule</th><th>Common Mistake</th></tr></thead>
+        <tbody>
+          <tr><td><b>Email</b></td><td class="cell-mono">Within 24h</td><td>Subject line states the ask. One topic per email. Bullet the action items.</td><td>Burying the actual request in paragraph 3.</td></tr>
+          <tr><td><b>Slack / Chat</b></td><td class="cell-mono">Within 1–4h (work hrs)</td><td>Short, threaded, one idea per message. Use @ sparingly.</td><td>Sending 6 fragmented messages instead of 1 complete one.</td></tr>
+          <tr><td><b>Video Call</b></td><td class="cell-mono">On time, camera on</td><td>Mute when not talking. Look at the camera, not the screen, when speaking.</td><td>Multitasking visibly, or joining audio-only with no warning.</td></tr>
+          <tr><td><b>Phone</b></td><td class="cell-mono">Answer or call back same day</td><td>Identify yourself immediately: "Hi, this is [name] from [context]."</td><td>Launching into the topic before the other person knows who's calling.</td></tr>
+          <tr><td><b>In-Person / Meeting</b></td><td class="cell-mono">2 min early</td><td>Come with an agenda point even if you didn't set the meeting.</td><td>Showing up with nothing prepared to contribute.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-title">The Core Skills</div>
+    <div class="grid grid-3">
+      <div class="card"><span class="card-icon">👂</span><div class="card-title">Listening</div><div class="card-body">Listen to understand, not to prepare your reply. Most people are rehearsing while the other person is still talking.</div></div>
+      <div class="card"><span class="card-icon">🗨️</span><div class="card-title">Business English</div><div class="card-body">Plain, direct, active voice. "I'll send it by Friday," not "It is anticipated that delivery will occur by Friday."</div></div>
+      <div class="card"><span class="card-icon">🧍</span><div class="card-title">Body Language</div><div class="card-body">Open posture, steady eye contact (60–70% of the time, not a stare), hands visible and calm.</div></div>
+      <div class="card"><span class="card-icon">🎤</span><div class="card-title">Voice & Tone</div><div class="card-body">Slow down 20% from your natural pace when speaking to groups. Nerves speed people up; slowing down reads as control.</div></div>
+      <div class="card"><span class="card-icon">✍️</span><div class="card-title">Writing & Grammar</div><div class="card-body">Read it once out loud before sending. Most errors are audible before they're visible.</div></div>
+      <div class="card"><span class="card-icon">🎬</span><div class="card-title">Presentation Skills</div><div class="card-body">One idea per slide. The room remembers your best sentence, not your busiest slide.</div></div>
+      <div class="card"><span class="card-icon">🤝</span><div class="card-title">Negotiation</div><div class="card-body">Whoever names a number first anchors the conversation. Ask their range before giving yours when you can.</div></div>
+      <div class="card"><span class="card-icon">🧯</span><div class="card-title">Conflict Resolution</div><div class="card-body">Attack the problem, never the person. "This approach isn't working" not "you're doing this wrong."</div></div>
+      <div class="card"><span class="card-icon">📬</span><div class="card-title">Giving & Receiving Feedback</div><div class="card-body">Giving: specific + actionable + kind. Receiving: say "thank you" before you say anything else, even if you disagree.</div></div>
+      <div class="card"><span class="card-icon">🌐</span><div class="card-title">Networking</div><div class="card-body">Give before you ask. Show up to the relationship with something useful, not just a request.</div></div>
+      <div class="card"><span class="card-icon">📖</span><div class="card-title">Storytelling</div><div class="card-body">Structure: situation → tension → resolution → what it means. Facts persuade the analytical brain; stories persuade the whole person.</div></div>
+      <div class="card"><span class="card-icon">☕</span><div class="card-title">Small Talk</div><div class="card-body">A skill, not fluff — it's the on-ramp to trust before the real conversation starts. Ask, then actually listen to the answer.</div></div>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-title">Audience-Specific Communication</div>
+    <div class="grid grid-2">
+      <div class="card"><span class="card-icon">👤</span><div class="card-title">Talking to Your Boss</div><div class="card-body">Lead with the bottom line, then context if asked. Bring a recommendation, not just a problem. Never surprise them in front of their boss.</div></div>
+      <div class="card"><span class="card-icon">👥</span><div class="card-title">Talking to Coworkers</div><div class="card-body">Assume good intent by default. Disagree on the idea in the room, not behind their back afterward.</div></div>
+      <div class="card"><span class="card-icon">💼</span><div class="card-title">Talking to Clients</div><div class="card-body">Translate technical reality into business impact. They don't need to know how hard it was — they need to know what it means for them.</div></div>
+      <div class="card"><span class="card-icon">🏠</span><div class="card-title">Remote Communication</div><div class="card-body">Over-communicate status since nobody can see you working. A visible "still on track" beats silence, every time.</div></div>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-title">Meeting Etiquette Flow</div>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-step-num">BEFORE</div><div class="flow-step-title">Prepare</div><div class="flow-step-desc">Read the agenda. Know your one contribution.</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-step-num">START</div><div class="flow-step-title">Arrive Early</div><div class="flow-step-desc">2 min early, camera/mic checked, notes open.</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-step-num">DURING</div><div class="flow-step-title">Contribute & Listen</div><div class="flow-step-desc">Speak with purpose. Mute when not talking. No side-scrolling.</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-step-num">END</div><div class="flow-step-title">Confirm Actions</div><div class="flow-step-desc">Recap who owns what, by when, out loud.</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-step-num">AFTER</div><div class="flow-step-title">Follow Up</div><div class="flow-step-desc">Send notes within a few hours, while it's still fresh.</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="module" id="m04" data-title="04 · WORK ETHICS">
+  <div class="module-header">
+    <div class="module-badge">MODULE 04 / 18</div>
+    <h2 class="module-title">Work Ethics</h2>
+    <p class="module-desc">The unglamorous behaviors that decide whether people trust you with bigger things. Nobody puts these on a resume, but everybody notices when they're missing.</p>
+  </div>
+
+  <div class="grid grid-4">
+    <div class="card"><span class="card-icon">⏰</span><div class="card-title">Punctuality</div><div class="card-body">On time means 5 minutes early. "On time" to you should mean "early" to everyone else.</div></div>
+    <div class="card"><span class="card-icon">📅</span><div class="card-title">Deadlines</div><div class="card-body">Flag a slipping deadline the moment you see it coming, not the day it's due.</div></div>
+    <div class="card"><span class="card-icon">📝</span><div class="card-title">Taking Notes</div><div class="card-body">Write it down in the meeting. "I'll remember" is where most dropped commitments start.</div></div>
+    <div class="card"><span class="card-icon">📂</span><div class="card-title">Documentation</div><div class="card-body">If it's not written down, it didn't happen — for handoffs, for disputes, for your own memory in 6 months.</div></div>
+    <div class="card"><span class="card-icon">🔍</span><div class="card-title">Transparency</div><div class="card-body">Share the real status, including the bad news, before someone has to ask.</div></div>
+    <div class="card"><span class="card-icon">🤲</span><div class="card-title">Honesty</div><div class="card-body">A hard truth today costs you less than a comfortable lie discovered later.</div></div>
+    <div class="card"><span class="card-icon">🙏</span><div class="card-title">Respect</div><div class="card-body">Same tone for the intern as for the CEO. How you treat people with no power over you is the real test.</div></div>
+    <div class="card"><span class="card-icon">🕐</span><div class="card-title">Time Management</div><div class="card-body">Protect your highest-focus hours for your hardest work — meetings and admin fill whatever time is left, not the other way around.</div></div>
+  </div>
+
+  <div class="callout warn">
+    <b>The trust equation:</b> Trust = (Reliability × Honesty × Care) ÷ Self-Interest. Raise the top three, lower the bottom one, and trust compounds. Optimize for the bottom one — put yourself first visibly — and no amount of talent recovers it quickly.
+  </div>
+</section>
+
+<section class="module" id="m05" data-title="05 · PRODUCTIVITY">
+  <div class="module-header">
+    <div class="module-badge">MODULE 05 / 18</div>
+    <h2 class="module-title">Productivity System</h2>
+    <p class="module-desc">A cadence at every timescale, so nothing important only lives in your head. Systems remember what willpower forgets.</p>
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-title">The Planning Cadence</div>
+    <div class="vtimeline">
+      <div class="vtimeline-item"><div class="vtimeline-time">DAILY</div><div class="vtimeline-title">Plan the day, 5 minutes, night before or first thing</div><div class="vtimeline-desc">3 must-dos max. Everything else is a bonus, not a demand.</div></div>
+      <div class="vtimeline-item"><div class="vtimeline-time">WEEKLY</div><div class="vtimeline-title">Plan + review, 30 minutes, same day every week</div><div class="vtimeline-desc">What moved, what stalled, what's the one priority for next week.</div></div>
+      <div class="vtimeline-item"><div class="vtimeline-time">MONTHLY</div><div class="vtimeline-title">Review, 1 hour</div><div class="vtimeline-desc">Zoom out from tasks to trends. Are the weekly wins adding up to something?</div></div>
+      <div class="vtimeline-item"><div class="vtimeline-time">QUARTERLY</div><div class="vtimeline-title">Goal-setting, half a day</div><div class="vtimeline-desc">Set 1–3 outcomes for the next 90 days. Fewer goals, held seriously, beat many goals held loosely.</div></div>
+      <div class="vtimeline-item"><div class="vtimeline-time">ANNUAL</div><div class="vtimeline-title">Full planning, 1 day</div><div class="vtimeline-desc">Direction-level: what are you building toward, and does last year's evidence support the plan?</div></div>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-title">Methods Comparison</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Method</th><th>Best For</th><th>Core Idea</th><th>Watch Out For</th></tr></thead>
+        <tbody>
+          <tr><td><b>Deep Work</b></td><td>Skill-building, hard creative tasks</td><td>Long, uninterrupted focus blocks — 90–180 min, no notifications.</td><td>Scheduling deep work you then don't protect from meetings.</td></tr>
+          <tr><td><b>Time Blocking</b></td><td>Days with many small obligations</td><td>Every hour has a named job, not just a to-do list floating unscheduled.</td><td>Overpacking the calendar with zero buffer.</td></tr>
+          <tr><td><b>Pomodoro</b></td><td>Low motivation / procrastination-prone tasks</td><td>25 min focused, 5 min break, repeat. Lowers the activation energy to start.</td><td>Treating the break as "done for the day."</td></tr>
+          <tr><td><b>GTD</b></td><td>High volume of incoming tasks/requests</td><td>Capture everything → clarify → organize → review weekly → do.</td><td>Building the perfect system instead of actually doing the work.</td></tr>
+          <tr><td><b>PARA Method</b></td><td>Digital file & note organization</td><td>Projects / Areas / Resources / Archives — four folders, everything fits one.</td><td>Over-categorizing into 40 subfolders instead of 4 top-level ones.</td></tr>
+          <tr><td><b>Second Brain</b></td><td>Long-term knowledge retention</td><td>Capture notes/ideas outside your head into a searchable system you actually revisit.</td><td>Collecting notes you never re-read — a graveyard, not a brain.</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-title">Eisenhower Priority Matrix</div>
+    <div class="matrix">
+      <div class="matrix-cell matrix-q2"><span class="matrix-label">Do First</span><span class="matrix-title">Urgent + Important</span><span class="matrix-desc">Crises, real deadlines. Handle now.</span></div>
+      <div class="matrix-cell matrix-q1"><span class="matrix-label">Schedule</span><span class="matrix-title">Important, Not Urgent</span><span class="matrix-desc">Skill-building, planning. This is where growth actually lives.</span></div>
+      <div class="matrix-cell matrix-q3"><span class="matrix-label">Delegate</span><span class="matrix-title">Urgent, Not Important</span><span class="matrix-desc">Most interruptions, some emails. Hand off if you can.</span></div>
+      <div class="matrix-cell matrix-q4"><span class="matrix-label">Delete</span><span class="matrix-title">Neither</span><span class="matrix-desc">Mindless scrolling, busywork with no output. Cut it.</span></div>
+    </div>
+  </div>
+</section>
+
+<section class="module" id="m06" data-title="06 · SOFTWARE STACK">
+  <div class="module-header">
+    <div class="module-badge">MODULE 06 / 18</div>
+    <h2 class="module-title">Software Stack</h2>
+    <p class="module-desc">A tool for every category, why it exists, and what to actually install. Pick one per row — don't run three password managers.</p>
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-title">Core Operating Layer</div>
+    <div class="table-wrap" style="overflow-x:auto;">
+    <div class="stack-row" style="min-width:640px;"><div class="stack-cat">Communication</div><div class="stack-why">Keep async and real-time conversation separate from your inbox chaos.</div><div class="stack-tools"><div class="stack-pick"><b>Slack</b> / Discord</div><div class="stack-alt">Alt: Microsoft Teams</div></div><div class="stack-why">Team chat, channels replace 80% of internal email.</div></div>
+    <div class="stack-row" style="min-width:640px;"><div class="stack-cat">Email</div><div class="stack-why">The professional front door — still what recruiters and clients default to.</div><div class="stack-tools"><div class="stack-pick"><b>Gmail</b> / Outlook</div><div class="stack-alt">Alt: Proton Mail (privacy-first)</div></div><div class="stack-why">Filters + labels turn a firehose into a system.</div></div>
+    <div class="stack-row" style="min-width:640px;"><div class="stack-cat">Calendar</div><div class="stack-why">The single source of truth for time — if it's not on it, it doesn't exist.</div><div class="stack-tools"><div class="stack-pick"><b>Google Calendar</b></div><div class="stack-alt">Alt: Outlook Calendar, Cal.com for booking links</div></div><div class="stack-why">Shareable, syncs everywhere, integrates with meeting tools.</div></div>
+    <div class="stack-row" style="min-width:640px;"><div class="stack-cat">Meetings</div><div class="stack-why">Video calls are now the default meeting format across time zones.</div><div class="stack-tools"><div class="stack-pick"><b>Zoom</b> / Google Meet</div><div class="stack-alt">Alt: Microsoft Teams</div></div><div class="stack-why">Reliable, recordable, works across every device.</div></div>
+    <div class="stack-row" style="min-width:640px;"><div class="stack-cat">Cloud Storage</div><div class="stack-why">Files need to survive a dead laptop and be shareable in one click.</div><div class="stack-tools"><div class="stack-pick"><b>Google Drive</b></div><div class="stack-alt">Alt: Dropbox, OneDrive</div></div><div class="stack-why">Free tier is generous, sharing permissions are granular.</div></div>
+    <div class="stack-row" style="min-width:640px;"><div class="stack-cat">AI Assistant</div><div class="stack-why">Drafting, research, and thinking-partner work at a speed no human matches.</div><div class="stack-tools"><div class="stack-pick"><b>Claude</b></div><div class="stack-alt">Alt: ChatGPT</div></div><div class="stack-why">Long-context reasoning, strong writing quality, artifact creation.</div></div>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-title">Documents & Creative</div>
+    <div class="table-wrap" style="overflow-x:auto;">
+    <div class="stack-row" style="min-width:640px;"><div class="stack-cat">Writing / Grammar</div><div class="stack-why">A second pair of eyes that never gets tired.</div><div class="stack-tools"><div class="stack-pick"><b>Grammarly</b></div><div class="stack-alt">Alt: Hemingway Editor for clarity</div></div><div class="stack-why">Catches tone and clarity issues, not just typos.</div></div>
+    <div class="stack-row" style="min-width:640px;"><div class="stack-cat">Documents</div><div class="stack-why">Collaborative writing that multiple people can edit live.</div><div class="stack-tools"><div class="stack-pick"><b>Google Docs</b></div><div class="stack-alt">Alt: Microsoft Word, Notion</div></div><div class="stack-why">Real-time collaboration, comments, version history built in.</div></div>
+    <div class="stack-row" style="min-width:640px;"><div class="stack-cat">Spreadsheets</div><div class="stack-why">Budgets, trackers, and any data that needs formulas.</div><div class="stack-tools"><div class="stack-pick"><b>Google Sheets</b></div><div class="stack-alt">Alt: Excel for heavy modeling</div></div><div class="stack-why">Excel wins on power; Sheets wins on shareability.</div></div>
+    <div class="stack-row" style="min-width:640px;"><div class="stack-cat">Presentations</div><div class="stack-why">Pitch decks, client reviews, portfolio walk-throughs.</div><div class="stack-tools"><div class="stack-pick"><b>Google Slides</b></div><div class="stack-alt">Alt: PowerPoint, Canva for visual-heavy decks</div></div><div class="stack-why">Fast to build, easy to share a link instead of a file.</div></div>
+    <div class="stack-row" style="min-width:640px;"><div class="stack-cat">Design</div><div class="stack-why">Quick graphics without needing a full design background.</div><div class="stack-tools"><div class="stack-pick"><b>Figma</b></div><div class="stack-alt">Alt: Canva for speed, Adobe Illustrator for vector precision</div></div><div class="stack-why">Industry standard for UI/UX, also great for general layout work.</div></div>
+    <div class="stack-row" style="min-width:640px;"><div class="stack-cat">Video Editing</div><div class="stack-why">Reels, portfolio breakdowns, tutorials.</div><div class="stack-tools"><div class="stack-pick"><b>DaVinci Resolve</b> (free)</div><div class="stack-alt">Alt: Adobe Premiere Pro, CapCut for quick edits</div></div><div class="stack-why">Professional-grade color and editing at zero cost.</div></div>
+    <div class="stack-row" style="min-width:640px;"><div class="stack-cat">Image Editing</div><div class="stack-why">Retouching, compositing, thumbnail work.</div><div class="stack-tools"><div class="stack-pick"><b>Photoshop</b></div><div class="stack-alt">Alt: GIMP (free), Photopea (browser-based, free)</div></div><div class="stack-why">Still the industry default for raster editing.</div></div>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-title">Organization & Security</div>
+    <div class="table-wrap" style="overflow-x:auto;">
+    <div class="stack-row" style="min-width:640px;"><div class="stack-cat">Password Manager</div><div class="stack-why">Reusing passwords is the #1 way accounts get compromised.</div><div class="stack-tools"><div class="stack-pick"><b>Bitwarden</b> (free)</div><div class="stack-alt">Alt: 1Password (paid, polished UI)</div></div><div class="stack-why">Open-source, free tier covers everything most people need.</div></div>
+    <div class="stack-row" style="min-width:640px;"><div class="stack-cat">Project Management</div><div class="stack-why">Tracking what's in progress, blocked, or done — for yourself or a team.</div><div class="stack-tools"><div class="stack-pick"><b>Notion</b> / Trello</div><div class="stack-alt">Alt: Asana, ClickUp</div></div><div class="stack-why">Notion doubles as notes + tasks + wiki in one place.</div></div>
+    <div class="stack-row" style="min-width:640px;"><div class="stack-cat">Whiteboard / Mind Map</div><div class="stack-why">Visual thinking for planning, brainstorming, and system design.</div><div class="stack-tools"><div class="stack-pick"><b>Miro</b></div><div class="stack-alt">Alt: FigJam, XMind for pure mind maps</div></div><div class="stack-why">Infinite canvas, real-time collaboration, sticky-note brainstorming.</div></div>
+    <div class="stack-row" style="min-width:640px;"><div class="stack-cat">Version Control</div><div class="stack-why">Never lose work to an overwrite again — every change is tracked and reversible.</div><div class="stack-tools"><div class="stack-pick"><b>Git + GitHub</b></div><div class="stack-alt">Alt: GitLab</div></div><div class="stack-why">Industry standard, also doubles as a portfolio for technical work.</div></div>
+    <div class="stack-row" style="min-width:640px;"><div class="stack-cat">Backup</div><div class="stack-why">Hardware fails. The question is when, not if.</div><div class="stack-tools"><div class="stack-pick"><b>Google Drive</b> + external SSD</div><div class="stack-alt">Alt: Backblaze for automated cloud backup</div></div><div class="stack-why">3-2-1 rule: 3 copies, 2 media types, 1 offsite.</div></div>
+    <div class="stack-row" style="min-width:640px;"><div class="stack-cat">VPN</div><div class="stack-why">Protects data on public wifi and adds a privacy layer.</div><div class="stack-tools"><div class="stack-pick"><b>Proton VPN</b></div><div class="stack-alt">Alt: Mullvad</div></div><div class="stack-why">No-logs policy, reputable privacy-first company.</div></div>
+    <div class="stack-row" style="min-width:640px;"><div class="stack-cat">Browser</div><div class="stack-why">Your daily workspace for research and web-based tools.</div><div class="stack-tools"><div class="stack-pick"><b>Chrome</b></div><div class="stack-alt">Alt: Brave (privacy-first), Arc (power users)</div></div><div class="stack-why">Best extension ecosystem, syncs everywhere.</div></div>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-title">Money, Focus & Growth</div>
+    <div class="table-wrap" style="overflow-x:auto;">
+    <div class="stack-row" style="min-width:640px;"><div class="stack-cat">Finance / Budgeting</div><div class="stack-why">You can't manage what you don't track.</div><div class="stack-tools"><div class="stack-pick"><b>Google Sheets custom tracker</b></div><div class="stack-alt">Alt: YNAB, Walnut (India-specific)</div></div><div class="stack-why">Fully customizable to Indian tax/CTC structures if built right.</div></div>
+    <div class="stack-row" style="min-width:640px;"><div class="stack-cat">Invoicing</div><div class="stack-why">Freelance income needs a paper trail for both you and the client.</div><div class="stack-tools"><div class="stack-pick"><b>Bonsai</b> / Wave</div><div class="stack-alt">Alt: Refrens (India-focused)</div></div><div class="stack-why">Templates, automatic numbering, payment tracking.</div></div>
+    <div class="stack-row" style="min-width:640px;"><div class="stack-cat">CRM</div><div class="stack-why">Tracking who you talked to, about what, and what's next — even solo.</div><div class="stack-tools"><div class="stack-pick"><b>Notion CRM</b> (custom)</div><div class="stack-alt">Alt: HubSpot free tier</div></div><div class="stack-why">A simple database is enough until you have a real sales team.</div></div>
+    <div class="stack-row" style="min-width:640px;"><div class="stack-cat">Portfolio / Website</div><div class="stack-why">The single link that has to represent you when you're not there.</div><div class="stack-tools"><div class="stack-pick"><b>ArtStation</b> / Behance</div><div class="stack-alt">Alt: Adobe Portfolio, custom site for full control</div></div><div class="stack-why">Industry-specific platforms get discovered by recruiters actively searching.</div></div>
+    <div class="stack-row" style="min-width:640px;"><div class="stack-cat">Automation</div><div class="stack-why">Removes repetitive manual steps between tools that don't talk to each other.</div><div class="stack-tools"><div class="stack-pick"><b>Zapier</b></div><div class="stack-alt">Alt: Make.com (cheaper, more flexible)</div></div><div class="stack-why">No-code, connects thousands of apps without writing scripts.</div></div>
+    <div class="stack-row" style="min-width:640px;"><div class="stack-cat">Screen Recording</div><div class="stack-why">Explaining something once on video beats explaining it five times live.</div><div class="stack-tools"><div class="stack-pick"><b>Loom</b></div><div class="stack-alt">Alt: OBS Studio (free, more control)</div></div><div class="stack-why">Instant shareable link, no editing required for quick explainers.</div></div>
+    <div class="stack-row" style="min-width:640px;"><div class="stack-cat">Focus / Habit Tracking</div><div class="stack-why">Willpower is unreliable; a visible streak or blocker is not.</div><div class="stack-tools"><div class="stack-pick"><b>Forest</b> / Habitica</div><div class="stack-alt">Alt: Cold Turkey (hard blocker for distracting sites)</div></div><div class="stack-why">Gamification and hard blocks both work — combine them.</div></div>
+    <div class="stack-row" style="min-width:640px;"><div class="stack-cat">Research / RSS</div><div class="stack-why">Staying current in your field without doom-scrolling social media for it.</div><div class="stack-tools"><div class="stack-pick"><b>Feedly</b></div><div class="stack-alt">Alt: Readwise Reader</div></div><div class="stack-why">Pulls from sources you choose instead of an algorithm choosing for you.</div></div>
+    </div>
+  </div>
+
+  <div class="callout good">
+    <b>The one rule for tool selection:</b> pick the tool that removes a step, not the tool with the most features. A simpler tool you actually open every day beats a powerful one you set up once and abandon.
+  </div>
+</section>
+
+<section class="module" id="m07" data-title="07 · ESSENTIAL PROFILES">
+  <div class="module-header">
+    <div class="module-badge">MODULE 07 / 18</div>
+    <h2 class="module-title">Essential Profiles</h2>
+    <p class="module-desc">Every platform where you exist professionally, why it matters, and what a complete profile actually contains.</p>
+  </div>
+
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Platform</th><th>Why It Matters</th><th>Must Include</th></tr></thead>
+      <tbody>
+        <tr><td><b>LinkedIn</b></td><td>Where recruiters and clients verify you exist and check your history.</td><td>Photo, headline (not just job title), summary, full work history, skills, 2–3 recommendations.</td></tr>
+        <tr><td><b>ArtStation / Behance</b></td><td>Industry-standard visual portfolios — where 3D/design work actually gets discovered.</td><td>6–10 best pieces only, breakdown shots for technical work, consistent naming, contact link.</td></tr>
+        <tr><td><b>GitHub</b></td><td>Proof of technical work for anyone in a coding-adjacent field.</td><td>Pinned repos, clean READMEs, green contribution graph shows consistency.</td></tr>
+        <tr><td><b>Personal Website</b></td><td>The one link that's entirely under your control, no platform algorithm involved.</td><td>Portfolio, bio, contact, and nothing that requires explanation.</td></tr>
+        <tr><td><b>Google / Microsoft / Apple ID</b></td><td>The backbone accounts everything else connects to.</td><td>Strong unique password, 2FA enabled, recovery email/phone set.</td></tr>
+        <tr><td><b>Slack / Discord / Zoom / Teams</b></td><td>Where daily professional collaboration actually happens.</td><td>Real name, professional photo, accurate status/timezone.</td></tr>
+        <tr><td><b>X / Instagram (Professional)</b></td><td>Visibility and networking in public — build in the open if your field rewards it.</td><td>Bio states what you do, pinned post shows your best work, consistent posting if active at all.</td></tr>
+        <tr><td><b>YouTube / Medium / Substack</b></td><td>Long-form proof of expertise — teaching something is the fastest way to prove you know it.</td><td>Clear channel/publication description, consistent topic focus.</td></tr>
+        <tr><td><b>Fiverr / Upwork / Toptal / Contra</b></td><td>Freelance marketplaces — income diversification outside a single employer.</td><td>Portfolio samples, clear pricing, fast response time (this is scored by the platform).</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="module" id="m08" data-title="08 · DOCUMENTS">
+  <div class="module-header">
+    <div class="module-badge">MODULE 08 / 18</div>
+    <h2 class="module-title">Documents Every Professional Should Have</h2>
+    <p class="module-desc">The paper trail of your career. Build these once, update quarterly, never scramble for them under deadline pressure again.</p>
+  </div>
+  <div class="grid grid-4">
+    <div class="card"><span class="card-icon">📄</span><div class="card-title">Master Resume</div><div class="card-body">Every role, project, and achievement you've ever had — never sent out directly, only trimmed from.</div></div>
+    <div class="card"><span class="card-icon">📋</span><div class="card-title">Tailored Resume</div><div class="card-body">1-page version cut from the master, customized per application to match the specific role.</div></div>
+    <div class="card"><span class="card-icon">✉️</span><div class="card-title">Cover Letter</div><div class="card-body">Template with 3 swappable paragraphs, not a start-from-scratch essay every time.</div></div>
+    <div class="card"><span class="card-icon">🖼️</span><div class="card-title">Portfolio / Case Studies</div><div class="card-body">Not just the final output — the problem, process, and result for each piece.</div></div>
+    <div class="card"><span class="card-icon">🧾</span><div class="card-title">Invoices & Quotations</div><div class="card-body">A numbered, dated template ready to fill in within 2 minutes of a job confirmation.</div></div>
+    <div class="card"><span class="card-icon">📜</span><div class="card-title">Contracts & NDAs</div><div class="card-body">A reusable base template — protects you from scope creep and unpaid work as much as it protects the client.</div></div>
+    <div class="card"><span class="card-icon">🏆</span><div class="card-title">Certificates & Achievements</div><div class="card-body">Scanned/digital, organized by year, ready to attach without hunting for the original.</div></div>
+    <div class="card"><span class="card-icon">👥</span><div class="card-title">Reference Sheet</div><div class="card-body">3 people who've agreed in advance to vouch for you — ask before you list them, always.</div></div>
+  </div>
+</section>
+
+<section class="module" id="m09" data-title="09 · DIGITAL ORGANIZATION">
+  <div class="module-header">
+    <div class="module-badge">MODULE 09 / 18</div>
+    <h2 class="module-title">Digital Organization</h2>
+    <p class="module-desc">A messy file system costs you real time every single week, in small increments you don't notice until you add them up.</p>
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-title">Folder Hierarchy Template</div>
+    <div class="template-block">📁 01_ACTIVE_PROJECTS
+   📁 [ClientName]_[ProjectName]
+      📁 01_Raw
+      📁 02_WIP
+      📁 03_Final
+      📁 04_Delivered
+📁 02_CLIENTS_ARCHIVE
+📁 03_ASSETS_LIBRARY
+   📁 Textures | Models | References
+📁 04_ADMIN
+   📁 Invoices | Contracts | Taxes
+📁 05_LEARNING
+📁 06_PERSONAL</div>
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-title">Naming Convention</div>
+    <div class="template-block">ProjectName_AssetType_Version_Date
+Example: PixarShort_Character_v03_20260706</div>
+    <p class="subsection-note">Never use "final_final_v2_ACTUAL". Version numbers exist so you never have to guess which file is current.</p>
+  </div>
+
+  <div class="grid grid-3">
+    <div class="card"><span class="card-icon">☁️</span><div class="card-title">Backup Strategy</div><div class="card-body">3-2-1 rule: 3 copies, on 2 different media types, with 1 stored offsite (cloud counts).</div></div>
+    <div class="card"><span class="card-icon">🗄️</span><div class="card-title">Archive System</div><div class="card-body">Move finished projects out of "active" monthly — active folders should only ever hold current work.</div></div>
+    <div class="card"><span class="card-icon">⬇️</span><div class="card-title">Downloads Management</div><div class="card-body">Clear the downloads folder weekly. It's a waiting room, not permanent storage.</div></div>
+  </div>
+</section>
+
+<section class="module" id="m10" data-title="10 · APPEARANCE">
+  <div class="module-header">
+    <div class="module-badge">MODULE 10 / 18</div>
+    <h2 class="module-title">Professional Appearance</h2>
+    <p class="module-desc">People form a judgment before you've said a word. This module makes sure that judgment is accurate.</p>
+  </div>
+  <div class="grid grid-4">
+    <div class="card"><span class="card-icon">👕</span><div class="card-title">Dress</div><div class="card-body">Match the room, one notch cleaner. Fitted beats expensive.</div></div>
+    <div class="card"><span class="card-icon">✂️</span><div class="card-title">Grooming</div><div class="card-body">Consistent, low-maintenance routine beats an occasional big effort.</div></div>
+    <div class="card"><span class="card-icon">🧹</span><div class="card-title">Cleanliness</div><div class="card-body">Applies to you and your visible workspace equally.</div></div>
+    <div class="card"><span class="card-icon">🖥️</span><div class="card-title">Desk Setup</div><div class="card-body">Clear surface behind you if on video — clutter reads as chaos even if you're not chaotic.</div></div>
+    <div class="card"><span class="card-icon">📷</span><div class="card-title">Camera Setup</div><div class="card-body">Eye-level camera, not looking down at you. This alone fixes half of bad video presence.</div></div>
+    <div class="card"><span class="card-icon">💡</span><div class="card-title">Lighting</div><div class="card-body">Light facing you, not behind you. A window in front beats any ring light.</div></div>
+    <div class="card"><span class="card-icon">🖼️</span><div class="card-title">Background</div><div class="card-body">Plain or professional blur. Nobody needs to see your entire room.</div></div>
+    <div class="card"><span class="card-icon">🎙️</span><div class="card-title">Audio</div><div class="card-body">Audio quality matters more than video quality — bad audio makes people leave calls mentally.</div></div>
+  </div>
+</section>
+
+<section class="module" id="m11" data-title="11 · BEHAVIOR">
+  <div class="module-header">
+    <div class="module-badge">MODULE 11 / 18</div>
+    <h2 class="module-title">Professional Behavior by Context</h2>
+    <p class="module-desc">The unwritten rules shift depending on where you are. Reading the room correctly is its own skill.</p>
+  </div>
+  <div class="table-wrap">
+    <table>
+      <thead><tr><th>Context</th><th>Unwritten Rule</th></tr></thead>
+      <tbody>
+        <tr><td><b>Office / Corporate</b></td><td>Hierarchy and politics are real. Read them, don't ignore them — but don't play them dirty either.</td></tr>
+        <tr><td><b>Remote</b></td><td>Visibility must be manufactured. Silence is read as absence, not focus.</td></tr>
+        <tr><td><b>Freelancing</b></td><td>You are the entire company. Client trust is your only product.</td></tr>
+        <tr><td><b>Startup</b></td><td>Speed and ownership over process. Titles matter less than output.</td></tr>
+        <tr><td><b>Government / Institutional</b></td><td>Process and documentation matter more than speed. Patience is the skill.</td></tr>
+        <tr><td><b>International / Cross-cultural</b></td><td>Directness levels vary hugely by culture — calibrate before assuming rudeness or evasiveness.</td></tr>
+        <tr><td><b>Client Meetings</b></td><td>Come with a recommendation, not just options. Clients pay for a decision, not homework.</td></tr>
+        <tr><td><b>Interviews</b></td><td>Ask as many good questions as you answer. It signals genuine interest, not desperation.</td></tr>
+        <tr><td><b>Networking Events</b></td><td>Curiosity about others beats a rehearsed pitch about yourself, every time.</td></tr>
+      </tbody>
+    </table>
+  </div>
+</section>
+
+<section class="module" id="m12" data-title="12 · MONEY">
+  <div class="module-header">
+    <div class="module-badge">MODULE 12 / 18</div>
+    <h2 class="module-title">Money</h2>
+    <p class="module-desc">Skill earns money. This module is about what happens after it arrives — because that part is a separate skill entirely.</p>
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-title">Money Flow</div>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-step-num">01</div><div class="flow-step-title">Earn</div><div class="flow-step-desc">Salary or freelance income, negotiated up front, not left on the table.</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-step-num">02</div><div class="flow-step-title">Protect</div><div class="flow-step-desc">Emergency fund first — 3–6 months of expenses, before any investing begins.</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-step-num">03</div><div class="flow-step-title">Track</div><div class="flow-step-desc">Every rupee categorized. You can't optimize what you don't measure.</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-step-num">04</div><div class="flow-step-title">Grow</div><div class="flow-step-desc">Invest the surplus, consistently, in instruments you actually understand.</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-step-num">05</div><div class="flow-step-title">Comply</div><div class="flow-step-desc">Taxes filed correctly and on time — this is a professional obligation, not optional.</div></div>
+    </div>
+  </div>
+
+  <div class="callout">
+    <b>Negotiation basics:</b> never give your number first if you can avoid it. Research the market range before any conversation. Silence after a number is offered is a tool — most people rush to fill it and undercut themselves.
+  </div>
+
+  <div class="grid grid-3">
+    <div class="card"><span class="card-icon">💰</span><div class="card-title">Freelance Finances</div><div class="card-body">Separate business and personal accounts from day one, even as a solo operator. Makes tax season sane.</div></div>
+    <div class="card"><span class="card-icon">🏷️</span><div class="card-title">Pricing</div><div class="card-body">Price the outcome you deliver, not the hours it took you. Hourly pricing punishes you for getting faster.</div></div>
+    <div class="card"><span class="card-icon">🐷</span><div class="card-title">Savings</div><div class="card-body">Automate it — a fixed percentage moved the day income arrives, before you can spend it.</div></div>
+  </div>
+</section>
+
+<section class="module" id="m13" data-title="13 · CAREER">
+  <div class="module-header">
+    <div class="module-badge">MODULE 13 / 18</div>
+    <h2 class="module-title">Career</h2>
+    <p class="module-desc">A career is a compounding portfolio of skill, reputation, and relationships. Manage it deliberately instead of letting it happen to you.</p>
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-title">Career Ladder Roadmap</div>
+    <div class="vtimeline">
+      <div class="vtimeline-item"><div class="vtimeline-time">STAGE 1</div><div class="vtimeline-title">Learn the fundamentals</div><div class="vtimeline-desc">Depth over breadth. One skill done well beats five done shallowly.</div></div>
+      <div class="vtimeline-item"><div class="vtimeline-time">STAGE 2</div><div class="vtimeline-title">Build proof</div><div class="vtimeline-desc">Personal projects and a portfolio that show the skill, not just claim it.</div></div>
+      <div class="vtimeline-item"><div class="vtimeline-time">STAGE 3</div><div class="vtimeline-title">Get in the room</div><div class="vtimeline-desc">Job search, freelance clients, or a first real opportunity — anything with real stakes.</div></div>
+      <div class="vtimeline-item"><div class="vtimeline-time">STAGE 4</div><div class="vtimeline-title">Compound</div><div class="vtimeline-desc">Deliver consistently, build reputation, let referrals and promotions come from evidence.</div></div>
+      <div class="vtimeline-item"><div class="vtimeline-time">STAGE 5</div><div class="vtimeline-title">Lead</div><div class="vtimeline-desc">Mentor others, take ownership of outcomes beyond your own output.</div></div>
+    </div>
+  </div>
+
+  <div class="grid grid-3">
+    <div class="card"><span class="card-icon">🧑‍🏫</span><div class="card-title">Mentors</div><div class="card-body">Find people 5–10 years ahead, not 20 — their path is still relevant to your context.</div></div>
+    <div class="card"><span class="card-icon">📈</span><div class="card-title">Promotion Strategy</div><div class="card-body">Do the next role's work before asking for the next role's title. Evidence first, ask second.</div></div>
+    <div class="card"><span class="card-icon">🔍</span><div class="card-title">Job Search</div><div class="card-body">Apply through warm connections first — referrals convert at a far higher rate than cold applications.</div></div>
+  </div>
+</section>
+
+<section class="module" id="m14" data-title="14 · DAILY HABITS">
+  <div class="module-header">
+    <div class="module-badge">MODULE 14 / 18</div>
+    <h2 class="module-title">Daily Habits of Top Professionals</h2>
+    <p class="module-desc">Not one universal schedule — the underlying structure that top performers all share, regardless of chronotype.</p>
+  </div>
+  <div class="vtimeline">
+    <div class="vtimeline-item"><div class="vtimeline-time">MORNING</div><div class="vtimeline-title">A consistent start ritual</div><div class="vtimeline-desc">Same first 30 minutes daily — it primes the rest of the day regardless of what time "morning" is for you.</div></div>
+    <div class="vtimeline-item"><div class="vtimeline-time">DEEP WORK</div><div class="vtimeline-title">Hardest task in your peak-energy window</div><div class="vtimeline-desc">Protect this block like a meeting with your most important client — because it is one.</div></div>
+    <div class="vtimeline-item"><div class="vtimeline-time">MEETINGS</div><div class="vtimeline-title">Batched, not scattered</div><div class="vtimeline-desc">Clustering meetings protects long stretches for actual work elsewhere in the day.</div></div>
+    <div class="vtimeline-item"><div class="vtimeline-time">LEARNING</div><div class="vtimeline-title">A fixed daily or weekly slot</div><div class="vtimeline-desc">Skill compounds only with consistent input, not occasional binges.</div></div>
+    <div class="vtimeline-item"><div class="vtimeline-time">EXERCISE</div><div class="vtimeline-title">Non-negotiable, even if short</div><div class="vtimeline-desc">20 minutes daily beats 2 hours once a week for both energy and mood.</div></div>
+    <div class="vtimeline-item"><div class="vtimeline-time">REFLECTION</div><div class="vtimeline-title">5–10 minutes reviewing the day</div><div class="vtimeline-desc">What worked, what didn't, what carries to tomorrow.</div></div>
+    <div class="vtimeline-item"><div class="vtimeline-time">SLEEP</div><div class="vtimeline-title">Fixed wake time, even on weekends</div><div class="vtimeline-desc">Consistency in wake time regulates energy more than total hours slept.</div></div>
+  </div>
+</section>
+
+<section class="module" id="m15" data-title="15 · MISTAKES TO NEVER MAKE">
+  <div class="module-header">
+    <div class="module-badge">MODULE 15 / 18</div>
+    <h2 class="module-title">Mistakes to Never Make</h2>
+    <p class="module-desc">Every one of these is cheap to avoid and expensive to recover from. Reputation damage is asymmetric — it's slow to build and fast to lose.</p>
+  </div>
+  <div class="grid grid-3">
+    <div class="card"><span class="card-icon">⏱️</span><div class="card-title">Late Replies</div><div class="card-body">Silence gets read as disinterest or disorganization, even when it's neither.</div><span class="card-tag tag-critical">Avoid</span></div>
+    <div class="card"><span class="card-icon">📉</span><div class="card-title">Missing Deadlines</div><div class="card-body">Without warning, this is the fastest way to lose trust — flag early instead.</div><span class="card-tag tag-critical">Avoid</span></div>
+    <div class="card"><span class="card-icon">🤥</span><div class="card-title">Lying / Excuses</div><div class="card-body">One caught lie makes every future claim suspect, permanently.</div><span class="card-tag tag-critical">Avoid</span></div>
+    <div class="card"><span class="card-icon">📂</span><div class="card-title">Poor Documentation</div><div class="card-body">Creates disputes and rework that a five-minute note would have prevented.</div><span class="card-tag tag-high">Avoid</span></div>
+    <div class="card"><span class="card-icon">😠</span><div class="card-title">Bad Attitude</div><div class="card-body">Skill gets you hired; attitude decides whether people want to keep working with you.</div><span class="card-tag tag-high">Avoid</span></div>
+    <div class="card"><span class="card-icon">🗣️</span><div class="card-title">Office Politics (Negative)</div><div class="card-body">Talking about people instead of to them corrodes trust across the whole team, not just one relationship.</div><span class="card-tag tag-high">Avoid</span></div>
+    <div class="card"><span class="card-icon">🔥</span><div class="card-title">Burnout</div><div class="card-body">Unsustainable pace produces a short sprint followed by a long, costly crash.</div><span class="card-tag tag-high">Avoid</span></div>
+    <div class="card"><span class="card-icon">📱</span><div class="card-title">Unprofessional Social Media</div><div class="card-body">Anything public is a permanent extension of your professional brand — assume it will be seen.</div><span class="card-tag tag-good">Avoid</span></div>
+    <div class="card"><span class="card-icon">📧</span><div class="card-title">Poor Emails</div><div class="card-body">Vague subject lines and buried asks waste everyone's time, repeatedly.</div><span class="card-tag tag-good">Avoid</span></div>
+  </div>
+</section>
+
+<section class="module" id="m16" data-title="16 · CHECKLIST">
+  <div class="module-header">
+    <div class="module-badge">MODULE 16 / 18</div>
+    <h2 class="module-title">The Professional Checklist</h2>
+    <p class="module-desc">A cadence you can actually run — copy this into your own tracker.</p>
+  </div>
+  <div class="grid grid-2">
+    <div>
+      <h4 class="inline-head">Daily</h4>
+      <div class="checklist">
+        <div class="check-item"><span class="check-box">✓</span>Reviewed today's 3 priorities</div>
+        <div class="check-item"><span class="check-box">✓</span>Inbox at zero or triaged</div>
+        <div class="check-item"><span class="check-box">✓</span>Logged expenses / time if applicable</div>
+      </div>
+      <h4 class="inline-head">Weekly</h4>
+      <div class="checklist">
+        <div class="check-item"><span class="check-box">✓</span>Reviewed last week, planned next</div>
+        <div class="check-item"><span class="check-box">✓</span>Cleared downloads & desktop</div>
+        <div class="check-item"><span class="check-box">✓</span>One networking / learning touchpoint</div>
+      </div>
+    </div>
+    <div>
+      <h4 class="inline-head">Monthly</h4>
+      <div class="checklist">
+        <div class="check-item"><span class="check-box">✓</span>Budget reviewed against actuals</div>
+        <div class="check-item"><span class="check-box">✓</span>Portfolio / resume updated if needed</div>
+        <div class="check-item"><span class="check-box">✓</span>Backup verified</div>
+      </div>
+      <h4 class="inline-head">Quarterly / Yearly</h4>
+      <div class="checklist">
+        <div class="check-item"><span class="check-box">✓</span>Goals set and reviewed against evidence</div>
+        <div class="check-item"><span class="check-box">✓</span>Tax filing on track</div>
+        <div class="check-item"><span class="check-box">✓</span>Skills audit — what's now outdated?</div>
+      </div>
+    </div>
+  </div>
+</section>
+
+<section class="module" id="m17" data-title="17 · FLOWCHARTS">
+  <div class="module-header">
+    <div class="module-badge">MODULE 17 / 18</div>
+    <h2 class="module-title">Visual Flowcharts</h2>
+    <p class="module-desc">How the machinery around a career actually moves, end to end.</p>
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-title">Client Lifecycle</div>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-step-num">01</div><div class="flow-step-title">Inquiry</div><div class="flow-step-desc">First contact, understand the need.</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-step-num">02</div><div class="flow-step-title">Proposal</div><div class="flow-step-desc">Scope, price, timeline in writing.</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-step-num">03</div><div class="flow-step-title">Contract</div><div class="flow-step-desc">Signed agreement before work begins.</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-step-num">04</div><div class="flow-step-title">Delivery</div><div class="flow-step-desc">Work + regular status updates.</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-step-num">05</div><div class="flow-step-title">Close & Follow-up</div><div class="flow-step-desc">Final invoice, ask for a referral.</div></div>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-title">Recruitment Lifecycle</div>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-step-num">01</div><div class="flow-step-title">Application</div><div class="flow-step-desc">Tailored resume + referral if possible.</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-step-num">02</div><div class="flow-step-title">Screening</div><div class="flow-step-desc">Recruiter call — clarity over polish.</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-step-num">03</div><div class="flow-step-title">Technical / Case</div><div class="flow-step-desc">Show process, not just the answer.</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-step-num">04</div><div class="flow-step-title">Final Round</div><div class="flow-step-desc">Culture fit + your questions for them.</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-step-num">05</div><div class="flow-step-title">Offer & Negotiate</div><div class="flow-step-desc">Never accept on the spot — take 24h.</div></div>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-title">Decision-Making Flow</div>
+    <div class="flow">
+      <div class="flow-step"><div class="flow-step-num">01</div><div class="flow-step-title">Define</div><div class="flow-step-desc">What decision, by when, who's affected.</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-step-num">02</div><div class="flow-step-title">Gather</div><div class="flow-step-desc">Enough info to be 70% confident — no more.</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-step-num">03</div><div class="flow-step-title">Decide</div><div class="flow-step-desc">Commit. Indecision has a cost too.</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-step-num">04</div><div class="flow-step-title">Act</div><div class="flow-step-desc">Move, and watch for early signal.</div></div>
+      <div class="flow-arrow">→</div>
+      <div class="flow-step"><div class="flow-step-num">05</div><div class="flow-step-title">Review</div><div class="flow-step-desc">Was it right? Adjust the next decision's process.</div></div>
+    </div>
+  </div>
+</section>
+
+<section class="module" id="m18" data-title="18 · BONUS">
+  <div class="module-header">
+    <div class="module-badge">MODULE 18 / 18</div>
+    <h2 class="module-title">Bonus — Templates & Scripts</h2>
+    <p class="module-desc">Ready-to-use language so you're never starting from a blank page under pressure.</p>
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-title">Email Templates</div>
+    <div class="grid grid-2">
+      <div>
+        <div class="template-label">Follow-up after no response</div>
+        <div class="template-block">Subject: Following up — [topic]
+
+Hi [Name],
+
+Circling back on this in case it got buried. Happy to
+resend anything or hop on a quick call if easier.
+
+[Your name]</div>
+      </div>
+      <div>
+        <div class="template-label">Declining a request</div>
+        <div class="template-block">Subject: Re: [topic]
+
+Hi [Name],
+
+Thanks for thinking of me. I won't be able to take this
+on right now given [brief reason] — wanted to let you
+know quickly rather than leave you waiting.
+
+[Your name]</div>
+      </div>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-title">Negotiation Script</div>
+    <div class="template-block">"I'm excited about this role. Based on my research and experience,
+I was expecting something closer to [range]. Is there flexibility
+on the offer?"
+
+— Then stop talking. Let the silence do its work.</div>
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-title">Priority & Risk Matrix</div>
+    <div class="grid grid-2">
+      <div class="card"><div class="card-title">Priority Matrix</div><div class="card-body">Impact × Urgency. High-impact + high-urgency gets done today. Low-impact + low-urgency gets cut, not scheduled.</div></div>
+      <div class="card"><div class="card-title">Risk Matrix</div><div class="card-body">Likelihood × Severity. High-likelihood + high-severity risks get a mitigation plan before the project starts, not after it breaks.</div></div>
+    </div>
+  </div>
+
+  <div class="subsection">
+    <div class="subsection-title">Corporate Vocabulary — Plain Translation</div>
+    <div class="table-wrap">
+      <table>
+        <thead><tr><th>Term</th><th>Plain Meaning</th></tr></thead>
+        <tbody>
+          <tr><td class="cell-mono">Bandwidth</td><td>Available time/capacity</td></tr>
+          <tr><td class="cell-mono">Circle back</td><td>Revisit this later</td></tr>
+          <tr><td class="cell-mono">Low-hanging fruit</td><td>Easy wins</td></tr>
+          <tr><td class="cell-mono">Move the needle</td><td>Make a real, measurable difference</td></tr>
+          <tr><td class="cell-mono">Take this offline</td><td>Let's discuss privately, not in this meeting</td></tr>
+          <tr><td class="cell-mono">Deep dive</td><td>Detailed look at one topic</td></tr>
+        </tbody>
+      </table>
+    </div>
+  </div>
+</section>
+
+    </div>
+  </main>
+</div>
+
+<footer>
+  THE PROFESSIONAL LIFE OPERATING SYSTEM · v1.0 · Built for the long game, not the highlight reel.
+</footer>
+
+<script>
+(function(){
+  const modules = Array.from(document.querySelectorAll('.module'));
+  const navContainer = document.getElementById('navContainer');
+  const statusModule = document.getElementById('statusModule');
+  const scrollProgress = document.getElementById('scrollProgress');
+  const scrollPct = document.getElementById('scrollPct');
+  const sidebar = document.getElementById('sidebar');
+  const sidebarToggle = document.getElementById('sidebarToggle');
+
+  // Build nav dynamically from module data-title attrs
+  const navHTML = modules.map(m => {
+    const title = m.getAttribute('data-title');
+    const [num, ...rest] = title.split('·');
+    const label = rest.join('·').trim();
+    return `<div class="nav-link" data-target="${m.id}"><span class="nav-num">${num.trim()}</span><span>${label}</span></div>`;
+  }).join('');
+  navContainer.innerHTML = `<div class="nav-group-label">Modules</div>${navHTML}`;
+
+  const navLinks = Array.from(document.querySelectorAll('.nav-link'));
+  navLinks.forEach(link => {
+    link.addEventListener('click', () => {
+      const target = document.getElementById(link.getAttribute('data-target'));
+      if(target) target.scrollIntoView({behavior:'smooth', block:'start'});
+      sidebar.classList.remove('open');
+    });
+  });
+
+  function setActive(id, title){
+    navLinks.forEach(l => l.classList.toggle('active', l.getAttribute('data-target') === id));
+    if(title) statusModule.textContent = title;
+  }
+
+  // Scroll spy + progress bar
+  function onScroll(){
+    const scrollTop = window.scrollY;
+    const docHeight = document.documentElement.scrollHeight - window.innerHeight;
+    const pct = docHeight > 0 ? Math.min(100, Math.round((scrollTop/docHeight)*100)) : 0;
+    scrollProgress.style.width = pct + '%';
+    scrollPct.textContent = pct + '%';
+
+    let current = modules[0];
+    for(const m of modules){
+      const rect = m.getBoundingClientRect();
+      if(rect.top <= 140){ current = m; }
+    }
+    if(current){
+      setActive(current.id, current.getAttribute('data-title'));
+    }
+  }
+  window.addEventListener('scroll', onScroll, {passive:true});
+  onScroll();
+
+  // Mobile sidebar toggle
+  sidebarToggle.addEventListener('click', () => {
+    sidebar.classList.toggle('open');
+  });
+  document.addEventListener('click', (e) => {
+    if(window.innerWidth <= 900 && sidebar.classList.contains('open')){
+      if(!sidebar.contains(e.target) && e.target !== sidebarToggle){
+        sidebar.classList.remove('open');
+      }
+    }
+  });
+})();
+</script>
+</body>
+</html>
