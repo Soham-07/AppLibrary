@@ -1,0 +1,2318 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Treasury — Personal CFO Console</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:opsz,wght@9..144,400;9..144,500;9..144,600;9..144,700&family=Inter:wght@400;500;600;700&family=IBM+Plex+Mono:wght@400;500;600&display=swap" rel="stylesheet">
+<style>
+:root{
+  --ink:#0A0D12;
+  --ink-2:#12161D;
+  --ink-3:#181D26;
+  --ink-4:#1F2530;
+  --line:#262C38;
+  --line-soft:#1B2129;
+  --paper:#ECE7DA;
+  --paper-dim:#9CA3B0;
+  --paper-faint:#5B6270;
+  --gold:#C7A045;
+  --gold-bright:#E8C368;
+  --gold-dim:#8A7038;
+  --emerald:#2E8B6B;
+  --emerald-bright:#4FBE93;
+  --rust:#B5533F;
+  --rust-bright:#DD7E63;
+  --azure:#5486AC;
+  --azure-bright:#7FB0D6;
+  --font-display:'Fraunces',serif;
+  --font-body:'Inter',-apple-system,sans-serif;
+  --font-mono:'IBM Plex Mono',monospace;
+  --radius:3px;
+  --radius-lg:6px;
+}
+*,*::before,*::after{box-sizing:border-box;}
+html{-webkit-text-size-adjust:100%;}
+body{
+  margin:0;
+  background:var(--ink);
+  color:var(--paper);
+  font-family:var(--font-body);
+  font-size:15px;
+  line-height:1.55;
+  -webkit-font-smoothing:antialiased;
+}
+::selection{background:var(--gold-dim);color:var(--ink);}
+::-webkit-scrollbar{width:10px;height:10px;}
+::-webkit-scrollbar-track{background:var(--ink);}
+::-webkit-scrollbar-thumb{background:var(--ink-4);border-radius:6px;border:2px solid var(--ink);}
+::-webkit-scrollbar-thumb:hover{background:var(--line);}
+a{color:var(--gold-bright);}
+h1,h2,h3,h4{font-family:var(--font-display);font-weight:600;margin:0;color:var(--paper);}
+p{margin:0 0 10px;}
+button{font-family:inherit;}
+:focus-visible{outline:2px solid var(--gold-bright);outline-offset:2px;}
+@media (prefers-reduced-motion:reduce){*{animation-duration:.001ms !important;transition-duration:.001ms !important;}}
+
+/* ---------- layout shell ---------- */
+.app{display:flex;min-height:100vh;}
+.sidebar{
+  width:272px;flex:0 0 272px;
+  background:linear-gradient(180deg,var(--ink-2),var(--ink));
+  border-right:1px solid var(--line-soft);
+  display:flex;flex-direction:column;
+  position:sticky;top:0;height:100vh;overflow-y:auto;
+  z-index:40;
+}
+.brand{
+  padding:26px 22px 18px;border-bottom:1px solid var(--line-soft);
+  position:relative;overflow:hidden;
+}
+.brand-seal{position:absolute;top:-40px;right:-40px;width:160px;height:160px;opacity:.5;pointer-events:none;}
+.brand-mark{display:flex;align-items:baseline;gap:9px;position:relative;z-index:1;}
+.brand-mark .glyph{
+  width:30px;height:30px;border:1.4px solid var(--gold);border-radius:50%;
+  display:flex;align-items:center;justify-content:center;
+  font-family:var(--font-display);font-size:15px;color:var(--gold-bright);flex:0 0 auto;
+}
+.brand h1{font-size:22px;letter-spacing:.02em;}
+.brand .tag{
+  display:block;margin-top:6px;font-family:var(--font-mono);font-size:10.5px;
+  letter-spacing:.14em;text-transform:uppercase;color:var(--paper-faint);position:relative;z-index:1;
+}
+.brand .owner{
+  margin-top:14px;font-family:var(--font-mono);font-size:11px;color:var(--gold-dim);
+  letter-spacing:.05em;position:relative;z-index:1;
+}
+
+nav.groups{padding:14px 10px 28px;flex:1;}
+.nav-group{margin-bottom:4px;}
+.nav-group-label{
+  font-family:var(--font-mono);font-size:10px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--paper-faint);padding:14px 12px 6px;
+}
+.nav-item{
+  display:flex;align-items:center;gap:10px;width:100%;text-align:left;
+  padding:9px 12px;border:none;background:transparent;color:var(--paper-dim);
+  font-size:13.5px;border-radius:var(--radius);cursor:pointer;line-height:1.3;
+  border-left:2px solid transparent;transition:background .12s,color .12s,border-color .12s;
+}
+.nav-item .n{font-family:var(--font-mono);font-size:10.5px;color:var(--paper-faint);width:16px;flex:0 0 auto;}
+.nav-item:hover{background:var(--ink-3);color:var(--paper);}
+.nav-item.active{background:var(--ink-3);color:var(--gold-bright);border-left-color:var(--gold);}
+.nav-item.active .n{color:var(--gold);}
+
+.sidebar-foot{
+  padding:14px 22px 20px;border-top:1px solid var(--line-soft);
+  font-family:var(--font-mono);font-size:10px;color:var(--paper-faint);letter-spacing:.05em;
+}
+
+.mobile-topbar{display:none;}
+
+.content{flex:1;min-width:0;padding:38px 46px 90px;max-width:1180px;}
+.module{display:none;animation:fade .18s ease;}
+.module.active{display:block;}
+@keyframes fade{from{opacity:0;transform:translateY(3px);}to{opacity:1;transform:translateY(0);}}
+
+.mod-head{margin-bottom:28px;padding-bottom:20px;border-bottom:1px solid var(--line-soft);}
+.mod-eyebrow{
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.16em;text-transform:uppercase;
+  color:var(--gold);margin-bottom:8px;display:flex;align-items:center;gap:8px;
+}
+.mod-eyebrow .rule{height:1px;width:24px;background:var(--gold-dim);display:inline-block;}
+.mod-head h2{font-size:30px;margin-bottom:8px;}
+.mod-dek{color:var(--paper-dim);font-size:14.5px;max-width:640px;}
+
+/* ---------- grid / cards ---------- */
+.grid{display:grid;gap:18px;}
+.grid-2{grid-template-columns:1fr 1fr;}
+.grid-3{grid-template-columns:repeat(3,1fr);}
+.grid-4{grid-template-columns:repeat(4,1fr);}
+@media (max-width:920px){.grid-2,.grid-3,.grid-4{grid-template-columns:1fr;}}
+
+.card{
+  background:var(--ink-2);border:1px solid var(--line-soft);border-radius:var(--radius-lg);
+  padding:22px;
+}
+.card + .card{margin-top:18px;}
+.card h3{font-size:15.5px;margin-bottom:4px;}
+.card .card-sub{color:var(--paper-faint);font-size:12.5px;margin-bottom:16px;}
+.card-tight{padding:16px 18px;}
+
+.panel-title{
+  font-family:var(--font-mono);font-size:11px;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--paper-faint);margin-bottom:14px;display:flex;align-items:center;justify-content:space-between;
+}
+
+/* ---------- form fields ---------- */
+label.field{display:block;margin-bottom:14px;}
+label.field .flabel{
+  display:block;font-size:12px;color:var(--paper-dim);margin-bottom:6px;letter-spacing:.01em;
+}
+label.field .fhint{display:block;font-size:11px;color:var(--paper-faint);margin-top:5px;}
+.input,select.input,textarea.input{
+  width:100%;background:var(--ink);border:1px solid var(--line);color:var(--paper);
+  padding:10px 12px;border-radius:var(--radius);font-family:var(--font-mono);font-size:14px;
+  transition:border-color .12s;
+}
+.input:focus{border-color:var(--gold-dim);outline:none;}
+select.input{font-family:var(--font-body);font-size:13.5px;appearance:none;
+  background-image:linear-gradient(45deg,transparent 50%,var(--paper-faint) 50%),linear-gradient(135deg,var(--paper-faint) 50%,transparent 50%);
+  background-position:calc(100% - 16px) center,calc(100% - 11px) center;background-size:5px 5px,5px 5px;background-repeat:no-repeat;}
+.input-row{display:flex;gap:12px;}
+.input-row > *{flex:1;}
+.prefix-wrap{position:relative;}
+.prefix-wrap .prefix{position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--paper-faint);font-family:var(--font-mono);font-size:13px;pointer-events:none;}
+.prefix-wrap .input{padding-left:26px;}
+.field-inline{display:flex;align-items:center;gap:10px;margin-bottom:14px;}
+.field-inline .flabel{margin:0;flex:1;}
+.field-inline .input{width:auto;max-width:140px;}
+
+.seg{display:flex;border:1px solid var(--line);border-radius:var(--radius);overflow:hidden;}
+.seg button{flex:1;background:var(--ink);color:var(--paper-dim);border:none;padding:9px 10px;font-size:12.5px;cursor:pointer;border-right:1px solid var(--line);transition:background .12s,color .12s;}
+.seg button:last-child{border-right:none;}
+.seg button.active{background:var(--ink-4);color:var(--gold-bright);}
+.seg button:hover:not(.active){background:var(--ink-3);color:var(--paper);}
+.seg.seg-wrap{flex-wrap:wrap;overflow:visible;border:none;gap:8px;}
+.seg.seg-wrap button{border:1px solid var(--line);border-radius:20px;flex:none;padding:7px 14px;}
+
+/* ---------- buttons ---------- */
+.btn{
+  display:inline-flex;align-items:center;gap:7px;padding:10px 18px;border-radius:var(--radius);
+  border:1px solid var(--gold-dim);background:transparent;color:var(--gold-bright);
+  font-family:var(--font-mono);font-size:12.5px;letter-spacing:.04em;cursor:pointer;
+  transition:background .12s,color .12s,border-color .12s;
+}
+.btn:hover{background:var(--gold-dim);color:var(--ink);}
+.btn-solid{background:var(--gold);border-color:var(--gold);color:var(--ink);font-weight:600;}
+.btn-solid:hover{background:var(--gold-bright);border-color:var(--gold-bright);}
+.btn-ghost{border-color:var(--line);color:var(--paper-dim);}
+.btn-ghost:hover{background:var(--ink-3);color:var(--paper);border-color:var(--line);}
+.btn-danger{border-color:var(--rust);color:var(--rust-bright);}
+.btn-danger:hover{background:var(--rust);color:var(--ink);}
+.btn-sm{padding:6px 12px;font-size:11px;}
+.btn[disabled]{opacity:.4;cursor:not-allowed;}
+.btn-row{display:flex;gap:10px;flex-wrap:wrap;margin-top:6px;}
+
+/* ---------- results / stats ---------- */
+.stat{padding:16px 0;}
+.stat .slabel{font-family:var(--font-mono);font-size:10.5px;letter-spacing:.1em;text-transform:uppercase;color:var(--paper-faint);}
+.stat .sval{font-family:var(--font-display);font-size:28px;color:var(--paper);margin-top:6px;}
+.stat .sval.gold{color:var(--gold-bright);}
+.stat .sval.green{color:var(--emerald-bright);}
+.stat .sval.red{color:var(--rust-bright);}
+.stat .ssub{font-size:11.5px;color:var(--paper-faint);margin-top:4px;}
+
+.result-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:0;border:1px solid var(--line-soft);border-radius:var(--radius-lg);overflow:hidden;background:var(--ink-3);}
+.result-strip .stat{padding:16px 18px;border-right:1px solid var(--line-soft);}
+.result-strip .stat:last-child{border-right:none;}
+
+.badge{display:inline-flex;align-items:center;gap:5px;font-family:var(--font-mono);font-size:10.5px;letter-spacing:.06em;text-transform:uppercase;padding:3px 9px;border-radius:20px;border:1px solid currentColor;}
+.badge.gold{color:var(--gold-bright);}
+.badge.green{color:var(--emerald-bright);}
+.badge.red{color:var(--rust-bright);}
+.badge.azure{color:var(--azure-bright);}
+
+.note{border-left:2px solid var(--gold-dim);padding:10px 14px;background:var(--ink-3);border-radius:0 var(--radius) var(--radius) 0;font-size:12.5px;color:var(--paper-dim);margin-top:14px;}
+.note.warn{border-left-color:var(--rust);}
+.note.good{border-left-color:var(--emerald);}
+
+/* ---------- table ---------- */
+table.tbl{width:100%;border-collapse:collapse;font-size:12.5px;}
+table.tbl th{text-align:left;font-family:var(--font-mono);font-size:10px;letter-spacing:.08em;text-transform:uppercase;color:var(--paper-faint);padding:8px 10px;border-bottom:1px solid var(--line);position:sticky;top:0;background:var(--ink-2);}
+table.tbl td{padding:8px 10px;border-bottom:1px solid var(--line-soft);font-family:var(--font-mono);color:var(--paper-dim);}
+table.tbl tr:last-child td{border-bottom:none;}
+table.tbl tr:hover td{background:var(--ink-3);}
+.tbl-wrap{max-height:340px;overflow-y:auto;border:1px solid var(--line-soft);border-radius:var(--radius);}
+td.num,th.num{text-align:right;}
+.rm-row{background:none;border:none;color:var(--rust-bright);cursor:pointer;font-size:14px;padding:2px 6px;}
+
+/* entry list rows (assets/expenses etc) */
+.entry-row{display:flex;align-items:center;gap:10px;padding:8px 0;border-bottom:1px solid var(--line-soft);}
+.entry-row:last-child{border-bottom:none;}
+.entry-row .en{flex:1;font-size:13px;}
+.entry-row .ec{font-family:var(--font-mono);font-size:10.5px;color:var(--paper-faint);text-transform:uppercase;letter-spacing:.05em;width:110px;flex:0 0 auto;}
+.entry-row .ev{font-family:var(--font-mono);font-size:13px;color:var(--paper);width:110px;flex:0 0 auto;text-align:right;}
+.entry-list{max-height:260px;overflow-y:auto;margin-bottom:10px;}
+.empty-state{padding:22px 10px;text-align:center;color:var(--paper-faint);font-size:12.5px;font-style:italic;}
+
+/* progress */
+.bar{height:8px;background:var(--ink);border-radius:6px;overflow:hidden;border:1px solid var(--line-soft);}
+.bar > i{display:block;height:100%;background:linear-gradient(90deg,var(--gold-dim),var(--gold-bright));border-radius:6px;transition:width .3s ease;}
+.bar.green > i{background:linear-gradient(90deg,var(--emerald),var(--emerald-bright));}
+.bar.red > i{background:linear-gradient(90deg,var(--rust),var(--rust-bright));}
+
+/* stamp */
+.stamp-wrap{display:flex;align-items:center;justify-content:center;padding:26px 0 10px;}
+.stamp{
+  width:150px;height:150px;border-radius:50%;border:3px double currentColor;
+  display:flex;align-items:center;justify-content:center;text-align:center;
+  font-family:var(--font-display);text-transform:uppercase;letter-spacing:.06em;
+  transform:rotate(-8deg);position:relative;
+}
+.stamp .st-txt{font-size:16px;line-height:1.2;padding:0 14px;}
+.stamp.gold{color:var(--gold-bright);}
+.stamp.red{color:var(--rust-bright);}
+.stamp.green{color:var(--emerald-bright);}
+.stamp::after{content:'';position:absolute;inset:8px;border:1px solid currentColor;border-radius:50%;opacity:.5;}
+
+/* checklist */
+.chk-row{display:flex;align-items:flex-start;gap:11px;padding:11px 0;border-bottom:1px solid var(--line-soft);cursor:pointer;}
+.chk-row:last-child{border-bottom:none;}
+.chk-box{width:17px;height:17px;border:1.4px solid var(--line);border-radius:3px;flex:0 0 auto;margin-top:2px;display:flex;align-items:center;justify-content:center;transition:all .12s;}
+.chk-row.checked .chk-box{background:var(--rust);border-color:var(--rust);}
+.chk-row.checked .chk-box::after{content:'✕';font-size:11px;color:var(--ink);}
+.chk-txt{font-size:13px;color:var(--paper-dim);}
+.chk-row.checked .chk-txt{color:var(--paper);}
+
+/* search */
+.search-wrap{position:relative;margin-bottom:20px;}
+.search-wrap .input{padding-left:34px;}
+.search-wrap::before{content:'⌕';position:absolute;left:12px;top:50%;transform:translateY(-50%);color:var(--paper-faint);font-size:15px;}
+
+/* reference cards */
+.ref-card{background:var(--ink-2);border:1px solid var(--line-soft);border-radius:var(--radius-lg);padding:18px 20px;}
+.ref-card h4{font-family:var(--font-display);font-size:16px;color:var(--gold-bright);margin-bottom:10px;}
+.ref-card .formula{font-family:var(--font-mono);font-size:13px;background:var(--ink);border:1px solid var(--line-soft);padding:8px 10px;border-radius:var(--radius);margin-bottom:10px;color:var(--emerald-bright);overflow-x:auto;white-space:nowrap;}
+.ref-row{display:flex;gap:8px;font-size:12px;margin-bottom:6px;line-height:1.5;}
+.ref-row b{flex:0 0 100px;color:var(--paper-faint);font-family:var(--font-mono);font-size:10px;letter-spacing:.06em;text-transform:uppercase;padding-top:2px;}
+.ref-row span{flex:1;color:var(--paper-dim);}
+
+/* chart */
+.chart-box{width:100%;height:180px;}
+.chart-box svg{width:100%;height:100%;overflow:visible;}
+
+/* health score ring */
+.ring-wrap{display:flex;align-items:center;gap:24px;}
+.ring{position:relative;width:120px;height:120px;flex:0 0 auto;}
+.ring svg{transform:rotate(-90deg);}
+.ring .ring-num{position:absolute;inset:0;display:flex;flex-direction:column;align-items:center;justify-content:center;}
+.ring .ring-num b{font-family:var(--font-display);font-size:28px;color:var(--paper);}
+.ring .ring-num small{font-family:var(--font-mono);font-size:9px;color:var(--paper-faint);letter-spacing:.08em;}
+
+/* priority list */
+.pri-item{display:flex;gap:16px;padding:14px 0;border-bottom:1px solid var(--line-soft);}
+.pri-item:last-child{border-bottom:none;}
+.pri-num{font-family:var(--font-display);font-size:22px;color:var(--gold-dim);width:34px;flex:0 0 auto;}
+.pri-body h4{font-size:14px;margin-bottom:3px;color:var(--paper);}
+.pri-body p{font-size:12.5px;color:var(--paper-faint);margin:0;}
+
+/* glossary pairs */
+.pair-card{background:var(--ink-2);border:1px solid var(--line-soft);border-radius:var(--radius-lg);padding:16px 18px;}
+.pair-heads{display:flex;gap:10px;margin-bottom:8px;}
+.pair-heads span{font-family:var(--font-mono);font-size:12px;padding:3px 10px;border-radius:20px;}
+.pair-heads .a{background:rgba(199,160,69,.15);color:var(--gold-bright);}
+.pair-heads .vs{color:var(--paper-faint);align-self:center;font-size:10px;}
+.pair-heads .b{background:rgba(84,134,172,.15);color:var(--azure-bright);}
+.pair-card p{font-size:12.5px;color:var(--paper-dim);margin:0;}
+
+footer.appfoot{margin-top:60px;padding-top:20px;border-top:1px solid var(--line-soft);font-family:var(--font-mono);font-size:10.5px;color:var(--paper-faint);}
+
+@media (max-width:880px){
+  .sidebar{position:fixed;left:0;top:0;bottom:0;transform:translateX(-100%);transition:transform .2s ease;box-shadow:0 0 40px rgba(0,0,0,.5);}
+  .sidebar.open{transform:translateX(0);}
+  .mobile-topbar{display:flex;align-items:center;gap:12px;padding:14px 18px;border-bottom:1px solid var(--line-soft);background:var(--ink-2);position:sticky;top:0;z-index:30;}
+  .mobile-topbar button{background:none;border:1px solid var(--line);color:var(--paper);padding:7px 10px;border-radius:var(--radius);}
+  .mobile-topbar span{font-family:var(--font-mono);font-size:11px;color:var(--paper-dim);letter-spacing:.06em;text-transform:uppercase;}
+  .content{padding:24px 18px 70px;}
+  .mod-head h2{font-size:24px;}
+  .scrim{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:35;}
+  .scrim.show{display:block;}
+  .ring-wrap{flex-direction:column;align-items:flex-start;}
+}
+</style>
+</head>
+<body>
+<svg width="0" height="0" style="position:absolute">
+  <defs>
+    <pattern id="guilloche" width="46" height="46" patternUnits="userSpaceOnUse" patternTransform="scale(1)">
+      <g fill="none" stroke="#C7A045" stroke-width="0.6">
+        <circle cx="23" cy="23" r="6"/>
+        <circle cx="23" cy="23" r="12"/>
+        <circle cx="23" cy="23" r="18"/>
+        <circle cx="0" cy="0" r="12"/>
+        <circle cx="46" cy="0" r="12"/>
+        <circle cx="0" cy="46" r="12"/>
+        <circle cx="46" cy="46" r="12"/>
+      </g>
+    </pattern>
+    <filter id="inkgrain">
+      <feTurbulence type="fractalNoise" baseFrequency="0.9" numOctaves="2" result="noise"/>
+      <feColorMatrix in="noise" type="matrix" values="0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 .35 0"/>
+      <feComposite operator="over" in2="SourceGraphic"/>
+    </filter>
+  </defs>
+</svg>
+
+<div class="scrim" id="scrim"></div>
+
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <svg class="brand-seal" viewBox="0 0 160 160"><rect width="160" height="160" fill="url(#guilloche)"/></svg>
+      <div class="brand-mark">
+        <span class="glyph">₹</span>
+        <h1>Treasury</h1>
+      </div>
+      <span class="tag">Personal CFO Console</span>
+      <span class="owner">Ledger of Opx · rev. 001</span>
+    </div>
+
+    <nav class="groups" id="navgroups">
+      <div class="nav-group">
+        <div class="nav-group-label">Overview</div>
+        <button class="nav-item active" data-mod="dashboard"><span class="n">01</span>Command Deck</button>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-label">Cash Flow</div>
+        <button class="nav-item" data-mod="budget"><span class="n">02</span>Income &amp; Budget</button>
+        <button class="nav-item" data-mod="networth"><span class="n">03</span>Net Worth Ledger</button>
+        <button class="nav-item" data-mod="emergency"><span class="n">04</span>Emergency Reserve</button>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-label">Debt &amp; Credit</div>
+        <button class="nav-item" data-mod="loan"><span class="n">05</span>Loan / EMI</button>
+        <button class="nav-item" data-mod="creditcard"><span class="n">06</span>Credit Card Cost</button>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-label">Growth &amp; Investing</div>
+        <button class="nav-item" data-mod="compound"><span class="n">07</span>Compounding &amp; SIP</button>
+        <button class="nav-item" data-mod="inflation"><span class="n">08</span>Inflation &amp; Real Return</button>
+        <button class="nav-item" data-mod="retirement"><span class="n">09</span>Retirement / FIRE</button>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-label">Goals &amp; Decisions</div>
+        <button class="nav-item" data-mod="goals"><span class="n">10</span>Goal Planner</button>
+        <button class="nav-item" data-mod="decision"><span class="n">11</span>The Verdict Desk</button>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-label">Professional Income</div>
+        <button class="nav-item" data-mod="ctc"><span class="n">12</span>Salary / CTC Split</button>
+        <button class="nav-item" data-mod="freelance"><span class="n">13</span>Freelance Rate</button>
+      </div>
+      <div class="nav-group">
+        <div class="nav-group-label">Reference Vault</div>
+        <button class="nav-item" data-mod="formulas"><span class="n">14</span>Formula &amp; Ratio Library</button>
+        <button class="nav-item" data-mod="priority"><span class="n">15</span>Priority Hierarchy</button>
+        <button class="nav-item" data-mod="scam"><span class="n">16</span>Red-Flag Detector</button>
+        <button class="nav-item" data-mod="banking"><span class="n">17</span>Banking Essentials</button>
+        <button class="nav-item" data-mod="glossary"><span class="n">18</span>Never Confuse This</button>
+      </div>
+    </nav>
+
+    <div class="sidebar-foot">Figures are educational, not licensed advice.<br>Verify rates before you act.</div>
+  </aside>
+
+  <main class="content">
+    <div class="mobile-topbar">
+      <button id="menuBtn">☰ Menu</button>
+      <span id="mobileTitle">Command Deck</span>
+    </div>
+
+    <div id="view-root">
+      <!-- ============ 01 DASHBOARD ============ -->
+      <section class="module active" id="mod-dashboard">
+        <div class="mod-head">
+          <div class="mod-eyebrow"><span class="rule"></span>01 · Overview</div>
+          <h2>Command Deck</h2>
+          <p class="mod-dek">Everything you've entered elsewhere in the Treasury, pulled into one view. Fill in the Budget, Net Worth and Emergency Reserve modules and this deck fills itself in.</p>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="card">
+            <div class="panel-title">Financial Health Score</div>
+            <div class="ring-wrap">
+              <div class="ring">
+                <svg viewBox="0 0 120 120" width="120" height="120">
+                  <circle cx="60" cy="60" r="52" fill="none" stroke="#1F2530" stroke-width="10"/>
+                  <circle id="healthRing" cx="60" cy="60" r="52" fill="none" stroke="#C7A045" stroke-width="10" stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="326.7"/>
+                </svg>
+                <div class="ring-num"><b id="healthScoreNum">—</b><small>OUT OF 100</small></div>
+              </div>
+              <div style="flex:1">
+                <p id="healthScoreWord" style="color:var(--paper-dim);font-size:13px;margin-bottom:8px;">Add data across the Cash Flow modules to generate a score.</p>
+                <div id="healthBreakdown" style="font-family:var(--font-mono);font-size:11.5px;color:var(--paper-faint);"></div>
+              </div>
+            </div>
+            <div class="note">Score = average of four checks: savings rate, emergency-fund coverage, debt-to-asset ratio and liquid-vs-total-asset mix. Each is scored 0–100 against the thresholds shown in the Formula Library, then averaged equally. It is a rough gauge, not a verdict.</div>
+          </div>
+
+          <div class="card">
+            <div class="panel-title">Net Worth Trend</div>
+            <div class="chart-box" id="dashChart"><div class="empty-state">Save a snapshot in the Net Worth Ledger to start the trend line.</div></div>
+          </div>
+        </div>
+
+        <div class="result-strip" style="margin-top:18px;">
+          <div class="stat"><div class="slabel">Net Worth</div><div class="sval gold" id="dashNetWorth">—</div><div class="ssub" id="dashNetWorthSub">not entered yet</div></div>
+          <div class="stat"><div class="slabel">Savings Rate</div><div class="sval" id="dashSavingsRate">—</div><div class="ssub" id="dashSavingsRateSub">not entered yet</div></div>
+          <div class="stat"><div class="slabel">Emergency Cover</div><div class="sval" id="dashEmergency">—</div><div class="ssub" id="dashEmergencySub">not entered yet</div></div>
+          <div class="stat"><div class="slabel">Active Goals</div><div class="sval" id="dashGoals">—</div><div class="ssub" id="dashGoalsSub">none set</div></div>
+        </div>
+
+        <div class="card" style="margin-top:18px;">
+          <div class="panel-title">What Needs Attention</div>
+          <div id="dashActions"></div>
+        </div>
+      </section>
+      <!-- ============ 02 INCOME & BUDGET ============ -->
+      <section class="module" id="mod-budget">
+        <div class="mod-head">
+          <div class="mod-eyebrow"><span class="rule"></span>02 · Cash Flow</div>
+          <h2>Income &amp; Budget</h2>
+          <p class="mod-dek">Log every income stream and every expense line. The split between essential, discretionary, debt and savings is what makes the budgeting-method comparison below work.</p>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="card">
+            <h3>Income Sources</h3>
+            <div class="card-sub">Salary, freelance, rental, dividends — anything that lands in an account.</div>
+            <div class="input-row">
+              <label class="field" style="flex:2;"><span class="flabel">Source</span><input class="input" id="incName" placeholder="e.g. Salary"></label>
+              <label class="field"><span class="flabel">Amount</span><input class="input" id="incAmt" type="number" placeholder="0"></label>
+              <label class="field"><span class="flabel">Frequency</span>
+                <select class="input" id="incFreq"><option value="monthly">Monthly</option><option value="annual">Annual</option></select>
+              </label>
+            </div>
+            <button class="btn btn-solid" id="addIncomeBtn">+ Add Income</button>
+            <div class="entry-list" id="incomeList" style="margin-top:16px;"></div>
+            <div class="stat" style="padding-top:10px;border-top:1px solid var(--line-soft);"><div class="slabel">Total Monthly Income</div><div class="sval green" id="incomeTotalDisplay">₹0</div></div>
+          </div>
+
+          <div class="card">
+            <h3>Expenses</h3>
+            <div class="card-sub">Tag each line so the budgeting-method check below has something to compare against.</div>
+            <div class="input-row">
+              <label class="field" style="flex:2;"><span class="flabel">Line item</span><input class="input" id="expName" placeholder="e.g. Rent"></label>
+              <label class="field"><span class="flabel">Amount</span><input class="input" id="expAmt" type="number" placeholder="0"></label>
+            </div>
+            <label class="field"><span class="flabel">Category</span>
+              <select class="input" id="expCategory">
+                <option value="essential">Essential (needs)</option>
+                <option value="discretionary">Discretionary (wants)</option>
+                <option value="debt">Debt repayment</option>
+                <option value="savings">Savings / Investment</option>
+              </select>
+            </label>
+            <button class="btn btn-solid" id="addExpenseBtn">+ Add Expense</button>
+            <div class="entry-list" id="expenseList" style="margin-top:16px;"></div>
+            <div class="stat" style="padding-top:10px;border-top:1px solid var(--line-soft);"><div class="slabel">Total Monthly Expenses</div><div class="sval red" id="expenseTotalDisplay">₹0</div></div>
+          </div>
+        </div>
+
+        <div class="result-strip" style="margin-top:18px;">
+          <div class="stat"><div class="slabel">Income</div><div class="sval green" id="budgetIncomeTotal">₹0</div></div>
+          <div class="stat"><div class="slabel">Expenses</div><div class="sval red" id="budgetExpenseTotal">₹0</div></div>
+          <div class="stat"><div class="slabel">Monthly Savings</div><div class="sval gold" id="budgetSavings">₹0</div></div>
+          <div class="stat"><div class="slabel">Savings Rate</div><div class="sval" id="budgetSavingsRate">0%</div></div>
+        </div>
+
+        <div class="card" style="margin-top:18px;">
+          <h3>Compare Against a Budgeting Method</h3>
+          <div class="card-sub">Each system splits income into buckets differently. None is universally correct — pick the one that matches your income stability and see how your actual spending lines up.</div>
+          <div class="seg" id="budgetMethodSeg">
+            <button class="active" data-method="502030">50 / 30 / 20</button>
+            <button data-method="702010">70 / 20 / 10</button>
+            <button data-method="zero">Zero-Based</button>
+            <button data-method="payfirst">Pay-Yourself-First</button>
+          </div>
+          <div id="budgetMethodExplain" class="note" style="margin-top:14px;"></div>
+          <div id="budgetBars" style="margin-top:16px;"></div>
+        </div>
+      </section>
+      <!-- ============ 03 NET WORTH ============ -->
+      <section class="module" id="mod-networth">
+        <div class="mod-head">
+          <div class="mod-eyebrow"><span class="rule"></span>03 · Cash Flow</div>
+          <h2>Net Worth Ledger</h2>
+          <p class="mod-dek">Net Worth = Total Assets − Total Liabilities. It's the single number that matters more than income, because it's what you'd have left if you converted everything to cash today.</p>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="card">
+            <h3>Assets</h3>
+            <div class="input-row">
+              <label class="field" style="flex:2;"><span class="flabel">Asset</span><input class="input" id="assetName" placeholder="e.g. Mutual funds"></label>
+              <label class="field"><span class="flabel">Value</span><input class="input" id="assetVal" type="number" placeholder="0"></label>
+            </div>
+            <label class="field"><span class="flabel">Category</span>
+              <select class="input" id="assetCategory">
+                <option value="cash">Cash / Bank</option>
+                <option value="investments">Investments (equity, MF, bonds)</option>
+                <option value="retirement">Retirement accounts</option>
+                <option value="gold">Gold</option>
+                <option value="property">Property</option>
+                <option value="business">Business equity</option>
+                <option value="other">Other</option>
+              </select>
+            </label>
+            <button class="btn btn-solid" id="addAssetBtn">+ Add Asset</button>
+            <div class="entry-list" id="assetList" style="margin-top:16px;"></div>
+            <div class="stat" style="padding-top:10px;border-top:1px solid var(--line-soft);"><div class="slabel">Total Assets</div><div class="sval green" id="assetTotalDisplay">₹0</div></div>
+          </div>
+
+          <div class="card">
+            <h3>Liabilities</h3>
+            <div class="input-row">
+              <label class="field" style="flex:2;"><span class="flabel">Liability</span><input class="input" id="liabName" placeholder="e.g. Car loan"></label>
+              <label class="field"><span class="flabel">Value</span><input class="input" id="liabVal" type="number" placeholder="0"></label>
+            </div>
+            <label class="field"><span class="flabel">Category</span>
+              <select class="input" id="liabCategory">
+                <option value="loan">Loan (home / auto / personal / education)</option>
+                <option value="creditcard">Credit card balance</option>
+                <option value="other">Other payable</option>
+              </select>
+            </label>
+            <button class="btn btn-solid" id="addLiabBtn">+ Add Liability</button>
+            <div class="entry-list" id="liabList" style="margin-top:16px;"></div>
+            <div class="stat" style="padding-top:10px;border-top:1px solid var(--line-soft);"><div class="slabel">Total Liabilities</div><div class="sval red" id="liabTotalDisplay">₹0</div></div>
+          </div>
+        </div>
+
+        <div class="result-strip" style="margin-top:18px;">
+          <div class="stat"><div class="slabel">Total Assets</div><div class="sval green" id="nwAssets">₹0</div></div>
+          <div class="stat"><div class="slabel">Total Liabilities</div><div class="sval red" id="nwLiabs">₹0</div></div>
+          <div class="stat"><div class="slabel">Net Worth</div><div class="sval gold" id="nwNet">₹0</div></div>
+          <div class="stat"><div class="slabel">Debt-to-Asset</div><div class="sval" id="nwDTA">0%</div></div>
+          <div class="stat"><div class="slabel">Liquidity Ratio</div><div class="sval" id="nwLiquidity">0%</div></div>
+        </div>
+
+        <div class="card" style="margin-top:18px;">
+          <div class="panel-title">Snapshot History <button class="btn btn-sm" id="saveSnapshotBtn">+ Save Today's Snapshot</button></div>
+          <div class="chart-box" id="nwChart"><div class="empty-state">No snapshots saved yet.</div></div>
+          <div class="tbl-wrap" style="margin-top:14px;" id="nwHistoryWrap"></div>
+        </div>
+      </section>
+      <!-- ============ 04 EMERGENCY FUND ============ -->
+      <section class="module" id="mod-emergency">
+        <div class="mod-head">
+          <div class="mod-eyebrow"><span class="rule"></span>04 · Cash Flow</div>
+          <h2>Emergency Reserve</h2>
+          <p class="mod-dek">A pool of cash sized to your essential expenses, income stability and dependents — kept liquid, never invested for growth.</p>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="card">
+            <h3>Your Situation</h3>
+            <label class="field"><span class="flabel">Monthly essential expenses</span>
+              <div class="prefix-wrap"><span class="prefix">₹</span><input class="input" id="efExpenses" type="number" placeholder="30000"></div>
+              <span class="fhint">Rent, food, utilities, EMIs, insurance — needs only, not wants.</span>
+            </label>
+            <label class="field"><span class="flabel">Income stability</span>
+              <select class="input" id="efStability">
+                <option value="stable">Stable — salaried, single employer</option>
+                <option value="somewhat">Somewhat variable — bonuses/commission-heavy</option>
+                <option value="variable">Variable — freelance / business / multiple clients</option>
+              </select>
+            </label>
+            <label class="field"><span class="flabel">Dependents relying on your income</span>
+              <input class="input" id="efDependents" type="number" placeholder="0" min="0">
+            </label>
+            <label class="field"><span class="flabel">Existing liquid savings earmarked for emergencies</span>
+              <div class="prefix-wrap"><span class="prefix">₹</span><input class="input" id="efExisting" type="number" placeholder="0"></div>
+            </label>
+          </div>
+
+          <div class="card">
+            <div class="panel-title">Recommended Reserve</div>
+            <div class="stat"><div class="slabel">Recommended coverage</div><div class="sval gold" id="efMonths">— months</div><div class="ssub" id="efMonthsWhy"></div></div>
+            <div class="stat"><div class="slabel">Target reserve</div><div class="sval" id="efTarget">₹0</div></div>
+            <div class="stat"><div class="slabel">Currently covers</div><div class="sval" id="efCurrentMonths">0 months</div></div>
+            <div class="bar" style="margin:6px 0 4px;"><i id="efBar" style="width:0%"></i></div>
+            <div class="stat"><div class="slabel">Gap to close</div><div class="sval red" id="efGap">₹0</div></div>
+            <div class="note">Base is 3 months. Add 3 for variable income, 1.5 for somewhat-variable, and 1 month per dependent (capped at a sensible ceiling). This is a starting heuristic, not a rule to follow blindly — a single income with a mortgage and three dependents needs more caution than the formula alone suggests.</div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:18px;">
+          <h3>Where to keep it</h3>
+          <p style="font-size:13px;color:var(--paper-dim);">Emergency money's job is to be there when you need it, not to grow. Priority order: instant-access savings account → sweep-in FD / liquid fund → short-tenure FDs laddered so at least a slice matures every few months. Avoid equity, long-lock FDs, and anything that penalizes early withdrawal — the cost of illiquidity during an actual emergency is far higher than the yield you'd give up by staying liquid.</p>
+        </div>
+      </section>
+      <!-- ============ 05 LOAN / EMI ============ -->
+      <section class="module" id="mod-loan">
+        <div class="mod-head">
+          <div class="mod-eyebrow"><span class="rule"></span>05 · Debt &amp; Credit</div>
+          <h2>Loan / EMI Calculator</h2>
+          <p class="mod-dek">EMI = P × r × (1+r)ⁿ ÷ [(1+r)ⁿ − 1], where r is the monthly rate and n the number of months. Compare loans by total cost, never by EMI alone.</p>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="card">
+            <h3>Loan A</h3>
+            <label class="field"><span class="flabel">Principal</span><div class="prefix-wrap"><span class="prefix">₹</span><input class="input" id="loanPrincipal" type="number" placeholder="1000000"></div></label>
+            <div class="input-row">
+              <label class="field"><span class="flabel">Annual interest rate</span><input class="input" id="loanRate" type="number" step="0.01" placeholder="9.5"></label>
+              <label class="field"><span class="flabel">Tenure (years)</span><input class="input" id="loanTenure" type="number" placeholder="5"></label>
+            </div>
+            <label class="field"><span class="flabel">Processing fee (%)</span><input class="input" id="loanFee" type="number" step="0.01" placeholder="0.5"></label>
+            <hr style="border:none;border-top:1px solid var(--line-soft);margin:16px 0;">
+            <div class="card-sub" style="margin-bottom:10px;">Optional: one-time prepayment</div>
+            <div class="input-row">
+              <label class="field"><span class="flabel">Prepayment amount</span><input class="input" id="loanPrepayAmt" type="number" placeholder="0"></label>
+              <label class="field"><span class="flabel">After month #</span><input class="input" id="loanPrepayMonth" type="number" placeholder="12"></label>
+            </div>
+            <label class="field-inline"><span class="flabel">On prepayment</span>
+              <select class="input" id="loanPrepayMode"><option value="tenure">Reduce tenure</option><option value="emi">Reduce EMI</option></select>
+            </label>
+            <label class="chk-row" id="compareToggle" style="border:none;padding-top:10px;">
+              <span class="chk-box"></span><span class="chk-txt">Compare against a second loan offer</span>
+            </label>
+          </div>
+
+          <div class="card" id="loanBCard" style="display:none;">
+            <h3>Loan B — the alternative offer</h3>
+            <label class="field"><span class="flabel">Principal</span><div class="prefix-wrap"><span class="prefix">₹</span><input class="input" id="loanBPrincipal" type="number" placeholder="1000000"></div></label>
+            <div class="input-row">
+              <label class="field"><span class="flabel">Annual interest rate</span><input class="input" id="loanBRate" type="number" step="0.01" placeholder="10.25"></label>
+              <label class="field"><span class="flabel">Tenure (years)</span><input class="input" id="loanBTenure" type="number" placeholder="4"></label>
+            </div>
+            <label class="field"><span class="flabel">Processing fee (%)</span><input class="input" id="loanBFee" type="number" step="0.01" placeholder="0"></label>
+            <div class="note">Same principal isn't required — this is for comparing two real offers on the table, even if their terms differ.</div>
+          </div>
+        </div>
+
+        <div class="result-strip" style="margin-top:18px;" id="loanResultStrip">
+          <div class="stat"><div class="slabel">Monthly EMI</div><div class="sval gold" id="loanEMI">₹0</div></div>
+          <div class="stat"><div class="slabel">Total Interest</div><div class="sval red" id="loanInterest">₹0</div></div>
+          <div class="stat"><div class="slabel">Total Repayment</div><div class="sval" id="loanTotal">₹0</div></div>
+          <div class="stat"><div class="slabel">Effective Cost (incl. fee)</div><div class="sval" id="loanEffective">₹0</div></div>
+        </div>
+
+        <div class="card" id="loanCompareResult" style="display:none;margin-top:18px;">
+          <div class="panel-title">Loan A vs Loan B — Total Cost</div>
+          <div id="loanCompareBody"></div>
+        </div>
+
+        <div class="card" id="loanPrepayResult" style="display:none;margin-top:18px;">
+          <div class="panel-title">Prepayment Impact</div>
+          <div id="loanPrepayBody" class="result-strip"></div>
+        </div>
+
+        <div class="card" style="margin-top:18px;">
+          <div class="panel-title">Amortization Schedule (year-wise) <button class="btn btn-sm" id="toggleMonthlyBtn">Show first 12 months</button></div>
+          <div class="tbl-wrap" id="amortWrap"></div>
+        </div>
+      </section>
+      <!-- ============ 06 CREDIT CARD ============ -->
+      <section class="module" id="mod-creditcard">
+        <div class="mod-head">
+          <div class="mod-eyebrow"><span class="rule"></span>06 · Debt &amp; Credit</div>
+          <h2>Credit Card Cost</h2>
+          <p class="mod-dek">Credit cards charge interest on a revolving balance, often 30–45% APR. Paying only the minimum due keeps you technically current while interest compounds on almost the whole balance — this module makes that cost visible.</p>
+        </div>
+
+        <div class="card">
+          <div class="input-row">
+            <label class="field"><span class="flabel">Outstanding balance</span><div class="prefix-wrap"><span class="prefix">₹</span><input class="input" id="ccBalance" type="number" placeholder="80000"></div></label>
+            <label class="field"><span class="flabel">Annual interest rate (APR)</span><input class="input" id="ccAPR" type="number" step="0.1" placeholder="36"></label>
+          </div>
+          <div class="input-row">
+            <label class="field"><span class="flabel">Minimum due (% of balance)</span><input class="input" id="ccMinPct" type="number" step="0.1" placeholder="5"></label>
+            <label class="field"><span class="flabel">Your planned fixed payment / month</span><div class="prefix-wrap"><span class="prefix">₹</span><input class="input" id="ccFixedPay" type="number" placeholder="8000"></div></label>
+          </div>
+        </div>
+
+        <div class="grid grid-2" style="margin-top:18px;">
+          <div class="card">
+            <h3>Scenario A — Minimum Due Only</h3>
+            <div class="stat"><div class="slabel">Time to clear balance</div><div class="sval red" id="ccMinMonths">—</div></div>
+            <div class="stat"><div class="slabel">Total interest paid</div><div class="sval red" id="ccMinInterest">₹0</div></div>
+            <div class="stat"><div class="slabel">Total paid vs balance</div><div class="sval" id="ccMinTotal">₹0</div></div>
+          </div>
+          <div class="card">
+            <h3>Scenario B — Your Fixed Payment</h3>
+            <div class="stat"><div class="slabel">Time to clear balance</div><div class="sval gold" id="ccFixMonths">—</div></div>
+            <div class="stat"><div class="slabel">Total interest paid</div><div class="sval" id="ccFixInterest">₹0</div></div>
+            <div class="stat"><div class="slabel">Interest saved vs Scenario A</div><div class="sval green" id="ccSaved">₹0</div></div>
+          </div>
+        </div>
+
+        <div class="note warn" style="margin-top:18px;" id="ccWarnNote"></div>
+      </section>
+      <!-- ============ 07 COMPOUNDING & SIP ============ -->
+      <section class="module" id="mod-compound">
+        <div class="mod-head">
+          <div class="mod-eyebrow"><span class="rule"></span>07 · Growth &amp; Investing</div>
+          <h2>Compounding &amp; SIP</h2>
+          <p class="mod-dek">FV = PV × (1+r)ⁿ for a lump sum. For a SIP, each installment compounds for a different length of time — this module runs the full month-by-month math, not an approximation.</p>
+        </div>
+
+        <div class="card">
+          <div class="seg" id="compModeSeg">
+            <button class="active" data-mode="lumpsum">Lump Sum</button>
+            <button data-mode="sip">SIP</button>
+            <button data-mode="both">Lump Sum + SIP</button>
+          </div>
+
+          <div class="grid grid-2" style="margin-top:18px;">
+            <div id="compLumpFields">
+              <label class="field"><span class="flabel">Lump sum amount</span><div class="prefix-wrap"><span class="prefix">₹</span><input class="input" id="compLump" type="number" placeholder="500000"></div></label>
+            </div>
+            <div id="compSipFields" style="display:none;">
+              <label class="field"><span class="flabel">Monthly SIP amount</span><div class="prefix-wrap"><span class="prefix">₹</span><input class="input" id="compSip" type="number" placeholder="15000"></div></label>
+            </div>
+            <label class="field"><span class="flabel">Expected annual return</span><input class="input" id="compReturn" type="number" step="0.1" placeholder="12"></label>
+            <label class="field"><span class="flabel">Time horizon (years)</span><input class="input" id="compYears" type="number" placeholder="15"></label>
+          </div>
+          <div class="grid grid-2">
+            <label class="field" id="compStepUpWrap" style="display:none;"><span class="flabel">Annual SIP step-up (%)</span><input class="input" id="compStepUp" type="number" step="0.1" placeholder="0"><span class="fhint">Optional — raise your SIP every year in line with rising income.</span></label>
+            <label class="field"><span class="flabel">Assumed inflation (for real value)</span><input class="input" id="compInflation" type="number" step="0.1" value="6"></label>
+          </div>
+        </div>
+
+        <div class="result-strip" style="margin-top:18px;">
+          <div class="stat"><div class="slabel">Future Value</div><div class="sval gold" id="compFV">₹0</div></div>
+          <div class="stat"><div class="slabel">Total Invested</div><div class="sval" id="compInvested">₹0</div></div>
+          <div class="stat"><div class="slabel">Total Gains</div><div class="sval green" id="compGains">₹0</div></div>
+          <div class="stat"><div class="slabel">Inflation-Adjusted (Real) Value</div><div class="sval" id="compReal">₹0</div></div>
+        </div>
+        <div class="note">Real value uses the Fisher relation: real value = future value ÷ (1+inflation)ⁿ. It tells you what today's rupees that future amount will actually buy.</div>
+      </section>
+      <!-- ============ 08 INFLATION ============ -->
+      <section class="module" id="mod-inflation">
+        <div class="mod-head">
+          <div class="mod-eyebrow"><span class="rule"></span>08 · Growth &amp; Investing</div>
+          <h2>Inflation &amp; Real Return</h2>
+          <p class="mod-dek">Money keeps its face value; it doesn't keep its purchasing power. Never confuse the two.</p>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="card">
+            <h3>Future Cost of Today's Money</h3>
+            <label class="field"><span class="flabel">Amount today</span><div class="prefix-wrap"><span class="prefix">₹</span><input class="input" id="infAmount" type="number" placeholder="100000"></div></label>
+            <label class="field"><span class="flabel">Assumed inflation rate</span><input class="input" id="infRate" type="number" step="0.1" placeholder="6"></label>
+            <div class="tbl-wrap" style="margin-top:14px;"><table class="tbl" id="infTable"><thead><tr><th>Years</th><th class="num">Future Cost</th><th class="num">Purchasing Power of Today's ₹1</th></tr></thead><tbody></tbody></table></div>
+          </div>
+
+          <div class="card">
+            <h3>Real Return (Fisher Equation)</h3>
+            <label class="field"><span class="flabel">Nominal (headline) return</span><input class="input" id="infNominal" type="number" step="0.1" placeholder="12"></label>
+            <label class="field"><span class="flabel">Inflation rate</span><input class="input" id="infRate2" type="number" step="0.1" placeholder="6"></label>
+            <div class="stat"><div class="slabel">Real Return</div><div class="sval gold" id="infReal">0%</div></div>
+            <div class="note">Real return = (1 + nominal) ÷ (1 + inflation) − 1. A 12% nominal return at 6% inflation isn't "6% real" — the exact figure is slightly lower than the simple subtraction, and the gap widens as rates rise.</div>
+            <div class="stat" style="margin-top:6px;"><div class="slabel">₹1,00,000 invested today, in real terms after</div></div>
+            <div class="grid grid-3" id="infRealGrid" style="gap:10px;"></div>
+          </div>
+        </div>
+      </section>
+      <!-- ============ 09 RETIREMENT / FIRE ============ -->
+      <section class="module" id="mod-retirement">
+        <div class="mod-head">
+          <div class="mod-eyebrow"><span class="rule"></span>09 · Growth &amp; Investing</div>
+          <h2>Retirement / FI-FIRE</h2>
+          <p class="mod-dek">Financial independence is the point where a safe withdrawal from your corpus covers your expenses indefinitely. This is a planning estimate, not a guarantee — sequence-of-returns risk in the years right around retirement can matter more than the average return you assume.</p>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="card">
+            <h3>Your Numbers</h3>
+            <div class="input-row">
+              <label class="field"><span class="flabel">Current age</span><input class="input" id="retAge" type="number" placeholder="24"></label>
+              <label class="field"><span class="flabel">Target retirement / FI age</span><input class="input" id="retTargetAge" type="number" placeholder="45"></label>
+            </div>
+            <label class="field"><span class="flabel">Current monthly expenses</span><div class="prefix-wrap"><span class="prefix">₹</span><input class="input" id="retExpenses" type="number" placeholder="40000"></div></label>
+            <div class="input-row">
+              <label class="field"><span class="flabel">Inflation assumption</span><input class="input" id="retInflation" type="number" step="0.1" value="6"></label>
+              <label class="field"><span class="flabel">Pre-retirement return</span><input class="input" id="retPreReturn" type="number" step="0.1" value="12"></label>
+            </div>
+            <label class="field"><span class="flabel">Safe withdrawal rate</span><input class="input" id="retSWR" type="number" step="0.1" value="4">
+              <span class="fhint">4% is a common US-derived starting point, not a law — a longer retirement, lower expected returns, or no pension safety net all argue for a lower rate.</span>
+            </label>
+          </div>
+
+          <div class="card">
+            <div class="panel-title">Corpus Required — By FIRE Style</div>
+            <div id="fireGrid"></div>
+            <div class="note">Future monthly expense at your target age: <b id="retFutureExpense" style="color:var(--paper);font-family:var(--font-mono);">₹0</b>. Corpus = (future annual expense) ÷ safe withdrawal rate.</div>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:18px;">
+          <div class="panel-title">Monthly SIP Required To Get There (Regular FIRE)</div>
+          <div class="result-strip">
+            <div class="stat"><div class="slabel">Years to target</div><div class="sval" id="retYears">0</div></div>
+            <div class="stat"><div class="slabel">Corpus required</div><div class="sval gold" id="retCorpusMain">₹0</div></div>
+            <div class="stat"><div class="slabel">Required monthly SIP</div><div class="sval green" id="retSIP">₹0</div></div>
+          </div>
+        </div>
+      </section>
+      <!-- ============ 10 GOAL PLANNER ============ -->
+      <section class="module" id="mod-goals">
+        <div class="mod-head">
+          <div class="mod-eyebrow"><span class="rule"></span>10 · Goals &amp; Decisions</div>
+          <h2>Goal Planner</h2>
+          <p class="mod-dek">Turns a vague ambition into a number and a monthly commitment. Every goal gets inflated to its future cost, then reverse-engineered into the SIP needed to fund it.</p>
+        </div>
+
+        <div class="card">
+          <h3>Add a Goal</h3>
+          <div class="input-row">
+            <label class="field" style="flex:2;"><span class="flabel">Goal name</span><input class="input" id="goalName" placeholder="e.g. Studio equipment fund"></label>
+            <label class="field"><span class="flabel">Cost in today's terms</span><div class="prefix-wrap"><span class="prefix">₹</span><input class="input" id="goalCost" type="number" placeholder="500000"></div></label>
+          </div>
+          <div class="input-row">
+            <label class="field"><span class="flabel">Years away</span><input class="input" id="goalYears" type="number" placeholder="3"></label>
+            <label class="field"><span class="flabel">Inflation for this goal</span><input class="input" id="goalInflation" type="number" step="0.1" value="6"></label>
+            <label class="field"><span class="flabel">Expected return while saving</span><input class="input" id="goalReturn" type="number" step="0.1" value="10"></label>
+          </div>
+          <button class="btn btn-solid" id="addGoalBtn">+ Add Goal</button>
+        </div>
+
+        <div id="goalsListWrap" style="margin-top:18px;"></div>
+      </section>
+      <!-- ============ 11 DECISION FRAMEWORK ============ -->
+      <section class="module" id="mod-decision">
+        <div class="mod-head">
+          <div class="mod-eyebrow"><span class="rule"></span>11 · Goals &amp; Decisions</div>
+          <h2>The Verdict Desk</h2>
+          <p class="mod-dek">For any "should I buy / borrow / spend this?" moment. It runs your numbers through the same checklist a disciplined CFO would, and stamps a verdict — but the reasoning underneath the stamp is what actually matters, not the stamp itself.</p>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="card">
+            <label class="field"><span class="flabel">What are you deciding on?</span><input class="input" id="decName" placeholder="e.g. New camera lens"></label>
+            <label class="field"><span class="flabel">Total cost</span><div class="prefix-wrap"><span class="prefix">₹</span><input class="input" id="decCost" type="number" placeholder="45000"></div></label>
+            <label class="field"><span class="flabel">Is this a need or a want?</span>
+              <select class="input" id="decNeedWant"><option value="want">Want — improves life, not required</option><option value="need">Need — replacing/required for income or basics</option></select>
+            </label>
+            <label class="field"><span class="flabel">Your current monthly free cash flow (income − all expenses)</span><div class="prefix-wrap"><span class="prefix">₹</span><input class="input" id="decFreeCash" type="number" placeholder="10000"></div></label>
+            <label class="field"><span class="flabel">Do you currently carry high-interest debt (credit card / personal loan)?</span>
+              <select class="input" id="decHighDebt"><option value="no">No</option><option value="yes">Yes</option></select>
+            </label>
+            <label class="field"><span class="flabel">Is your emergency fund fully in place?</span>
+              <select class="input" id="decEmergency"><option value="yes">Yes, fully funded</option><option value="partial">Partially</option><option value="no">Not really</option></select>
+            </label>
+            <button class="btn btn-solid" id="runVerdictBtn">Run the Verdict</button>
+          </div>
+
+          <div class="card">
+            <div class="stamp-wrap"><div class="stamp gold" id="verdictStamp" style="filter:url(#inkgrain);opacity:.3;"><span class="st-txt">Awaiting<br>Input</span></div></div>
+            <div id="verdictReasoning"></div>
+          </div>
+        </div>
+      </section>
+      <!-- ============ 12 SALARY / CTC ============ -->
+      <section class="module" id="mod-ctc">
+        <div class="mod-head">
+          <div class="mod-eyebrow"><span class="rule"></span>12 · Professional Income</div>
+          <h2>Salary / CTC Split</h2>
+          <p class="mod-dek">CTC is not what lands in your account. This breaks the number down to what's actually yours each month — India-specific, new vs old regime. <span style="color:var(--gold-bright);">Tax figures reflect FY 2025-26 / FY 2026-27 (AY 2026-27 / 2027-28) rules as confirmed in Union Budget 2026, as of August 2026 — always confirm current slabs before filing.</span></p>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="card">
+            <h3>CTC Structure</h3>
+            <label class="field"><span class="flabel">Annual CTC</span><div class="prefix-wrap"><span class="prefix">₹</span><input class="input" id="ctcTotal" type="number" placeholder="900000"></div></label>
+            <div class="input-row">
+              <label class="field"><span class="flabel">Basic (% of CTC)</span><input class="input" id="ctcBasicPct" type="number" value="40"></label>
+              <label class="field"><span class="flabel">HRA (% of Basic)</span><input class="input" id="ctcHRAPct" type="number" value="50"></label>
+            </div>
+            <div class="input-row">
+              <label class="field"><span class="flabel">Employer PF (% of Basic)</span><input class="input" id="ctcPFPct" type="number" value="12"></label>
+              <label class="field"><span class="flabel">City type (for HRA exemption)</span>
+                <select class="input" id="ctcCityType"><option value="metro">Metro (Delhi/Mumbai/Kolkata/Chennai)</option><option value="nonmetro">Non-metro</option></select>
+              </label>
+            </div>
+            <label class="chk-row" id="ctcPFCapToggle" style="border:none;padding-top:2px;"><span class="chk-box"></span><span class="chk-txt">Cap employer + employee PF wage at the ₹15,000/month statutory ceiling</span></label>
+            <label class="chk-row checked" id="ctcGratuityToggle" style="border:none;"><span class="chk-box"></span><span class="chk-txt">Include gratuity provision in CTC (4.81% of Basic)</span></label>
+          </div>
+
+          <div class="card">
+            <h3>Tax Regime</h3>
+            <div class="seg" id="ctcRegimeSeg">
+              <button class="active" data-regime="new">New Regime (default)</button>
+              <button data-regime="old">Old Regime</button>
+            </div>
+            <div id="ctcOldFields" style="display:none;margin-top:14px;">
+              <label class="field"><span class="flabel">Annual rent paid (for HRA exemption)</span><div class="prefix-wrap"><span class="prefix">₹</span><input class="input" id="ctcRent" type="number" placeholder="0"></div></label>
+              <div class="input-row">
+                <label class="field"><span class="flabel">Section 80C investments</span><div class="prefix-wrap"><span class="prefix">₹</span><input class="input" id="ctc80C" type="number" placeholder="0"></div></label>
+                <label class="field"><span class="flabel">Section 80D health premium</span><div class="prefix-wrap"><span class="prefix">₹</span><input class="input" id="ctc80D" type="number" placeholder="0"></div></label>
+              </div>
+              <label class="field"><span class="flabel">Age bracket</span>
+                <select class="input" id="ctcAgeBracket"><option value="below60">Below 60</option><option value="60to80">60–80 (senior)</option><option value="above80">Above 80 (super senior)</option></select>
+              </label>
+            </div>
+            <label class="field" style="margin-top:14px;"><span class="flabel">Professional tax (annual, varies by state)</span><div class="prefix-wrap"><span class="prefix">₹</span><input class="input" id="ctcProfTax" type="number" value="2400"></div></label>
+          </div>
+        </div>
+
+        <div class="card" style="margin-top:18px;">
+          <div class="panel-title">Breakdown</div>
+          <div class="tbl-wrap"><table class="tbl" id="ctcBreakupTable"><thead><tr><th>Component</th><th class="num">Annual</th><th class="num">Monthly</th></tr></thead><tbody></tbody></table></div>
+        </div>
+
+        <div class="result-strip" style="margin-top:18px;">
+          <div class="stat"><div class="slabel">Taxable Income</div><div class="sval" id="ctcTaxableIncome">₹0</div></div>
+          <div class="stat"><div class="slabel">Total Tax (incl. cess)</div><div class="sval red" id="ctcTaxTotal">₹0</div></div>
+          <div class="stat"><div class="slabel">Annual Take-Home</div><div class="sval gold" id="ctcTakeHomeAnnual">₹0</div></div>
+          <div class="stat"><div class="slabel">Monthly Take-Home</div><div class="sval green" id="ctcTakeHomeMonthly">₹0</div></div>
+        </div>
+        <div class="note">Simplifications: this assumes no other income, no employer perquisites beyond PF/gratuity, and applies marginal relief on the Section 87A rebate. Old-regime HRA exemption uses the standard least-of-three rule. It's a planning estimate — not a substitute for your Form 16 or a CA.</div>
+      </section>
+      <!-- ============ 13 FREELANCE RATE ============ -->
+      <section class="module" id="mod-freelance">
+        <div class="mod-head">
+          <div class="mod-eyebrow"><span class="rule"></span>13 · Professional Income</div>
+          <h2>Freelance Rate Calculator</h2>
+          <p class="mod-dek">Works backward from the income you actually want to keep, to the rate you need to charge — accounting for tax, overhead, and the hours that never get billed.</p>
+        </div>
+
+        <div class="grid grid-2">
+          <div class="card">
+            <label class="field"><span class="flabel">Desired annual take-home</span><div class="prefix-wrap"><span class="prefix">₹</span><input class="input" id="frTakeHome" type="number" placeholder="600000"></div></label>
+            <label class="field"><span class="flabel">Estimated effective tax rate</span><input class="input" id="frTaxRate" type="number" step="0.1" placeholder="10"></label>
+            <label class="field"><span class="flabel">Annual business expenses (software, hardware, internet, etc.)</span><div class="prefix-wrap"><span class="prefix">₹</span><input class="input" id="frExpenses" type="number" placeholder="80000"></div></label>
+          </div>
+          <div class="card">
+            <label class="field"><span class="flabel">Billable hours per week (target)</span><input class="input" id="frHoursWeek" type="number" placeholder="25"></label>
+            <label class="field"><span class="flabel">Working weeks per year</span><input class="input" id="frWeeksYear" type="number" placeholder="46"><span class="fhint">48 minus holidays/sick time/breaks.</span></label>
+            <label class="field"><span class="flabel">Non-billable time (admin, pitching, revisions)</span><input class="input" id="frNonBillable" type="number" step="1" placeholder="25"></label>
+          </div>
+        </div>
+
+        <div class="result-strip" style="margin-top:18px;">
+          <div class="stat"><div class="slabel">Required Gross Revenue</div><div class="sval gold" id="frGross">₹0</div></div>
+          <div class="stat"><div class="slabel">Billable Hours / Year</div><div class="sval" id="frBillableHours">0</div></div>
+          <div class="stat"><div class="slabel">Minimum Hourly Rate</div><div class="sval green" id="frHourly">₹0</div></div>
+          <div class="stat"><div class="slabel">Minimum Day Rate (8h)</div><div class="sval" id="frDay">₹0</div></div>
+          <div class="stat"><div class="slabel">Minimum Monthly Retainer</div><div class="sval" id="frMonthly">₹0</div></div>
+        </div>
+        <div class="note">This is your floor, not your price. Value-based pricing on a project that saves or makes the client real money can justify charging well above this number.</div>
+      </section>
+      <!-- ============ 14 FORMULA LIBRARY ============ -->
+      <section class="module" id="mod-formulas">
+        <div class="mod-head">
+          <div class="mod-eyebrow"><span class="rule"></span>14 · Reference Vault</div>
+          <h2>Formula &amp; Ratio Library</h2>
+          <p class="mod-dek">The core formulas and ratios used across this console, in one searchable place. None of these are universal laws — read the "healthy range" as a starting point, not a verdict.</p>
+        </div>
+        <div class="search-wrap"><input class="input" id="formulaSearch" placeholder="Search formulas — try 'savings', 'EMI', 'CAGR'…"></div>
+        <div class="grid grid-2" id="formulaGrid"></div>
+      </section>
+      <!-- ============ 15 PRIORITY HIERARCHY ============ -->
+      <section class="module" id="mod-priority">
+        <div class="mod-head">
+          <div class="mod-eyebrow"><span class="rule"></span>15 · Reference Vault</div>
+          <h2>Financial Priority Hierarchy</h2>
+          <p class="mod-dek">A sensible default order for where the next rupee should go. Not gospel — a medical emergency, a predatory loan, or a closing investment window can all reorder this list.</p>
+        </div>
+        <div class="card" id="priorityList"></div>
+      </section>
+
+      <!-- ============ 16 SCAM RED-FLAGS ============ -->
+      <section class="module" id="mod-scam">
+        <div class="mod-head">
+          <div class="mod-eyebrow"><span class="rule"></span>16 · Reference Vault</div>
+          <h2>Red-Flag Detector</h2>
+          <p class="mod-dek">Tick anything that applies to an offer, message, or "advisor" in front of you. This isn't a verdict machine — even one checked box is reason enough to slow down and verify independently.</p>
+        </div>
+        <div class="grid grid-2">
+          <div class="card">
+            <div id="scamChecklist"></div>
+          </div>
+          <div class="card">
+            <div class="panel-title">Risk Reading</div>
+            <div class="ring-wrap">
+              <div class="ring">
+                <svg viewBox="0 0 120 120" width="120" height="120">
+                  <circle cx="60" cy="60" r="52" fill="none" stroke="#1F2530" stroke-width="10"/>
+                  <circle id="scamRing" cx="60" cy="60" r="52" fill="none" stroke="#B5533F" stroke-width="10" stroke-linecap="round" stroke-dasharray="326.7" stroke-dashoffset="326.7"/>
+                </svg>
+                <div class="ring-num"><b id="scamRingNum">0</b><small>FLAGS</small></div>
+              </div>
+              <p id="scamVerdict" style="color:var(--paper-dim);font-size:13px;flex:1;">Check any red flags you're seeing on the left.</p>
+            </div>
+            <div class="note warn">Never share your OTP, PIN, CVV, full card number, or net-banking password with anyone — no genuine bank or investment platform will ever ask for these over call, SMS, or email.</div>
+          </div>
+        </div>
+      </section>
+
+      <!-- ============ 17 BANKING ESSENTIALS ============ -->
+      <section class="module" id="mod-banking">
+        <div class="mod-head">
+          <div class="mod-eyebrow"><span class="rule"></span>17 · Reference Vault</div>
+          <h2>Banking Essentials</h2>
+          <p class="mod-dek">Payment rails, account types, fees to watch for, how many accounts a person actually needs, and a directory of who's good for what. India-specific figures noted as of August 2026 — banks and NPCI revise these periodically, so confirm on your bank's app before relying on them.</p>
+        </div>
+        <div class="panel-title" style="margin-top:4px;">Payment Rails</div>
+        <div class="tbl-wrap" style="margin-bottom:24px;"><table class="tbl" id="railsTable"><thead><tr><th>Rail</th><th>Speed</th><th>Typical Limit</th><th>Cost</th><th>Best For</th></tr></thead><tbody></tbody></table></div>
+        <div class="panel-title">Account Types</div>
+        <div class="grid grid-2" id="acctGrid" style="margin-bottom:24px;"></div>
+        <div class="panel-title">Fees Worth Hunting Down in Your Schedule of Charges</div>
+        <div class="grid grid-3" id="feeGrid" style="margin-bottom:24px;"></div>
+
+        <div class="panel-title">How Many Accounts Does a Person Actually Need</div>
+        <p style="font-size:12.5px;color:var(--paper-dim);max-width:680px;margin:-6px 0 14px;">A general structure, not a rule — the point of separate accounts is behavioral friction between "spend," "save" and "owed to the taxman," not the number itself. Every extra account is also a recurring cost: minimum balance, KYC renewal, one more login to track.</p>
+        <div class="grid grid-2" id="acctStructureGrid" style="margin-bottom:24px;"></div>
+
+        <div class="panel-title">Bank Directory — Who's Good For What</div>
+        <p style="font-size:12.5px;color:var(--paper-dim);max-width:680px;margin:-6px 0 14px;">A general reference, not a ranking or endorsement. Coverage, fees and rates change — confirm current terms directly with the bank. Deposit insurance in India (via DICGC) covers up to ₹5,00,000 per depositor, per bank, across all accounts combined — worth knowing regardless of which bank you pick.</p>
+        <div class="seg seg-wrap" id="bankFilterSeg" style="margin-bottom:16px;">
+          <button class="active" data-cat="all">All</button>
+          <button data-cat="public">Public Sector</button>
+          <button data-cat="private">Private Sector</button>
+          <button data-cat="digital">Digital-First</button>
+          <button data-cat="coop">Cooperative &amp; Regional</button>
+          <button data-cat="intl">International &amp; Freelance Tools</button>
+        </div>
+        <div class="grid grid-2" id="bankDirectoryGrid"></div>
+      </section>
+
+      <!-- ============ 18 GLOSSARY ============ -->
+      <section class="module" id="mod-glossary">
+        <div class="mod-head">
+          <div class="mod-eyebrow"><span class="rule"></span>18 · Reference Vault</div>
+          <h2>Never Confuse This</h2>
+          <p class="mod-dek">Pairs of terms that sound related and get used interchangeably — but mean genuinely different things, and mixing them up leads to bad decisions.</p>
+        </div>
+        <div class="grid grid-2" id="glossaryGrid"></div>
+      </section>
+
+    </div>
+    <footer class="appfoot">TREASURY — a personal reference console. Not licensed financial, tax, or legal advice. Figures are planning estimates; verify current rates, slabs, and limits before acting on them.</footer>
+  </main>
+</div>
+<script>
+(function(){
+"use strict";
+
+/* ============================================================
+   UTILITIES
+============================================================ */
+function $(id){ return document.getElementById(id); }
+function num(id){ const v = parseFloat($(id).value); return isNaN(v) ? 0 : v; }
+function val(id){ return $(id).value; }
+function fmtINR(n){
+  if(n===null||n===undefined||isNaN(n)) return '₹0';
+  const neg = n<0; n=Math.round(Math.abs(n));
+  let s = n.toString();
+  let last3 = s.length>3 ? s.slice(-3) : s;
+  let rest = s.length>3 ? s.slice(0,-3) : '';
+  if(rest!=='') last3 = ','+last3;
+  rest = rest.replace(/\B(?=(\d{2})+(?!\d))/g, ',');
+  return (neg?'-':'')+'₹'+rest+last3;
+}
+function fmtNum(n,d){ d=d===undefined?0:d; if(n===null||n===undefined||isNaN(n)) return '0'; return Number(n).toLocaleString('en-IN',{maximumFractionDigits:d,minimumFractionDigits:d}); }
+function fmtPct(n,d){ d=d===undefined?1:d; if(n===null||n===undefined||isNaN(n)) return '0%'; return Number(n).toFixed(d)+'%'; }
+function uid(){ return Math.random().toString(36).slice(2,10); }
+function clamp(n,lo,hi){ return Math.max(lo,Math.min(hi,n)); }
+function el(html){ const t=document.createElement('template'); t.innerHTML=html.trim(); return t.content.firstElementChild; }
+
+/* storage helpers — personal (non-shared) JSON blobs, one key per module */
+async function storeGet(key, fallback){
+  try{
+    const r = await window.storage.get(key, false);
+    if(r && r.value){ return JSON.parse(r.value); }
+    return fallback;
+  }catch(e){ return fallback; }
+}
+async function storeSet(key, obj){
+  try{ await window.storage.set(key, JSON.stringify(obj), false); }
+  catch(e){ console.error('storage save failed', key, e); }
+}
+
+/* ============================================================
+   NAVIGATION
+============================================================ */
+const navItems = document.querySelectorAll('.nav-item');
+const modules = document.querySelectorAll('.module');
+function goTo(mod){
+  modules.forEach(m => m.classList.toggle('active', m.id === 'mod-'+mod));
+  navItems.forEach(b => b.classList.toggle('active', b.dataset.mod === mod));
+  const active = document.querySelector('.nav-item.active');
+  $('mobileTitle').textContent = active ? active.textContent.replace(/^\d+/,'').trim() : '';
+  window.scrollTo(0,0);
+  closeSidebar();
+}
+navItems.forEach(btn => btn.addEventListener('click', () => goTo(btn.dataset.mod)));
+
+function openSidebar(){ $('sidebar').classList.add('open'); $('scrim').classList.add('show'); }
+function closeSidebar(){ $('sidebar').classList.remove('open'); $('scrim').classList.remove('show'); }
+const menuBtn = document.getElementById('menuBtn');
+if(menuBtn) menuBtn.addEventListener('click', openSidebar);
+document.getElementById('scrim').addEventListener('click', closeSidebar);
+
+/* generic checkbox-row toggler: any element with class chk-row toggles .checked on click */
+document.addEventListener('click', function(e){
+  const row = e.target.closest('.chk-row');
+  if(row && row.dataset.wired !== 'custom'){
+    row.classList.toggle('checked');
+  }
+});
+
+/* generic segmented control wiring: buttons inside a .seg toggle .active among siblings */
+function wireSeg(container, cb){
+  container.querySelectorAll('button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      container.querySelectorAll('button').forEach(b=>b.classList.remove('active'));
+      btn.classList.add('active');
+      cb(btn);
+    });
+  });
+}
+
+/* ============================================================
+   02 — INCOME & BUDGET
+============================================================ */
+let budgetData = { incomes: [], expenses: [], method: '502030' };
+
+function budgetMonthlyIncome(){
+  return budgetData.incomes.reduce((s,i)=> s + (i.freq==='annual' ? i.amt/12 : i.amt), 0);
+}
+function budgetMonthlyExpense(){
+  return budgetData.expenses.reduce((s,e)=> s + e.amt, 0);
+}
+function budgetCategoryTotal(cat){
+  return budgetData.expenses.filter(e=>e.cat===cat).reduce((s,e)=> s + e.amt, 0);
+}
+
+function renderIncomeList(){
+  const wrap = $('incomeList');
+  wrap.innerHTML='';
+  if(budgetData.incomes.length===0){ wrap.appendChild(el('<div class="empty-state">No income sources yet.</div>')); }
+  budgetData.incomes.forEach(i=>{
+    const monthly = i.freq==='annual' ? i.amt/12 : i.amt;
+    const row = el(`<div class="entry-row"><span class="en">${escapeHtml(i.name)}</span><span class="ec">${i.freq}</span><span class="ev">${fmtINR(monthly)}/mo</span><button class="rm-row" title="remove">✕</button></div>`);
+    row.querySelector('.rm-row').addEventListener('click', ()=>{ budgetData.incomes = budgetData.incomes.filter(x=>x.id!==i.id); saveBudget(); renderBudget(); });
+    wrap.appendChild(row);
+  });
+  $('incomeTotalDisplay').textContent = fmtINR(budgetMonthlyIncome());
+}
+function renderExpenseList(){
+  const wrap = $('expenseList');
+  wrap.innerHTML='';
+  if(budgetData.expenses.length===0){ wrap.appendChild(el('<div class="empty-state">No expenses logged yet.</div>')); }
+  const catLabel = {essential:'Essential', discretionary:'Discretionary', debt:'Debt', savings:'Savings'};
+  budgetData.expenses.forEach(e=>{
+    const row = el(`<div class="entry-row"><span class="en">${escapeHtml(e.name)}</span><span class="ec">${catLabel[e.cat]||e.cat}</span><span class="ev">${fmtINR(e.amt)}</span><button class="rm-row" title="remove">✕</button></div>`);
+    row.querySelector('.rm-row').addEventListener('click', ()=>{ budgetData.expenses = budgetData.expenses.filter(x=>x.id!==e.id); saveBudget(); renderBudget(); });
+    wrap.appendChild(row);
+  });
+  $('expenseTotalDisplay').textContent = fmtINR(budgetMonthlyExpense());
+}
+
+const BUDGET_METHODS = {
+  '502030': { label:'50/30/20', explain:"50% of income to needs, 30% to wants, 20% to savings and extra debt repayment. Built for stable, moderate-to-comfortable incomes — it gets harder to hit in high cost-of-living cities on a single income.",
+    buckets:[ {name:'Essential (needs)', actual:()=>budgetCategoryTotal('essential'), target:50},
+              {name:'Discretionary (wants)', actual:()=>budgetCategoryTotal('discretionary'), target:30},
+              {name:'Savings + Debt', actual:()=>budgetCategoryTotal('savings')+budgetCategoryTotal('debt'), target:20} ] },
+  '702010': { label:'70/20/10', explain:"70% for all living costs, 20% to savings, 10% to debt paydown or giving. More breathing room for day-to-day spending, less enforced savings discipline — suits lower-pressure budgets or early-career income.",
+    buckets:[ {name:'Living Expenses', actual:()=>budgetCategoryTotal('essential')+budgetCategoryTotal('discretionary'), target:70},
+              {name:'Savings', actual:()=>budgetCategoryTotal('savings'), target:20},
+              {name:'Debt / Giving', actual:()=>budgetCategoryTotal('debt'), target:10} ] },
+  'zero': { label:'Zero-Based', explain:"Every rupee of income gets assigned a job — spending, saving or debt — until nothing is left unaccounted for. Forces intentionality; time-consuming to maintain if income or expenses are irregular.",
+    buckets:null },
+  'payfirst': { label:'Pay-Yourself-First', explain:"Savings gets taken off the top — before anything else is spent — typically 20%. Everything else is flexible around what's left. Works well for irregular income where you save the moment money arrives, rather than hoping there's something left at month-end.",
+    buckets:[ {name:'Savings (taken first)', actual:()=>budgetCategoryTotal('savings'), target:20} ] }
+};
+
+function renderBudgetBars(){
+  const income = budgetMonthlyIncome();
+  const method = BUDGET_METHODS[budgetData.method];
+  $('budgetMethodExplain').textContent = method.explain;
+  const wrap = $('budgetBars');
+  wrap.innerHTML='';
+  if(income<=0){ wrap.appendChild(el('<div class="empty-state">Add income to compare against a budgeting method.</div>')); return; }
+
+  if(budgetData.method==='zero'){
+    const totalExp = budgetMonthlyExpense();
+    const unallocated = income - totalExp;
+    ['essential','discretionary','debt','savings'].forEach(cat=>{
+      const amt = budgetCategoryTotal(cat);
+      const pct = income>0 ? (amt/income*100) : 0;
+      wrap.appendChild(buildBarRow(cat[0].toUpperCase()+cat.slice(1), amt, pct, null));
+    });
+    const note = el(`<div class="note ${Math.abs(unallocated)<1 ? 'good':'warn'}">Unallocated: <b>${fmtINR(unallocated)}</b> — zero-based budgeting means this should land at ₹0.</div>`);
+    wrap.appendChild(note);
+    return;
+  }
+
+  method.buckets.forEach(b=>{
+    const amt = b.actual();
+    const actualPct = income>0 ? (amt/income*100) : 0;
+    wrap.appendChild(buildBarRow(b.name, amt, actualPct, b.target, income));
+  });
+}
+function buildBarRow(name, amt, actualPct, targetPct, income){
+  const targetAmt = targetPct!==null && income ? income*targetPct/100 : null;
+  const over = targetPct!==null && actualPct>targetPct;
+  const width = targetPct ? clamp(actualPct/targetPct*100,0,100) : clamp(actualPct,0,100);
+  const row = el(`<div style="margin-bottom:16px;">
+    <div style="display:flex;justify-content:space-between;font-size:12.5px;margin-bottom:6px;">
+      <span style="color:var(--paper-dim);">${name}</span>
+      <span style="font-family:var(--font-mono);color:${over?'var(--rust-bright)':'var(--paper)'};">${fmtINR(amt)} (${fmtPct(actualPct)})${targetPct!==null?` <span style="color:var(--paper-faint);">/ target ${targetPct}% · ${fmtINR(targetAmt)}</span>`:''}</span>
+    </div>
+    <div class="bar ${over?'red':'green'}"><i style="width:${width}%"></i></div>
+  </div>`);
+  return row;
+}
+
+function saveBudget(){ storeSet('treasury-budget-v1', budgetData); }
+function renderBudget(){
+  renderIncomeList(); renderExpenseList(); renderBudgetBars();
+  const inc = budgetMonthlyIncome(), exp = budgetMonthlyExpense(), sav = inc-exp, rate = inc>0? (sav/inc*100):0;
+  $('budgetIncomeTotal').textContent = fmtINR(inc);
+  $('budgetExpenseTotal').textContent = fmtINR(exp);
+  $('budgetSavings').textContent = fmtINR(sav);
+  $('budgetSavingsRate').textContent = fmtPct(rate);
+  refreshDashboard();
+}
+function escapeHtml(s){ const d=document.createElement('div'); d.textContent=s; return d.innerHTML; }
+
+$('addIncomeBtn').addEventListener('click', ()=>{
+  const name=val('incName').trim(); const amt=num('incAmt'); const freq=val('incFreq');
+  if(!name || amt<=0) return;
+  budgetData.incomes.push({id:uid(), name, amt, freq});
+  $('incName').value=''; $('incAmt').value='';
+  saveBudget(); renderBudget();
+});
+$('addExpenseBtn').addEventListener('click', ()=>{
+  const name=val('expName').trim(); const amt=num('expAmt'); const cat=val('expCategory');
+  if(!name || amt<=0) return;
+  budgetData.expenses.push({id:uid(), name, amt, cat});
+  $('expName').value=''; $('expAmt').value='';
+  saveBudget(); renderBudget();
+});
+wireSeg($('budgetMethodSeg'), (btn)=>{ budgetData.method = btn.dataset.method; saveBudget(); renderBudgetBars(); });
+
+/* ============================================================
+   03 — NET WORTH LEDGER
+============================================================ */
+let networthData = { assets: [], liabilities: [], history: [] };
+
+function nwTotals(){
+  const assets = networthData.assets.reduce((s,a)=>s+a.val,0);
+  const liabs = networthData.liabilities.reduce((s,l)=>s+l.val,0);
+  const liquid = networthData.assets.filter(a=>a.cat==='cash'||a.cat==='investments').reduce((s,a)=>s+a.val,0);
+  return { assets, liabs, net: assets-liabs, liquid };
+}
+function renderAssetList(){
+  const wrap=$('assetList'); wrap.innerHTML='';
+  if(networthData.assets.length===0){ wrap.appendChild(el('<div class="empty-state">No assets added yet.</div>')); }
+  const catLabel={cash:'Cash/Bank',investments:'Investments',retirement:'Retirement',gold:'Gold',property:'Property',business:'Business',other:'Other'};
+  networthData.assets.forEach(a=>{
+    const row=el(`<div class="entry-row"><span class="en">${escapeHtml(a.name)}</span><span class="ec">${catLabel[a.cat]||a.cat}</span><span class="ev">${fmtINR(a.val)}</span><button class="rm-row">✕</button></div>`);
+    row.querySelector('.rm-row').addEventListener('click',()=>{ networthData.assets=networthData.assets.filter(x=>x.id!==a.id); saveNW(); renderNetWorth(); });
+    wrap.appendChild(row);
+  });
+  $('assetTotalDisplay').textContent = fmtINR(nwTotals().assets);
+}
+function renderLiabList(){
+  const wrap=$('liabList'); wrap.innerHTML='';
+  if(networthData.liabilities.length===0){ wrap.appendChild(el('<div class="empty-state">No liabilities added yet.</div>')); }
+  const catLabel={loan:'Loan',creditcard:'Credit Card',other:'Other'};
+  networthData.liabilities.forEach(l=>{
+    const row=el(`<div class="entry-row"><span class="en">${escapeHtml(l.name)}</span><span class="ec">${catLabel[l.cat]||l.cat}</span><span class="ev">${fmtINR(l.val)}</span><button class="rm-row">✕</button></div>`);
+    row.querySelector('.rm-row').addEventListener('click',()=>{ networthData.liabilities=networthData.liabilities.filter(x=>x.id!==l.id); saveNW(); renderNetWorth(); });
+    wrap.appendChild(row);
+  });
+  $('liabTotalDisplay').textContent = fmtINR(nwTotals().liabs);
+}
+function renderNWHistory(){
+  const wrap=$('nwHistoryWrap');
+  if(networthData.history.length===0){ wrap.innerHTML=''; return; }
+  let rows = networthData.history.slice().reverse().map(h=>`<tr><td>${h.date}</td><td class="num">${fmtINR(h.assets)}</td><td class="num">${fmtINR(h.liabs)}</td><td class="num">${fmtINR(h.net)}</td></tr>`).join('');
+  wrap.innerHTML = `<table class="tbl"><thead><tr><th>Date</th><th class="num">Assets</th><th class="num">Liabilities</th><th class="num">Net Worth</th></tr></thead><tbody>${rows}</tbody></table>`;
+}
+function drawLineChart(container, points){
+  container.innerHTML='';
+  if(!points || points.length<2){
+    container.appendChild(el(`<div class="empty-state">${points && points.length===1 ? 'One snapshot saved — add another to see a trend.' : 'Not enough data yet.'}</div>`));
+    return;
+  }
+  const w=560,h=170,pad=28;
+  const vals = points.map(p=>p.value);
+  let min=Math.min(...vals,0), max=Math.max(...vals,1);
+  if(min===max){ min-=1; max+=1; }
+  const xStep = (w-pad*2)/(points.length-1);
+  const yFor = v => h-pad - ( (v-min)/(max-min) )*(h-pad*2);
+  const xFor = i => pad + i*xStep;
+  let path = points.map((p,i)=> (i===0?'M':'L')+xFor(i).toFixed(1)+','+yFor(p.value).toFixed(1)).join(' ');
+  let areaPath = path + ` L${xFor(points.length-1).toFixed(1)},${h-pad} L${xFor(0).toFixed(1)},${h-pad} Z`;
+  const dots = points.map((p,i)=>`<circle cx="${xFor(i).toFixed(1)}" cy="${yFor(p.value).toFixed(1)}" r="3" fill="#E8C368"/>`).join('');
+  const labels = points.map((p,i)=>{
+    if(points.length>6 && i%Math.ceil(points.length/6)!==0 && i!==points.length-1) return '';
+    return `<text x="${xFor(i).toFixed(1)}" y="${h-6}" font-size="9" fill="#5B6270" text-anchor="middle" font-family="IBM Plex Mono">${p.label}</text>`;
+  }).join('');
+  const svg = `<svg viewBox="0 0 ${w} ${h}" preserveAspectRatio="none">
+    <line x1="${pad}" y1="${h-pad}" x2="${w-pad}" y2="${h-pad}" stroke="#262C38" stroke-width="1"/>
+    <path d="${areaPath}" fill="rgba(199,160,69,0.08)" stroke="none"/>
+    <path d="${path}" fill="none" stroke="#C7A045" stroke-width="1.6"/>
+    ${dots}${labels}
+  </svg>`;
+  container.innerHTML = svg;
+}
+function saveNW(){ storeSet('treasury-networth-v1', networthData); }
+function renderNetWorth(){
+  renderAssetList(); renderLiabList(); renderNWHistory();
+  const t = nwTotals();
+  $('nwAssets').textContent = fmtINR(t.assets);
+  $('nwLiabs').textContent = fmtINR(t.liabs);
+  $('nwNet').textContent = fmtINR(t.net);
+  $('nwDTA').textContent = t.assets>0 ? fmtPct(t.liabs/t.assets*100) : '0%';
+  $('nwLiquidity').textContent = t.assets>0 ? fmtPct(t.liquid/t.assets*100) : '0%';
+  drawLineChart($('nwChart'), networthData.history.map(h=>({label:h.date.slice(5), value:h.net})));
+  refreshDashboard();
+}
+$('addAssetBtn').addEventListener('click', ()=>{
+  const name=val('assetName').trim(), v=num('assetVal'), cat=val('assetCategory');
+  if(!name||v<=0) return;
+  networthData.assets.push({id:uid(),name,val:v,cat});
+  $('assetName').value=''; $('assetVal').value='';
+  saveNW(); renderNetWorth();
+});
+$('addLiabBtn').addEventListener('click', ()=>{
+  const name=val('liabName').trim(), v=num('liabVal'), cat=val('liabCategory');
+  if(!name||v<=0) return;
+  networthData.liabilities.push({id:uid(),name,val:v,cat});
+  $('liabName').value=''; $('liabVal').value='';
+  saveNW(); renderNetWorth();
+});
+$('saveSnapshotBtn').addEventListener('click', ()=>{
+  const t=nwTotals();
+  const date = new Date().toISOString().slice(0,10);
+  const existingIdx = networthData.history.findIndex(h=>h.date===date);
+  const entry = {date, assets:t.assets, liabs:t.liabs, net:t.net};
+  if(existingIdx>=0) networthData.history[existingIdx]=entry; else networthData.history.push(entry);
+  saveNW(); renderNetWorth();
+});
+
+/* ============================================================
+   04 — EMERGENCY FUND
+============================================================ */
+let emergencyData = { expenses:0, stability:'stable', dependents:0, existing:0 };
+
+function computeEF(){
+  const exp = emergencyData.expenses;
+  const stabilityAdd = { stable:0, somewhat:1.5, variable:3 }[emergencyData.stability] || 0;
+  const depAdd = Math.min(emergencyData.dependents,4) * 1;
+  const months = 3 + stabilityAdd + depAdd;
+  const target = exp*months;
+  const currentMonths = exp>0 ? emergencyData.existing/exp : 0;
+  const gap = Math.max(0, target - emergencyData.existing);
+  return {months, target, currentMonths, gap, exp};
+}
+function saveEF(){ storeSet('treasury-emergency-v1', emergencyData); }
+function renderEF(){
+  ['efExpenses','efStability','efDependents','efExisting'].forEach(id=>{
+    const map = {efExpenses:'expenses', efStability:'stability', efDependents:'dependents', efExisting:'existing'};
+    const k = map[id];
+    if(id==='efStability') $(id).value = emergencyData[k];
+    else $(id).value = emergencyData[k] || '';
+  });
+  const r = computeEF();
+  $('efMonths').textContent = r.months.toFixed(1)+' months';
+  $('efMonthsWhy').textContent = `Base 3 + stability/dependents adjustments`;
+  $('efTarget').textContent = fmtINR(r.target);
+  $('efCurrentMonths').textContent = r.currentMonths.toFixed(1)+' months';
+  $('efBar').style.width = clamp(r.target>0 ? (emergencyData.existing/r.target*100) : 0,0,100)+'%';
+  $('efGap').textContent = fmtINR(r.gap);
+  refreshDashboard();
+}
+['efExpenses','efStability','efDependents','efExisting'].forEach(id=>{
+  $(id).addEventListener('input', ()=>{
+    emergencyData.expenses = num('efExpenses');
+    emergencyData.stability = val('efStability');
+    emergencyData.dependents = num('efDependents');
+    emergencyData.existing = num('efExisting');
+    saveEF(); renderEF();
+  });
+});
+
+/* ============================================================
+   01 — DASHBOARD (reads from budget / net worth / emergency / goals)
+============================================================ */
+function refreshDashboard(){
+  const inc = budgetMonthlyIncome(), exp = budgetMonthlyExpense();
+  const savRate = inc>0 ? ((inc-exp)/inc*100) : null;
+  const t = nwTotals();
+  const ef = computeEF();
+  const goalCount = goalsData.goals.length;
+
+  // --- headline stats
+  $('dashNetWorth').textContent = t.assets>0||t.liabs>0 ? fmtINR(t.net) : '—';
+  $('dashNetWorthSub').textContent = t.assets>0||t.liabs>0 ? `${fmtINR(t.assets)} assets − ${fmtINR(t.liabs)} liabilities` : 'not entered yet';
+  $('dashSavingsRate').textContent = savRate!==null ? fmtPct(savRate) : '—';
+  $('dashSavingsRate').className = 'sval ' + (savRate!==null && savRate<10 ? 'red' : '');
+  $('dashSavingsRateSub').textContent = savRate!==null ? `${fmtINR(inc-exp)} saved / month` : 'not entered yet';
+  $('dashEmergency').textContent = ef.exp>0 ? ef.currentMonths.toFixed(1)+' / '+ef.months.toFixed(1)+' mo' : '—';
+  $('dashEmergencySub').textContent = ef.exp>0 ? (ef.gap>0 ? fmtINR(ef.gap)+' short of target' : 'fully funded') : 'not entered yet';
+  $('dashGoals').textContent = goalCount || '—';
+  $('dashGoalsSub').textContent = goalCount ? 'tracked in Goal Planner' : 'none set';
+
+  // --- net worth trend (mirrors Net Worth Ledger chart)
+  drawLineChart($('dashChart'), networthData.history.map(h=>({label:h.date.slice(5), value:h.net})));
+
+  // --- health score: average of 4 sub-scores, each 0-100
+  const hasAnyData = inc>0 || t.assets>0 || t.liabs>0 || ef.exp>0;
+  if(!hasAnyData){
+    $('healthScoreNum').textContent='—';
+    $('healthScoreWord').textContent='Add data across the Cash Flow modules to generate a score.';
+    $('healthRing').style.strokeDashoffset = 326.7;
+    $('healthBreakdown').innerHTML='';
+  } else {
+    const savScore = savRate===null ? 50 : clamp(savRate<=0?0: savRate<10? savRate/10*40 : savRate<20? 40+(savRate-10)/10*30 : savRate<30? 70+(savRate-20)/10*30 :100,0,100);
+    const efScore = ef.months>0 ? clamp(ef.currentMonths/ef.months*100,0,100) : 50;
+    const dtaScore = t.assets>0 ? clamp(100-(t.liabs/t.assets*100)*2,0,100) : 50;
+    const liqScore = t.assets>0 ? clamp(t.liquid/t.assets*100/60*100,0,100) : 50;
+    const score = Math.round((savScore+efScore+dtaScore+liqScore)/4);
+    const circumference = 326.7;
+    $('healthRing').style.strokeDashoffset = circumference*(1-score/100);
+    $('healthRing').style.stroke = score>=70?'#4FBE93':score>=40?'#C7A045':'#B5533F';
+    $('healthScoreNum').textContent = score;
+    $('healthScoreWord').textContent = score>=70 ? 'Solid footing across the board.' : score>=40 ? 'Workable, with clear room to firm up.' : 'A few structural gaps worth prioritizing.';
+    $('healthBreakdown').innerHTML = `Savings rate — ${Math.round(savScore)}<br>Emergency cover — ${Math.round(efScore)}<br>Debt-to-asset — ${Math.round(dtaScore)}<br>Liquidity mix — ${Math.round(liqScore)}`;
+  }
+
+  // --- action items
+  const actions = [];
+  if(inc<=0) actions.push('Add your income sources in <b>Income &amp; Budget</b> — nothing else on this deck can calculate without it.');
+  if(t.assets<=0 && t.liabs<=0) actions.push('Log your assets and liabilities in the <b>Net Worth Ledger</b> to see where you actually stand.');
+  if(ef.exp>0 && ef.gap>0) actions.push(`Your emergency reserve is short by <b>${fmtINR(ef.gap)}</b> — see the Emergency Reserve module.`);
+  if(savRate!==null && savRate<10) actions.push('Your savings rate is under 10% — worth a look at the Budget module method comparison.');
+  if(goalCount===0) actions.push('No goals tracked yet — the Goal Planner turns a vague ambition into a monthly number.');
+  const wrap = $('dashActions');
+  wrap.innerHTML='';
+  if(actions.length===0){ wrap.appendChild(el('<div class="empty-state">Nothing urgent — the basics are in place.</div>')); }
+  actions.forEach(a=> wrap.appendChild(el(`<div class="note">${a}</div>`)) );
+}
+
+/* ============================================================
+   05 — LOAN / EMI
+============================================================ */
+function amortize(principal, annualRatePct, months){
+  const r = annualRatePct/1200;
+  if(months<=0 || principal<=0) return {emi:0, rows:[]};
+  const emi = r===0 ? principal/months : principal*r*Math.pow(1+r,months)/(Math.pow(1+r,months)-1);
+  let balance = principal, rows=[];
+  for(let m=1;m<=months;m++){
+    const interest = balance*r;
+    let pr = emi-interest;
+    if(pr>balance) pr=balance;
+    balance -= pr;
+    rows.push({month:m, interest, principal:pr, balance:Math.max(balance,0)});
+    if(balance<=0.5) break;
+  }
+  return {emi, rows};
+}
+function amortizeWithPrepay(principal, annualRatePct, months, prepayAmt, prepayMonth, mode){
+  const r = annualRatePct/1200;
+  const emi0 = r===0 ? principal/months : principal*r*Math.pow(1+r,months)/(Math.pow(1+r,months)-1);
+  let balance = principal, rows=[], emi=emi0;
+  for(let m=1;m<=months;m++){
+    if(balance<=0.5) break;
+    const interest = balance*r;
+    let pr = emi-interest;
+    if(pr>balance) pr=balance;
+    balance -= pr;
+    if(prepayAmt>0 && m===prepayMonth){
+      balance = Math.max(0, balance-prepayAmt);
+      const remaining = months-m;
+      if(mode==='emi' && remaining>0 && balance>0){
+        emi = r===0 ? balance/remaining : balance*r*Math.pow(1+r,remaining)/(Math.pow(1+r,remaining)-1);
+      }
+    }
+    rows.push({month:m, interest, principal:pr, balance});
+  }
+  return {emi:emi0, finalEmi:emi, rows};
+}
+function yearlySummary(rows){
+  const years=[];
+  for(let i=0;i<rows.length;i+=12){
+    const slice = rows.slice(i,i+12);
+    years.push({
+      year: Math.floor(i/12)+1,
+      principal: slice.reduce((s,r)=>s+r.principal,0),
+      interest: slice.reduce((s,r)=>s+r.interest,0),
+      balance: slice[slice.length-1].balance
+    });
+  }
+  return years;
+}
+let showMonthlyView = false;
+function renderLoan(){
+  const P = num('loanPrincipal'), rate = num('loanRate'), tenureYears = num('loanTenure'), fee = num('loanFee');
+  const months = Math.round(tenureYears*12);
+  const {emi, rows} = amortize(P, rate, months);
+  const totalPaid = rows.reduce((s,r)=>s+r.principal+r.interest,0);
+  const totalInterest = rows.reduce((s,r)=>s+r.interest,0);
+  const feeAmt = P*fee/100;
+  $('loanEMI').textContent = fmtINR(emi);
+  $('loanInterest').textContent = fmtINR(totalInterest);
+  $('loanTotal').textContent = fmtINR(totalPaid);
+  $('loanEffective').textContent = fmtINR(totalPaid+feeAmt);
+
+  // amortization table
+  const wrap = $('amortWrap');
+  if(showMonthlyView){
+    const first12 = rows.slice(0,12);
+    wrap.innerHTML = `<table class="tbl"><thead><tr><th>Month</th><th class="num">Principal</th><th class="num">Interest</th><th class="num">Balance</th></tr></thead><tbody>${
+      first12.map(r=>`<tr><td>${r.month}</td><td class="num">${fmtINR(r.principal)}</td><td class="num">${fmtINR(r.interest)}</td><td class="num">${fmtINR(r.balance)}</td></tr>`).join('')
+    }</tbody></table>`;
+  } else {
+    const ys = yearlySummary(rows);
+    wrap.innerHTML = `<table class="tbl"><thead><tr><th>Year</th><th class="num">Principal Paid</th><th class="num">Interest Paid</th><th class="num">Balance Remaining</th></tr></thead><tbody>${
+      ys.map(y=>`<tr><td>Year ${y.year}</td><td class="num">${fmtINR(y.principal)}</td><td class="num">${fmtINR(y.interest)}</td><td class="num">${fmtINR(y.balance)}</td></tr>`).join('')
+    }</tbody></table>`;
+  }
+
+  // prepayment impact
+  const prepayAmt = num('loanPrepayAmt'), prepayMonth = Math.round(num('loanPrepayMonth')), prepayMode = val('loanPrepayMode');
+  if(prepayAmt>0 && prepayMonth>0 && prepayMonth<months){
+    const withPre = amortizeWithPrepay(P, rate, months, prepayAmt, prepayMonth, prepayMode);
+    const newInterest = withPre.rows.reduce((s,r)=>s+r.interest,0);
+    const newMonths = withPre.rows.length;
+    $('loanPrepayResult').style.display='block';
+    const body = $('loanPrepayBody');
+    body.innerHTML='';
+    if(prepayMode==='tenure'){
+      body.innerHTML = `<div class="stat"><div class="slabel">Tenure Reduced By</div><div class="sval gold">${months-newMonths} months</div></div>
+        <div class="stat"><div class="slabel">Interest Saved</div><div class="sval green">${fmtINR(totalInterest-newInterest)}</div></div>
+        <div class="stat"><div class="slabel">New Payoff</div><div class="sval">Month ${newMonths}</div></div>`;
+    } else {
+      body.innerHTML = `<div class="stat"><div class="slabel">EMI Reduced To</div><div class="sval gold">${fmtINR(withPre.finalEmi)}</div></div>
+        <div class="stat"><div class="slabel">Interest Saved</div><div class="sval green">${fmtINR(totalInterest-newInterest)}</div></div>
+        <div class="stat"><div class="slabel">Tenure</div><div class="sval">Unchanged — ${months} months</div></div>`;
+    }
+  } else {
+    $('loanPrepayResult').style.display='none';
+  }
+
+  // comparator
+  if($('loanBCard').style.display!=='none'){
+    const PB=num('loanBPrincipal'), rB=num('loanBRate'), tB=num('loanBTenure'), feeB=num('loanBFee');
+    const mB = Math.round(tB*12);
+    const resB = amortize(PB, rB, mB);
+    const totalB = resB.rows.reduce((s,r)=>s+r.principal+r.interest,0);
+    const feeAmtB = PB*feeB/100;
+    $('loanCompareResult').style.display='block';
+    $('loanCompareBody').innerHTML = `<div class="result-strip">
+      <div class="stat"><div class="slabel">Loan A — EMI</div><div class="sval">${fmtINR(emi)}</div><div class="ssub">Total cost ${fmtINR(totalPaid+feeAmt)}</div></div>
+      <div class="stat"><div class="slabel">Loan B — EMI</div><div class="sval">${fmtINR(resB.emi)}</div><div class="ssub">Total cost ${fmtINR(totalB+feeAmtB)}</div></div>
+      <div class="stat"><div class="slabel">Cheaper Overall</div><div class="sval ${ (totalPaid+feeAmt) < (totalB+feeAmtB) ? 'green':'gold'}">${ (totalPaid+feeAmt) < (totalB+feeAmtB) ? 'Loan A' : 'Loan B'}</div><div class="ssub">by ${fmtINR(Math.abs((totalPaid+feeAmt)-(totalB+feeAmtB)))}</div></div>
+    </div>`;
+  } else {
+    $('loanCompareResult').style.display='none';
+  }
+}
+['loanPrincipal','loanRate','loanTenure','loanFee','loanPrepayAmt','loanPrepayMonth','loanPrepayMode',
+ 'loanBPrincipal','loanBRate','loanBTenure','loanBFee'].forEach(id=>{
+  const elx = $(id);
+  elx.addEventListener('input', renderLoan);
+  elx.addEventListener('change', renderLoan);
+});
+$('compareToggle').addEventListener('click', ()=>{
+  const show = $('loanBCard').style.display==='none';
+  $('loanBCard').style.display = show ? 'block' : 'none';
+  renderLoan();
+});
+$('toggleMonthlyBtn').addEventListener('click', ()=>{
+  showMonthlyView = !showMonthlyView;
+  $('toggleMonthlyBtn').textContent = showMonthlyView ? 'Show yearly summary' : 'Show first 12 months';
+  renderLoan();
+});
+
+/* ============================================================
+   06 — CREDIT CARD COST
+============================================================ */
+function simulateCardMinDue(balance, aprPct, minPct){
+  const r = aprPct/1200;
+  let bal=balance, totalInterest=0, months=0;
+  const minFloor = Math.min(500, balance);
+  while(bal>1 && months<1200){
+    const interest = bal*r;
+    let payment = Math.max(bal*minPct/100, minFloor);
+    payment = Math.min(payment, bal+interest);
+    const newBal = bal + interest - payment;
+    if(newBal >= bal - 0.01){ return {trap:true}; }
+    bal = newBal; totalInterest += interest; months++;
+  }
+  return {trap:false, months, totalInterest, totalPaid: balance+totalInterest};
+}
+function simulateCardFixed(balance, aprPct, fixedPay){
+  const r = aprPct/1200;
+  let bal=balance, totalInterest=0, months=0;
+  while(bal>1 && months<1200){
+    const interest = bal*r;
+    if(fixedPay <= interest){ return {trap:true}; }
+    const payment = Math.min(fixedPay, bal+interest);
+    bal = bal + interest - payment;
+    totalInterest += interest; months++;
+  }
+  return {trap:false, months, totalInterest, totalPaid: balance+totalInterest};
+}
+function fmtMonths(m){
+  if(m===undefined||m===null) return '—';
+  const y = Math.floor(m/12), mm = m%12;
+  if(y===0) return mm+' mo';
+  return y+'y '+mm+'mo';
+}
+function renderCreditCard(){
+  const bal = num('ccBalance'), apr = num('ccAPR'), minPct = num('ccMinPct'), fixed = num('ccFixedPay');
+  const minRes = simulateCardMinDue(bal, apr, minPct);
+  const fixRes = simulateCardFixed(bal, apr, fixed);
+
+  if(minRes.trap){
+    $('ccMinMonths').textContent='Never clears';
+    $('ccMinInterest').textContent='—';
+    $('ccMinTotal').textContent='—';
+  } else {
+    $('ccMinMonths').textContent = fmtMonths(minRes.months);
+    $('ccMinInterest').textContent = fmtINR(minRes.totalInterest);
+    $('ccMinTotal').textContent = fmtINR(minRes.totalPaid);
+  }
+  if(fixRes.trap){
+    $('ccFixMonths').textContent='Never clears';
+    $('ccFixInterest').textContent='—';
+    $('ccSaved').textContent='—';
+  } else {
+    $('ccFixMonths').textContent = fmtMonths(fixRes.months);
+    $('ccFixInterest').textContent = fmtINR(fixRes.totalInterest);
+    $('ccSaved').textContent = (!minRes.trap) ? fmtINR(minRes.totalInterest - fixRes.totalInterest) : 'not comparable — min-due path never clears';
+  }
+  let warn = '';
+  if(minRes.trap){
+    warn = `At a ${minPct}% minimum due on a ${apr}% APR card, the payment barely covers interest — the balance will not shrink. This is the minimum-due trap: you stay "current" while owing roughly the same amount indefinitely.`;
+  } else if(!minRes.trap){
+    warn = `Paying only the minimum due clears this balance in ${fmtMonths(minRes.months)} and costs ${fmtINR(minRes.totalInterest)} in interest — often more than the original balance itself.`;
+  }
+  $('ccWarnNote').textContent = warn;
+}
+['ccBalance','ccAPR','ccMinPct','ccFixedPay'].forEach(id=> $(id).addEventListener('input', renderCreditCard));
+
+/* ============================================================
+   07 — COMPOUNDING & SIP
+============================================================ */
+let compMode = 'lumpsum';
+function simulateGrowth({lumpsum=0, sipMonthly=0, annualReturn, years, stepUpPct=0}){
+  const i = annualReturn/1200;
+  const totalMonths = Math.round(years*12);
+  let balance = lumpsum, invested = lumpsum, currentSip = sipMonthly;
+  for(let m=1;m<=totalMonths;m++){
+    balance = (balance+currentSip)*(1+i);
+    invested += currentSip;
+    if(m%12===0) currentSip = currentSip*(1+stepUpPct/100);
+  }
+  return {fv:balance, invested};
+}
+function renderCompound(){
+  const lump = compMode!=='sip' ? num('compLump') : 0;
+  const sip = compMode!=='lumpsum' ? num('compSip') : 0;
+  const annualReturn = num('compReturn'), years = num('compYears');
+  const stepUp = compMode!=='lumpsum' ? num('compStepUp') : 0;
+  const inflation = num('compInflation');
+  const {fv, invested} = simulateGrowth({lumpsum:lump, sipMonthly:sip, annualReturn, years, stepUpPct:stepUp});
+  const gains = fv-invested;
+  const real = fv/Math.pow(1+inflation/100, years);
+  $('compFV').textContent = fmtINR(fv);
+  $('compInvested').textContent = fmtINR(invested);
+  $('compGains').textContent = fmtINR(gains);
+  $('compReal').textContent = fmtINR(real);
+}
+wireSeg($('compModeSeg'), (btn)=>{
+  compMode = btn.dataset.mode;
+  $('compLumpFields').style.display = compMode==='sip' ? 'none' : 'block';
+  $('compSipFields').style.display = compMode==='lumpsum' ? 'none' : 'block';
+  $('compStepUpWrap').style.display = compMode==='lumpsum' ? 'none' : 'block';
+  renderCompound();
+});
+['compLump','compSip','compReturn','compYears','compStepUp','compInflation'].forEach(id=> $(id).addEventListener('input', renderCompound));
+
+/* ============================================================
+   08 — INFLATION & REAL RETURN
+============================================================ */
+function renderInflation(){
+  const amt = num('infAmount'), rate = num('infRate');
+  const yrs = [1,3,5,10,15,20,25,30];
+  const tbody = document.querySelector('#infTable tbody');
+  tbody.innerHTML = yrs.map(y=>{
+    const future = amt*Math.pow(1+rate/100,y);
+    const idleReal = amt/Math.pow(1+rate/100,y);
+    return `<tr><td>${y}</td><td class="num">${fmtINR(future)}</td><td class="num">${fmtINR(idleReal)}</td></tr>`;
+  }).join('');
+
+  const nominal = num('infNominal'), rate2 = num('infRate2');
+  const real = ((1+nominal/100)/(1+rate2/100) - 1)*100;
+  $('infReal').textContent = fmtPct(real,2);
+  const grid = $('infRealGrid');
+  grid.innerHTML = [5,10,20].map(y=>{
+    const v = 100000*Math.pow(1+real/100,y);
+    return `<div class="stat" style="padding:10px;"><div class="slabel">${y} yrs</div><div class="sval" style="font-size:18px;">${fmtINR(v)}</div></div>`;
+  }).join('');
+}
+['infAmount','infRate','infNominal','infRate2'].forEach(id=> $(id).addEventListener('input', renderInflation));
+
+/* ============================================================
+   09 — RETIREMENT / FI-FIRE
+============================================================ */
+function requiredSipForFV(targetFV, annualReturn, years){
+  const i = annualReturn/1200, n = Math.round(years*12);
+  if(n<=0) return targetFV;
+  const factor = ((Math.pow(1+i,n)-1)/i)*(1+i);
+  return factor>0 ? targetFV/factor : 0;
+}
+function renderRetirement(){
+  const age = num('retAge'), targetAge = num('retTargetAge'), expenses = num('retExpenses');
+  const inflation = num('retInflation'), preReturn = num('retPreReturn'), swr = num('retSWR');
+  const years = Math.max(0, targetAge-age);
+  const futureMonthly = expenses*Math.pow(1+inflation/100, years);
+  const futureAnnual = futureMonthly*12;
+  $('retFutureExpense').textContent = fmtINR(futureMonthly)+'/mo';
+  const corpusRegular = swr>0 ? futureAnnual/(swr/100) : 0;
+  const corpusLean = corpusRegular*0.7, corpusFat = corpusRegular*1.5;
+  $('fireGrid').innerHTML = `
+    <div class="stat"><div class="slabel">Lean FIRE (0.7×) — leaner lifestyle</div><div class="sval">${fmtINR(corpusLean)}</div></div>
+    <div class="stat"><div class="slabel">Regular FIRE (1×) — current lifestyle</div><div class="sval gold">${fmtINR(corpusRegular)}</div></div>
+    <div class="stat"><div class="slabel">Fat FIRE (1.5×) — comfortable margin</div><div class="sval">${fmtINR(corpusFat)}</div></div>
+  `;
+  $('retYears').textContent = years;
+  $('retCorpusMain').textContent = fmtINR(corpusRegular);
+  const sip = requiredSipForFV(corpusRegular, preReturn, years);
+  $('retSIP').textContent = fmtINR(sip);
+}
+['retAge','retTargetAge','retExpenses','retInflation','retPreReturn','retSWR'].forEach(id=> $(id).addEventListener('input', renderRetirement));
+
+/* ============================================================
+   10 — GOAL PLANNER
+============================================================ */
+let goalsData = { goals: [] };
+function saveGoals(){ storeSet('treasury-goals-v1', goalsData); }
+function renderGoals(){
+  const wrap = $('goalsListWrap');
+  wrap.innerHTML='';
+  if(goalsData.goals.length===0){
+    wrap.appendChild(el('<div class="card"><div class="empty-state">No goals yet — add one above.</div></div>'));
+    refreshDashboard();
+    return;
+  }
+  goalsData.goals.forEach(g=>{
+    const futureCost = g.cost*Math.pow(1+g.inflation/100, g.years);
+    const sip = requiredSipForFV(futureCost, g.return, g.years);
+    const card = el(`<div class="card">
+      <div style="display:flex;justify-content:space-between;align-items:flex-start;">
+        <h3>${escapeHtml(g.name)}</h3>
+        <button class="rm-row" style="font-size:16px;">✕</button>
+      </div>
+      <div class="card-sub">${g.years} years away · ${g.inflation}% inflation · ${g.return}% expected return</div>
+      <div class="result-strip">
+        <div class="stat"><div class="slabel">Today's Cost</div><div class="sval">${fmtINR(g.cost)}</div></div>
+        <div class="stat"><div class="slabel">Future Cost</div><div class="sval gold">${fmtINR(futureCost)}</div></div>
+        <div class="stat"><div class="slabel">Required Monthly SIP</div><div class="sval green">${fmtINR(sip)}</div></div>
+      </div>
+    </div>`);
+    card.querySelector('.rm-row').addEventListener('click', ()=>{
+      goalsData.goals = goalsData.goals.filter(x=>x.id!==g.id);
+      saveGoals(); renderGoals();
+    });
+    wrap.appendChild(card);
+  });
+  refreshDashboard();
+}
+$('addGoalBtn').addEventListener('click', ()=>{
+  const name=val('goalName').trim(), cost=num('goalCost'), years=num('goalYears'), inflation=num('goalInflation'), ret=num('goalReturn');
+  if(!name||cost<=0||years<=0) return;
+  goalsData.goals.push({id:uid(), name, cost, years, inflation, return:ret});
+  $('goalName').value=''; $('goalCost').value='';
+  saveGoals(); renderGoals();
+});
+
+/* ============================================================
+   11 — THE VERDICT DESK
+============================================================ */
+function runVerdict(){
+  const name = val('decName').trim() || 'this decision';
+  const cost = num('decCost');
+  const needWant = val('decNeedWant');
+  const freeCash = num('decFreeCash');
+  const highDebt = val('decHighDebt');
+  const emergency = val('decEmergency');
+  const monthsNeeded = freeCash>0 ? cost/freeCash : Infinity;
+
+  let verdict, colorClass, reasons=[];
+  if(highDebt==='yes'){
+    verdict='RECONSIDER'; colorClass='red';
+    reasons.push('Carrying high-interest debt changes the math. Paying that down almost always beats the return on any purchase — it is a guaranteed "gain" equal to the interest rate no longer being paid.');
+  } else if(emergency==='no' && needWant==='want'){
+    verdict='CAUTION'; colorClass='gold';
+    reasons.push('The emergency reserve is not in place yet. Optional spending ahead of that reserve leaves you exposed if something goes wrong at the same time.');
+  } else if(!isFinite(monthsNeeded)){
+    verdict='CAUTION'; colorClass='gold';
+    reasons.push('No free cash flow figure was entered, so affordability cannot be checked against your budget.');
+  } else if(monthsNeeded>6){
+    verdict = needWant==='need' ? 'CAUTION' : 'RECONSIDER'; colorClass = needWant==='need' ? 'gold' : 'red';
+    reasons.push(`This would take about ${monthsNeeded.toFixed(1)} months of your entire free cash flow to cover — a large commitment relative to what you have available.`);
+  } else if(monthsNeeded>2 && needWant==='want'){
+    verdict='CAUTION'; colorClass='gold';
+    reasons.push(`This uses roughly ${monthsNeeded.toFixed(1)} months' worth of free cash flow. Affordable, but worth sitting with for a day before committing.`);
+  } else {
+    verdict='APPROVED'; colorClass='green';
+    reasons.push(`This fits comfortably within your current free cash flow (about ${monthsNeeded.toFixed(1)} months' worth) without touching savings or reserves.`);
+  }
+
+  if(cost>0){
+    const grown = cost*Math.pow(1.10,5);
+    reasons.push(`Reference point, not a rule: invested instead at 10% for 5 years, ${fmtINR(cost)} could become roughly ${fmtINR(grown)}.`);
+  }
+
+  const stamp = $('verdictStamp');
+  stamp.className = 'stamp '+colorClass;
+  stamp.style.opacity = '1';
+  stamp.style.filter = 'url(#inkgrain)';
+  stamp.innerHTML = `<span class="st-txt">${verdict}</span>`;
+  $('verdictReasoning').innerHTML = `<h3 style="margin-bottom:10px;">${escapeHtml(name)} — ${fmtINR(cost)}</h3>` + reasons.map(r=>`<div class="note ${colorClass==='red'?'warn':colorClass==='green'?'good':''}">${r}</div>`).join('');
+}
+$('runVerdictBtn').addEventListener('click', runVerdict);
+
+/* ============================================================
+   12 — SALARY / CTC SPLIT (India)
+============================================================ */
+let ctcRegime = 'new';
+function slabTaxNew(x){
+  const slabs = [[0,400000,0],[400000,800000,0.05],[800000,1200000,0.10],[1200000,1600000,0.15],[1600000,2000000,0.20],[2000000,2400000,0.25],[2400000,Infinity,0.30]];
+  let tax=0;
+  for(const [lo,hi,rate] of slabs){ if(x>lo) tax += (Math.min(x,hi)-lo)*rate; }
+  return tax;
+}
+function slabTaxOld(x, bracket){
+  const exempt = bracket==='below60' ? 250000 : bracket==='60to80' ? 300000 : 500000;
+  const slabs = [[exempt,500000,0.05],[500000,1000000,0.20],[1000000,Infinity,0.30]];
+  let tax=0;
+  for(const [lo,hi,rate] of slabs){ if(x>lo) tax += (Math.min(x,hi)-lo)*rate; }
+  return tax;
+}
+function surchargeFor(taxableIncome, tax, regime){
+  let rate=0;
+  if(taxableIncome>20000000) rate=0.25;
+  else if(taxableIncome>10000000) rate=0.15;
+  else if(taxableIncome>5000000) rate=0.10;
+  if(regime==='old' && taxableIncome>50000000) rate=0.37;
+  return tax*rate;
+}
+function renderCTC(){
+  const ctc = num('ctcTotal');
+  const basicPct = num('ctcBasicPct')/100;
+  const hraPct = num('ctcHRAPct')/100;
+  const pfPct = num('ctcPFPct')/100;
+  const capPF = $('ctcPFCapToggle').classList.contains('checked');
+  const includeGratuity = $('ctcGratuityToggle').classList.contains('checked');
+  const cityType = val('ctcCityType');
+  const profTax = num('ctcProfTax');
+
+  const basic = ctc*basicPct;
+  const hra = basic*hraPct;
+  const pfWageBase = capPF ? Math.min(basic,180000) : basic;
+  const employerPF = pfWageBase*pfPct;
+  const employeePF = pfWageBase*pfPct;
+  const gratuity = includeGratuity ? basic*0.0481 : 0;
+  let special = ctc - basic - hra - employerPF - gratuity;
+  const shortfall = special<0;
+  if(shortfall) special = 0;
+  const grossSalary = basic + hra + special;
+
+  let hraExempt = 0;
+  if(ctcRegime==='old'){
+    const rent = num('ctcRent');
+    if(rent>0){
+      const rentMinus10 = Math.max(0, rent-0.10*basic);
+      const cityPct = cityType==='metro' ? 0.5*basic : 0.4*basic;
+      hraExempt = Math.min(hra, rentMinus10, cityPct);
+    }
+  }
+  const stdDed = ctcRegime==='new' ? 75000 : 50000;
+  let taxableIncome = grossSalary - stdDed - hraExempt;
+  if(ctcRegime==='old'){
+    const c80C = Math.min(num('ctc80C'), 150000);
+    const c80D = Math.min(num('ctc80D'), 25000);
+    taxableIncome -= (c80C+c80D);
+  }
+  taxableIncome = Math.max(0, Math.round(taxableIncome));
+
+  let tax;
+  if(ctcRegime==='new'){
+    tax = slabTaxNew(taxableIncome);
+    if(taxableIncome<=1200000){ tax = Math.max(0, tax-60000); }
+    else { const marginal = taxableIncome-1200000; if(tax>marginal) tax=marginal; }
+  } else {
+    const bracket = val('ctcAgeBracket');
+    tax = slabTaxOld(taxableIncome, bracket);
+    if(taxableIncome<=500000){ tax = Math.max(0, tax-12500); }
+  }
+  const surcharge = surchargeFor(taxableIncome, tax, ctcRegime);
+  const cess = (tax+surcharge)*0.04;
+  const totalTax = tax+surcharge+cess;
+
+  const takeHomeAnnual = grossSalary - employeePF - profTax - totalTax;
+  const takeHomeMonthly = takeHomeAnnual/12;
+
+  const tbody = document.querySelector('#ctcBreakupTable tbody');
+  const rows = [
+    ['Basic', basic], ['HRA', hra], ['Special Allowance', special],
+    ['— Gross Salary (subtotal)', grossSalary],
+    ['Employer PF', employerPF], ['Gratuity Provision', gratuity],
+    ['— CTC (check)', basic+hra+special+employerPF+gratuity]
+  ];
+  tbody.innerHTML = rows.map(([label,v])=>`<tr><td>${label}</td><td class="num">${fmtINR(v)}</td><td class="num">${fmtINR(v/12)}</td></tr>`).join('');
+
+  $('ctcTaxableIncome').textContent = fmtINR(taxableIncome);
+  $('ctcTaxTotal').textContent = fmtINR(totalTax);
+  $('ctcTakeHomeAnnual').textContent = fmtINR(takeHomeAnnual);
+  $('ctcTakeHomeMonthly').textContent = fmtINR(takeHomeMonthly);
+}
+wireSeg($('ctcRegimeSeg'), (btn)=>{
+  ctcRegime = btn.dataset.regime;
+  $('ctcOldFields').style.display = ctcRegime==='old' ? 'block' : 'none';
+  renderCTC();
+});
+['ctcTotal','ctcBasicPct','ctcHRAPct','ctcPFPct','ctcCityType','ctcProfTax','ctcRent','ctc80C','ctc80D','ctcAgeBracket']
+  .forEach(id=> $(id).addEventListener('input', renderCTC));
+['ctcPFCapToggle','ctcGratuityToggle'].forEach(id=> $(id).addEventListener('click', renderCTC));
+
+/* ============================================================
+   13 — FREELANCE RATE
+============================================================ */
+function renderFreelance(){
+  const takeHome = num('frTakeHome'), taxRate = num('frTaxRate'), expenses = num('frExpenses');
+  const hoursWeek = num('frHoursWeek'), weeksYear = num('frWeeksYear'), nonBillable = num('frNonBillable');
+  const taxFactor = 1 - clamp(taxRate,0,95)/100;
+  const grossRevenue = taxFactor>0 ? (takeHome+expenses)/taxFactor : 0;
+  const totalHours = hoursWeek*weeksYear;
+  const billableHours = totalHours*(1-clamp(nonBillable,0,95)/100);
+  const hourly = billableHours>0 ? grossRevenue/billableHours : 0;
+  $('frGross').textContent = fmtINR(grossRevenue);
+  $('frBillableHours').textContent = fmtNum(billableHours);
+  $('frHourly').textContent = fmtINR(hourly);
+  $('frDay').textContent = fmtINR(hourly*8);
+  $('frMonthly').textContent = fmtINR(grossRevenue/12);
+}
+['frTakeHome','frTaxRate','frExpenses','frHoursWeek','frWeeksYear','frNonBillable'].forEach(id=> $(id).addEventListener('input', renderFreelance));
+
+/* ============================================================
+   14 — FORMULA & RATIO LIBRARY
+============================================================ */
+const FORMULAS = [
+  { name:'Savings Rate', formula:'(Income − Expenses) ÷ Income × 100', meaning:'Share of income you keep rather than spend.',
+    range:'20% workable · 30%+ strong · under 10% fragile', example:'Income ₹60,000, expenses ₹42,000 → rate = 30%.',
+    interp:'The single best early predictor of long-term wealth — more powerful than the return rate on your investments in the first decade.',
+    limits:'Says nothing about where the savings go. A high rate parked in a zero-interest account still loses to inflation.' },
+  { name:'Emergency Fund Ratio', formula:'Liquid Savings ÷ Monthly Essential Expenses', meaning:'How many months you could cover with cash on hand.',
+    range:'3–6 months stable income · 6–9 variable income', example:'₹1,80,000 liquid ÷ ₹30,000 essentials = 6 months.',
+    interp:'A ratio below 1 means a single bad month forces borrowing.', limits:'Ignores insurance coverage, which can substitute for part of this cushion.' },
+  { name:'Debt-to-Income (DTI)', formula:'Total Monthly Debt Payments ÷ Gross Monthly Income × 100', meaning:'Share of income already committed to debt.',
+    range:'Under 36% generally lendable · above 43% is a red flag to most lenders', example:'EMIs ₹18,000 ÷ income ₹60,000 = 30%.',
+    interp:'Lenders use this to size how much more you can safely borrow.', limits:'Does not distinguish cheap debt (subsidized education loan) from expensive debt (credit card).' },
+  { name:'Housing Ratio', formula:'Monthly Housing Cost ÷ Gross Monthly Income × 100', meaning:'Share of income going to rent or home loan EMI.',
+    range:'Under 30% is the common ceiling', example:'Rent ₹15,000 ÷ income ₹60,000 = 25%.',
+    interp:'Above this range, other goals typically get squeezed out.', limits:'City cost-of-living varies enormously — 30% in a metro buys very different housing than 30% elsewhere.' },
+  { name:'Debt-to-Asset Ratio', formula:'Total Liabilities ÷ Total Assets × 100', meaning:'Share of what you own that is actually owed to someone else.',
+    range:'Under 30% comfortable · above 60% highly leveraged', example:'Liabilities ₹8L, assets ₹20L = 40%.',
+    interp:'A rising ratio over time signals leverage is growing faster than net worth.', limits:'A young professional with a fresh home loan will naturally run high here — context matters more than the raw number.' },
+  { name:'Liquidity Ratio', formula:'Liquid Assets ÷ Total Assets × 100', meaning:'Share of net worth you could access quickly without a fire-sale discount.',
+    range:'Enough to cover the emergency fund target, without excess sitting idle', example:'Cash + liquid MF ₹3L ÷ total assets ₹15L = 20%.',
+    interp:'Too low and emergencies force bad decisions; too high and money sits idle, losing to inflation.', limits:'"Liquid" is relative — a stock portfolio is liquid in normal markets, not necessarily in a crash.' },
+  { name:'EMI', formula:'P × r × (1+r)ⁿ ÷ [(1+r)ⁿ − 1]', meaning:'Fixed monthly payment that fully amortizes a loan over n months at monthly rate r.',
+    range:'n/a — a calculation, not a threshold', example:'₹10L at 9% for 5 years ≈ ₹20,760/month.',
+    interp:'Early payments are mostly interest; principal share rises each month.', limits:'Assumes a fixed rate — floating-rate loans mean this recalculates as rates move.' },
+  { name:'CAGR', formula:'(Ending Value ÷ Beginning Value)^(1/years) − 1', meaning:'The single steady annual growth rate that would take a start value to an end value.',
+    range:'n/a — used to compare, not to judge on its own', example:'₹1L → ₹2L in 6 years → CAGR ≈ 12.2%.',
+    interp:'Smooths out year-to-year volatility into one comparable number.', limits:'Hides the ride — two investments with the same CAGR can have wildly different volatility along the way.' },
+  { name:'XIRR', formula:'The discount rate that makes the net present value of all irregular cash flows equal zero', meaning:'Annualized return for money going in and out at different, uneven dates — like SIPs.',
+    range:'n/a — a calculation method', example:'Twelve unequal SIP installments plus a final withdrawal — XIRR accounts for exactly when each rupee was invested.',
+    interp:'The correct way to measure SIP or irregular-investment returns; CAGR understates or overstates them.', limits:'Needs exact dates and amounts for every cash flow — a spreadsheet or app function, not mental math.' },
+  { name:'Real Return (Fisher)', formula:'(1 + Nominal) ÷ (1 + Inflation) − 1', meaning:'What your return is actually worth after inflation eats into it.',
+    range:'n/a — compare to zero: negative real return means you lost purchasing power despite a positive headline number', example:'12% nominal, 6% inflation → real ≈ 5.66%, not 6%.',
+    interp:'This is the number that actually determines whether you are getting richer.', limits:'Uses a single inflation figure — your personal inflation rate (driven by your own spending mix) can differ from the headline CPI.' },
+  { name:'Rule of 72', formula:'72 ÷ Annual Return % ≈ Years to Double', meaning:'Quick mental-math estimate of doubling time.',
+    range:'n/a — a shortcut', example:'At 12% return, money roughly doubles every 6 years.',
+    interp:'Useful for gut-checking a projection without a calculator.', limits:'An approximation — accuracy degrades at very high or very low rates.' },
+  { name:'Net Worth', formula:'Total Assets − Total Liabilities', meaning:'What you would have left if you converted everything to cash and paid off everything owed.',
+    range:'n/a — track the trend, not a single snapshot', example:'Assets ₹20L, liabilities ₹8L → net worth ₹12L.',
+    interp:'The number that matters more than income, because income can be spent entirely while net worth reflects what actually accumulated.', limits:'A snapshot, not a story — does not show income stability or debt quality behind the number.' },
+  { name:'Credit Utilization', formula:'Total Credit Card Balance ÷ Total Credit Limit × 100', meaning:'How much of your available credit you are actually using.',
+    range:'Under 30% generally recommended for credit health', example:'₹30,000 used of a ₹1,00,000 limit = 30%.',
+    interp:'A major factor in most credit scoring models, independent of whether you pay in full each month.', limits:'Reported utilization is usually a snapshot on your statement date, not your average through the month.' },
+  { name:'Effective Tax Rate', formula:'Total Tax Paid ÷ Total (Taxable) Income × 100', meaning:'The average rate you actually pay, blended across all slabs.',
+    range:'n/a — always lower than your marginal (top slab) rate', example:'₹90,000 tax on ₹9,00,000 taxable income = 10% effective, even if the top slab is 20%.',
+    interp:'The right number for "how much of my income goes to tax" — the marginal rate answers a different question (the tax on your next rupee).', limits:'Ignores indirect taxes like GST, which are a real part of your total tax burden.' },
+  { name:'ROI', formula:'(Gain from Investment − Cost of Investment) ÷ Cost of Investment × 100', meaning:'Total return over the life of an investment, not annualized.',
+    range:'n/a — always state the time period alongside it', example:'₹1L became ₹1.5L over 4 years → ROI = 50% (not 50%/year).',
+    interp:'A 50% ROI over 1 year and over 10 years mean very different things — pair it with CAGR for the annualized picture.', limits:'Easy to state misleadingly by omitting the time period — a classic sales-pitch trick.' },
+  { name:'Fund Expense Ratio', formula:'Annual Fund Costs ÷ Average Assets Under Management × 100', meaning:'The annual cut a mutual fund or ETF takes for managing your money.',
+    range:'Index funds often under 0.5% · active funds commonly 1–2%', example:'A 1% expense ratio on ₹10L costs roughly ₹10,000 a year, taken quietly from returns.',
+    interp:'Compounds against you the same way returns compound for you — a 1% difference in cost is enormous over decades.', limits:'A lower expense ratio does not guarantee better after-cost returns, though it is a strong starting filter.' }
+];
+function renderFormulaGrid(filter){
+  const f = (filter||'').toLowerCase();
+  const grid = $('formulaGrid');
+  grid.innerHTML='';
+  const items = FORMULAS.filter(x => !f || x.name.toLowerCase().includes(f) || x.meaning.toLowerCase().includes(f));
+  if(items.length===0){ grid.appendChild(el('<div class="empty-state">No formulas match that search.</div>')); return; }
+  items.forEach(x=>{
+    grid.appendChild(el(`<div class="ref-card">
+      <h4>${x.name}</h4>
+      <div class="formula">${x.formula}</div>
+      <div class="ref-row"><b>Meaning</b><span>${x.meaning}</span></div>
+      <div class="ref-row"><b>Range</b><span>${x.range}</span></div>
+      <div class="ref-row"><b>Example</b><span>${x.example}</span></div>
+      <div class="ref-row"><b>Reading it</b><span>${x.interp}</span></div>
+      <div class="ref-row"><b>Limits</b><span>${x.limits}</span></div>
+    </div>`));
+  });
+}
+$('formulaSearch').addEventListener('input', (e)=> renderFormulaGrid(e.target.value));
+
+/* ============================================================
+   15 — FINANCIAL PRIORITY HIERARCHY
+============================================================ */
+const PRIORITIES = [
+  { t:'Basic stability', d:'Cover essential expenses reliably this month and next. Nothing else on this list matters if rent and food are not secure.' },
+  { t:'High-interest debt', d:'Credit cards, personal loans, or anything above roughly 15-18% interest. Paying this down is a guaranteed, tax-free "return" equal to the rate you stop paying.' },
+  { t:'A starter emergency fund', d:'Even one month of essential expenses in cash removes the need to reach for high-interest debt when something breaks.' },
+  { t:'Employer match / free money', d:'If an employer matches retirement contributions up to a limit, capturing the full match is close to a risk-free 50-100% return on that slice.' },
+  { t:'Full emergency fund', d:'Build the reserve out to the 3-9 month range sized to your income stability, from the Emergency Reserve module.' },
+  { t:'Insurance and risk protection', d:'Health cover and term life if others depend on your income. One uninsured hospitalization can undo years of saving.' },
+  { t:'Remaining moderate-interest debt', d:'Education loans, vehicle loans, and other debt in the 8-15% range, weighed against your investable returns.' },
+  { t:'Retirement and long-term investing', d:'Once the safety layers are in place, this is where consistent compounding does the most work — time in the market matters more than timing it.' },
+  { t:'Medium-term goals', d:'A house down payment, a big purchase, further education — goals with a 3-10 year horizon, sized in the Goal Planner.' },
+  { t:'Optional and speculative allocation', d:'A small, clearly-labeled slice for higher-risk bets you could afford to lose entirely, sized so a total loss does not affect anything above it on this list.' }
+];
+function renderPriority(){
+  const wrap = $('priorityList');
+  wrap.innerHTML = PRIORITIES.map((p,i)=>`<div class="pri-item"><div class="pri-num">${(i+1).toString().padStart(2,'0')}</div><div class="pri-body"><h4>${p.t}</h4><p>${p.d}</p></div></div>`).join('');
+}
+
+/* ============================================================
+   16 — SCAM RED-FLAG DETECTOR
+============================================================ */
+const SCAM_FLAGS = [
+  'Guaranteed or fixed high returns, with little or no acknowledgment of risk',
+  'Pressure to decide immediately, or urgency around a closing window',
+  'Requests for your OTP, PIN, CVV, full card number, or net-banking password',
+  'The "advisor" or platform cannot be verified with a regulator (SEBI, RBI, IRDAI)',
+  'Returns depend mainly on recruiting other people, not on an underlying business or asset',
+  'Unsolicited contact — a call, SMS, or message you did not initiate',
+  'Requests to install a remote-access app to "help" with a transaction',
+  'Payment requested to a personal account rather than a registered business or institutional account',
+  'Promises that sound too specific and too good given the stated risk',
+  'Reluctance to put anything in writing, or to provide official documentation'
+];
+function renderScamChecklist(){
+  const wrap = $('scamChecklist');
+  wrap.innerHTML = SCAM_FLAGS.map((f,i)=>`<div class="chk-row" data-flag="${i}"><span class="chk-box"></span><span class="chk-txt">${f}</span></div>`).join('');
+  updateScamRing();
+}
+function updateScamRing(){
+  const checked = document.querySelectorAll('#scamChecklist .chk-row.checked').length;
+  const circumference = 326.7;
+  const pct = clamp(checked/SCAM_FLAGS.length,0,1);
+  $('scamRing').style.strokeDashoffset = circumference*(1-pct);
+  $('scamRingNum').textContent = checked;
+  const verdictEl = $('scamVerdict');
+  if(checked===0) verdictEl.textContent = 'Check any red flags you are seeing on the left.';
+  else if(checked===1) verdictEl.textContent = 'One flag is enough reason to slow down and verify independently before sending money or sharing details.';
+  else if(checked<=3) verdictEl.textContent = 'Several flags present. Treat this as very likely fraudulent and verify through official channels only.';
+  else verdictEl.textContent = 'This matches a well-worn scam pattern. Do not send money or share credentials — verify independently or walk away.';
+}
+document.getElementById('scamChecklist') && document.addEventListener('click', function(e){
+  if(e.target.closest('#scamChecklist')) updateScamRing();
+});
+
+/* ============================================================
+   17 — BANKING ESSENTIALS
+============================================================ */
+const RAILS = [
+  ['UPI','Instant, 24/7','₹1,00,000/transaction (₹5,00,000 for select categories like insurance, medical, education, IPO)','Free','Everyday payments, splitting bills, merchant checkout'],
+  ['IMPS','Instant, 24/7','Up to ₹5,00,000/day, bank-dependent','Usually free online; some banks charge a small fee','Instant transfers above the UPI limit, or when UPI is down'],
+  ['NEFT','Near-instant batches, 24/7 since Dec 2019','No RBI-set maximum · ₹1 minimum','Free for online/app transfers; branch transfers may carry a small fee','Routine and scheduled transfers of any size'],
+  ['RTGS','Real-time, 24/7','₹2,00,000 minimum · no maximum','Free for online/app transfers','Urgent high-value transfers — property, business settlements']
+];
+function renderBankingRails(){
+  document.querySelector('#railsTable tbody').innerHTML = RAILS.map(r=>`<tr><td>${r[0]}</td><td>${r[1]}</td><td>${r[2]}</td><td>${r[3]}</td><td>${r[4]}</td></tr>`).join('');
+}
+const ACCOUNTS = [
+  { n:'Savings Account', d:'Standard interest-bearing account for individuals. Some minimum balance required unless it is a zero-balance/basic savings variant.' },
+  { n:'Current Account', d:'For businesses and high-transaction-volume use. No interest paid; built for frequent in-and-out flow, not for parking savings.' },
+  { n:'Salary Account', d:'A savings account linked to employer payroll, usually with the minimum-balance requirement waived while salary credits continue.' },
+  { n:'Zero-Balance / Basic Savings Account', d:'No minimum balance requirement, often with some transaction limits — designed for accessibility.' },
+  { n:'Fixed Deposit (FD)', d:'A lump sum locked for a fixed tenure at a fixed rate. Higher rate than savings, but early withdrawal usually costs a penalty.' },
+  { n:'Recurring Deposit (RD)', d:'Fixed monthly deposits over a fixed tenure at a fixed rate — a forced-savings structure with FD-like returns.' },
+  { n:'Sweep-In / Auto-Sweep Account', d:'Balance above a threshold automatically moves into a linked FD, then sweeps back if the savings balance runs low — a middle ground between liquidity and FD returns.' },
+  { n:'Joint Account', d:'Shared ownership with another holder — check the operating mandate (either-or-survivor, jointly, etc.) since it changes who can transact alone.' }
+];
+function renderBankingAccounts(){
+  $('acctGrid').innerHTML = ACCOUNTS.map(a=>`<div class="ref-card"><h4 style="font-size:14.5px;">${a.n}</h4><p style="font-size:12.5px;color:var(--paper-dim);margin:0;">${a.d}</p></div>`).join('');
+}
+const FEES = [
+  'Minimum balance charges', 'ATM charges (own bank / other bank, beyond free limit)', 'Cheque bounce charges',
+  'IMPS / RTGS charges (bank-set, on top of RBI online-transfer waiver)', 'International transaction / forex markup',
+  'Debit and credit card annual fees', 'SMS and e-statement charges', 'Account closure charges (especially within the first year)',
+  'Loan processing and prepayment/foreclosure charges', 'Dormancy charges on an inactive account'
+];
+function renderBankingFees(){
+  $('feeGrid').innerHTML = FEES.map(f=>`<div class="ref-card card-tight"><p style="font-size:12.5px;color:var(--paper-dim);margin:0;">${f}</p></div>`).join('');
+}
+
+const ACCOUNT_STRUCTURE = [
+  { t:'Primary / Spending', n:'Typically 1', d:'Salary or main income lands here; daily UPI, bills, groceries, rent. The account you touch constantly — keep roughly a month\u2019s expenses plus whatever is due this month, not more.' },
+  { t:'Emergency / Savings', n:'Typically 1, ideally a different bank', d:'Holds the emergency fund and any short-term goal money. A different bank than the primary adds useful friction — slightly harder to dip into on impulse than an account you see every day.' },
+  { t:'Goals / Investment', n:'Optional — 0 to 1', d:'Where SIP auto-debits pull from, kept visually separate from daily spending. Many digital banks now offer sub-account "Pots" or "Jars" that do this job without opening a literal extra account.' },
+  { t:'Business / Freelance', n:'1, once income is regular', d:'Every client or business payment lands here first, nowhere else. Keeps tax filing clean and stops income from quietly dissolving into daily spending before a decision has been made about what it is for.' },
+  { t:'Tax Reserve', n:'1 — can be a sub-account or FD', d:'A fixed slice of every incoming payment (commonly 25-30% for freelancers) moves here immediately, so an advance-tax bill never arrives as a surprise.' }
+];
+function renderAccountStructure(){
+  $('acctStructureGrid').innerHTML = ACCOUNT_STRUCTURE.map(a=>`<div class="ref-card">
+    <h4 style="font-size:14.5px;">${a.t}</h4>
+    <div style="margin-bottom:8px;"><span class="badge gold">${a.n}</span></div>
+    <p style="font-size:12.5px;color:var(--paper-dim);margin:0;">${a.d}</p>
+  </div>`).join('');
+}
+
+const BANKS = [
+  { cat:'public', name:'State Bank of India (SBI)', best:'Widest branch and ATM reach in the country, government scheme and scholarship disbursals, maximum safety perception.',
+    pros:['Largest network by far — branches reach small towns most private banks skip','Government-backed, lowest perceived default risk','The YONO app has closed much of the old digital gap with private banks'],
+    cons:['Can be slower for in-branch service at busy locations','Historically less aggressive on savings account interest rates'] },
+  { cat:'public', name:'Bank of Baroda', best:'Competitive MSME and business loan rates, a workable digital app (bob World).',
+    pros:['Strong small-business and trade-finance focus','Wide branch network after absorbing Vijaya Bank and Dena Bank in 2019'],
+    cons:['Digital experience is improving but still trails the top private banks'] },
+  { cat:'public', name:'Bank of Maharashtra', best:'Strong presence across Maharashtra specifically, including tier-2/tier-3 towns.',
+    pros:['Government-backed safety','Genuinely dense branch network within Maharashtra if most banking happens in-state'],
+    cons:['Much smaller national footprint outside Maharashtra and a handful of other states'] },
+  { cat:'public', name:'Punjab National Bank (PNB)', best:'Traditional banking needs with wide reach, especially in North India.',
+    pros:['One of the oldest and largest PSU networks','Broad branch coverage'],
+    cons:['Digital and service experience varies noticeably by branch'] },
+
+  { cat:'private', name:'HDFC Bank', best:'Fast digital banking and wide acceptance — the largest private bank in India after the 2023 HDFC Ltd merger.',
+    pros:['Strong app and net banking','Extensive ATM/branch network','Generally fast account opening and service'],
+    cons:['Higher minimum average balance requirements than most PSU banks','Non-maintenance fees can add up quickly'] },
+  { cat:'private', name:'ICICI Bank', best:'Integrated everyday banking plus investing — demat and trading under one login.',
+    pros:['Strong digital platform (iMobile)','Convenient if a linked demat/trading account is wanted too'],
+    cons:['Minimum balance requirements','Known for pushing cross-sold cards, insurance and investment products'] },
+  { cat:'private', name:'Axis Bank', best:'A large, digitally solid private bank — also now carries the former Citibank India retail book (transition completed 2024).',
+    pros:['Solid digital experience','Wide network, strong card products'],
+    cons:['Minimum balance requirements typical of large private banks'] },
+  { cat:'private', name:'Kotak Mahindra Bank', best:'Fully digital account opening (Kotak 811) and historically strong savings account interest rates.',
+    pros:['811 opens a full-KYC savings account from a phone in minutes','Often among the higher savings interest rates in the private space'],
+    cons:['RBI briefly barred it from onboarding new digital customers in 2024 over IT-compliance gaps — the restriction was lifted in February 2025, worth knowing as a reminder that even large banks draw supervisory action'] },
+
+  { cat:'digital', name:'Jupiter', best:'Budgeting-first banking for a first job or freelance income, with built-in "Pots" for goal separation.',
+    pros:['Clean interface, strong built-in budgeting and spend analytics','No traditional minimum-balance stress on the everyday account'],
+    cons:['Not a bank itself — a layer on top of a partner bank (Federal Bank); deposits legally sit with the partner, not "Jupiter"'] },
+  { cat:'digital', name:'Fi Money', best:'Similar to Jupiter — "Jars" for goal-based saving, decent connected mutual fund investing.',
+    pros:['Strong analytics and spending insights','Easy connected investing'],
+    cons:['Same neobank caveat — deposits sit with its partner bank (Federal Bank), not Fi itself'] },
+  { cat:'digital', name:'IDFC FIRST Bank', best:'An actual licensed bank, not a neobank layer — markets itself on transparency and monthly interest credit.',
+    pros:['Monthly savings-interest credit (vs. the usual quarterly) genuinely helps compounding','Low/no-fee positioning on several products'],
+    cons:['Smaller branch network than SBI/HDFC/ICICI if in-person service matters'] },
+
+  { cat:'coop', name:'Saraswat Co-operative Bank', best:'India\u2019s largest urban co-operative bank — strong community trust, present across Maharashtra, Goa, Gujarat and more.',
+    pros:['Personalized, relationship-driven service common at co-operative banks','Often competitive FD rates'],
+    cons:['Regulated differently from commercial banks (RBI plus the Registrar of Co-operative Societies) — confirm DICGC deposit insurance (₹5,00,000 per depositor) before parking large sums'] },
+  { cat:'coop', name:'Cosmos Co-operative Bank', best:'Pune-headquartered, one of the oldest urban co-operative banks in India, strong regional presence.',
+    pros:['Long operating history, an early adopter of core banking technology among co-operative banks'],
+    cons:['Same co-operative-sector caveat on regulatory structure and deposit insurance limits'] },
+  { cat:'coop', name:'NKGSB Co-operative Bank', best:'The name literally stands for Nasik-Kolhapur-Goa-Sindhudurg — a co-operative bank rooted in exactly this region.',
+    pros:['Deep local and regional relationships','Community-focused service'],
+    cons:['Smaller and more regional than the national players — less useful if pan-India banking is needed'] },
+
+  { cat:'intl', name:'HSBC India', best:'International banking relationships and premium/priority tiers.',
+    pros:['Genuinely useful for moving money across countries often','Global banking relationships'],
+    cons:['Very limited branch network in India, high minimum balance for the useful tiers — overkill without a specific international need'] },
+  { cat:'intl', name:'Standard Chartered India', best:'Similar profile to HSBC — a foreign bank with an India priority-banking presence.',
+    pros:['International reach, decent card products'],
+    cons:['Same limited-network, high-minimum-balance story as most foreign banks in India'] },
+  { cat:'intl', name:'Wise (formerly TransferWise)', best:'Receiving payments from international clients at a genuinely honest exchange rate — arguably the single most useful tool once work starts coming from clients abroad.',
+    pros:['Real mid-market exchange rate with the fee shown upfront, not buried in the rate','Multi-currency account — hold USD/EUR/GBP balances directly'],
+    cons:['Not a full Indian bank account — still needs to route to an Indian bank to actually spend, and cross-border receipts need proper FEMA/tax paperwork (FIRC)'] },
+  { cat:'intl', name:'Payoneer', best:'A very common payment rail for freelancers on platforms like Upwork or Fiverr, or getting paid directly by overseas studios and clients.',
+    pros:['Widely accepted by freelance marketplaces and international clients','Straightforward withdrawal to an Indian bank account'],
+    cons:['Withdrawal and currency-conversion fees add up — worth comparing against Wise for larger amounts'] }
+];
+function renderBankDirectory(filter){
+  const items = filter==='all' ? BANKS : BANKS.filter(b=>b.cat===filter);
+  $('bankDirectoryGrid').innerHTML = items.map(b=>`<div class="ref-card">
+    <h4>${b.name}</h4>
+    <div class="ref-row"><b>Best For</b><span>${b.best}</span></div>
+    <div class="ref-row"><b>Pros</b><span>${b.pros.join(' · ')}</span></div>
+    <div class="ref-row"><b>Cons</b><span>${b.cons.join(' · ')}</span></div>
+  </div>`).join('');
+}
+wireSeg($('bankFilterSeg'), (btn)=> renderBankDirectory(btn.dataset.cat));
+
+/* ============================================================
+   18 — NEVER CONFUSE THIS
+============================================================ */
+const GLOSSARY_PAIRS = [
+  { a:'Income', b:'Wealth', p:'Income is what flows in each period. Wealth (net worth) is what has accumulated. High income with high spending can mean low wealth.' },
+  { a:'Revenue', b:'Profit', p:'Revenue is total money coming in from sales. Profit is what remains after every cost is subtracted. A business can have huge revenue and still lose money.' },
+  { a:'Profit', b:'Cash Flow', p:'Profit is an accounting figure that can include non-cash items. Cash flow is the actual money moving in and out — a profitable business can still run out of cash.' },
+  { a:'Saving', b:'Investing', p:'Saving sets money aside with capital safety as the priority. Investing puts money at risk in pursuit of growth. Confusing the two means either taking risk with money you cannot afford to lose, or leaving growth money sitting idle.' },
+  { a:'Investing', b:'Speculation', p:'Investing is buying an asset for its underlying, reasoned value and expected return. Speculation is betting on price movement itself, often with limited understanding of what is actually being bought.' },
+  { a:'Nominal Return', b:'Real Return', p:'Nominal is the headline percentage. Real is what remains after subtracting inflation. Only the real figure tells you if your purchasing power actually grew.' },
+  { a:'APR', b:'APY / Effective Rate', p:'APR is the stated annual rate. APY (or effective annual rate) accounts for compounding frequency, so it is usually the higher, truer figure for anything compounding more often than annually.' },
+  { a:'EMI', b:'Total Loan Cost', p:'A lower EMI can come from a longer tenure — which often means paying far more in total interest. Always compare loans by total cost, not by the monthly number alone.' },
+  { a:'CTC', b:'Take-Home Salary', p:'CTC (Cost to Company) includes employer contributions and provisions you never see in your account. Take-home is what actually lands after every deduction — often 15-25% less than CTC.' },
+  { a:'Assets', b:'Cash', p:'An asset is anything of value you own — including things that are not liquid, like property or a locked-in retirement account. Cash is only one kind of asset, and often a small share of total net worth.' },
+  { a:'Liquidity', b:'Profitability', p:'Liquidity is how quickly an asset can be converted to cash without a loss. Profitability is how much it earns. A highly profitable asset can still be dangerously illiquid when you need cash fast.' },
+  { a:'Tax Planning', b:'Tax Evasion', p:'Tax planning uses legal deductions and structures to reduce tax owed. Tax evasion is illegally hiding income or falsifying claims. The line matters — one is prudent, the other is a crime.' },
+  { a:'Insurance', b:'Investment', p:'Insurance transfers risk for a premium. Investment grows capital by taking on risk. Products that blend the two (like some endowment or ULIP plans) often do both jobs less efficiently than buying them separately.' },
+  { a:'Risk', b:'Volatility', p:'Volatility is how much a price swings. Risk is the chance of a permanent, unrecoverable loss. A volatile investment held for the long term is not necessarily risky; a "stable"-looking investment that loses to inflation every year quietly is.' }
+];
+function renderGlossary(){
+  $('glossaryGrid').innerHTML = GLOSSARY_PAIRS.map(g=>`<div class="pair-card"><div class="pair-heads"><span class="a">${g.a}</span><span class="vs">vs</span><span class="b">${g.b}</span></div><p>${g.p}</p></div>`).join('');
+}
+
+/* ============================================================
+   INIT
+============================================================ */
+async function init(){
+  // default-on toggle for gratuity inclusion
+  $('ctcGratuityToggle').classList.add('checked');
+
+  const [b, nw, ef, g] = await Promise.all([
+    storeGet('treasury-budget-v1', null),
+    storeGet('treasury-networth-v1', null),
+    storeGet('treasury-emergency-v1', null),
+    storeGet('treasury-goals-v1', null)
+  ]);
+  if(b) budgetData = Object.assign(budgetData, b);
+  if(nw) networthData = Object.assign(networthData, nw);
+  if(ef) emergencyData = Object.assign(emergencyData, ef);
+  if(g) goalsData = Object.assign(goalsData, g);
+
+  // restore budgeting-method segmented control to saved state
+  document.querySelectorAll('#budgetMethodSeg button').forEach(btn=>{
+    btn.classList.toggle('active', btn.dataset.method===budgetData.method);
+  });
+
+  renderBudget();
+  renderNetWorth();
+  renderEF();
+  renderGoals();
+  renderLoan();
+  renderCreditCard();
+  renderCompound();
+  renderInflation();
+  renderRetirement();
+  renderFreelance();
+  renderCTC();
+  renderFormulaGrid('');
+  renderPriority();
+  renderScamChecklist();
+  renderBankingRails();
+  renderBankingAccounts();
+  renderBankingFees();
+  renderAccountStructure();
+  renderBankDirectory('all');
+  renderGlossary();
+  refreshDashboard();
+}
+init();
+
+})();
+</script>
+</body>
+</html>
