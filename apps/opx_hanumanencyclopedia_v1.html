@@ -1,0 +1,1033 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>Hanuman Ji — The Complete Encyclopedia</title>
+<style>
+/* ============================================================
+   DESIGN TOKENS
+   Palette: warm manuscript-black ground, saffron/gold display accent,
+   sindoor-red devotional accent, verdigris-teal scholarly accent,
+   muted rose folklore accent, parchment text.
+   Signature element: the Provenance Ledger — every claim carries a
+   colored source-stamp badge, styled like a wax seal, threaded through
+   the whole site as the visual language of "how do we know this."
+   ============================================================ */
+:root{
+  --ink:#0e0b08;
+  --panel:#171310;
+  --panel2:#1e1813;
+  --line:#332a20;
+  --parchment:#ece2cd;
+  --parchment-dim:#b9ac93;
+  --muted:#8a7d68;
+  --gold:#d4a24c;
+  --gold-bright:#f0c777;
+  --sindoor:#c1442e;
+  --sindoor-bright:#e2603f;
+  --teal:#3f7d72;
+  --teal-bright:#5fa295;
+  --rose:#a9647a;
+  --grey-red:#8a4a48;
+  --green-dot:#5c9a5c;
+  --yellow-dot:#c9a53b;
+  --orange-dot:#c17a3a;
+  --red-dot:#b5504a;
+  --radius:3px;
+  --serif:'Fraunces','Cormorant Garamond',Georgia,serif;
+  --body:'Source Serif 4','Georgia',serif;
+  --mono:'JetBrains Mono','Consolas',monospace;
+}
+@font-face{font-family:'Fraunces';src:local('Georgia');}
+*{box-sizing:border-box;}
+html{scroll-behavior:smooth;}
+body{
+  margin:0;
+  background:
+    radial-gradient(ellipse at top left, rgba(212,162,76,0.05), transparent 55%),
+    radial-gradient(ellipse at bottom right, rgba(63,125,114,0.05), transparent 55%),
+    var(--ink);
+  color:var(--parchment);
+  font-family:var(--body);
+  line-height:1.65;
+  font-size:16px;
+}
+::selection{background:var(--gold);color:var(--ink);}
+a{color:var(--gold-bright);text-decoration:none;}
+a:hover{text-decoration:underline;}
+h1,h2,h3,h4{font-family:var(--serif);font-weight:600;color:var(--parchment);letter-spacing:.01em;margin:0 0 .4em;}
+p{margin:0 0 1em;}
+.eyebrow{
+  font-family:var(--mono);font-size:.68rem;letter-spacing:.14em;text-transform:uppercase;
+  color:var(--gold);opacity:.85;display:block;margin-bottom:.5em;
+}
+button{font-family:inherit;cursor:pointer;}
+:focus-visible{outline:2px solid var(--gold-bright);outline-offset:2px;}
+
+/* ---------- Top bar ---------- */
+.topbar{
+  position:sticky;top:0;z-index:40;
+  display:flex;align-items:center;gap:14px;
+  padding:10px 18px;
+  background:rgba(14,11,8,.92);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--line);
+}
+.topbar .brand{display:flex;align-items:center;gap:10px;font-family:var(--serif);font-size:1.15rem;color:var(--parchment);white-space:nowrap;}
+.brand .om{color:var(--sindoor-bright);font-size:1.3rem;}
+.menu-toggle{
+  display:none;background:none;border:1px solid var(--line);color:var(--parchment);
+  width:36px;height:36px;border-radius:var(--radius);font-size:1.1rem;
+}
+.searchwrap{flex:1;position:relative;max-width:520px;}
+.searchwrap input{
+  width:100%;padding:9px 12px 9px 32px;background:var(--panel);border:1px solid var(--line);
+  color:var(--parchment);border-radius:var(--radius);font-family:var(--body);font-size:.92rem;
+}
+.searchwrap input:focus{border-color:var(--gold);}
+.searchwrap::before{content:"⌕";position:absolute;left:11px;top:7px;color:var(--muted);font-size:1.05rem;}
+#searchResults{
+  position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--panel2);
+  border:1px solid var(--line);border-radius:var(--radius);max-height:60vh;overflow:auto;
+  display:none;box-shadow:0 12px 30px rgba(0,0,0,.5);z-index:50;
+}
+#searchResults.show{display:block;}
+#searchResults .res{padding:10px 12px;border-bottom:1px solid var(--line);cursor:pointer;}
+#searchResults .res:hover{background:var(--panel);}
+#searchResults .res .rtitle{font-family:var(--serif);color:var(--gold-bright);font-size:.95rem;}
+#searchResults .res .rsnippet{font-size:.8rem;color:var(--parchment-dim);margin-top:2px;}
+#searchResults .res .rsnippet mark{background:transparent;color:var(--gold-bright);font-weight:700;}
+.topbar .levelnav{display:flex;gap:6px;}
+.levelbtn{
+  font-family:var(--mono);font-size:.68rem;letter-spacing:.05em;
+  padding:6px 9px;border:1px solid var(--line);background:transparent;color:var(--parchment-dim);
+  border-radius:var(--radius);white-space:nowrap;
+}
+.levelbtn.active{border-color:var(--gold);color:var(--gold-bright);background:rgba(212,162,76,.08);}
+
+/* ---------- Layout ---------- */
+.shell{display:grid;grid-template-columns:280px 1fr;min-height:calc(100vh - 57px);}
+.sidebar{
+  border-right:1px solid var(--line);padding:18px 10px 60px;
+  position:sticky;top:57px;align-self:start;height:calc(100vh - 57px);overflow-y:auto;
+}
+.sidebar::-webkit-scrollbar{width:6px;}
+.sidebar::-webkit-scrollbar-thumb{background:var(--line);border-radius:3px;}
+.navgroup{margin-bottom:6px;}
+.navgroup > .navgroup-title{
+  font-family:var(--mono);font-size:.66rem;letter-spacing:.13em;text-transform:uppercase;
+  color:var(--muted);padding:14px 10px 6px;
+}
+.navlink{
+  display:flex;align-items:center;gap:8px;padding:7px 10px;border-radius:var(--radius);
+  color:var(--parchment-dim);font-size:.87rem;cursor:pointer;border-left:2px solid transparent;
+}
+.navlink .num{font-family:var(--mono);font-size:.7rem;color:var(--muted);min-width:20px;}
+.navlink:hover{background:var(--panel);color:var(--parchment);}
+.navlink.active{background:var(--panel2);color:var(--gold-bright);border-left-color:var(--sindoor);}
+.navlink.dimmed{opacity:.35;}
+
+main{padding:34px 40px 100px;max-width:920px;}
+.crumbs{font-family:var(--mono);font-size:.72rem;color:var(--muted);margin-bottom:18px;}
+.crumbs a{color:var(--muted);}
+.crumbs .sep{margin:0 6px;}
+
+.content-section{display:none;}
+.content-section.active{display:block;animation:fadein .25s ease;}
+@keyframes fadein{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+.sec-number{font-family:var(--mono);color:var(--sindoor-bright);font-size:.85rem;letter-spacing:.1em;}
+.sec-title{font-size:2rem;margin-top:.15em;}
+.sec-sub{color:var(--parchment-dim);font-size:1.02rem;margin-bottom:1.6em;font-style:italic;}
+.levels-row{display:flex;gap:6px;margin-bottom:1.6em;flex-wrap:wrap;}
+.levelchip{font-family:var(--mono);font-size:.62rem;letter-spacing:.06em;padding:3px 8px;border:1px solid var(--line);border-radius:20px;color:var(--muted);}
+
+h3.h{font-size:1.25rem;margin-top:1.8em;color:var(--gold-bright);border-bottom:1px solid var(--line);padding-bottom:.35em;}
+h4.h4{font-size:1.02rem;margin-top:1.3em;color:var(--parchment);}
+
+/* ---------- Provenance badges (the signature element) ---------- */
+.tag{
+  display:inline-flex;align-items:center;gap:5px;font-family:var(--mono);font-size:.68rem;
+  letter-spacing:.03em;padding:2px 8px 2px 6px;border-radius:20px;white-space:nowrap;
+  border:1px solid transparent;margin:0 4px 4px 0;vertical-align:middle;
+}
+.tag-scripture{background:rgba(212,162,76,.12);border-color:rgba(212,162,76,.4);color:var(--gold-bright);}
+.tag-tradition{background:rgba(193,68,46,.12);border-color:rgba(193,68,46,.4);color:var(--sindoor-bright);}
+.tag-folklore{background:rgba(169,100,122,.12);border-color:rgba(169,100,122,.4);color:var(--rose);}
+.tag-scholarly{background:rgba(63,125,114,.14);border-color:rgba(63,125,114,.45);color:var(--teal-bright);}
+.tag-unknown{background:rgba(138,74,72,.12);border-color:rgba(138,74,72,.4);color:#c98d8a;}
+
+.legend{
+  display:flex;flex-wrap:wrap;gap:8px;background:var(--panel);border:1px solid var(--line);
+  padding:12px 14px;border-radius:var(--radius);margin:1.4em 0;font-size:.78rem;
+}
+
+.stamp{
+  border:1px solid var(--line);background:var(--panel);border-radius:var(--radius);
+  padding:14px 16px;margin:1.1em 0;
+}
+.stamp.scripture{border-left:3px solid var(--gold);}
+.stamp.tradition{border-left:3px solid var(--sindoor);}
+.stamp.folklore{border-left:3px solid var(--rose);}
+.stamp.scholarly{border-left:3px solid var(--teal);}
+.stamp.unknown{border-left:3px solid var(--grey-red);}
+.stamp .stamp-head{font-family:var(--mono);font-size:.7rem;letter-spacing:.08em;text-transform:uppercase;color:var(--muted);margin-bottom:.5em;}
+
+table{width:100%;border-collapse:collapse;margin:1.2em 0;font-size:.88rem;}
+th,td{border:1px solid var(--line);padding:9px 11px;text-align:left;vertical-align:top;}
+th{background:var(--panel);font-family:var(--mono);font-size:.72rem;letter-spacing:.05em;text-transform:uppercase;color:var(--gold);}
+td{background:var(--panel2);color:var(--parchment-dim);}
+tr:hover td{background:#231c15;}
+
+.confidence{display:inline-flex;align-items:center;gap:5px;font-size:.85rem;}
+.dot{width:9px;height:9px;border-radius:50%;display:inline-block;flex:none;}
+.dot.g{background:var(--green-dot);}
+.dot.y{background:var(--yellow-dot);}
+.dot.o{background:var(--orange-dot);}
+.dot.r{background:var(--red-dot);}
+
+.card{border:1px solid var(--line);background:var(--panel);border-radius:var(--radius);padding:16px 18px;margin:1em 0;}
+.grid2{display:grid;grid-template-columns:1fr 1fr;gap:14px;}
+.grid3{display:grid;grid-template-columns:repeat(3,1fr);gap:14px;}
+@media(max-width:760px){.grid2,.grid3{grid-template-columns:1fr;}}
+
+.namepill{
+  display:inline-block;font-family:var(--mono);font-size:.72rem;background:var(--panel2);
+  border:1px solid var(--line);padding:3px 9px;border-radius:20px;margin:2px;color:var(--parchment-dim);
+}
+
+blockquote{
+  margin:1.2em 0;padding:10px 16px;border-left:3px solid var(--gold);background:var(--panel);
+  color:var(--parchment-dim);font-style:italic;font-size:.95rem;
+}
+ul,ol{padding-left:1.3em;}
+li{margin-bottom:.5em;}
+
+/* ---------- Home hero ---------- */
+.hero{padding:8px 0 30px;}
+.hero .om-big{font-size:2.4rem;color:var(--sindoor-bright);}
+.hero h1{font-size:2.6rem;margin:.2em 0 .15em;}
+.hero .tagline{font-size:1.1rem;color:var(--parchment-dim);max-width:640px;}
+.hero-actions{display:flex;gap:10px;margin-top:1.4em;flex-wrap:wrap;}
+.btn{
+  font-family:var(--mono);font-size:.78rem;letter-spacing:.04em;padding:10px 16px;
+  border-radius:var(--radius);border:1px solid var(--gold);color:var(--gold-bright);background:transparent;
+}
+.btn:hover{background:rgba(212,162,76,.1);}
+.btn.solid{background:var(--sindoor);border-color:var(--sindoor);color:#fff0e8;}
+.btn.solid:hover{background:var(--sindoor-bright);}
+
+.progresswrap{margin-top:1.6em;background:var(--panel);border:1px solid var(--line);padding:12px 14px;border-radius:var(--radius);max-width:420px;}
+.progressbar{height:6px;background:var(--line);border-radius:4px;overflow:hidden;margin-top:8px;}
+.progressbar-fill{height:100%;background:linear-gradient(90deg,var(--sindoor),var(--gold));width:0%;transition:width .4s;}
+.progresslabel{font-family:var(--mono);font-size:.72rem;color:var(--muted);}
+
+/* ---------- Timeline ---------- */
+.timeline{position:relative;margin:2em 0;padding-left:26px;border-left:2px solid var(--line);}
+.tl-item{position:relative;padding:0 0 26px 20px;cursor:pointer;}
+.tl-item::before{
+  content:"";position:absolute;left:-31px;top:3px;width:10px;height:10px;border-radius:50%;
+  background:var(--ink);border:2px solid var(--gold);
+}
+.tl-item:hover::before{background:var(--gold);}
+.tl-item .tl-title{font-family:var(--serif);color:var(--parchment);font-size:1.05rem;}
+.tl-item .tl-desc{color:var(--parchment-dim);font-size:.85rem;margin-top:2px;}
+
+/* ---------- Myth vs fact ---------- */
+.mvf{border:1px solid var(--line);border-radius:var(--radius);margin:1em 0;overflow:hidden;}
+.mvf-claim{background:var(--panel2);padding:12px 16px;font-family:var(--serif);font-size:1.02rem;color:var(--parchment);border-bottom:1px solid var(--line);}
+.mvf-row{padding:10px 16px;border-bottom:1px solid var(--line);font-size:.88rem;color:var(--parchment-dim);}
+.mvf-row:last-child{border-bottom:none;}
+.mvf-row b{color:var(--parchment);}
+
+/* ---------- Names encyclopedia ---------- */
+.namesgrid{display:grid;grid-template-columns:1fr;gap:10px;}
+.namecard{border:1px solid var(--line);background:var(--panel);border-radius:var(--radius);padding:12px 16px;}
+.namecard .nn{font-family:var(--serif);font-size:1.15rem;color:var(--gold-bright);}
+.namecard .nmeta{font-family:var(--mono);font-size:.68rem;color:var(--muted);margin-bottom:6px;}
+
+footer{border-top:1px solid var(--line);padding:26px 40px;font-size:.78rem;color:var(--muted);font-family:var(--mono);}
+
+@media(max-width:900px){
+  .shell{grid-template-columns:1fr;}
+  .sidebar{
+    position:fixed;left:0;top:57px;bottom:0;width:280px;background:var(--ink);z-index:35;
+    transform:translateX(-100%);transition:transform .25s;box-shadow:20px 0 40px rgba(0,0,0,.4);
+  }
+  .sidebar.open{transform:translateX(0);}
+  .menu-toggle{display:block;}
+  .topbar .levelnav{display:none;}
+  main{padding:24px 18px 80px;}
+  .hero h1{font-size:1.9rem;}
+}
+</style>
+</head>
+<body>
+
+<div class="topbar">
+  <button class="menu-toggle" id="menuToggle" aria-label="Toggle navigation">☰</button>
+  <div class="brand"><span class="om">卐</span><span></span></div>
+  <div class="searchwrap">
+    <input id="searchInput" type="text" placeholder="Search — e.g. Sanjeevani, Anjana, Chiranjivi, is Hanuman real?" autocomplete="off">
+    <div id="searchResults"></div>
+  </div>
+  <div class="levelnav">
+    <button class="levelbtn active" data-level="all">All</button>
+    <button class="levelbtn" data-level="1">🌱 Beginner</button>
+    <button class="levelbtn" data-level="2">📖 Story</button>
+    <button class="levelbtn" data-level="3">🔍 Deep Dive</button>
+    <button class="levelbtn" data-level="4">🧠 Researcher</button>
+  </div>
+</div>
+
+<div class="shell">
+  <nav class="sidebar" id="sidebar"></nav>
+  <main id="main"></main>
+</div>
+
+<footer>
+  HANUMAN JI — A SOURCE-AWARE ENCYCLOPEDIA · BUILT FOR ZERO-TO-DEEP LEARNING · NOT A SUBSTITUTE FOR PRIMARY TEXTS OR A QUALIFIED SCHOLAR/GURU
+</footer>
+
+<script>
+/* ============================================================
+   BADGE HELPERS — used inline throughout content strings
+   ============================================================ */
+const T = {
+  scripture:(label)=>`<span class="tag tag-scripture">📜 ${label}</span>`,
+  tradition:(label)=>`<span class="tag tag-tradition">🕉️ ${label}</span>`,
+  folklore:(label)=>`<span class="tag tag-folklore">🗣️ ${label}</span>`,
+  scholarly:(label)=>`<span class="tag tag-scholarly">🔬 ${label}</span>`,
+  unknown:(label)=>`<span class="tag tag-unknown">❓ ${label}</span>`,
+};
+const SECTIONS=[]; const TIMELINE=[]; const NAMES=[]; const MYTHS=[]; const SOURCES=[];
+</script>
+<script>
+SECTIONS.push({
+  id:"start-here", num:"01", group:"Foundations", title:"Who Is Hanuman Ji?", icon:"🏠",
+  sub:"Start here if you are coming to this subject with zero background.",
+  levels:["1"],
+  body:`
+  <div class="stamp scripture"><div class="stamp-head">Learn This First</div>
+  <p>Hanuman is one of the central characters of the <b>Ramayana</b>, an ancient Indian epic. He is a <b>Vanara</b> — a forest-dwelling being usually described as monkey-like — renowned for extraordinary physical strength, unwavering loyalty, sharp intelligence, and total devotion to Prince Rama, whom he served as messenger, warrior, and friend. Across most of the Hindu tradition today, Hanuman is not just a supporting character in someone else's story — he is worshipped in his own right as a deity, with more temples dedicated to him than to almost any other Hindu god.</p></div>
+
+  <h3 class="h">1. Why is he important?</h3>
+  <p>Hanuman occupies an unusual position: he is simultaneously a warrior, a scholar, a diplomat, a servant, and — in most traditions today — a god. ${T.tradition('Widespread devotional belief')} holds him up as the ideal devotee: someone whose power comes precisely from surrendering it in service of someone he loves, rather than from ego or ambition. That idea — strength through humility — is the single most repeated theme across every telling of his story.</p>
+
+  <h3 class="h">2. His relationship with Rama</h3>
+  <p>Rama is a prince of Ayodhya whose wife, Sita, is abducted by the demon-king Ravana. ${T.scripture('Valmiki Ramayana, Kishkindha & Sundara Kanda')} Hanuman meets Rama while Rama is searching for Sita, becomes his emissary, locates Sita in Ravana's kingdom of Lanka, and fights in the war that follows. Their bond is the emotional center of Hanuman's entire story — everything he is famous for (the ocean-leap, the burning of Lanka, carrying the mountain) happens in service of finding Sita and helping Rama.</p>
+
+  <h3 class="h">3. What does "Vanara" mean?</h3>
+  <p>Vanara (वानर) is usually translated "monkey," but that translation is a simplification. ${T.scholarly('Textual & scholarly note')} In the Valmiki Ramayana the Vanaras are a forest-dwelling people with monkey-like features who live in Kishkindha under their king Sugriva — part animal in description, but written and treated as intelligent, speaking, reasoning characters with their own society, army, and politics, not as ordinary animals. Later art and performance traditions increasingly depict them as fully simian in appearance.</p>
+
+  <h3 class="h">4. God, devotee, warrior — or all of these?</h3>
+  <p>${T.scripture('In the earliest layer of the story')} Hanuman is presented primarily as an extraordinarily gifted vanara minister and warrior — not yet worshipped as a god in his own right. ${T.tradition('In later tradition')} — through Puranic literature, regional epics, and above all the 16th-century Hanuman Chalisa — he is elevated to full deity status, with his own temples, festivals (Hanuman Jayanti), and theology. This encyclopedia will keep tagging which layer a given claim belongs to, because collapsing "warrior-minister" and "worshipped deity" into one flat idea erases a real historical development.</p>
+
+  <h3 class="h">5–7. Strength, devotion, and why both together</h3>
+  <p>Hanuman is famous for feats of strength — leaping across an ocean channel to Lanka, lifting an entire mountain in the war's most urgent hour, tearing through armies. But every telling pairs that strength with devotion: his power is consistently shown as something he holds in trust for Rama, not something he wields for himself. This pairing — immense capability plus total restraint — is why devotees describe him as a model for self-discipline rather than a simple strongman figure.</p>
+
+  <h3 class="h">8. Intelligence and knowledge</h3>
+  <p>${T.scripture('Valmiki Ramayana, Kishkindha Kanda')} Hanuman's first appearance in the story is not a feat of strength at all — it is a feat of speech. Disguised as an ascetic, he approaches Rama and Lakshmana and delivers such a precise, grammatically flawless introduction that Rama immediately remarks that no one could speak so well without having mastered the Vedas and grammar deeply. His entire mission to Lanka afterward depends on tact, patience, and strategic judgment as much as on physical power.</p>
+
+  <h3 class="h">9. Why worshipped so widely?</h3>
+  <p>${T.tradition('Devotional tradition, elaborated further in Section 21')} Hanuman is invoked especially for courage, protection from fear and negative influences, physical strength and health, and steadiness of mind. Because he is considered a Chiranjivi (an immortal, see Section 15) still present and reachable, devotees treat him as an active, approachable protector rather than a distant historical figure.</p>
+
+  <h3 class="h">10. What a beginner should carry forward</h3>
+  <ul>
+    <li>Hanuman's story is told across <b>many different texts</b>, written centuries apart, in different languages, with real differences between them — this site will not pretend they all say the same thing.</li>
+    <li>The oldest surviving full account is the <b>Valmiki Ramayana</b> (Sanskrit). The most popular account for most Hindi-speaking devotees today is <b>Tulsidas's Ramcharitmanas</b> (16th century) and the <b>Hanuman Chalisa</b> drawn from it — these are two different texts, roughly 2,000 years apart in composition.</li>
+    <li>"Scripture," "tradition," "folklore," and "history" are four different kinds of claims. This site labels every claim with which kind it is, using the badge system explained in Section 2.</li>
+  </ul>
+  `
+});
+</script>
+<script>
+SECTIONS.push({
+  id:"world-of-ramayana", num:"02", group:"Foundations", title:"Understanding the World of the Ramayana", icon:"📚",
+  sub:"The background concepts you need before the story will make sense — and the labeling system this whole site runs on.",
+  levels:["1"],
+  body:`
+  <h3 class="h">The Provenance Ledger — how this site labels every claim</h3>
+  <p>Not every statement about Hanuman comes from the same kind of source. This site tags each claim so you always know what kind of ground you're standing on:</p>
+  <div class="legend">
+    <span class="tag tag-scripture">📜 Scriptural source</span> — found in an identified Hindu scripture / textual tradition
+    <span class="tag tag-tradition">🕉️ Religious tradition</span> — belief/interpretation held by a particular Hindu tradition or lineage
+    <span class="tag tag-folklore">🗣️ Folklore / popular story</span> — spread through oral tradition, regional retellings, performance
+    <span class="tag tag-scholarly">🔬 Historical / scholarly</span> — academic, textual-historical, archaeological, or linguistic research
+    <span class="tag tag-unknown">❓ Unknown / debated</span> — no single agreed answer or sufficient evidence
+  </div>
+  <p>Where a specific claim carries extra weight (e.g. in the Myth vs Fact and Names sections) it also gets a confidence dot: <span class="confidence"><span class="dot g"></span> primary text</span> · <span class="confidence"><span class="dot y"></span> later tradition / multiple sources</span> · <span class="confidence"><span class="dot o"></span> popular, uncertain origin</span> · <span class="confidence"><span class="dot r"></span> unverified / disputed</span>.</p>
+
+  <h3 class="h">Core concepts, explained from zero</h3>
+  <div class="grid2">
+    <div class="card"><h4 class="h4">Hinduism</h4><p>${T.scholarly('Neutral overview')} A family of interconnected religious traditions native to the Indian subcontinent, with no single founder, no single scripture, and no central authority — closer to a wide river system of related philosophies, deities, and practices than to a single organized institution. It includes multiple scriptural layers (Vedas, Upanishads, epics, Puranas) and countless regional and lineage-based traditions.</p></div>
+    <div class="card"><h4 class="h4">Hindu scriptures</h4><p>${T.scholarly('Textual classification')} Broadly divided into <i>Shruti</i> ("that which is heard" — the Vedas, considered by many traditions the most authoritative layer) and <i>Smriti</i> ("that which is remembered" — epics like the Ramayana and Mahabharata, law texts, and the Puranas). Hanuman appears entirely within Smriti literature, never in the Vedas themselves.</p></div>
+    <div class="card"><h4 class="h4">The Ramayana</h4><p>${T.scripture('Definition')} An epic Sanskrit poem telling the story of Prince Rama — his exile, the abduction of his wife Sita by the demon-king Ravana, and the war fought to rescue her. It exists in one earliest full Sanskrit telling and dozens of later retellings across Indian and Southeast Asian languages (see Section 16).</p></div>
+    <div class="card"><h4 class="h4">Valmiki, the "Adi Kavi"</h4><p>${T.tradition('Traditional attribution')} Valmiki is traditionally credited as the original author (<i>Adi Kavi</i>, "first poet") of the earliest surviving full Ramayana. ${T.scholarly('Scholarly caveat')} Most scholars treat the surviving Sanskrit text as a composite work assembled and expanded over a long period rather than the fixed output of one author writing at one sitting — see Section 23.</p></div>
+    <div class="card"><h4 class="h4">Versions of the Ramayana</h4><p>${T.scholarly('Textual history')} There is no single, universally fixed Ramayana. Regional and language traditions (Tamil, Bengali, Awadhi, Thai, Indonesian, Khmer, and more) retell the story with real differences in emphasis, added episodes, and sometimes different endings — explored fully in Section 16.</p></div>
+    <div class="card"><h4 class="h4">Yugas</h4><p>${T.tradition('Cosmological framework')} A Yuga is a vast cosmic time-age in Hindu cosmology. Tradition names four — Satya, Treta, Dvapara, and Kali — of declining virtue and lengthening moral decline. Rama and Hanuman's story is traditionally placed in the <i>Treta Yuga</i>. These are theological time-scales, not historical dates in the modern sense.</p></div>
+    <div class="card"><h4 class="h4">Dharma</h4><p>${T.tradition('Core concept')} Roughly "duty," "righteousness," or "the right order of things" — though no single English word captures it. Dharma depends on context: a king's dharma differs from a soldier's, a servant's, or a child's. Much of the Ramayana's drama, including Hanuman's choices, is framed around dharma-based dilemmas rather than simple good-versus-evil.</p></div>
+    <div class="card"><h4 class="h4">Karma</h4><p>${T.tradition('Core concept')} The principle that actions have consequences that shape a being's future, including across lifetimes in traditions that hold to rebirth. It is an ethical-causal framework, not a synonym for "fate."</p></div>
+    <div class="card"><h4 class="h4">Avatar (Avatara)</h4><p>${T.tradition('Theological concept')} A deliberate, purposeful descent of a deity — most famously Vishnu — into a worldly form to restore dharma when it is under serious threat. Rama is considered one of Vishnu's principal avatars.</p></div>
+    <div class="card"><h4 class="h4">Vishnu</h4><p>${T.tradition('Who he is')} One of the principal deities of Hindu tradition, understood in Vaishnava traditions as the preserver of cosmic order, who takes avatar form across ages whenever needed. Rama is traditionally held to be his seventh major avatar.</p></div>
+    <div class="card"><h4 class="h4">Rama</h4><p>${T.scripture('Central character')} Prince of Ayodhya, exiled to the forest for fourteen years, whose wife Sita is abducted by Ravana. Hanuman's entire story unfolds around serving him. Vaishnava tradition additionally holds Rama to be an avatar of Vishnu.</p></div>
+    <div class="card"><h4 class="h4">Sita</h4><p>${T.scripture('Central character')} Rama's wife, abducted by Ravana and held in Lanka. Finding her is the mission that brings Hanuman into the story's center — his search for her, described in Sections 8–11, is the hinge on which the whole epic turns.</p></div>
+    <div class="card"><h4 class="h4">Lakshmana</h4><p>${T.scripture('Central character')} Rama's younger brother, who accompanies him into exile and fights alongside him. His near-fatal wounding in the war is what sends Hanuman on the Sanjeevani mission (Section 13).</p></div>
+    <div class="card"><h4 class="h4">Ravana</h4><p>${T.scripture('Central character')} The Rakshasa king of Lanka who abducts Sita, setting the whole war in motion. He is a complex figure in the tradition — a powerful scholar and devotee of Shiva as well as the epic's antagonist — not a flat villain in most serious tellings.</p></div>
+    <div class="card"><h4 class="h4">The Vanaras</h4><p>${T.scripture('Who they are')} The forest-dwelling people, led by King Sugriva of Kishkindha, whose army — including Hanuman — allies with Rama against Ravana. See Section 1, point 3, for more on the word itself.</p></div>
+    <div class="card"><h4 class="h4">Rakshasas</h4><p>${T.scripture('Who they are')} A category of powerful, often night-wandering beings in Hindu literature, ranging from noble figures like Vibhishana to fearsome warriors and Ravana himself. "Demon" is a common but imperfect English translation — Rakshasas are not uniformly evil in every text.</p></div>
+  </div>
+  `
+});
+</script>
+<script>
+SECTIONS.push({
+  id:"before-birth", num:"03", group:"The Story", title:"Before Hanuman Ji's Birth", icon:"🌟",
+  sub:"The larger narrative context that leads to Hanuman's appearance in the world.",
+  levels:["2"],
+  body:`
+  <h3 class="h">The cosmic problem: Ravana</h3>
+  <p>${T.scripture('Valmiki Ramayana, Bala Kanda')} The Ramayana frames its own beginning with Ravana, the Rakshasa king of Lanka, who through austerities had won a boon of near-invulnerability — but, in his pride, had not thought to ask for protection from harm by a human, considering humans beneath his concern. Ravana then abuses his power over gods, sages, and the wider world.</p>
+  <p>${T.tradition('Vaishnava theological reading')} This is where the avatar concept (Section 2) becomes the hinge of the plot: because Ravana is safe from gods and demons but not from a human, Vishnu chooses to descend in human form — as Rama — specifically to be able to defeat him. This is a later theological framing layered onto the base narrative rather than a plot mechanic stated identically in every retelling.</p>
+
+  <h3 class="h">Why the Vanaras exist as they do</h3>
+  <p>${T.tradition('Puranic elaboration')} Later Puranic tradition adds that, in anticipation of the coming war, various gods deliberately fathered or arranged for powerful beings to be born as Vanaras — so that Rama would have an army of exceptionally capable allies ready in the forest of Kishkindha when he needed them. Hanuman's own birth (Section 4) is presented within this framework as one of the most important of these arranged births.</p>
+  <div class="stamp unknown"><div class="stamp-head">What's actually in the earliest text vs added later</div>
+  <p>${T.scripture('Valmiki\'s own narrative')} introduces the Vanaras simply as the existing people of the forest kingdom of Kishkindha, ruled by the brothers Vali and Sugriva, without dwelling heavily on a coordinated "gods pre-arrange an army" plan. ${T.tradition('The elaborated version')} — that an assembly of gods deliberately seeded an entire generation of Vanara heroes for the coming war — is developed much more explicitly in later Puranic retellings and popular tradition. Both are presented honestly here rather than merged into one flat claim.</p></div>
+  `
+});
+
+SECTIONS.push({
+  id:"birth", num:"04", group:"The Story", title:"The Birth of Hanuman Ji", icon:"👶",
+  sub:"Parentage, names, and how differently the sources tell this one story.",
+  levels:["2","3"],
+  body:`
+  <h3 class="h">The core account</h3>
+  <p>${T.scripture('Widely attested across tradition')} Hanuman's mother is <b>Anjana</b> (also Anjani), a vanara woman; his father figure is <b>Kesari</b>, a vanara chief. His divine parentage is attributed to <b>Vayu</b>, the wind-god, which is why Hanuman is called <b>Pavanputra</b> or <b>Vayuputra</b> — "son of the wind." This is the detail repeated most consistently across sources, even where the surrounding story differs.</p>
+
+  <h3 class="h">Where the versions genuinely differ</h3>
+  <table>
+    <tr><th>Version</th><th>Source / Tradition</th><th>What it says</th><th>Context</th></tr>
+    <tr><td>Anjana, an apsara under a curse</td><td>${T.tradition('Puranic tradition')}</td><td>Anjana was a celestial nymph (apsara) cursed to be born on earth as a vanara; the curse was lifted through devotion and austerity, after which she was blessed with a son.</td><td>Common in Puranic and regional storytelling, used to explain why a divine woman would be born in vanara form.</td></tr>
+    <tr><td>The sacred payasam (divine pudding)</td><td>${T.tradition('Popular Puranic/Ramcharitmanas-adjacent tradition')}</td><td>King Dasharatha (Rama's father) performed a yajna and received divine payasam for his queens to conceive sons; in some tellings a portion was carried off by a kite and dropped where Anjana was doing penance, and Vayu delivered it to her, making Hanuman connected to the same divine substance that produced Rama and his brothers.</td><td>A folk-devotional motif that links Hanuman's birth story to Rama's, symbolically foreshadowing their bond. It is not part of Valmiki's own birth account.</td></tr>
+    <tr><td>Vayu as direct divine father</td><td>${T.scripture('Broadly consistent across Valmiki and later texts')}</td><td>Vayu is Hanuman's true, divine father, with Kesari as Anjana's husband/foster-father figure in the household sense.</td><td>The most stable element across nearly all tellings.</td></tr>
+    <tr><td>Hanuman as a partial incarnation of Shiva</td><td>${T.tradition('Shaiva tradition specifically')}</td><td>Some traditions, especially Shaiva ones, hold Hanuman to be an amsha (partial incarnation) of Shiva, sometimes framed as the eleventh Rudra.</td><td>Not a universal Hindu position — it is a Shaiva theological reading, held alongside the Vayu-parentage account rather than replacing it.</td></tr>
+  </table>
+  <p>${T.folklore('A note on his other birth-related names')}: <b>Anjaneya</b> ("son of Anjana"), <b>Kesarinandan</b> ("son of Kesari"), and <b>Maruti</b> (also linked to the wind/Marut gods) all derive directly from this parentage story and are used interchangeably with "Hanuman" in prayer and poetry.</p>
+  `
+});
+</script>
+<script>
+SECTIONS.push({
+  id:"childhood", num:"05", group:"The Story", title:"Childhood of Hanuman Ji", icon:"☀️",
+  sub:"A chronological look at the childhood stories — and which text each one actually comes from.",
+  levels:["2","3"],
+  body:`
+  <div class="timeline">
+    <div class="tl-item"><div class="tl-title">Extraordinary infant strength</div>
+      <div class="tl-desc">${T.tradition('Puranic tradition')} As an infant, Hanuman is described as already possessing unusual strength and restlessness, foreshadowing his adult power.</div></div>
+    <div class="tl-item"><div class="tl-title">The leap toward the sun</div>
+      <div class="tl-desc">${T.tradition('Puranic tradition, widely repeated in popular retelling')} Seeing the rising sun and mistaking it for a ripe fruit, the infant Hanuman leaps into the sky to seize it. This episode is not part of Valmiki's own narrative — it belongs to later Puranic and folk material, though it is now one of the most commonly told Hanuman stories of all.</div></div>
+    <div class="tl-item"><div class="tl-title">Indra's intervention and the origin of the name "Hanuman"</div>
+      <div class="tl-desc">${T.folklore('Popular etymological legend')} In the most common version, Indra, king of the gods, strikes the child with his vajra (thunderbolt) to stop him, injuring his jaw (<i>hanu</i>) — giving rise to the name "Hanuman," roughly "one with a [prominent/injured] jaw." This is a widely repeated folk etymology rather than a claim with one single fixed textual source, and different texts and linguists offer other explanations for the name.</div></div>
+    <div class="tl-item"><div class="tl-title">Vayu's fury and the gods' boons</div>
+      <div class="tl-desc">${T.tradition('Puranic tradition')} Angered at his son's injury, Vayu withdraws air from the universe; to placate him, the assembled gods each grant the child a boon — invulnerability to their weapons, mastery of forms, and related powers — collectively giving rise to Hanuman's near-invincibility in later life.</div></div>
+    <div class="tl-item"><div class="tl-title">The sage's curse and the forgotten powers</div>
+      <div class="tl-desc">${T.tradition('Puranic / epic-adjacent tradition, referenced back in Section 8')} Because the boy's power made him mischievous toward meditating sages, tradition holds that a sage placed a curse (or a self-limiting blessing) on him so that he would forget the full extent of his own strength until reminded of it at the right moment. This detail exists specifically to set up the moment, later in the story, when Jambavan reminds Hanuman of his powers before the leap to Lanka.</div></div>
+  </div>
+  <div class="stamp unknown"><div class="stamp-head">Being honest about this section</div>
+  <p>Almost none of Hanuman's childhood material comes from Valmiki's own Sundara Kanda or Kishkindha Kanda — it is overwhelmingly ${T.tradition('later Puranic')} and ${T.folklore('folk')} material, developed over centuries after the core epic and elaborated further in regional storytelling and performance. That doesn't make it less meaningful to devotees, but it does mean these are not "verses from the original Ramayana," and this site will not claim otherwise.</p></div>
+  `
+});
+
+SECTIONS.push({
+  id:"character", num:"06", group:"The Story", title:"Strength, Intelligence & Knowledge", icon:"🧠",
+  sub:"The whole character — not just the strongman version most people know.",
+  levels:["2","3"],
+  body:`
+  <div class="grid2">
+    <div class="card"><h4 class="h4">💪 Strength</h4><p>${T.scripture('Sundara & Yuddha Kanda')} Leaping the ocean channel to Lanka, single-handedly destroying a royal garden and a fortified war-hall, surviving capture by a Brahmastra, and uprooting an entire mountain — all attested within the core narrative, not just later legend.</p></div>
+    <div class="card"><h4 class="h4">🧠 Intelligence</h4><p>${T.scripture('Kishkindha & Sundara Kanda')} His introduction to Rama is a feat of rhetoric, not muscle (Section 7). In Lanka, he deliberately restrains his full power at first, gathers intelligence quietly before acting, and times his self-revelation and eventual capture for maximum strategic effect rather than simply overpowering everyone he meets.</p></div>
+    <div class="card"><h4 class="h4">📚 Knowledge</h4><p>${T.tradition('Traditional account, elaborated in Section 18')} Later tradition credits Hanuman with deep scriptural learning, attributing his education to the sun-god Surya as his guru (see Section 18). He is repeatedly shown as fluent, persuasive, and diplomatically skilled — first as Rama's envoy to Sugriva, later as Rama's messenger to Sita and, briefly, to Ravana himself.</p></div>
+    <div class="card"><h4 class="h4">❤️ Character</h4><p>${T.scripture('Consistent across the core narrative')} Humility (he repeatedly credits his success to Rama's grace, not his own power), loyalty (his devotion to Rama never wavers even under torture and threat), discipline (his restraint before revealing his full power), and service (he consistently chooses the role of servant/messenger over any claim to glory).</p></div>
+  </div>
+  `
+});
+</script>
+<script>
+SECTIONS.push({
+  id:"meeting-rama", num:"07", group:"The Story", title:"First Meeting With Lord Rama", icon:"🤝",
+  sub:"One of the pivotal moments of the whole epic.",
+  levels:["2"],
+  body:`
+  <h3 class="h">1–2. Where Rama and Lakshmana were, and why</h3>
+  <p>${T.scripture('Valmiki Ramayana, Kishkindha Kanda')} After Sita's abduction, Rama and his brother Lakshmana travel south searching for her, eventually reaching the region near Kishkindha and Mount Rishyamukha.</p>
+  <h3 class="h">3. Sugriva's situation</h3>
+  <p>${T.scripture('Kishkindha Kanda')} Sugriva, Vali's younger brother, has been driven from the throne of Kishkindha by Vali after a misunderstanding, and lives in hiding on Rishyamukha, fearful that any stranger approaching might be an assassin sent by his brother.</p>
+  <h3 class="h">4–5. Why Hanuman approaches, and how he introduces himself</h3>
+  <p>${T.scripture('Kishkindha Kanda')} Seeing two armed strangers approach, Sugriva sends his most trusted minister, Hanuman, disguised as a wandering ascetic, to find out who they are and whether they pose a threat. Hanuman approaches Rama and Lakshmana and delivers an introduction of such precise, elegant Sanskrit that Rama turns to Lakshmana and remarks that no one could speak with such flawless grammar and rhetoric without having deeply studied the Vedas and scriptures — one of the most quoted character-establishing moments in the whole epic.</p>
+  <h3 class="h">6–7. Why the meeting matters, and what it represents</h3>
+  <p>${T.scripture('Narrative significance')} This meeting sets up the Rama–Sugriva alliance: Rama agrees to help Sugriva defeat Vali and reclaim Kishkindha's throne, and in exchange Sugriva commits the Vanara kingdom's full strength to helping Rama find Sita. ${T.tradition('Devotional/spiritual reading')} Traditions that treat Hanuman as an ideal devotee point to this scene as the moment his life's true purpose begins — recognizing Rama and placing his considerable gifts entirely at Rama's service from this point forward.</p>
+  `
+});
+
+SECTIONS.push({
+  id:"search-for-sita", num:"08", group:"The Story", title:"The Search for Sita", icon:"🏔️",
+  sub:"The vanara search parties, a looming deadline, and the discovery of Lanka's location.",
+  levels:["2"],
+  body:`
+  <p>${T.scripture('Kishkindha Kanda')} After Rama helps Sugriva defeat Vali and reclaim the throne, Sugriva organizes vanara search parties in all four directions to look for Sita. The southern party — led by Angada (Vali's son) and including Hanuman, the wise old bear-king Jambavan, and others — is sent toward the most likely direction, since Ravana's kingdom lies south across the ocean.</p>
+  <p>${T.scripture('Kishkindha Kanda')} The southern party searches for a long time without success and, facing a deadline set by Sugriva, considers giving up; Angada, fearing Sugriva's anger, proposes the group fast to death rather than return empty-handed. At this critical moment they meet <b>Sampati</b>, an aged, wing-clipped vulture and the elder brother of Jatayu (the vulture who earlier died trying to stop Ravana's abduction of Sita). Sampati, whose eyesight still reaches great distances, tells them he can see Sita held captive in Lanka, across the ocean.</p>
+  <p>${T.scripture('Kishkindha Kanda')} With the location finally known, the group realizes someone must leap the ocean channel to reach Lanka. This is the moment <b>Jambavan</b> reminds Hanuman of his own forgotten powers (see Section 5) — that he is the son of Vayu, capable of flight and enormous size, and the only one present capable of making the crossing.</p>
+  `
+});
+
+SECTIONS.push({
+  id:"ocean-leap", num:"09", group:"The Story", title:"The Leap Across the Ocean", icon:"🌊",
+  sub:"Three encounters, broken down individually.",
+  levels:["2","3"],
+  body:`
+  <div class="stamp scripture"><div class="stamp-head">Mainaka, the offer of rest</div>
+  <p>As Hanuman leaps across the ocean, the mountain Mainaka rises from the sea to offer him a place to rest, out of gratitude (tradition holds the ocean once sheltered Mainaka from Indra). ${T.tradition('Devotional reading')} Hanuman touches the mountain briefly, as a gesture of respect, but declines to stop — read traditionally as an example of staying focused on the mission rather than being tempted by comfort along the way.</p></div>
+  <div class="stamp scripture"><div class="stamp-head">Surasa, the test</div>
+  <p>The naga-mother Surasa, testing him at the gods' request, blocks his path and demands he enter her mouth. As she magically enlarges her mouth to swallow him, Hanuman matches her by growing larger still — then, at the last instant, shrinks to the size of a thumb, enters and exits her mouth in a flash, and continues on. Surasa reveals the test was to check his intelligence as much as his strength, and blesses his onward journey.</p></div>
+  <div class="stamp scripture"><div class="stamp-head">Simhika, the shadow-seizing demoness</div>
+  <p>Simhika, a shape-shifting demoness with the power to catch and hold a flying creature by seizing its shadow, drags Hanuman toward her to devour him. Recognizing the trap, he again shrinks his body, then rapidly expands inside her, and kills her — clearing the last obstacle before Lanka's shore.</p></div>
+  <p>${T.tradition('Later interpretation')} These three obstacles are commonly read symbolically in devotional commentary — temptation (Mainaka), pride/ego-testing (Surasa), and hidden deception (Simhika) — but that symbolic reading is a later interpretive layer, not a claim the base narrative makes explicitly about itself.</p>
+  `
+});
+</script>
+<script>
+SECTIONS.push({
+  id:"in-lanka", num:"10", group:"The Story", title:"Hanuman Ji in Lanka", icon:"🏝️",
+  sub:"Entering, searching, and finally finding Sita.",
+  levels:["2"],
+  body:`
+  <p>${T.scripture('Sundara Kanda')} Hanuman shrinks himself to slip into Lanka undetected at night. At the gates he is confronted by <b>Lankini</b>, the city's guardian spirit, who strikes him — he strikes back, and she falls, recalling a prophecy that her defeat by a vanara would signal Lanka's coming ruin, and lets him pass.</p>
+  <p>${T.scripture('Sundara Kanda')} He searches the city through the night — palace halls, Ravana's own chamber (where he briefly and anxiously mistakes the sleeping queen Mandodari for Sita before realizing his error and continuing), and finally the <b>Ashoka Vatika</b>, a guarded garden, where he finds Sita: grieving, refusing Ravana's advances, guarded by fearsome rakshasi women, and near despair.</p>
+  <p>${T.scripture('Sundara Kanda')} Hanuman witnesses Ravana come to threaten and pressure Sita, and Sita's steadfast, dignified refusal. Only after Ravana leaves does Hanuman, still hidden, approach and quietly begin speaking of Rama to gain her trust without alarming her.</p>
+  `
+});
+
+SECTIONS.push({
+  id:"ring-and-message", num:"11", group:"The Story", title:"The Ring, the Message, and the Burning of Lanka", icon:"🔥",
+  sub:"From the quiet exchange in the garden to the destruction of the city.",
+  levels:["2"],
+  body:`
+  <h3 class="h">The token and the conversation</h3>
+  <p>${T.scripture('Sundara Kanda')} To prove he truly comes from Rama, Hanuman gives Sita Rama's signet ring. Reassured, she speaks with him and, when he prepares to leave, gives him her <i>chudamani</i> (a hair/crown ornament) to carry back to Rama as proof she is alive and found.</p>
+  <h3 class="h">Testing Lanka's strength, and capture</h3>
+  <p>${T.scripture('Sundara Kanda')} Before leaving, Hanuman deliberately destroys the Ashoka Vatika garden and a war-hall, drawing out and killing a series of warriors sent against him, including Ravana's son <b>Akshaya Kumara</b>. Ravana's other son, <b>Indrajit</b>, finally subdues him using the divine Brahmastra weapon — and Hanuman, out of respect for the weapon itself (to refuse its binding would dishonor it), allows himself to be captured and brought before Ravana.</p>
+  <h3 class="h">Before Ravana, and the fire</h3>
+  <p>${T.scripture('Sundara Kanda')} Hanuman delivers a bold, unflinching speech to Ravana, warning him to return Sita. In retaliation, Ravana orders his tail set alight. Rather than suffering the humiliation, Hanuman — his tail burning — leaps across Lanka's rooftops, setting much of the city ablaze, before extinguishing the flame in the ocean and returning to report to Rama.</p>
+  <div class="stamp unknown"><div class="stamp-head">Text vs. popular version</div>
+  <p>${T.scripture('Valmiki\'s account')} presents the burning as a deliberate act of retaliation and a display of power, described in a single sustained passage. ${T.folklore('Popular retellings and performance traditions')} (folk theatre, comics, film) often dramatize it further — emphasizing Hanuman "playfully" or "mischievously" setting the fire building-by-building — an emphasis of tone rather than a difference in the core event.</p></div>
+  `
+});
+
+SECTIONS.push({
+  id:"war", num:"12", group:"The Story", title:"Hanuman Ji During the Rama–Ravana War", icon:"⚔️",
+  sub:"A chronological look at his role in the fighting.",
+  levels:["2"],
+  body:`
+  <p>${T.scripture('Yuddha Kanda')} Once Rama's army crosses to Lanka (aided by the vanaras building a causeway, the "Rama Setu," across the strait), Hanuman fights as one of its foremost warriors. He plays a central role in numerous engagements, at times directly protecting Rama and Lakshmana in the thick of battle, and at points carrying them on his shoulders when they are wounded or need rapid movement across the battlefield.</p>
+  <p>${T.scripture('Yuddha Kanda')} His decisive individual contribution comes in the Sanjeevani episode (Section 13), after which he continues fighting through to the war's end, including further clashes with major rakshasa commanders. Different tellings vary in which specific duels they dwell on, but his role as one of the two or three most consequential fighters on Rama's side — alongside Lakshmana and Sugriva's army generally — is consistent throughout.</p>
+  `
+});
+</script>
+<script>
+SECTIONS.push({
+  id:"sanjeevani", num:"13", group:"The Story", title:"Sanjeevani & The Mountain", icon:"🏔️",
+  sub:"A dedicated look at the war's most famous single episode.",
+  levels:["2","3"],
+  body:`
+  <p>${T.scripture('Yuddha Kanda')} Lakshmana is struck unconscious by Indrajit's Shakti weapon. The physician <b>Sushena</b> identifies that only a specific set of Himalayan herbs — commonly referred to together as <i>Sanjeevani</i> (the "life-restoring" herb, most closely the <i>mrita-sanjivani</i>) — growing on a mountain identified as <b>Dronagiri</b> (Drona Parvat) can save him before dawn.</p>
+  <p>${T.scripture('Yuddha Kanda — this detail is in Valmiki\'s own text, not only later retelling')} Hanuman flies to the Himalayas to fetch it. Unable to identify the correct herb among the mountain's vegetation, and racing the clock, he uproots and carries the entire mountain back to Lanka, herbs and all, so that Sushena can find and apply the correct one there. Lakshmana is revived, and Hanuman then returns the mountain to its place.</p>
+  <div class="stamp unknown"><div class="stamp-head">❓ Myth, text, and modern claims</div>
+  <p>${T.scripture('What the base narrative says')}: Hanuman lifts and transports a real mountain by his own physical strength — this is presented as a literal event within the epic's own internal logic, not as a metaphor.<br><br>
+  ${T.tradition('What religious tradition adds')}: various temples and local traditions across India (and, in some claims, Sri Lanka) identify specific hills as fragments dropped from the mountain during the flight, or as the mountain's resting place — these are localized devotional/folk identifications, not part of the base scriptural account.<br><br>
+  ${T.folklore('What popular retelling adds')}: comic and folk-theatre versions frequently add the episode of Bharata (Rama's brother, ruling Ayodhya in his absence) nearly shooting Hanuman down mid-flight, mistaking him for a threatening flying creature, before recognizing him — a dramatic addition from later retelling traditions, not Valmiki's own narrative.<br><br>
+  ${T.scholarly('What can be said historically/scientifically')}: there is no credible scientific or archaeological evidence establishing this as a historical event, and claims that a specific real mountain in India today is scientifically "proven" to be the one described should be treated as unverified devotional or promotional claims rather than established fact.</p></div>
+  `
+});
+
+SECTIONS.push({
+  id:"after-the-war", num:"14", group:"The Story", title:"After the War", icon:"👑",
+  sub:"Sita's return, Rama's coronation, and Hanuman's place in it.",
+  levels:["2"],
+  body:`
+  <p>${T.scripture('Yuddha Kanda')} With Ravana defeated and killed, Sita is reunited with Rama; the Valmiki text includes her undergoing a trial by fire (Agni Pariksha) to publicly affirm her purity before the assembled army — an episode that remains one of the most discussed and debated parts of the epic in both traditional and modern commentary. Rama, Sita, and Lakshmana then return to Ayodhya, where Rama is crowned king (Ram Rajyabhishek).</p>
+  <p>${T.scripture('Yuddha Kanda / Uttara Kanda')} Hanuman continues in Rama's service after the coronation. ${T.tradition('Popular devotional tradition')} particularly treasures the scene, told in various later retellings, where Rama, unable to adequately reward Hanuman's devotion with any material gift, instead embraces him as an equal — often cited as the emotional high point of their relationship.</p>
+  `
+});
+
+SECTIONS.push({
+  id:"chiranjivi", num:"15", group:"The Story", title:"Is Hanuman Ji Immortal?", icon:"♾️",
+  sub:"The concept of Chiranjivi, and what the belief does and doesn't claim.",
+  levels:["2","3"],
+  body:`
+  <p>${T.tradition('Puranic tradition')} <i>Chiranjivi</i> means "long-lived" or "deathless" — a small set of beings who, per various Puranic and later devotional sources, remain alive in the world across ages rather than passing on at a fixed lifespan. Hanuman is one of the figures most consistently included in these lists, alongside others such as Ashwatthama, King Bali, the sage Vyasa, Vibhishana, Kripacharya, Parashurama, and (in some listings) the sage Markandeya.</p>
+  <p>${T.tradition('Source of the belief')} The specific grouping and enumeration of Chiranjivis appears in later devotional verses and Puranic material rather than in Valmiki's own Ramayana text; different sources vary somewhat in exactly which figures they include.</p>
+  <p>${T.tradition('What "immortal" means here')} This is a theological claim about a being remaining accessible and present across cosmic ages, not a biological or historical claim in the modern sense. ${T.unknown('Historical verification')} There is no way to independently confirm or falsify this kind of claim through historical or scientific method — it belongs to the domain of religious belief, and this site presents it as such rather than as settled fact or as something disproven.</p>
+  `
+});
+
+SECTIONS.push({
+  id:"other-texts", num:"16", group:"Deep Dive", title:"Hanuman Ji in Other Texts", icon:"📖",
+  sub:"An expandable library across the traditions where Hanuman appears.",
+  levels:["3","4"],
+  body:`
+  <table>
+    <tr><th>Text</th><th>Approx. context</th><th>Hanuman's role</th></tr>
+    <tr><td>Valmiki Ramayana (Sanskrit)</td><td>${T.scholarly('Composite text; most scholars place its core composition and growth across roughly the 1st millennium BCE into the early centuries CE, with the Bala and Uttara Kandas generally considered later additions — exact dating remains debated among scholars')}</td><td>The earliest full surviving account. Minister-warrior of Kishkindha; Rama's messenger and general.</td></tr>
+    <tr><td>Mahabharata</td><td>${T.scripture('A different epic, with its own timeline, traditionally set generations after the Ramayana')}</td><td>Appears in the Vana Parva meeting Bhima (Section 17); also associated with Arjuna's chariot banner (Kapidhvaja) in some passages/traditions.</td></tr>
+    <tr><td>Ramcharitmanas (Tulsidas)</td><td>${T.scholarly('16th century CE, Awadhi language')}</td><td>A devotional retelling that greatly elevates Hanuman's status and devotional centrality; the source text of the Hanuman Chalisa (Section 20).</td></tr>
+    <tr><td>Various Puranas</td><td>${T.tradition('Composed and compiled over a long span, largely 1st millennium CE and after')}</td><td>Source of most childhood stories, the Chiranjivi concept, and much of the Shiva-incarnation tradition.</td></tr>
+    <tr><td>Kamban's Ramavataram (Tamil)</td><td>${T.scholarly('Roughly 12th century CE')}</td><td>A major regional retelling with its own distinct characterization and episodes.</td></tr>
+    <tr><td>Krittibas Ramayana (Bengali)</td><td>${T.scholarly('Roughly 15th century CE')}</td><td>The standard Bengali retelling, with regional variations in emphasis.</td></tr>
+    <tr><td>Southeast Asian traditions (Thai Ramakien, Indonesian/Javanese Kakawin Ramayana, Khmer Reamker, and others)</td><td>${T.scholarly('Developed over centuries via cultural transmission across South and Southeast Asia')}</td><td>Hanuman is often portrayed with a markedly different personality — in several Southeast Asian traditions he is playful, romantically involved with other characters, and more of a charming trickster-hero than the strictly celibate, singularly devoted figure emphasized in most North Indian devotional tradition.</td></tr>
+  </table>
+  `
+});
+</script>
+<script>
+SECTIONS.push({
+  id:"bhima", num:"17", group:"Deep Dive", title:"Hanuman Ji and Bhima", icon:"🐒",
+  sub:"A Mahabharata story, not a Ramayana one — and the site keeps that distinction explicit.",
+  levels:["3"],
+  body:`
+  <p>${T.scripture('Mahabharata, Vana Parva')} While the Pandava brothers are in forest exile, Bhima — famed for his own great strength — comes across an old, seemingly frail monkey lying across a mountain path on Gandhamadana, its tail blocking the way. Bhima arrogantly demands the monkey move its tail aside; the monkey, feigning weakness, asks Bhima to move it himself. Bhima, to his shock, cannot lift the tail even with his full strength.</p>
+  <p>${T.scripture('Vana Parva')} Realizing this is no ordinary animal, Bhima asks who he is. The monkey reveals himself as Hanuman — like Bhima, a son of Vayu, making them brothers by that shared divine parentage — and gently humbles Bhima's pride, teaching him about the ages (yugas) and the limits of physical strength alone. Hanuman then promises to make his presence known during the coming Kurukshetra war by residing, unseen, on the banner of Arjuna's chariot to bring the Pandavas fortune.</p>
+  <p>${T.unknown('Why this matters for source-labeling')} This is a genuinely different text from the Ramayana, written about a different epic's characters, generations after Hanuman's own story — it should never be described as "part of the Ramayana."</p>
+  `
+});
+
+SECTIONS.push({
+  id:"deities", num:"18", group:"Deep Dive", title:"Relationship With Other Deities", icon:"🕉️",
+  sub:"Different Hindu traditions interpret these relationships differently — no single answer is presented as universal.",
+  levels:["3"],
+  body:`
+  <table>
+    <tr><th>Deity</th><th>Relationship</th><th>Tradition</th></tr>
+    <tr><td>Rama</td><td>Chosen lord and object of total devotion (ishta-devata); the emotional and narrative center of Hanuman's entire story.</td><td>${T.scripture('Core to every major text')}</td></tr>
+    <tr><td>Vishnu</td><td>Since Rama is held to be an avatar of Vishnu, Hanuman's devotion to Rama is understood in Vaishnava tradition as devotion flowing through to Vishnu.</td><td>${T.tradition('Vaishnava theology')}</td></tr>
+    <tr><td>Shiva</td><td>Held by Shaiva tradition to be a partial incarnation or the eleventh Rudra-form of Shiva — a belief the Hanuman Chalisa itself alludes to in its opening invocation (see Section 20).</td><td>${T.tradition('Specifically Shaiva tradition, not held universally')}</td></tr>
+    <tr><td>Vayu</td><td>Divine father (Section 4); the source of Hanuman's power of flight and several of his epithets.</td><td>${T.scripture('Consistent across nearly all sources')}</td></tr>
+    <tr><td>Surya</td><td>Traditionally held to be Hanuman's guru, who taught him the Vedas and scriptures while Hanuman orbited him across the sky to receive instruction continuously.</td><td>${T.tradition('Puranic tradition')}</td></tr>
+  </table>
+  `
+});
+
+SECTIONS.push({
+  id:"devotion-philosophy", num:"19", group:"Deep Dive", title:"Devotion & Spiritual Philosophy", icon:"📿",
+  sub:"Why Hanuman is held up as the ideal devotee.",
+  levels:["3"],
+  body:`
+  <p>${T.tradition('Bhakti tradition')} <b>Bhakti</b> (loving devotion) and <b>seva</b> (selfless service) are the two ideas most consistently attached to Hanuman's character across the devotional tradition — the belief that his immense power is meaningful precisely because it is placed entirely at Rama's service rather than used for personal ends.</p>
+  <p>${T.folklore('A widely told devotional story, not from Valmiki')} One popular story tells of Rama and Sita giving Hanuman a pearl necklace; when he is seen breaking each pearl open and discarding it, and asked why, he explains he was checking for Rama and Sita inside each one — and when doubted, tears open his own chest to reveal Rama and Sita enshrined within his heart. This is a devotional/iconographic legend (it is the basis for the common image of Hanuman opening his chest) rather than an episode from the core epic.</p>
+  <p>${T.tradition('Traditional interpretation')} Qualities emphasized in this framework include humility, fearlessness (born from devotion rather than recklessness), discipline (including the celibacy/brahmacharya tradition associated with him), and the deliberate suppression of ego even while possessing enormous capability.</p>
+  `
+});
+</script>
+<script>
+SECTIONS.push({
+  id:"chalisa", num:"20", group:"Deep Dive", title:"Hanuman Chalisa — A Complete Guide", icon:"🎵",
+  sub:"What it is, who wrote it, and how it's structured — without reproducing the full verse text verbatim here.",
+  levels:["3"],
+  body:`
+  <div class="stamp scripture"><div class="stamp-head">What it is</div>
+  <p>The Hanuman Chalisa ("forty [verses] on Hanuman") is a devotional hymn of 43 verses total: two opening dohas (couplets), forty chaupais (quatrains — the "forty" the title refers to), and one closing doha. ${T.scholarly('Authorship and dating')} It is attributed to the poet-saint <b>Tulsidas</b> (traditionally dated c. 1497/1532–1623 CE), composed in the <b>Awadhi</b> language, and is closely associated with his larger and better-known work, the Ramcharitmanas.</p></div>
+
+  <h3 class="h">Its historical context</h3>
+  <p>${T.scholarly('Bhakti movement context')} Tulsidas composed during the Bhakti movement, a broad devotional current that favored accessible vernacular language over Sanskrit reserved for scholarly elites — part of why the Chalisa, written in everyday Awadhi rather than classical Sanskrit, spread so widely and remains so commonly memorized today.</p>
+
+  <h3 class="h">Its structure and major themes</h3>
+  <p>${T.scripture('Structural overview')} The opening dohas ask for clarity of mind and invoke blessing before the main hymn begins. The forty chaupais then move through a fairly consistent progression: Hanuman's form, birth, and inherent qualities; his knowledge and wisdom; his complete service to Rama, including his role in reviving Lakshmana; his strength and courage in the Ramayana's key episodes; and his role as a protector who removes obstacles and fear for those who remember him. The closing doha asks Hanuman to reside in the devotee's heart together with Rama, Sita, and Lakshmana.</p>
+
+  <h3 class="h">The Akbar legend</h3>
+  <p>${T.folklore('Popular legend, not a historical record')} A widely told story holds that Tulsidas composed the Chalisa while imprisoned by the Mughal emperor Akbar's court, after which an army of monkeys is said to have caused enough chaos that he was released. ${T.scholarly('Historical caveat')} This story is treated by scholars as devotional legend rather than a documented historical event — it should not be repeated as established biography.</p>
+
+  <h3 class="h">A note on the text itself</h3>
+  <p>This site deliberately does not reproduce the full 43-verse text here, to avoid any risk of a transcription or translation error being presented as authoritative. For the verse-by-verse Devanagari text, transliteration, and meaning, consult a dedicated, well-reviewed source such as a printed edition or a reputable dedicated Chalisa resource — this page exists to give you the structure and context to read those verses with understanding, not to replace them.</p>
+  `
+});
+</script>
+<script>
+SECTIONS.push({
+  id:"worship", num:"21", group:"Worship & Culture", title:"Worship & Practices", icon:"🙏",
+  sub:"Practices vary a great deal by region and tradition — this is not a single universal rulebook.",
+  levels:["2","3"],
+  body:`
+  <p>${T.tradition('Widely observed, but regionally variable')} Hanuman temples are among the most numerous of any deity in India. Tuesdays and Saturdays are the most commonly observed days for his worship in many (though not all) regional traditions, along with recitation of the Hanuman Chalisa, and — especially in devotional and monastic contexts — reading of the <b>Sundarkand</b> (the Sundara Kanda chapter of the Ramayana, describing his journey to Lanka) as a standalone devotional text.</p>
+  <p>${T.tradition('Regional variation, stated plainly')} Specific customs — which day is emphasized, whether Tuesday or Saturday, what offerings are made, how strictly celibacy/brahmacharya symbolism is emphasized in local worship — differ meaningfully by region and community. No single regional practice described in devotional media should be assumed to be a universal Hindu rule.</p>
+  `
+});
+
+SECTIONS.push({
+  id:"across-india-world", num:"22", group:"Worship & Culture", title:"Hanuman Ji Across India & the World", icon:"🗺️",
+  sub:"Regional traditions, art, and cultural presence beyond scripture.",
+  levels:["2","3"],
+  body:`
+  <p>${T.scholarly('Cultural geography')} Hanuman appears across an unusually wide cultural range for a Hindu deity: major regional temple traditions across India (from Hampi, traditionally identified with ancient Kishkindha, to temples across North and South India), classical dance and theatre traditions such as Kathakali and Ramlila performance, and — as discussed in Section 16 — Southeast Asian Ramayana traditions (Thailand, Indonesia, Cambodia) where he is a major and sometimes quite differently characterized figure.</p>
+  <p>${T.folklore('Modern popular culture')} He also appears widely in contemporary Indian comics, animated films, television serials, and devotional music, which is where many people today first encounter his stories — often blending scripture, Puranic tradition, and folklore without distinguishing them, which is precisely the gap this encyclopedia is trying to close.</p>
+  `
+});
+
+SECTIONS.push({
+  id:"history-archaeology", num:"23", group:"Reference Library", title:"History, Archaeology & Real-World Evidence", icon:"🏛️",
+  sub:"What can historians and archaeologists actually verify?",
+  levels:["4"],
+  body:`
+  <div class="stamp scholarly"><div class="stamp-head">The honest scholarly picture</div>
+  <p>${T.scholarly('Textual history')} The Valmiki Ramayana, as it survives, is understood by most scholars as a composite text that developed and was expanded over a long span — commonly discussed as forming its core across roughly the mid-to-late first millennium BCE, with the first and last books (Bala Kanda and Uttara Kanda) generally regarded as later additions to an already-circulating core narrative. Exact dating remains genuinely debated among specialists, and this site presents that range as an estimate, not a settled figure.</p></div>
+  <p>${T.scholarly('Transmission')} For most of its history the text was preserved and transmitted orally and through manuscript copying across different regions, which is part of why multiple regional versions with real differences developed — textual variation of this kind is normal for ancient oral-to-written epic literature generally, not unique to the Ramayana.</p>
+  <p>${T.scholarly('Archaeological limitations')} There is no archaeological find that historians broadly agree confirms specific events of the Hanuman narrative (the ocean crossing, the mountain-lifting, or Hanuman's existence as a historical individual) as literal history. Sites associated with the story in tradition (such as Hampi with Kishkindha) have their own real, independently dateable archaeological history as places, but that is different from archaeological proof of the narrative events themselves.</p>
+  <p>${T.unknown('The bottom line')} Religious faith, literary/textual tradition, and historical-archaeological evidence are three different kinds of claims. A devotee's faith that these events happened is not something history can prove or disprove — and a scholar's inability to verify an event historically is not, by itself, a statement about whether the tradition's spiritual claims are true. This site keeps those two conversations separate rather than pretending one settles the other.</p>
+  `
+});
+</script>
+<script>
+MYTHS.push(
+{
+  claim:"NASA confirmed the Ram Setu (Adam's Bridge) is a 1.7-million-year-old man-made bridge, proving the Ramayana happened exactly as told.",
+  text:"Valmiki Ramayana describes the vanara army building a causeway (the Setu) across the strait to Lanka under the engineer Nala's direction — this is a core scriptural claim about the narrative itself.",
+  scholars:"NASA has publicly stated it has not made any such claim and has no data confirming a man-made structure of that age at that location. The Rama Setu / Adam's Bridge is a real, naturally-occurring chain of limestone shoals and sandbanks, studied by geologists as a natural formation shaped over a very long geological timescale, not as engineered construction.",
+  cannot:"Whether the Setu narrative reflects a real historical construction event, and if so when, is not something current evidence settles either way.",
+  why:"A striking real geological feature lying exactly where the epic places its most famous engineering feat is a very natural seed for this kind of claim to spread, especially once misattributed to a prestigious source like NASA."
+},
+{
+  claim:"The exact mountain Hanuman carried to Lanka has been scientifically located and dated.",
+  text:"Valmiki's account names the mountain Dronagiri/Drona Parvat and describes it being carried and returned — presented as a real event within the story's own logic.",
+  scholars:"No mainstream geological or archaeological study has established a scientifically verified identification of a real mountain moved by this event. Various sites are venerated locally as connected to the story by tradition, which is a different and legitimate kind of claim from a scientific one.",
+  cannot:"Which, if any, real Himalayan location the story may be pointing to (if it is pointing to a real place at all).",
+  why:"Naming real geography inside a sacred story is a very common and old way traditions connect faith to lived landscape — it doesn't require the modern idea of scientific proof to remain spiritually meaningful to devotees."
+},
+{
+  claim:"Hanuman wrote his own account of the Ramayana, on a mountain, before Valmiki — and Valmiki's version exists only because Hanuman gave it up.",
+  text:"This is not part of Valmiki's own Ramayana narrative.",
+  scholars:"This story (often called the 'Hanuman Nataka' or 'Mahanataka' legend) comes from a separate later legendary tradition and an associated (contested) dramatic text, not from the core epic.",
+  cannot:"Whether any authentic underlying composition by this name and origin ever existed in the form later legend describes.",
+  why:"The story elevates Hanuman's own literary/scholarly stature and explains why a 'more perfect' account could exist only in legend, not in circulated texts — a common motif type in devotional literature."
+},
+{
+  claim:"Hanuman Chalisa was composed by Valmiki, as part of the original Ramayana.",
+  text:"Not accurate — see Section 20 in full.",
+  scholars:"The Hanuman Chalisa is well-documented as a 16th-century CE composition by Tulsidas, roughly two thousand years (by most scholarly estimates) after the core Valmiki Ramayana took shape, written in Awadhi rather than the Sanskrit of Valmiki's text.",
+  cannot:"Nothing meaningfully uncertain here — this is one of the more clearly documented authorship attributions in the tradition.",
+  why:"Because the Chalisa is so central to everyday devotional practice, people sometimes assume anything this foundational to worship must be part of the 'original' scripture — a natural but incorrect assumption."
+},
+{
+  claim:"There is only one Ramayana, and every regional or later version tells exactly the same story.",
+  text:"See Section 16 in full — real differences exist across Valmiki's Sanskrit text, Tulsidas's Ramcharitmanas, Kamban's Tamil Ramavataram, the Bengali Krittibas Ramayana, and Southeast Asian traditions like the Thai Ramakien.",
+  scholars:"The existence of a genuine, well-documented 'Many Ramayanas' tradition — the same core story retold with real narrative and characterization differences across languages and centuries — is a well-established area of scholarship, not a fringe claim.",
+  cannot:"Which single version, if any, should be considered the 'default' or most authoritative one is ultimately a matter of tradition and personal/community practice, not something scholarship adjudicates.",
+  why:"In devotional practice a person usually grows up with one dominant regional version and naturally experiences it as 'the' story, since that's the only version they were raised with."
+},
+{
+  claim:"Hanuman never had any family — he was purely celibate with no descendants at all, in every tradition without exception.",
+  text:"Valmiki's core narrative does not focus on this question at all — it isn't part of the main plot either way.",
+  scholars:"His celibacy (brahmacharya) is the overwhelmingly dominant tradition, especially in North Indian devotional worship. That said, some regional and Puranic traditions separately tell of a figure named Makardhwaja, described as born from a drop of Hanuman's sweat swallowed by a fish, and treated in some tellings as his 'son' in an unusual, non-conventional sense. This is a minority, regionally specific tradition, not the mainstream devotional account.",
+  cannot:"How old the Makardhwaja tradition actually is, or how widely it was ever accepted outside specific regional tellings.",
+  why:"Extremely popular devotional figures often accumulate a wide range of regional side-stories over centuries — some become near-universal, others stay local, and both kinds are worth knowing about honestly rather than picking only the version that feels tidiest."
+}
+);
+
+SECTIONS.push({
+  id:"myths-vs-facts", num:"24", group:"Reference Library", title:"Myths vs Facts", icon:"🧪",
+  sub:"Common internet claims, checked against text, tradition, and scholarship — not to attack belief, but to stop fake facts from spreading.",
+  levels:["4"],
+  body:`<div id="mythsMount"></div>`
+});
+</script>
+<script>
+NAMES.push(
+{name:"Hanuman", meaning:"Most consistently glossed as relating to \"hanu\" (jaw), tied to the childhood story of Indra's vajra striking his jaw (Section 5).", tag:"folklore"},
+{name:"Anjaneya", meaning:"\"Son of Anjana\" — his mother's name.", tag:"scripture"},
+{name:"Kesarinandan / Kesari-nandan", meaning:"\"Son of Kesari\" — his father-figure.", tag:"scripture"},
+{name:"Pavanputra / Pavan-sut", meaning:"\"Son of the Wind\" — from his divine father Vayu.", tag:"scripture"},
+{name:"Vayuputra", meaning:"Alternate form of \"son of Vayu,\" same origin as Pavanputra.", tag:"scripture"},
+{name:"Maruti", meaning:"Linked to the Marut wind-gods; another wind-lineage name.", tag:"tradition"},
+{name:"Mahavir / Mahabali", meaning:"\"Great Hero\" / \"Great Strength\" — an epithet of praise for his might.", tag:"tradition"},
+{name:"Bajrangbali", meaning:"\"The strong one with limbs [hard/unbreakable] as the vajra (thunderbolt)\" — a very widely used popular Hindi name, especially in North India.", tag:"tradition"},
+{name:"Sankat Mochan", meaning:"\"Remover of troubles/obstacles\" — a devotional epithet used especially in prayer and temple naming (e.g. the Sankat Mochan temple in Varanasi founded by Tulsidas).", tag:"tradition"},
+{name:"Ramdoot / Ramdut", meaning:"\"Messenger of Rama\" — describing his central narrative role as envoy.", tag:"scripture"},
+{name:"Kapish / Kapi", meaning:"General Sanskrit term for a vanara/monkey-like being, applied to him as a category name as well as an epithet.", tag:"scripture"},
+{name:"Sankatmochan Kesari Kishor", meaning:"A longer devotional compound name combining several epithets, used in some prayers and hymns.", tag:"tradition"}
+);
+
+SECTIONS.push({
+  id:"names", num:"25", group:"Reference Library", title:"Every Name of Hanuman Ji", icon:"🧩",
+  sub:"A searchable table of his names and titles — meaning, and where each one comes from.",
+  levels:["4"],
+  body:`<div id="namesMount"></div>`
+});
+
+SECTIONS.push({
+  id:"symbols", num:"26", group:"Reference Library", title:"Symbols & Iconography", icon:"🖼️",
+  sub:"What the mace, the mountain, and the open chest actually represent, and where each image comes from.",
+  levels:["3"],
+  body:`
+  <div class="grid2">
+    <div class="card"><h4 class="h4">The Gada (mace)</h4><p>${T.scripture('Consistent across depictions')} His signature weapon, symbolizing both raw strength and disciplined, righteous force used in service of dharma rather than aggression for its own sake.</p></div>
+    <div class="card"><h4 class="h4">The mountain</h4><p>${T.scripture('Sanjeevani episode, Section 13')} Depictions of Hanuman flying while carrying a mountain reference the Sanjeevani rescue — visually, the single most recognizable image of him in Indian art after the mace.</p></div>
+    <div class="card"><h4 class="h4">The flag / Kapidhvaja</h4><p>${T.scripture('Mahabharata tradition, Section 17')} His association with Arjuna's chariot banner, symbolizing protective, unseen presence in a righteous fight.</p></div>
+    <div class="card"><h4 class="h4">The open chest</h4><p>${T.folklore('Devotional legend, Section 19')} The image of Hanuman tearing open his chest to reveal Rama and Sita enshrined within is drawn directly from the pearl-necklace devotional story, not from the core epic.</p></div>
+  </div>
+  <p>${T.tradition('Color and form')} Depictions vary regionally — orange/vermilion coloring is common and is traditionally connected to devotional practices of applying sindoor to his images; postures range from the humble kneeling devotee (Anjaneya/Dasabhuja forms in prayer) to the dynamic flying warrior (mountain-bearing, tail ablaze). These are stylistic and regional artistic conventions rather than claims with a single textual source.</p>
+  `
+});
+
+SECTIONS.push({
+  id:"character-analysis", num:"27", group:"Reference Library", title:"Character Analysis", icon:"🧠",
+  sub:"What can modern people learn from Hanuman Ji — kept explicitly separate from what the original texts claim about him.",
+  levels:["3","4"],
+  body:`
+  <div class="grid3">
+    <div class="card"><h4 class="h4">Leadership</h4><p>${T.scripture('Narrative evidence')} He leads by competence and trust rather than rank — Sugriva and Rama both rely on his judgment precisely because he has earned it through demonstrated skill, not because he demands authority.</p></div>
+    <div class="card"><h4 class="h4">Communication</h4><p>${T.scripture('Section 7')} His introduction to Rama is the clearest textual example: precision, restraint, and credibility built through how he speaks, not just what he says.</p></div>
+    <div class="card"><h4 class="h4">Courage</h4><p>${T.scripture('Sections 9–11')} Consistently shown choosing the harder, riskier path (the ocean leap, entering enemy territory alone, provoking Ravana directly) over the safer option.</p></div>
+    <div class="card"><h4 class="h4">Emotional intelligence</h4><p>${T.scripture('Section 10')} His careful, patient approach to Sita in the garden — establishing trust before revealing his purpose — shows deliberate social judgment, not just brute confidence.</p></div>
+    <div class="card"><h4 class="h4">Strategy</h4><p>${T.scripture('Section 11')} Deliberately allowing his own capture by the Brahmastra to get an audience with Ravana is a calculated trade, not a mistake.</p></div>
+    <div class="card"><h4 class="h4">Self-control</h4><p>${T.scripture('Throughout')} A being of near-limitless physical power who is never shown abusing it for personal gain — restraint, not raw power, is the throughline the texts keep returning to.</p></div>
+  </div>
+  <div class="stamp unknown"><div class="stamp-head">💭 Modern lesson vs. original textual claim</div>
+  <p>The "lessons" above are ${T.tradition('this site\'s own modern reading')} of the narrative material, offered because readers often ask for it — they are not claims that Valmiki or Tulsidas stated these as explicit morals. Treat this section as interpretation, clearly labeled as such, sitting on top of the sourced narrative described in earlier sections.</p></div>
+  `
+});
+</script>
+<script>
+TIMELINE.push(
+{t:"Before birth", d:"Ravana's rise, the avatar decision, and the gods arranging the Vanara generation.", sec:"before-birth"},
+{t:"Birth", d:"Anjana, Kesari, and Vayu — and the different tellings of how he came to be.", sec:"birth"},
+{t:"Childhood", d:"The leap toward the sun, Indra's vajra, the boons, and the forgotten powers.", sec:"childhood"},
+{t:"Meeting Rama", d:"The disguised ascetic's flawless introduction at Rishyamukha.", sec:"meeting-rama"},
+{t:"Search for Sita", d:"Angada's party, Sampati's distant sight, and Jambavan's reminder.", sec:"search-for-sita"},
+{t:"Journey to Lanka", d:"Mainaka, Surasa, and Simhika — three obstacles across the ocean.", sec:"ocean-leap"},
+{t:"Meeting Sita", d:"Entering Lanka, the Ashoka Vatika, the ring and the chudamani.", sec:"ring-and-message"},
+{t:"Return from Lanka", d:"Testing Lanka's strength, capture, and the burning of the city.", sec:"ring-and-message"},
+{t:"The war", d:"Fighting alongside Rama's army against Ravana's forces.", sec:"war"},
+{t:"Sanjeevani episode", d:"Lakshmana's wound and the mountain carried whole from the Himalayas.", sec:"sanjeevani"},
+{t:"End of the Ramayana", d:"Ravana's defeat, Sita's return, and Rama's coronation.", sec:"after-the-war"},
+{t:"Later traditions", d:"Chiranjivi status, the Mahabharata meeting with Bhima, and Puranic elaboration.", sec:"chiranjivi"},
+{t:"Hanuman worship through history", d:"The rise of dedicated Hanuman devotion, temples, and the Hanuman Chalisa.", sec:"chalisa"},
+{t:"Modern cultural presence", d:"Temples, festivals, art, performance, and popular media today.", sec:"across-india-world"}
+);
+
+SECTIONS.push({
+  id:"timeline", num:"⏱", group:"Reference Library", title:"Complete Chronological Timeline", icon:"🕰️",
+  sub:"Every stage of the story, in order. Click any point to jump to the full chapter.",
+  levels:["2","3"],
+  body:`<div id="timelineMount"></div>`
+});
+
+SOURCES.push(
+{cat:"Primary / Classical", items:["Valmiki Ramayana (Sanskrit) — the earliest surviving full account.","Mahabharata, Vana Parva — the Hanuman–Bhima episode (Section 17).","Ramcharitmanas, Tulsidas (16th c. CE, Awadhi) — the dominant North Indian devotional retelling.","Hanuman Chalisa, Tulsidas — the most widely recited devotional hymn (Section 20)."]},
+{cat:"Regional & Secondary Epics", items:["Kamban's Ramavataram (Tamil, c. 12th c. CE).","Krittibas Ramayana (Bengali, c. 15th c. CE).","Southeast Asian traditions: Thai Ramakien, Khmer Reamker, Indonesian/Javanese Kakawin Ramayana."]},
+{cat:"Traditional & Devotional Sources", items:["Various Puranas (childhood stories, Chiranjivi tradition, Shiva-incarnation belief).","Regional temple and oral traditions (local place-identifications, festival customs)."]},
+{cat:"Notes & Limitations", items:["Exact composition dates for the Valmiki Ramayana's different books remain genuinely debated among scholars — see Section 23.","This site does not reproduce full scriptural verse text verbatim (see Section 20) to avoid transcription/translation error; consult a dedicated critical edition for word-for-word text.","Where sources disagree, this site presents the disagreement rather than picking a winner — see the Provenance Ledger in Section 2."]}
+);
+
+SECTIONS.push({
+  id:"source-library", num:"📚", group:"Reference Library", title:"Source Library", icon:"📚",
+  sub:"Every major claim on this site traces back to one of these categories.",
+  levels:["4"],
+  body:`<div id="sourcesMount"></div>`
+});
+</script>
+<script>
+/* ============================================================
+   RENDER ENGINE
+   ============================================================ */
+const GROUP_ORDER = ["Foundations","The Story","Deep Dive","Worship & Culture","Reference Library"];
+const LEVEL_LABEL = {"1":"🌱 Beginner","2":"📖 Story","3":"🔍 Deep Dive","4":"🧠 Researcher"};
+const visited = new Set();
+const total = SECTIONS.length;
+
+function levelChips(levels){
+  return (levels||[]).map(l=>`<span class="levelchip">${LEVEL_LABEL[l]}</span>`).join("");
+}
+
+function buildMain(){
+  const main = document.getElementById('main');
+  let html = `
+  <div class="content-section active" id="content-home">
+    <div class="hero">
+      <span class="om-big">卐</span>
+      <h1>Hanuman Ji — The Complete Encyclopedia</h1>
+      <p class="tagline">A guided journey from zero background to deep understanding — with every claim tagged by where it actually comes from: scripture, tradition, folklore, scholarship, or honest uncertainty.</p>
+      <div class="hero-actions">
+        <button class="btn solid" onclick="goTo('start-here')">🌱 Start from zero</button>
+        <button class="btn" onclick="goTo('timeline')">🕰️ See the full timeline</button>
+        <button class="btn" onclick="goTo('world-of-ramayana')">📚 Understand the labeling system</button>
+      </div>
+      <div class="progresswrap">
+        <div class="progresslabel" id="progressLabel">Your Hanuman Knowledge Journey: 0% explored</div>
+        <div class="progressbar"><div class="progressbar-fill" id="progressFill"></div></div>
+      </div>
+    </div>
+    <h3 class="h">How this site is organized</h3>
+    <div class="grid2">
+      <div class="card"><h4 class="h4">🌱 Level 1 — Beginner</h4><p>For someone with zero background. Sections 1–2.</p></div>
+      <div class="card"><h4 class="h4">📖 Level 2 — Story</h4><p>The complete chronological story, birth to coronation. Sections 3–15 + the Timeline.</p></div>
+      <div class="card"><h4 class="h4">🔍 Level 3 — Deep Dive</h4><p>Texts, variations, traditions, symbols, philosophy. Sections 6, 16–22, 26–27.</p></div>
+      <div class="card"><h4 class="h4">🧠 Level 4 — Researcher</h4><p>Sources, dating, myth-busting, the full name index. Sections 23–25, Source Library.</p></div>
+    </div>
+    <p style="margin-top:1.6em;color:var(--parchment-dim);font-size:.9rem;">Use the level buttons in the top bar to filter the navigation to one level at a time, or just browse everything with search.</p>
+  </div>`;
+
+  SECTIONS.forEach(s=>{
+    html += `
+    <div class="content-section" id="content-${s.id}">
+      <div class="crumbs"><a onclick="goTo('home')">Home</a><span class="sep">/</span>${s.group}<span class="sep">/</span>${s.title}</div>
+      <span class="sec-number">${s.icon} SECTION ${s.num}</span>
+      <h1 class="sec-title">${s.title}</h1>
+      <p class="sec-sub">${s.sub}</p>
+      <div class="levels-row">${levelChips(s.levels)}</div>
+      ${s.body}
+    </div>`;
+  });
+  main.innerHTML = html;
+
+  mountTimeline();
+  mountMyths();
+  mountNames();
+  mountSources();
+}
+
+function mountTimeline(){
+  const el = document.getElementById('timelineMount');
+  if(!el) return;
+  el.innerHTML = `<div class="timeline">` + TIMELINE.map((it,i)=>`
+    <div class="tl-item" onclick="goTo('${it.sec}')">
+      <div class="tl-title">${i+1}. ${it.t}</div>
+      <div class="tl-desc">${it.d}</div>
+    </div>`).join('') + `</div>`;
+}
+
+function mountMyths(){
+  const el = document.getElementById('mythsMount');
+  if(!el) return;
+  el.innerHTML = MYTHS.map(m=>`
+    <div class="mvf">
+      <div class="mvf-claim">❌ "${m.claim}"</div>
+      <div class="mvf-row"><b>📜 What the text actually says:</b> ${m.text}</div>
+      <div class="mvf-row"><b>🔬 What scholars/historians say:</b> ${m.scholars}</div>
+      <div class="mvf-row"><b>❓ What we cannot confirm:</b> ${m.cannot}</div>
+      <div class="mvf-row"><b>🕉️ Why the belief may exist:</b> ${m.why}</div>
+    </div>`).join('');
+}
+
+function mountNames(){
+  const el = document.getElementById('namesMount');
+  if(!el) return;
+  const tagFn = {scripture:T.scripture,tradition:T.tradition,folklore:T.folklore,scholarly:T.scholarly,unknown:T.unknown};
+  el.innerHTML = `<div class="namesgrid">` + NAMES.map(n=>`
+    <div class="namecard">
+      <div class="nn">${n.name}</div>
+      <div class="nmeta">${tagFn[n.tag]('source: '+n.tag)}</div>
+      <p style="margin:0;">${n.meaning}</p>
+    </div>`).join('') + `</div>`;
+}
+
+function mountSources(){
+  const el = document.getElementById('sourcesMount');
+  if(!el) return;
+  el.innerHTML = SOURCES.map(s=>`
+    <h3 class="h">${s.cat}</h3>
+    <ul>${s.items.map(i=>`<li>${i}</li>`).join('')}</ul>`).join('');
+}
+
+/* ---------- Sidebar ---------- */
+function buildSidebar(){
+  const sb = document.getElementById('sidebar');
+  let html = `<div class="navlink" data-id="home" onclick="goTo('home')">🏠 <span>Home</span></div>`;
+  GROUP_ORDER.forEach(g=>{
+    const items = SECTIONS.filter(s=>s.group===g);
+    if(!items.length) return;
+    html += `<div class="navgroup"><div class="navgroup-title">${g}</div>`;
+    items.forEach(s=>{
+      html += `<div class="navlink" data-id="${s.id}" data-levels="${(s.levels||[]).join(',')}" onclick="goTo('${s.id}')">
+        <span class="num">${s.num}</span><span>${s.icon} ${s.title}</span></div>`;
+    });
+    html += `</div>`;
+  });
+  sb.innerHTML = html;
+}
+
+/* ---------- Navigation ---------- */
+function goTo(id){
+  document.querySelectorAll('.content-section').forEach(el=>el.classList.remove('active'));
+  const target = document.getElementById('content-'+id);
+  if(target) target.classList.add('active');
+  document.querySelectorAll('.navlink').forEach(el=>el.classList.toggle('active', el.dataset.id===id));
+  if(id!=='home'){ visited.add(id); updateProgress(); }
+  window.scrollTo({top:0,behavior:'smooth'});
+  document.getElementById('sidebar').classList.remove('open');
+  document.getElementById('searchResults').classList.remove('show');
+  document.getElementById('searchInput').value='';
+  location.hash = id;
+}
+
+function updateProgress(){
+  const pct = Math.round((visited.size/total)*100);
+  const fill = document.getElementById('progressFill');
+  const label = document.getElementById('progressLabel');
+  if(fill) fill.style.width = pct+'%';
+  if(label) label.textContent = `Your Hanuman Knowledge Journey: ${pct}% explored`;
+}
+
+/* ---------- Level filter ---------- */
+document.querySelectorAll('.levelbtn').forEach(btn=>{
+  btn.addEventListener('click',()=>{
+    document.querySelectorAll('.levelbtn').forEach(b=>b.classList.remove('active'));
+    btn.classList.add('active');
+    const lvl = btn.dataset.level;
+    document.querySelectorAll('.navlink[data-levels]').forEach(el=>{
+      const levels = (el.dataset.levels||'').split(',');
+      el.classList.toggle('dimmed', lvl!=='all' && !levels.includes(lvl));
+    });
+  });
+});
+
+/* ---------- Search ---------- */
+let SEARCH_INDEX = [];
+function buildSearchIndex(){
+  SEARCH_INDEX = SECTIONS.map(s=>{
+    const el = document.getElementById('content-'+s.id);
+    const text = el ? el.textContent.replace(/\s+/g,' ').trim() : '';
+    return {id:s.id, title:s.title, icon:s.icon, text};
+  });
+}
+document.getElementById('searchInput').addEventListener('input', e=>{
+  const q = e.target.value.trim().toLowerCase();
+  const box = document.getElementById('searchResults');
+  if(q.length<2){ box.classList.remove('show'); box.innerHTML=''; return; }
+  const hits = SEARCH_INDEX.filter(s=> s.title.toLowerCase().includes(q) || s.text.toLowerCase().includes(q)).slice(0,10);
+  if(!hits.length){ box.innerHTML = `<div class="res"><div class="rtitle">No matches</div><div class="rsnippet">Try a different word — e.g. a name, place, or event.</div></div>`; box.classList.add('show'); return; }
+  box.innerHTML = hits.map(h=>{
+    const idx = h.text.toLowerCase().indexOf(q);
+    let snippet = idx>=0 ? h.text.substring(Math.max(0,idx-50), idx+80) : h.text.substring(0,100);
+    const re = new RegExp('('+q.replace(/[.*+?^${}()|[\]\\]/g,'\\$&')+')','ig');
+    snippet = snippet.replace(re,'<mark>$1</mark>');
+    return `<div class="res" onclick="goTo('${h.id}')"><div class="rtitle">${h.icon} ${h.title}</div><div class="rsnippet">…${snippet}…</div></div>`;
+  }).join('');
+  box.classList.add('show');
+});
+document.addEventListener('click', e=>{
+  if(!e.target.closest('.searchwrap')) document.getElementById('searchResults').classList.remove('show');
+});
+
+/* ---------- Mobile menu ---------- */
+document.getElementById('menuToggle').addEventListener('click', ()=>{
+  document.getElementById('sidebar').classList.toggle('open');
+});
+
+/* ---------- Init ---------- */
+buildMain();
+buildSidebar();
+buildSearchIndex();
+const startId = (location.hash||'').replace('#','') || 'home';
+goTo(SECTIONS.find(s=>s.id===startId) || startId==='home' ? startId : 'home');
+</script>
+</body>
+</html>
