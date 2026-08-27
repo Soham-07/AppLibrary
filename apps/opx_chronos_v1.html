@@ -1,0 +1,860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1">
+<title>Chronos — Time & Course Ledger</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=IBM+Plex+Mono:wght@400;500;600;700&family=IBM+Plex+Sans:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+  :root{
+    --void:#0B0D10;
+    --panel:#14171C;
+    --panel-2:#1B1F26;
+    --line:#262B32;
+    --ink:#ECE8E1;
+    --ink-dim:#7C8590;
+    --ink-faint:#454C56;
+    --amber:#FF9F43;
+    --amber-glow:rgba(255,159,67,0.35);
+    --teal:#35D0A3;
+    --rust:#FF5D5D;
+    --mono:'IBM Plex Mono',monospace;
+    --sans:'IBM Plex Sans',sans-serif;
+    --radius:10px;
+  }
+  *{box-sizing:border-box;margin:0;padding:0;}
+  html,body{height:100%;}
+  body{
+    background:var(--void);
+    color:var(--ink);
+    font-family:var(--sans);
+    min-height:100vh;
+    position:relative;
+  }
+  body::before{
+    content:'';
+    position:fixed;inset:0;pointer-events:none;z-index:0;
+    background:
+      radial-gradient(ellipse at 50% -10%, rgba(255,159,67,0.06), transparent 60%),
+      repeating-linear-gradient(180deg, rgba(255,255,255,0.012) 0px, rgba(255,255,255,0.012) 1px, transparent 1px, transparent 3px);
+  }
+  .wrap{max-width:1080px;margin:0 auto;padding:24px 20px 80px;position:relative;z-index:1;}
+
+  header.topbar{display:flex;flex-wrap:wrap;gap:16px;justify-content:space-between;align-items:center;padding-bottom:22px;border-bottom:1px solid var(--line);margin-bottom:28px;}
+  .wordmark{font-family:var(--mono);font-weight:700;font-size:1.05rem;letter-spacing:0.06em;}
+  .wordmark span{display:block;font-family:var(--sans);font-weight:400;font-size:0.72rem;color:var(--ink-dim);letter-spacing:0.03em;margin-top:2px;}
+
+  nav.tabs{display:flex;background:var(--panel);border:1px solid var(--line);border-radius:999px;padding:4px;gap:4px;}
+  nav.tabs button{font-family:var(--mono);font-size:0.72rem;letter-spacing:0.08em;text-transform:uppercase;background:transparent;border:none;color:var(--ink-dim);padding:9px 16px;border-radius:999px;cursor:pointer;transition:all .2s ease;}
+  nav.tabs button.active{background:var(--amber);color:#1A1103;font-weight:600;}
+  nav.tabs button:hover:not(.active){color:var(--ink);}
+
+  button:focus-visible, input:focus-visible, select:focus-visible{outline:2px solid var(--amber);outline-offset:2px;}
+
+  .tab-panel{display:none;animation:fadeIn .3s ease;}
+  .tab-panel.active{display:block;}
+  @keyframes fadeIn{from{opacity:0;transform:translateY(4px);}to{opacity:1;transform:translateY(0);}}
+
+  .eyebrow{font-family:var(--mono);font-size:0.68rem;letter-spacing:0.14em;text-transform:uppercase;color:var(--ink-dim);margin-bottom:8px;}
+
+  .input-panel{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:24px;display:flex;flex-wrap:wrap;gap:20px;align-items:flex-end;}
+  .input-group{display:flex;flex-direction:column;gap:6px;}
+  .input-group label{font-family:var(--mono);font-size:0.68rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink-dim);}
+  input[type=date],input[type=text],input[type=number],select{
+    background:var(--void);border:1px solid var(--line);color:var(--ink);font-family:var(--mono);font-size:0.85rem;padding:10px 12px;border-radius:6px;min-width:180px;
+  }
+  select{min-width:110px;}
+  .chips{display:flex;gap:8px;flex-wrap:wrap;}
+  .chip{font-family:var(--mono);font-size:0.68rem;letter-spacing:0.06em;text-transform:uppercase;background:var(--panel-2);border:1px solid var(--line);color:var(--ink-dim);padding:9px 12px;border-radius:999px;cursor:pointer;transition:.2s;}
+  .chip:hover{border-color:var(--amber);color:var(--amber);}
+
+  .direction-label{font-family:var(--mono);font-size:0.78rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--amber);text-align:center;margin-bottom:14px;}
+
+  .flap-row{display:grid;grid-template-columns:repeat(6,1fr);gap:10px;margin-bottom:16px;}
+  .flap-cell{background:linear-gradient(180deg,var(--panel-2),var(--panel));border:1px solid var(--line);border-radius:10px;padding:16px 4px 12px;text-align:center;position:relative;overflow:hidden;}
+  .flap-cell::after{content:'';position:absolute;left:0;right:0;top:50%;height:1px;background:rgba(0,0,0,0.4);}
+  .flap-value{font-family:var(--mono);font-weight:700;font-size:clamp(1.4rem,5.2vw,2.5rem);font-variant-numeric:tabular-nums;color:var(--amber);text-shadow:0 0 14px var(--amber-glow);line-height:1;transition:text-shadow .15s ease, transform .15s ease;display:inline-block;}
+  .flap-value.tick{text-shadow:0 0 26px var(--amber-glow);transform:scale(1.05);}
+  .flap-label{font-family:var(--mono);font-size:0.6rem;letter-spacing:0.12em;text-transform:uppercase;color:var(--ink-dim);margin-top:6px;}
+
+  .summary-line{font-family:var(--sans);font-size:0.92rem;color:var(--ink-dim);text-align:center;padding:14px 16px;background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);margin-bottom:24px;line-height:1.5;}
+  .summary-line b{color:var(--ink);font-weight:600;}
+
+  .stats-grid{display:grid;grid-template-columns:repeat(auto-fit,minmax(140px,1fr));gap:10px;}
+  .stat-tile{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:14px;}
+  .stat-tile .v{font-family:var(--mono);font-weight:600;font-size:1.15rem;color:var(--ink);}
+  .stat-tile .l{font-family:var(--mono);font-size:0.6rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-dim);margin-top:4px;}
+
+  .overview-strip{display:grid;grid-template-columns:repeat(auto-fit,minmax(150px,1fr));gap:10px;margin-bottom:26px;}
+  .overview-tile{background:var(--panel);border:1px solid var(--line);border-radius:8px;padding:16px;}
+  .overview-tile .v{font-family:var(--mono);font-weight:700;font-size:1.35rem;color:var(--teal);white-space:nowrap;overflow:hidden;text-overflow:ellipsis;}
+  .overview-tile .l{font-family:var(--mono);font-size:0.6rem;letter-spacing:0.08em;text-transform:uppercase;color:var(--ink-dim);margin-top:4px;}
+
+  .section-head{display:flex;justify-content:space-between;align-items:center;margin:6px 0 14px;flex-wrap:wrap;gap:10px;}
+  .section-head h2{font-family:var(--mono);font-size:0.8rem;letter-spacing:0.1em;text-transform:uppercase;color:var(--ink);}
+
+  .btn{font-family:var(--sans);font-weight:600;font-size:0.78rem;letter-spacing:0.03em;text-transform:uppercase;padding:10px 18px;border-radius:6px;border:1px solid var(--amber);background:transparent;color:var(--amber);cursor:pointer;transition:.2s;}
+  .btn:hover{background:var(--amber);color:#1A1103;}
+  .btn.primary{background:var(--amber);color:#1A1103;}
+  .btn.primary:hover{filter:brightness(1.1);}
+  .btn.ghost{border-color:var(--line);color:var(--ink-dim);}
+  .btn.ghost:hover{border-color:var(--ink-dim);color:var(--ink);background:transparent;}
+  .btn.danger{border-color:var(--rust);color:var(--rust);}
+  .btn.danger:hover{background:var(--rust);color:#fff;}
+  .btn.small{padding:6px 12px;font-size:0.68rem;}
+
+  .goal-form{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:20px;margin-bottom:22px;display:none;}
+  .goal-form.open{display:block;}
+  .form-row{display:flex;flex-wrap:wrap;gap:14px;margin-bottom:14px;}
+  .form-row .input-group{flex:1;min-width:160px;}
+  .mode-toggle{display:flex;gap:8px;margin-bottom:16px;}
+  .mode-toggle button{flex:1;}
+  .form-actions{display:flex;gap:10px;justify-content:flex-end;flex-wrap:wrap;}
+
+  .comparison-chart{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;margin-bottom:22px;display:none;flex-direction:column;gap:12px;}
+  .compare-row{display:flex;align-items:center;gap:12px;}
+  .compare-name{font-family:var(--mono);font-size:0.7rem;color:var(--ink-dim);width:110px;flex-shrink:0;overflow:hidden;text-overflow:ellipsis;white-space:nowrap;}
+  .compare-bar-track{flex:1;height:8px;background:var(--void);border-radius:4px;overflow:hidden;}
+  .compare-bar-fill{height:100%;border-radius:4px;transition:width .4s ease;}
+  .compare-pct{font-family:var(--mono);font-size:0.7rem;color:var(--ink);width:38px;text-align:right;flex-shrink:0;}
+
+  .goal-grid{display:grid;grid-template-columns:repeat(auto-fill,minmax(240px,1fr));gap:14px;margin-bottom:8px;}
+  .goal-card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);padding:18px;cursor:pointer;transition:.2s;position:relative;}
+  .goal-card:hover{border-color:var(--amber);transform:translateY(-2px);}
+  .goal-card .name{font-family:var(--sans);font-weight:600;font-size:0.95rem;margin-bottom:4px;padding-right:70px;}
+  .goal-card .meta{font-family:var(--mono);font-size:0.64rem;color:var(--ink-dim);margin-bottom:16px;}
+  .ring-wrap{display:flex;align-items:center;gap:14px;}
+  .ring{position:relative;width:64px;height:64px;flex-shrink:0;}
+  .ring svg{transform:rotate(-90deg);}
+  .ring-pct{position:absolute;inset:0;display:flex;align-items:center;justify-content:center;font-family:var(--mono);font-weight:700;font-size:0.76rem;}
+  .status-chip{position:absolute;top:16px;right:16px;font-family:var(--mono);font-size:0.56rem;letter-spacing:0.06em;text-transform:uppercase;padding:3px 8px;border-radius:999px;}
+  .status-chip.upcoming{background:rgba(124,133,144,0.15);color:var(--ink-dim);}
+  .status-chip.active{background:rgba(255,159,67,0.15);color:var(--amber);}
+  .status-chip.finished{background:rgba(53,208,163,0.15);color:var(--teal);}
+
+  .empty-state{text-align:center;padding:48px 20px;color:var(--ink-dim);font-family:var(--sans);font-size:0.9rem;border:1px dashed var(--line);border-radius:var(--radius);line-height:1.6;}
+  .empty-state b{color:var(--ink);}
+
+  .goal-detail{background:var(--panel);border:1px solid var(--amber);border-radius:var(--radius);padding:22px;margin-top:22px;display:none;}
+  .goal-detail.open{display:block;}
+  .detail-head{display:flex;justify-content:space-between;align-items:flex-start;gap:14px;margin-bottom:18px;flex-wrap:wrap;}
+  .detail-head h3{font-family:var(--sans);font-size:1.1rem;font-weight:700;}
+  .detail-meta{font-family:var(--mono);font-size:0.68rem;color:var(--ink-dim);margin-top:4px;}
+  .detail-actions{display:flex;gap:8px;flex-wrap:wrap;}
+
+  .milestones{display:flex;gap:8px;margin:14px 0 4px;flex-wrap:wrap;}
+  .milestone{flex:1;min-width:70px;background:var(--void);border:1px solid var(--line);border-radius:8px;padding:10px;text-align:center;}
+  .milestone.hit{border-color:var(--teal);}
+  .milestone .m-pct{font-family:var(--mono);font-weight:700;color:var(--ink-dim);font-size:0.9rem;}
+  .milestone.hit .m-pct{color:var(--teal);}
+  .milestone .m-date{font-family:var(--mono);font-size:0.58rem;color:var(--ink-faint);margin-top:4px;}
+
+  .dual-flap{display:grid;grid-template-columns:repeat(2,1fr);gap:20px;margin:18px 0;}
+  .dual-flap .flap-row{margin-bottom:0;}
+
+  .loading-msg{text-align:center;color:var(--ink-dim);font-family:var(--mono);font-size:0.76rem;padding:36px 20px;}
+
+  footer.reset-row{text-align:center;margin-top:30px;}
+  footer.reset-row button{background:none;border:none;color:var(--ink-faint);font-family:var(--mono);font-size:0.66rem;text-decoration:underline;cursor:pointer;}
+  footer.reset-row button:hover{color:var(--rust);}
+
+  @media (prefers-reduced-motion: reduce){*,*::before,*::after{animation-duration:0.001ms !important;transition-duration:0.001ms !important;}}
+
+  @media (max-width:640px){
+    .flap-row{grid-template-columns:repeat(3,1fr);}
+    .flap-value{font-size:1.5rem;}
+    .dual-flap{grid-template-columns:1fr;}
+    .dual-flap .flap-row{grid-template-columns:repeat(3,1fr);}
+    header.topbar{flex-direction:column;align-items:flex-start;}
+    .goal-card .name{padding-right:0;}
+    .status-chip{position:static;display:inline-block;margin-bottom:8px;}
+  }
+</style>
+</head>
+<body>
+<div class="wrap">
+
+  <header class="topbar">
+    <div class="wordmark">CHRONOS<span>Time & Course Ledger</span></div>
+    <nav class="tabs">
+      <button type="button" class="tab active" data-tab="chrono">Chronometer</button>
+      <button type="button" class="tab" data-tab="ledger">Course Ledger</button>
+    </nav>
+  </header>
+
+  <section id="tab-chrono" class="tab-panel active">
+    <div class="eyebrow">Precision Time Calculator</div>
+    <p style="color:var(--ink-dim);font-size:0.88rem;margin-bottom:18px;max-width:560px;">Pick any date and Chronos measures the exact distance between then and now — years down to seconds.</p>
+
+    <div class="input-panel">
+      <div class="input-group">
+        <label for="chronoDateInput">Date</label>
+        <input type="date" id="chronoDateInput">
+      </div>
+      <div class="input-group">
+        <label>Quick jump</label>
+        <div class="chips">
+          <button type="button" class="chip" data-preset="now">Today</button>
+          <button type="button" class="chip" data-preset="1w">-1 Week</button>
+          <button type="button" class="chip" data-preset="1m">-1 Month</button>
+          <button type="button" class="chip" data-preset="1y">-1 Year</button>
+        </div>
+      </div>
+    </div>
+
+    <div class="direction-label" id="chronoDirectionLabel">SELECT A DATE TO BEGIN</div>
+
+    <div class="flap-row" id="chronoFlapRow">
+      <div class="flap-cell"><div class="flap-value" data-unit="years">--</div><div class="flap-label">Years</div></div>
+      <div class="flap-cell"><div class="flap-value" data-unit="months">--</div><div class="flap-label">Months</div></div>
+      <div class="flap-cell"><div class="flap-value" data-unit="days">--</div><div class="flap-label">Days</div></div>
+      <div class="flap-cell"><div class="flap-value" data-unit="hours">--</div><div class="flap-label">Hours</div></div>
+      <div class="flap-cell"><div class="flap-value" data-unit="minutes">--</div><div class="flap-label">Minutes</div></div>
+      <div class="flap-cell"><div class="flap-value" data-unit="seconds">--</div><div class="flap-label">Seconds</div></div>
+    </div>
+
+    <div class="summary-line" id="chronoSummary">Pick a date above to get started.</div>
+    <div class="stats-grid" id="chronoStatsGrid"></div>
+  </section>
+
+  <section id="tab-ledger" class="tab-panel">
+    <div class="eyebrow">Time-Based Progress Tracking</div>
+    <p style="color:var(--ink-dim);font-size:0.88rem;margin-bottom:18px;max-width:560px;">Set a start date and a duration for anything you're working through — a course, a habit, a goal. Chronos saves it on this device and tracks exactly how much time is done, automatically.</p>
+
+    <div class="overview-strip" id="ledgerOverview"></div>
+
+    <div class="section-head">
+      <h2>Your Goals</h2>
+      <button class="btn primary" id="newGoalBtn" type="button">+ New Goal</button>
+    </div>
+
+    <form class="goal-form" id="newGoalForm">
+      <div class="form-row">
+        <div class="input-group">
+          <label for="goalName">Name</label>
+          <input type="text" id="goalName" placeholder="e.g. Maya 3D Course" required>
+        </div>
+        <div class="input-group">
+          <label for="goalCategory">Category <span style="opacity:.6;">(optional)</span></label>
+          <input type="text" id="goalCategory" placeholder="e.g. Skill, Certification, Habit">
+        </div>
+      </div>
+      <div class="form-row">
+        <div class="input-group">
+          <label for="goalStart">Start Date</label>
+          <input type="date" id="goalStart" required>
+        </div>
+      </div>
+      <div class="mode-toggle">
+        <button type="button" class="btn ghost" id="modeDurationBtn">Set Duration</button>
+        <button type="button" class="btn ghost" id="modeEndDateBtn">Set End Date</button>
+      </div>
+      <div class="form-row" id="durationGroup">
+        <div class="input-group">
+          <label for="goalDurationNum">Duration</label>
+          <input type="number" id="goalDurationNum" min="1" step="1" value="30">
+        </div>
+        <div class="input-group">
+          <label for="goalDurationUnit">Unit</label>
+          <select id="goalDurationUnit">
+            <option value="days" selected>Days</option>
+            <option value="weeks">Weeks</option>
+            <option value="months">Months</option>
+          </select>
+        </div>
+      </div>
+      <div class="form-row" id="endDateGroup" style="display:none;">
+        <div class="input-group">
+          <label for="goalEndDate">End Date</label>
+          <input type="date" id="goalEndDate">
+        </div>
+      </div>
+      <div class="form-actions">
+        <button type="button" class="btn ghost" id="cancelGoalBtn">Cancel</button>
+        <button type="submit" class="btn primary">Save Goal</button>
+      </div>
+    </form>
+
+    <div class="comparison-chart" id="comparisonChart"></div>
+
+    <div class="goal-grid" id="goalGrid"><div class="loading-msg">Loading your saved goals…</div></div>
+
+    <div class="goal-detail" id="goalDetail"></div>
+
+    <footer class="reset-row">
+      <button type="button" id="resetAllBtn">Clear all saved goals</button>
+    </footer>
+  </section>
+
+</div>
+
+<script>
+(function(){
+  "use strict";
+
+  /* ============ STORAGE LAYER ============
+     Prefers the artifact runtime's persistent window.storage (syncs
+     with this Claude account). Falls back to plain localStorage so
+     the file still works if it's downloaded and opened on its own —
+     either way, everything stays on-device, no login required. */
+  const STORAGE_KEY = 'opx-chronos-courses';
+  const hasCloudStorage = typeof window.storage !== 'undefined' && window.storage && typeof window.storage.get === 'function';
+
+  async function storageGetRaw(key){
+    if(hasCloudStorage){
+      try{ const r = await window.storage.get(key, false); return r ? r.value : null; }
+      catch(e){ return null; }
+    }
+    try{ return localStorage.getItem(key); } catch(e){ return null; }
+  }
+  async function storageSetRaw(key, val){
+    if(hasCloudStorage){
+      try{ await window.storage.set(key, val, false); return true; }
+      catch(e){ return false; }
+    }
+    try{ localStorage.setItem(key, val); return true; } catch(e){ return false; }
+  }
+  async function storageDeleteRaw(key){
+    if(hasCloudStorage){
+      try{ await window.storage.delete(key, false); return true; }
+      catch(e){ return false; }
+    }
+    try{ localStorage.removeItem(key); return true; } catch(e){ return false; }
+  }
+  async function loadCourses(){
+    const raw = await storageGetRaw(STORAGE_KEY);
+    if(!raw) return [];
+    try{ const parsed = JSON.parse(raw); return Array.isArray(parsed) ? parsed : []; }
+    catch(e){ return []; }
+  }
+  async function saveCourses(list){ return storageSetRaw(STORAGE_KEY, JSON.stringify(list)); }
+
+  /* ============ DATE MATH ============ */
+  const MONTHS = ['Jan','Feb','Mar','Apr','May','Jun','Jul','Aug','Sep','Oct','Nov','Dec'];
+  const WEEKDAYS = ['Sunday','Monday','Tuesday','Wednesday','Thursday','Friday','Saturday'];
+  const UNIT_LABELS = {years:'Years',months:'Months',days:'Days',hours:'Hours',minutes:'Minutes',seconds:'Seconds'};
+  const COLOR_AMBER = '#FF9F43';
+  const COLOR_TEAL = '#35D0A3';
+  const COLOR_FAINT = '#454C56';
+
+  function pad2(n){ return String(Math.abs(n)).padStart(2,'0'); }
+
+  function toDateInputValue(d){ return d.getFullYear()+'-'+pad2(d.getMonth()+1)+'-'+pad2(d.getDate()); }
+
+  function parseDateInput(val){
+    if(!val) return null;
+    const parts = val.split('-').map(Number);
+    if(parts.length!==3 || !parts[0] || !parts[1] || !parts[2]) return null;
+    return new Date(parts[0], parts[1]-1, parts[2], 0,0,0,0);
+  }
+
+  function fmtDate(d){ return d.getDate()+' '+MONTHS[d.getMonth()]+' '+d.getFullYear(); }
+
+  // Accurate calendar difference. Assumes end >= start.
+  function calendarDiff(start, end){
+    let y = end.getFullYear() - start.getFullYear();
+    let m = end.getMonth() - start.getMonth();
+    let d = end.getDate() - start.getDate();
+    let h = end.getHours() - start.getHours();
+    let mi = end.getMinutes() - start.getMinutes();
+    let s = end.getSeconds() - start.getSeconds();
+    if(s < 0){ s += 60; mi--; }
+    if(mi < 0){ mi += 60; h--; }
+    if(h < 0){ h += 24; d--; }
+    if(d < 0){
+      const prevMonthLength = new Date(end.getFullYear(), end.getMonth(), 0).getDate();
+      d += prevMonthLength; m--;
+    }
+    if(m < 0){ m += 12; y--; }
+    return {y,m,d,h,mi,s};
+  }
+
+  function totalsFromMs(ms){
+    const totalSeconds = Math.floor(ms/1000);
+    return {
+      seconds: totalSeconds,
+      minutes: Math.floor(totalSeconds/60),
+      hours: Math.floor(totalSeconds/3600),
+      days: Math.floor(totalSeconds/86400),
+      weeks: Math.round(totalSeconds/86400/7*10)/10,
+      months: Math.round(totalSeconds/86400/30.4368*10)/10
+    };
+  }
+
+  function dayOfYear(date){
+    const start = new Date(date.getFullYear(),0,0);
+    return Math.floor((date-start)/86400000);
+  }
+  function isLeap(y){ return (y%4===0 && y%100!==0) || y%400===0; }
+
+  function countWeekdaysWeekends(start, end){
+    let weekdays=0, weekends=0;
+    const cur = new Date(start.getFullYear(), start.getMonth(), start.getDate());
+    const last = new Date(end.getFullYear(), end.getMonth(), end.getDate());
+    while(cur <= last){
+      const day = cur.getDay();
+      if(day===0 || day===6) weekends++; else weekdays++;
+      cur.setDate(cur.getDate()+1);
+    }
+    return {weekdays, weekends};
+  }
+
+  function addMonths(date, n){
+    const targetMonthIndex = date.getMonth() + n;
+    const targetYear = date.getFullYear() + Math.floor(targetMonthIndex/12);
+    const targetMonth = ((targetMonthIndex%12)+12)%12;
+    const daysInTargetMonth = new Date(targetYear, targetMonth+1, 0).getDate();
+    return new Date(targetYear, targetMonth, Math.min(date.getDate(), daysInTargetMonth));
+  }
+
+  function escapeHtml(str){
+    const d = document.createElement('div');
+    d.textContent = str == null ? '' : str;
+    return d.innerHTML;
+  }
+
+  function ringSVG(pct, color){
+    const r=26, c=2*Math.PI*r;
+    const clamped = Math.max(0, Math.min(100, pct));
+    const offset = c - (clamped/100)*c;
+    return '<div class="ring"><svg width="64" height="64">'+
+      '<circle cx="32" cy="32" r="'+r+'" stroke="#262B32" stroke-width="6" fill="none"/>'+
+      '<circle cx="32" cy="32" r="'+r+'" stroke="'+color+'" stroke-width="6" fill="none" stroke-dasharray="'+c+'" stroke-dashoffset="'+offset+'" stroke-linecap="round" style="transition:stroke-dashoffset .4s ease;"/>'+
+      '</svg><div class="ring-pct">'+Math.round(clamped)+'%</div></div>';
+  }
+
+  function statTile(v,l){ return '<div class="stat-tile"><div class="v">'+v+'</div><div class="l">'+l+'</div></div>'; }
+  function overviewTile(v,l){ return '<div class="overview-tile"><div class="v">'+v+'</div><div class="l">'+l+'</div></div>'; }
+
+  function updateFlapGroup(prefix, diff, lastVals){
+    const map = {years:diff.y, months:diff.m, days:diff.d, hours:diff.h, minutes:diff.mi, seconds:diff.s};
+    Object.keys(map).forEach(function(unit){
+      const el = document.getElementById(prefix+'-'+unit) || document.querySelector('#'+prefix+' [data-unit="'+unit+'"]');
+      if(!el) return;
+      const txt = pad2(map[unit]);
+      if(lastVals[unit] !== txt){
+        el.classList.add('tick');
+        setTimeout(function(){ el.classList.remove('tick'); }, 200);
+      }
+      el.textContent = txt;
+      lastVals[unit] = txt;
+    });
+  }
+
+  /* ============ STATE ============ */
+  let activeTab = 'chrono';
+  let courses = [];
+  let editingId = null;
+  let selectedGoalId = null;
+  let currentMode = 'duration';
+  let tickCount = 0;
+  let lastChronoFlap = {};
+  let lastGoalFlap = { elapsed:{}, remain:{} };
+
+  /* ============ CHRONOMETER ============ */
+  function updateChronometer(){
+    const val = document.getElementById('chronoDateInput').value;
+    const sel = parseDateInput(val);
+    const dirLabel = document.getElementById('chronoDirectionLabel');
+    const summary = document.getElementById('chronoSummary');
+    const grid = document.getElementById('chronoStatsGrid');
+
+    if(!sel){
+      Object.keys(UNIT_LABELS).forEach(function(u){
+        const el = document.querySelector('#chronoFlapRow [data-unit="'+u+'"]');
+        if(el) el.textContent = '--';
+      });
+      dirLabel.textContent = 'SELECT A DATE TO BEGIN';
+      summary.textContent = 'Pick a date above to get started.';
+      grid.innerHTML = '';
+      lastChronoFlap = {};
+      return;
+    }
+
+    const now = new Date();
+    const future = sel > now;
+    const start = future ? now : sel;
+    const end = future ? sel : now;
+    const diff = calendarDiff(start, end);
+    const ms = end - start;
+    const totals = totalsFromMs(ms);
+
+    dirLabel.textContent = future ? 'TIME REMAINING UNTIL' : 'TIME ELAPSED SINCE';
+    updateFlapGroup('chronoFlapRow', diff, lastChronoFlap);
+
+    summary.innerHTML = "That's <b>"+diff.y+"y "+diff.m+"m "+diff.d+"d "+diff.h+"h "+diff.mi+"m "+diff.s+"s</b> — or <b>"+totals.days.toLocaleString()+" days</b> — "+(future?'until':'since')+" <b>"+fmtDate(sel)+"</b>.";
+
+    const wk = countWeekdaysWeekends(start, end);
+    grid.innerHTML = [
+      statTile(totals.weeks.toLocaleString(),'Total Weeks'),
+      statTile(totals.months.toLocaleString(),'Total Months (avg)'),
+      statTile(totals.hours.toLocaleString(),'Total Hours'),
+      statTile(totals.minutes.toLocaleString(),'Total Minutes'),
+      statTile(totals.seconds.toLocaleString(),'Total Seconds'),
+      statTile(WEEKDAYS[sel.getDay()],'Day Of Week'),
+      statTile(dayOfYear(sel),'Day Of Year, '+sel.getFullYear()),
+      statTile(isLeap(sel.getFullYear())?'Yes':'No','Leap Year ('+sel.getFullYear()+')'),
+      statTile(wk.weekdays.toLocaleString(),'Weekdays In Range'),
+      statTile(wk.weekends.toLocaleString(),'Weekend Days In Range')
+    ].join('');
+  }
+
+  document.getElementById('chronoDateInput').addEventListener('input', updateChronometer);
+  document.querySelectorAll('.chips .chip').forEach(function(chip){
+    chip.addEventListener('click', function(){
+      const preset = chip.dataset.preset;
+      const d = new Date();
+      if(preset==='1w') d.setDate(d.getDate()-7);
+      else if(preset==='1m') d.setMonth(d.getMonth()-1);
+      else if(preset==='1y') d.setFullYear(d.getFullYear()-1);
+      document.getElementById('chronoDateInput').value = toDateInputValue(d);
+      updateChronometer();
+    });
+  });
+
+  /* ============ COURSE LEDGER ============ */
+  function computeCourseStatus(course, now){
+    const start = parseDateInput(course.startISO.slice(0,10));
+    const end = parseDateInput(course.endISO.slice(0,10));
+    if(now < start) return 'upcoming';
+    if(now >= end) return 'finished';
+    return 'active';
+  }
+  function computeProgress(course, now){
+    const start = parseDateInput(course.startISO.slice(0,10)).getTime();
+    const end = parseDateInput(course.endISO.slice(0,10)).getTime();
+    const n = now.getTime();
+    if(n<=start) return 0;
+    if(n>=end) return 100;
+    return Math.round(((n-start)/(end-start))*1000)/10;
+  }
+  function statusColor(status){
+    return status==='finished' ? COLOR_TEAL : status==='upcoming' ? COLOR_FAINT : COLOR_AMBER;
+  }
+
+  function renderOverview(){
+    const now = new Date();
+    const total = courses.length;
+    const active = courses.filter(function(c){ return computeCourseStatus(c,now)==='active'; }).length;
+    const avgProgress = total ? (courses.reduce(function(s,c){ return s+computeProgress(c,now); },0)/total).toFixed(1) : '0';
+    let nearest = null;
+    courses.forEach(function(c){
+      const status = computeCourseStatus(c,now);
+      if(status==='finished') return;
+      const end = parseDateInput(c.endISO.slice(0,10));
+      if(!nearest || end < parseDateInput(nearest.endISO.slice(0,10))) nearest = c;
+    });
+    let totalDaysInvested = 0;
+    courses.forEach(function(c){
+      const start = parseDateInput(c.startISO.slice(0,10));
+      const end = parseDateInput(c.endISO.slice(0,10));
+      const cappedNow = now < end ? now : end;
+      totalDaysInvested += Math.max(0, (cappedNow-start)/86400000);
+    });
+
+    document.getElementById('ledgerOverview').innerHTML = [
+      overviewTile(total, 'Goals Tracked'),
+      overviewTile(active, 'Active Now'),
+      overviewTile(avgProgress+'%', 'Avg Progress'),
+      overviewTile(Math.round(totalDaysInvested).toLocaleString()+'d', 'Time Invested (All)'),
+      overviewTile(nearest ? escapeHtml(nearest.name) : '—', nearest ? 'Next Deadline · '+fmtDate(parseDateInput(nearest.endISO.slice(0,10))) : 'Next Deadline')
+    ].join('');
+  }
+
+  function renderComparison(){
+    const now = new Date();
+    const el = document.getElementById('comparisonChart');
+    if(!courses.length){ el.style.display='none'; return; }
+    el.style.display='flex';
+    el.innerHTML = courses.map(function(c){
+      const pct = computeProgress(c,now);
+      const status = computeCourseStatus(c,now);
+      return '<div class="compare-row">'+
+        '<div class="compare-name">'+escapeHtml(c.name)+'</div>'+
+        '<div class="compare-bar-track"><div class="compare-bar-fill" style="width:'+pct+'%;background:'+statusColor(status)+';"></div></div>'+
+        '<div class="compare-pct">'+pct+'%</div></div>';
+    }).join('');
+  }
+
+  function daysLeftLabel(now, course, status){
+    const end = parseDateInput(course.endISO.slice(0,10));
+    const start = parseDateInput(course.startISO.slice(0,10));
+    if(status==='upcoming'){
+      const d = Math.ceil((start-now)/86400000);
+      return 'starts in '+d+'d';
+    }
+    if(status==='finished') return 'finished';
+    const d = Math.ceil((end-now)/86400000);
+    return d+'d left';
+  }
+
+  function renderGoalGrid(){
+    const now = new Date();
+    const grid = document.getElementById('goalGrid');
+    if(!courses.length){
+      grid.innerHTML = '<div class="empty-state">No goals yet. <b>Add your first one</b> — a course, a skill, a habit — and Chronos will track exactly how much time you\'ve put in.</div>';
+      return;
+    }
+    grid.innerHTML = courses.map(function(c){
+      const pct = computeProgress(c,now);
+      const status = computeCourseStatus(c,now);
+      const color = statusColor(status);
+      return '<div class="goal-card" data-id="'+c.id+'">'+
+        '<div class="status-chip '+status+'">'+status+'</div>'+
+        '<div class="name">'+escapeHtml(c.name)+'</div>'+
+        '<div class="meta">'+fmtDate(parseDateInput(c.startISO.slice(0,10)))+' → '+fmtDate(parseDateInput(c.endISO.slice(0,10)))+'</div>'+
+        '<div class="ring-wrap">'+ringSVG(pct,color)+
+          '<div><div style="font-family:var(--mono);font-size:0.7rem;color:var(--ink-dim);">'+Math.round(pct)+'% complete</div>'+
+          '<div style="font-family:var(--mono);font-size:0.7rem;color:var(--ink-dim);margin-top:2px;">'+daysLeftLabel(now,c,status)+'</div></div>'+
+        '</div></div>';
+    }).join('');
+    grid.querySelectorAll('.goal-card').forEach(function(card){
+      card.addEventListener('click', function(){ openGoalDetail(card.dataset.id); });
+    });
+  }
+
+  function renderMilestones(course){
+    const start = parseDateInput(course.startISO.slice(0,10)).getTime();
+    const end = parseDateInput(course.endISO.slice(0,10)).getTime();
+    const now = Date.now();
+    return [0.25,0.5,0.75,1].map(function(f){
+      const t = start + (end-start)*f;
+      const hit = now >= t;
+      return '<div class="milestone '+(hit?'hit':'')+'"><div class="m-pct">'+Math.round(f*100)+'%</div><div class="m-date">'+fmtDate(new Date(t))+'</div></div>';
+    }).join('');
+  }
+
+  function buildDetailSummary(course, status, pct, elapsedDiff, remainDiff){
+    const name = escapeHtml(course.name);
+    if(status==='upcoming'){
+      const start = parseDateInput(course.startISO.slice(0,10));
+      const untilStart = calendarDiff(new Date(), start);
+      return '<b>'+name+'</b> hasn\'t started yet — it begins in <b>'+untilStart.y+'y '+untilStart.m+'m '+untilStart.d+'d</b>.';
+    }
+    if(status==='finished'){
+      return '<b>'+name+'</b> has run its full course. You invested <b>'+elapsedDiff.y+'y '+elapsedDiff.m+'m '+elapsedDiff.d+'d</b> from start to finish.';
+    }
+    return "You're <b>"+Math.round(pct)+'%</b> through <b>'+name+'</b> — <b>'+elapsedDiff.y+'y '+elapsedDiff.m+'m '+elapsedDiff.d+'d '+elapsedDiff.h+'h</b> done, <b>'+remainDiff.y+'y '+remainDiff.m+'m '+remainDiff.d+'d '+remainDiff.h+'h</b> to go.';
+  }
+
+  function flapRowHTML(prefix){
+    const units = ['years','months','days','hours','minutes','seconds'];
+    return '<div class="flap-row" id="'+prefix+'">'+units.map(function(u){
+      return '<div class="flap-cell"><div class="flap-value" id="'+prefix+'-'+u+'">00</div><div class="flap-label">'+UNIT_LABELS[u]+'</div></div>';
+    }).join('')+'</div>';
+  }
+
+  function openGoalDetail(id){
+    const course = courses.find(function(c){ return c.id===id; });
+    if(!course) return;
+    selectedGoalId = id;
+    lastGoalFlap = { elapsed:{}, remain:{} };
+    const panel = document.getElementById('goalDetail');
+    panel.classList.add('open');
+    panel.innerHTML =
+      '<div class="detail-head"><div><h3>'+escapeHtml(course.name)+'</h3>'+
+      '<div class="detail-meta">'+(course.category?escapeHtml(course.category)+' · ':'')+fmtDate(parseDateInput(course.startISO.slice(0,10)))+' → '+fmtDate(parseDateInput(course.endISO.slice(0,10)))+'</div></div>'+
+      '<div class="detail-actions">'+
+        '<button class="btn ghost small" id="editGoalBtn" type="button">Edit</button>'+
+        '<button class="btn danger small" id="deleteGoalBtn" type="button">Delete</button>'+
+        '<button class="btn ghost small" id="closeGoalBtn" type="button">Close</button>'+
+      '</div></div>'+
+      '<div style="display:flex;align-items:center;gap:16px;margin-bottom:14px;">'+
+        '<div id="detailRing"></div>'+
+        '<div><div style="font-family:var(--mono);font-size:1.5rem;font-weight:700;" id="detailPctBig">0%</div>'+
+        '<div style="font-family:var(--mono);font-size:0.64rem;color:var(--ink-dim);text-transform:uppercase;letter-spacing:0.08em;">complete</div></div>'+
+      '</div>'+
+      '<div id="detailSummary" class="summary-line" style="text-align:left;"></div>'+
+      '<div class="dual-flap">'+
+        '<div><div class="eyebrow">Time Invested</div>'+flapRowHTML('detailElapsed')+'</div>'+
+        '<div><div class="eyebrow">Time Remaining</div>'+flapRowHTML('detailRemain')+'</div>'+
+      '</div>'+
+      '<div class="eyebrow" style="margin-top:16px;">Milestones</div>'+
+      '<div class="milestones">'+renderMilestones(course)+'</div>';
+
+    document.getElementById('editGoalBtn').addEventListener('click', function(){ editGoal(id); });
+    document.getElementById('deleteGoalBtn').addEventListener('click', function(){ deleteGoal(id); });
+    document.getElementById('closeGoalBtn').addEventListener('click', closeGoalDetail);
+    updateGoalDetailTick();
+    if(typeof panel.scrollIntoView==='function') panel.scrollIntoView({behavior:'smooth', block:'nearest'});
+  }
+
+  function updateGoalDetailTick(){
+    if(!selectedGoalId) return;
+    const course = courses.find(function(c){ return c.id===selectedGoalId; });
+    if(!course){ closeGoalDetail(); return; }
+    const now = new Date();
+    const start = parseDateInput(course.startISO.slice(0,10));
+    const end = parseDateInput(course.endISO.slice(0,10));
+    const status = computeCourseStatus(course, now);
+    const pct = computeProgress(course, now);
+
+    const elapsedEnd = now < end ? now : end;
+    const elapsedDiff = elapsedEnd >= start ? calendarDiff(start, elapsedEnd) : {y:0,m:0,d:0,h:0,mi:0,s:0};
+    const remainDiff = now >= end ? {y:0,m:0,d:0,h:0,mi:0,s:0} : calendarDiff(now, end);
+
+    updateFlapGroup('detailElapsed', elapsedDiff, lastGoalFlap.elapsed);
+    updateFlapGroup('detailRemain', remainDiff, lastGoalFlap.remain);
+
+    const ringEl = document.getElementById('detailRing');
+    if(ringEl) ringEl.innerHTML = ringSVG(pct, statusColor(status));
+    const pctEl = document.getElementById('detailPctBig');
+    if(pctEl) pctEl.textContent = Math.round(pct)+'%';
+    const sumEl = document.getElementById('detailSummary');
+    if(sumEl) sumEl.innerHTML = buildDetailSummary(course, status, pct, elapsedDiff, remainDiff);
+  }
+
+  function closeGoalDetail(){
+    selectedGoalId = null;
+    const panel = document.getElementById('goalDetail');
+    panel.classList.remove('open');
+    panel.innerHTML = '';
+  }
+
+  async function deleteGoal(id){
+    const course = courses.find(function(c){ return c.id===id; });
+    if(!course) return;
+    if(!confirm('Delete "'+course.name+'"? This can\'t be undone.')) return;
+    courses = courses.filter(function(c){ return c.id!==id; });
+    await saveCourses(courses);
+    closeGoalDetail();
+    renderOverview(); renderComparison(); renderGoalGrid();
+  }
+
+  function editGoal(id){
+    const course = courses.find(function(c){ return c.id===id; });
+    if(!course) return;
+    editingId = id;
+    document.getElementById('goalName').value = course.name;
+    document.getElementById('goalCategory').value = course.category || '';
+    document.getElementById('goalStart').value = course.startISO.slice(0,10);
+    document.getElementById('goalEndDate').value = course.endISO.slice(0,10);
+    setMode('enddate');
+    const form = document.getElementById('newGoalForm');
+    form.classList.add('open');
+    if(typeof form.scrollIntoView==='function') form.scrollIntoView({behavior:'smooth', block:'center'});
+  }
+
+  /* ============ FORM ============ */
+  function setMode(mode){
+    currentMode = mode;
+    const durBtn = document.getElementById('modeDurationBtn');
+    const endBtn = document.getElementById('modeEndDateBtn');
+    durBtn.classList.toggle('primary', mode==='duration');
+    durBtn.classList.toggle('ghost', mode!=='duration');
+    endBtn.classList.toggle('primary', mode==='enddate');
+    endBtn.classList.toggle('ghost', mode!=='enddate');
+    document.getElementById('durationGroup').style.display = mode==='duration' ? 'flex' : 'none';
+    document.getElementById('endDateGroup').style.display = mode==='enddate' ? 'flex' : 'none';
+  }
+  document.getElementById('modeDurationBtn').addEventListener('click', function(){ setMode('duration'); });
+  document.getElementById('modeEndDateBtn').addEventListener('click', function(){ setMode('enddate'); });
+
+  document.getElementById('newGoalBtn').addEventListener('click', function(){
+    editingId = null;
+    const form = document.getElementById('newGoalForm');
+    form.reset();
+    document.getElementById('goalStart').value = toDateInputValue(new Date());
+    document.getElementById('goalDurationNum').value = '30';
+    setMode('duration');
+    form.classList.add('open');
+    if(typeof form.scrollIntoView==='function') form.scrollIntoView({behavior:'smooth', block:'center'});
+  });
+  document.getElementById('cancelGoalBtn').addEventListener('click', function(){
+    editingId = null;
+    document.getElementById('newGoalForm').classList.remove('open');
+  });
+
+  document.getElementById('newGoalForm').addEventListener('submit', async function(e){
+    e.preventDefault();
+    const name = document.getElementById('goalName').value.trim();
+    const category = document.getElementById('goalCategory').value.trim();
+    const start = parseDateInput(document.getElementById('goalStart').value);
+    if(!name || !start){ alert('Give it a name and a start date at least.'); return; }
+
+    let end;
+    if(currentMode==='duration'){
+      const n = parseInt(document.getElementById('goalDurationNum').value, 10);
+      const unit = document.getElementById('goalDurationUnit').value;
+      if(!n || n<1){ alert('Enter a valid duration (1 or more).'); return; }
+      if(unit==='days'){ end = new Date(start); end.setDate(end.getDate()+n); }
+      else if(unit==='weeks'){ end = new Date(start); end.setDate(end.getDate()+n*7); }
+      else { end = addMonths(start, n); }
+    } else {
+      end = parseDateInput(document.getElementById('goalEndDate').value);
+      if(!end){ alert('Pick an end date.'); return; }
+    }
+    if(end <= start){ alert('End date must be after the start date.'); return; }
+
+    if(editingId){
+      const idx = courses.findIndex(function(c){ return c.id===editingId; });
+      if(idx>-1){
+        courses[idx] = Object.assign({}, courses[idx], {
+          name: name, category: category,
+          startISO: toDateInputValue(start), endISO: toDateInputValue(end)
+        });
+      }
+    } else {
+      courses.push({
+        id: 'g_'+Date.now()+'_'+Math.random().toString(36).slice(2,7),
+        name: name, category: category,
+        startISO: toDateInputValue(start), endISO: toDateInputValue(end),
+        createdISO: new Date().toISOString()
+      });
+    }
+    await saveCourses(courses);
+    editingId = null;
+    document.getElementById('newGoalForm').classList.remove('open');
+    renderOverview(); renderComparison(); renderGoalGrid();
+  });
+
+  document.getElementById('resetAllBtn').addEventListener('click', async function(){
+    if(!confirm('Delete all saved goals? This cannot be undone.')) return;
+    await storageDeleteRaw(STORAGE_KEY);
+    courses = [];
+    closeGoalDetail();
+    renderOverview(); renderComparison(); renderGoalGrid();
+  });
+
+  /* ============ TABS ============ */
+  document.querySelectorAll('nav.tabs button').forEach(function(btn){
+    btn.addEventListener('click', function(){
+      activeTab = btn.dataset.tab;
+      document.querySelectorAll('nav.tabs button').forEach(function(b){ b.classList.toggle('active', b===btn); });
+      document.querySelectorAll('.tab-panel').forEach(function(p){ p.classList.toggle('active', p.id==='tab-'+activeTab); });
+    });
+  });
+
+  /* ============ MAIN LOOP ============ */
+  function tick(){
+    tickCount++;
+    if(activeTab==='chrono') updateChronometer();
+    if(activeTab==='ledger'){
+      if(tickCount % 10 === 1){ renderOverview(); renderComparison(); renderGoalGrid(); }
+      if(selectedGoalId) updateGoalDetailTick();
+    }
+  }
+
+  /* ============ INIT ============ */
+  async function initLedger(){
+    courses = await loadCourses();
+    renderOverview();
+    renderComparison();
+    renderGoalGrid();
+  }
+
+  (function init(){
+    const defaultDate = new Date();
+    defaultDate.setFullYear(defaultDate.getFullYear()-1);
+    document.getElementById('chronoDateInput').value = toDateInputValue(defaultDate);
+    updateChronometer();
+    initLedger();
+    setInterval(tick, 1000);
+  })();
+
+})();
+</script>
+</body>
+</html>
