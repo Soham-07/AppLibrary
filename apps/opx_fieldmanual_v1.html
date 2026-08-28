@@ -1,0 +1,1212 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<title>THE FIELD MANUAL — Business, Career &amp; Professional Life</title>
+<style>
+:root{
+  --ink:#0B0D10; --surface:#14171D; --surface2:#1B1F27; --surface3:#20242D;
+  --border:#2A2F3A; --border-lite:#333947;
+  --text:#E9E6DD; --text-dim:#9C978A; --text-faint:#6B6860;
+  --gold:#C9A544; --gold-dim:#8A7433;
+  --steel:#5B8FA8; --steel-dim:#3E6376;
+  --brick:#B5583F; --olive:#748F5C; --amber:#C97C3F;
+  --serif:Georgia,'Iowan Old Style','Palatino Linotype','Book Antiqua',serif;
+  --sans:-apple-system,BlinkMacSystemFont,'Segoe UI',Roboto,Helvetica,Arial,sans-serif;
+  --mono:ui-monospace,'SF Mono','Cascadia Mono','Consolas','Menlo',monospace;
+}
+*{box-sizing:border-box;}
+html,body{margin:0;padding:0;background:var(--ink);color:var(--text);font-family:var(--sans);
+  -webkit-font-smoothing:antialiased;}
+body{font-size:15px;line-height:1.6;}
+::selection{background:var(--gold-dim);color:#000;}
+a{color:var(--steel);}
+button{font-family:inherit;cursor:pointer;}
+::-webkit-scrollbar{width:9px;height:9px;}
+::-webkit-scrollbar-track{background:var(--surface);}
+::-webkit-scrollbar-thumb{background:var(--border-lite);border-radius:5px;}
+
+/* ---------- layout shell ---------- */
+#app{display:flex;min-height:100vh;}
+#rail{
+  width:272px;flex:0 0 272px;background:var(--surface);border-right:1px solid var(--border);
+  display:flex;flex-direction:column;position:fixed;top:0;left:0;bottom:0;
+  transform:translateX(0);transition:transform .25s ease;z-index:40;
+}
+#railHead{padding:22px 20px 16px;border-bottom:1px solid var(--border);}
+#railHead .stamp{
+  font-family:var(--mono);font-size:10px;letter-spacing:.18em;color:var(--gold);
+  text-transform:uppercase;border:1px solid var(--gold-dim);display:inline-block;
+  padding:2px 7px;border-radius:2px;margin-bottom:10px;
+}
+#railHead h1{font-family:var(--serif);font-size:21px;margin:0 0 4px;letter-spacing:.01em;
+  font-weight:600;color:var(--text);}
+#railHead .sub{font-size:11.5px;color:var(--text-dim);letter-spacing:.03em;}
+#railNav{flex:1;overflow-y:auto;padding:14px 0 20px;}
+.navGroup{margin-bottom:6px;}
+.navGroupLabel{
+  font-family:var(--mono);font-size:10px;letter-spacing:.16em;color:var(--text-faint);
+  padding:14px 20px 6px;text-transform:uppercase;
+}
+.navItem{
+  display:flex;align-items:baseline;gap:10px;width:100%;text-align:left;background:none;border:none;
+  color:var(--text-dim);padding:7px 20px 7px 16px;font-size:13.5px;border-left:2px solid transparent;
+}
+.navItem:hover{background:var(--surface2);color:var(--text);}
+.navItem.active{color:var(--gold);border-left-color:var(--gold);background:var(--surface2);}
+.navItem .n{font-family:var(--mono);font-size:10.5px;color:var(--text-faint);min-width:20px;}
+.navItem.active .n{color:var(--gold-dim);}
+#railFoot{padding:14px 20px;border-top:1px solid var(--border);font-family:var(--mono);
+  font-size:10px;color:var(--text-faint);letter-spacing:.04em;}
+
+#railToggle{display:none;position:fixed;top:14px;left:14px;z-index:60;background:var(--surface2);
+  border:1px solid var(--border-lite);color:var(--text);width:38px;height:38px;border-radius:6px;
+  font-size:16px;}
+#railScrim{display:none;position:fixed;inset:0;background:rgba(0,0,0,.5);z-index:35;}
+
+#main{flex:1;margin-left:272px;min-height:100vh;display:flex;flex-direction:column;}
+#topbar{
+  position:sticky;top:0;z-index:20;background:rgba(11,13,16,.9);backdrop-filter:blur(8px);
+  border-bottom:1px solid var(--border);padding:14px 28px;display:flex;gap:16px;align-items:center;
+}
+#searchWrap{flex:1;position:relative;max-width:520px;}
+#searchInput{
+  width:100%;background:var(--surface2);border:1px solid var(--border-lite);color:var(--text);
+  padding:9px 14px 9px 34px;border-radius:6px;font-size:14px;font-family:var(--sans);
+}
+#searchInput:focus{outline:none;border-color:var(--gold-dim);}
+#searchWrap svg{position:absolute;left:11px;top:50%;transform:translateY(-50%);opacity:.5;}
+#searchResults{
+  position:absolute;top:calc(100% + 6px);left:0;right:0;background:var(--surface2);
+  border:1px solid var(--border-lite);border-radius:8px;max-height:420px;overflow-y:auto;
+  display:none;box-shadow:0 12px 30px rgba(0,0,0,.5);
+}
+#searchResults.show{display:block;}
+.srItem{padding:10px 14px;border-bottom:1px solid var(--border);display:block;}
+.srItem:last-child{border-bottom:none;}
+.srItem:hover{background:var(--surface3);}
+.srType{font-family:var(--mono);font-size:9.5px;color:var(--gold);letter-spacing:.1em;text-transform:uppercase;}
+.srTitle{font-size:13.5px;color:var(--text);margin-top:2px;}
+.srMeta{font-size:11.5px;color:var(--text-dim);margin-top:1px;}
+#statPills{display:flex;gap:8px;font-family:var(--mono);}
+.pill{font-size:10px;color:var(--text-dim);border:1px solid var(--border-lite);padding:5px 9px;
+  border-radius:20px;white-space:nowrap;}
+.pill b{color:var(--gold);}
+@media (max-width:880px){#statPills{display:none;}}
+
+#content{flex:1;padding:32px 40px 90px;max-width:980px;}
+@media (max-width:640px){#content{padding:22px 18px 70px;}}
+
+/* ---------- home ---------- */
+.heroRow{display:flex;align-items:flex-end;justify-content:space-between;gap:20px;
+  border-bottom:1px solid var(--border);padding-bottom:22px;margin-bottom:28px;flex-wrap:wrap;}
+.heroKicker{font-family:var(--mono);font-size:11px;letter-spacing:.2em;color:var(--gold);
+  text-transform:uppercase;margin-bottom:10px;}
+.heroTitle{font-family:var(--serif);font-size:38px;line-height:1.15;margin:0 0 12px;font-weight:600;}
+.heroDesc{color:var(--text-dim);font-size:15px;max-width:640px;}
+.heroStamp{font-family:var(--mono);font-size:10.5px;color:var(--text-faint);text-align:right;
+  line-height:1.7;white-space:nowrap;}
+.gridCards{display:grid;grid-template-columns:repeat(auto-fill,minmax(210px,1fr));gap:12px;}
+.miniCard{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:16px;
+  text-align:left;display:flex;flex-direction:column;gap:6px;}
+.miniCard:hover{border-color:var(--gold-dim);}
+.miniCard .n{font-family:var(--mono);font-size:10px;color:var(--gold-dim);}
+.miniCard .t{font-family:var(--serif);font-size:16.5px;color:var(--text);font-weight:600;}
+.miniCard .d{font-size:12.5px;color:var(--text-dim);line-height:1.5;}
+.sectionLabel{font-family:var(--mono);font-size:11px;letter-spacing:.14em;color:var(--text-faint);
+  text-transform:uppercase;margin:34px 0 14px;display:flex;align-items:center;gap:10px;}
+.sectionLabel::after{content:'';flex:1;height:1px;background:var(--border);}
+
+/* ---------- domain page ---------- */
+.pageHead{border-bottom:1px solid var(--border);padding-bottom:20px;margin-bottom:24px;}
+.pageEyebrow{font-family:var(--mono);font-size:11px;color:var(--gold);letter-spacing:.16em;
+  text-transform:uppercase;margin-bottom:8px;}
+.pageTitle{font-family:var(--serif);font-size:32px;font-weight:600;margin:0 0 8px;}
+.pageTag{color:var(--text-dim);font-size:14.5px;}
+.wwhBlock{display:grid;gap:14px;margin-bottom:28px;}
+.wwhRow{display:grid;grid-template-columns:96px 1fr;gap:16px;padding:14px 0;border-top:1px solid var(--border);}
+.wwhRow:first-child{border-top:none;}
+.wwhLabel{font-family:var(--mono);font-size:11px;color:var(--steel);letter-spacing:.1em;
+  text-transform:uppercase;padding-top:2px;}
+.wwhText{font-size:14.5px;color:var(--text);line-height:1.65;}
+.topicList{display:grid;grid-template-columns:repeat(auto-fill,minmax(230px,1fr));gap:8px;margin-top:6px;}
+.topicItem{background:var(--surface);border:1px solid var(--border);border-radius:6px;padding:10px 13px;
+  font-size:13px;color:var(--text-dim);display:flex;gap:8px;align-items:flex-start;}
+.topicItem::before{content:'—';color:var(--gold-dim);flex:0 0 auto;}
+
+/* ---------- cards: framework / technique / etc ---------- */
+.card{background:var(--surface);border:1px solid var(--border);border-radius:10px;margin-bottom:14px;
+  overflow:hidden;}
+.cardHead{padding:16px 18px;display:flex;justify-content:space-between;align-items:center;gap:14px;
+  width:100%;background:none;border:none;text-align:left;color:var(--text);}
+.cardHead:hover{background:var(--surface2);}
+.cardHeadL{display:flex;flex-direction:column;gap:5px;}
+.cardTitle{font-family:var(--serif);font-size:17.5px;font-weight:600;color:var(--text);}
+.cardSub{font-size:12.5px;color:var(--text-dim);}
+.stampRow{display:flex;gap:6px;flex-wrap:wrap;flex:0 0 auto;}
+.stamp2{font-family:var(--mono);font-size:9.5px;letter-spacing:.08em;text-transform:uppercase;
+  padding:3px 8px;border-radius:3px;border:1px solid;white-space:nowrap;}
+.stamp-low{color:var(--olive);border-color:#3a4a30;}
+.stamp-medium{color:var(--amber);border-color:#4a3a20;}
+.stamp-high{color:var(--brick);border-color:#4a2a20;}
+.stamp-neutral{color:var(--steel);border-color:var(--steel-dim);}
+.chev{font-family:var(--mono);color:var(--text-faint);transition:transform .2s;flex:0 0 auto;}
+.card.open .chev{transform:rotate(90deg);}
+.cardBody{max-height:0;overflow:hidden;transition:max-height .28s ease;}
+.card.open .cardBody{max-height:2400px;}
+.cardBodyIn{padding:0 18px 20px;border-top:1px solid var(--border);}
+.fieldGrid{display:grid;gap:12px;margin-top:14px;}
+.field{display:grid;grid-template-columns:120px 1fr;gap:14px;}
+@media (max-width:560px){.field{grid-template-columns:1fr;gap:4px;}}
+.fieldLabel{font-family:var(--mono);font-size:10.5px;color:var(--gold-dim);letter-spacing:.08em;
+  text-transform:uppercase;padding-top:2px;}
+.fieldText{font-size:13.5px;color:var(--text-dim);line-height:1.6;}
+.fieldText b, .fieldText strong{color:var(--text);}
+.stepList{margin:0;padding-left:0;list-style:none;counter-reset:step;}
+.stepList li{counter-increment:step;padding:8px 0 8px 34px;position:relative;font-size:13.5px;
+  color:var(--text-dim);border-top:1px solid var(--border);}
+.stepList li:first-child{border-top:none;}
+.stepList li::before{content:counter(step);position:absolute;left:0;top:8px;font-family:var(--mono);
+  font-size:11px;color:var(--gold);border:1px solid var(--gold-dim);width:20px;height:20px;
+  border-radius:50%;display:flex;align-items:center;justify-content:center;}
+.scriptBox{background:var(--surface3);border-left:2px solid var(--steel-dim);padding:12px 14px;
+  border-radius:0 6px 6px 0;font-size:13.5px;color:var(--text);line-height:1.65;margin-top:8px;
+  white-space:pre-wrap;font-family:var(--sans);}
+.scriptBox .ph{color:var(--gold);}
+.metricGrid{display:grid;grid-template-columns:repeat(auto-fill,minmax(260px,1fr));gap:12px;}
+.metricCard{background:var(--surface);border:1px solid var(--border);border-radius:8px;padding:15px 16px;}
+.metricCard .mt{font-family:var(--serif);font-size:15.5px;font-weight:600;margin-bottom:4px;}
+.metricCard .mf{font-family:var(--mono);font-size:12px;color:var(--steel);background:var(--surface3);
+  padding:4px 8px;border-radius:4px;display:inline-block;margin:4px 0 8px;}
+.metricCard .md{font-size:12.5px;color:var(--text-dim);line-height:1.55;}
+.metricCard .mw{font-size:12px;color:var(--amber);margin-top:8px;line-height:1.5;}
+.metricCard .mw b{color:var(--amber);}
+
+.caseHead{display:flex;justify-content:space-between;align-items:baseline;flex-wrap:wrap;gap:8px;}
+.flagCols{display:grid;grid-template-columns:1fr 1fr;gap:16px;margin-top:10px;}
+@media (max-width:600px){.flagCols{grid-template-columns:1fr;}}
+.flagCol h4{font-family:var(--mono);font-size:11px;letter-spacing:.1em;text-transform:uppercase;
+  margin:0 0 8px;}
+.flagCol.good h4{color:var(--olive);}
+.flagCol.bad h4{color:var(--brick);}
+.flagCol ul{margin:0;padding-left:16px;}
+.flagCol li{font-size:13px;color:var(--text-dim);margin-bottom:6px;line-height:1.5;}
+
+.backBtn{background:none;border:1px solid var(--border-lite);color:var(--text-dim);padding:7px 14px;
+  border-radius:6px;font-size:12.5px;margin-bottom:20px;display:inline-flex;align-items:center;gap:6px;}
+.backBtn:hover{color:var(--text);border-color:var(--gold-dim);}
+
+.crossRef{margin-top:26px;padding-top:16px;border-top:1px dashed var(--border);font-size:12.5px;
+  color:var(--text-faint);}
+.crossRef b{color:var(--text-dim);}
+
+footer{padding:26px 40px;border-top:1px solid var(--border);font-family:var(--mono);font-size:10.5px;
+  color:var(--text-faint);text-align:center;}
+
+@media (max-width:900px){
+  #rail{transform:translateX(-100%);}
+  #rail.open{transform:translateX(0);}
+  #main{margin-left:0;}
+  #railToggle{display:flex;align-items:center;justify-content:center;}
+  #railScrim.show{display:block;}
+  #topbar{padding-left:60px;}
+}
+@media print{
+  #rail,#topbar,#railToggle,.backBtn{display:none!important;}
+  #main{margin-left:0;}
+  body{background:#fff;color:#111;}
+  .card{break-inside:avoid;border-color:#ccc;}
+  .cardBody{max-height:none!important;}
+}
+</style>
+</head>
+<body>
+<div id="app">
+  <button id="railToggle" aria-label="Toggle navigation">☰</button>
+  <div id="railScrim"></div>
+  <nav id="rail">
+    <div id="railHead">
+      <div class="stamp">Vol. I · Compiled 19 Aug 2026</div>
+      <h1>THE FIELD MANUAL</h1>
+      <div class="sub">Business, Career &amp; Professional Life</div>
+    </div>
+    <div id="railNav"></div>
+    <div id="railFoot">OPX PRIVATE REFERENCE — NOT LEGAL, TAX, OR<br>INVESTMENT ADVICE</div>
+  </nav>
+  <div id="main">
+    <div id="topbar">
+      <div id="searchWrap">
+        <svg width="15" height="15" viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2"><circle cx="11" cy="11" r="8"/><line x1="21" y1="21" x2="16.65" y2="16.65"/></svg>
+        <input id="searchInput" type="text" placeholder="Search the manual — techniques, frameworks, metrics…" autocomplete="off">
+        <div id="searchResults"></div>
+      </div>
+      <div id="statPills"></div>
+    </div>
+    <div id="content"></div>
+    <footer>THE FIELD MANUAL · SELF-CONTAINED REFERENCE · NO DATA LEAVES THIS FILE</footer>
+  </div>
+</div>
+<script>
+const DOMAINS = [
+{id:'career',num:1,title:'Career Architecture',tag:`Career capital, skill stacking, and the mastery ladder`,
+ what:`A career is the compounding sequence of roles, skills, and relationships that sets your earning power and options over time — not any single job.`,
+ why:`Career capital (rare + valuable skill, combined with reputation and network) compounds like money. Early decisions set the trajectory for what's even available to choose from later.`,
+ how:`Stack 2–3 skills that are individually good but rare in combination — that combination beats being world-class at one thing you'll never reach the top of. Go T-shaped: one deep skill plus broad, adjacent competence (a 3D artist who also understands client pricing and pipeline software is worth more than one who only animates). Build career capital before chasing passion — skill is what earns you the leverage to design work you actually want, not the reverse.`,
+ when:`Force a direction review every 12–24 months. Treat 3+ years with no new skill acquired or no scope growth as a warning sign, not stability.`,
+ where:`Inside a single employer, across a freelance client base, or inside your own company — the capital-building logic is identical in all three.`,
+ who:`Applies equally to employees, freelancers, and founders. Career capital funds every path.`,
+ topics:[`Career capital & skill stacking`,`Generalist vs specialist vs T-shaped`,`The mastery ladder (awareness → beginner → competent → advanced → expert → master)`,`Reputation & personal brand`,`Networking & mentorship`,`Career plateaus & reinvention`,`Portfolio careers`,`Career breaks & re-entry`]},
+
+{id:'jobs',num:2,title:'Jobs & Employment',tag:`Resumes, interviews, offers, and staying valuable once you're in`,
+ what:`The full system of finding, winning, and growing inside employment.`,
+ why:`A job is a repeating negotiation with an employer optimizing for maximum output per rupee spent. Understanding their evaluation criteria is how you get paid what you're actually worth.`,
+ how:`Prioritize warm referrals over cold applications — most hires at good companies never see the public pipeline. Tailor your resume's language to mirror the job description's own keywords (ATS systems and skimming humans both pattern-match on this). Prepare STAR-format stories (Situation, Task, Action, Result) for behavioral rounds. Negotiate the first offer every time — most offers carry built-in slack precisely because negotiation is expected.`,
+ when:`Start searching 3–6 months before you need the outcome. Negotiate before signing — leverage effectively disappears the moment you accept.`,
+ where:`Corporate, startup, government, and academic tracks each evaluate differently — corporate leans process and pedigree, startups lean output and speed, government leans credentials and tenure.`,
+ who:`Job seekers on one side; hiring managers, recruiters, and HR on the other — each with different, sometimes conflicting incentives worth understanding.`,
+ topics:[`Resume & ATS keyword matching`,`Referrals vs cold applications`,`Interview formats — technical, behavioral, case`,`Offer & salary negotiation`,`Probation & the first 90 days`,`Promotions & performance reviews`,`Layoffs & resignations`,`Reading workplace politics early`]},
+
+{id:'freelancing',num:3,title:'Freelancing',tag:`Selling your skill directly — pricing, clients, and scope`,
+ what:`Selling your skill directly to clients without an employer in between. You own pricing, client selection, and scope — and all the risk that comes with owning them.`,
+ why:`Removes the single-employer income ceiling and lets skill and reputation set the price directly. In exchange, sales, collections, and scope management become fully your job.`,
+ how:`Your first client almost always comes from your existing network — cold outreach typically converts at under 2–5%, a warm introduction converts far higher. Price by value delivered once you have proof of results, not by the hour. Put scope and a deposit in writing on every project, no exceptions. Once you've delivered the same service three times manually, package it into a repeatable, pre-priced offer.`,
+ when:`Best started as a side stream before quitting a job. Go full-time once you're holding 2–3 months of expenses in reserve and your pipeline is consistently full — not just full once.`,
+ where:`Direct clients pay better and build longer relationships than marketplaces; marketplaces are faster to start but compress price and take a cut.`,
+ who:`Designers, writers, developers, consultants, and increasingly 3D/animation and VFX specialists — anyone with a packageable, sellable skill.`,
+ topics:[`Client acquisition — warm beats cold`,`Pricing models: hourly → value → productized`,`Contracts, scope & deposits`,`Scope creep & change requests`,`Client qualification & red flags`,`Retainers & recurring revenue`,`Portfolio & case studies`,`Scaling solo work into an agency`]},
+
+{id:'entrepreneurship',num:4,title:'Entrepreneurship',tag:`Building a system that creates value independent of your own hours`,
+ what:`Building a business that creates and captures value independent of your own labor hours. The target is a system, not a job you designed for yourself.`,
+ why:`Equity and systems scale; labor-for-money — employment, freelancing — is capped by the hours you personally have. A business isn't.`,
+ how:`Validate the problem before building anything: talk to at least ten real prospects and look for people already paying, badly, for a worse solution. Ship an MVP that tests the single riskiest assumption first, not the easiest feature. Treat product-market fit as a measurable signal — organic referrals, low churn, a "very disappointed if this went away" survey score above roughly 40% — not a feeling.`,
+ when:`Raise venture money only if the business genuinely needs venture-scale growth — a huge addressable market, network effects, or a capital-intensive moat. Most businesses shouldn't, and bootstrapped is the default that keeps control.`,
+ where:`Market choice matters as much as idea quality — a mediocre idea in a market growing fast beats a great idea in one that's shrinking.`,
+ who:`Founders, co-founders, early employees, and investors — each with different incentives that should be made explicit and written down early, before conflict forces the conversation.`,
+ topics:[`Idea validation & customer discovery`,`MVP & product-market fit`,`Bootstrapping vs venture capital`,`Co-founder agreements & equity splits`,`Fundraising basics: angel → seed → Series A`,`Cap tables & dilution`,`Hiring the first ten people`,`Why most startups actually fail — distribution, not product`]},
+
+{id:'business-models',num:5,title:'Business Models',tag:`Who pays, for what, how often, at what margin`,
+ what:`The structural answer to "how does this make money" — who pays, for what, how often, and at what margin.`,
+ why:`The model determines almost everything downstream: what team you need, how fast you can grow, and how defensible the business ends up being.`,
+ how:`For any model, trace the full chain: Revenue → Costs → Margins → Customer acquisition → Retention → Scaling → Moat. High margin, low acquisition cost, high retention — the SaaS pattern — scales completely differently from low margin, high volume — the retail pattern. Neither is superior in the abstract; each fits different markets.`,
+ when:`Revisit the model the moment customer acquisition cost starts rising faster than customer lifetime value, or when a cheaper distribution channel opens up.`,
+ where:`Model viability is deeply market- and geography-dependent — a marketplace model needs enough density in one geography before it needs breadth across many.`,
+ who:`Founders choosing a model, investors evaluating one, operators optimizing an existing one.`,
+ topics:[`B2B vs B2C vs B2B2C vs C2C`,`Subscription & SaaS`,`Marketplace & platform — network effects`,`Freemium`,`Usage-based pricing`,`Licensing & franchise`,`Services & agency models`,`Creator economy models`]},
+
+{id:'sales',num:6,title:'Sales',tag:`Moving a specific person from unaware to paying, ethically`,
+ what:`The process of moving a specific person from unaware, to convinced, to paying — without deception.`,
+ why:`Nothing else in business matters if nothing sells. Sales is where value actually converts into revenue, and most business failures are distribution failures, not product failures.`,
+ how:`Qualify hard before you pitch — know their real pain, budget, timeline, and who actually decides. Lead discovery with questions, not features, using something like SPIN (Situation, Problem, Implication, Need-payoff) to let the prospect articulate their own urgency. Handle objections by isolating the real one — "if we solved that specific thing, would you move forward?" — rather than arguing every point raised.`,
+ when:`Sales-led fits high-touch, high-price deals; product-led fits low-price, high-volume. Consultative selling fits best when the buyer doesn't yet have a clear picture of their own problem.`,
+ where:`Enterprise deals run through committees and procurement; small-business and consumer deals are decided by one or two people, fast.`,
+ who:`Founders selling early — sales can't be outsourced responsibly until you've done it yourself and know what actually works — then reps, then account managers as the team grows.`,
+ topics:[`Prospecting & qualification (ICP)`,`Discovery & SPIN questioning`,`Objection handling`,`Closing techniques`,`MEDDIC for enterprise deals`,`Sales psychology — why people actually buy`,`Pipeline & CRM discipline`,`Customer success, upsell & renewal`]},
+
+{id:'negotiation',num:7,title:'Negotiation',tag:`BATNA, anchoring, and the line between strategy and manipulation`,
+ what:`The structured process of reaching agreement between parties who have both shared and conflicting interests.`,
+ why:`Nearly every professional outcome — salary, price, scope, equity — is set at a negotiation table. The gap between a strong and a weak negotiator compounds into a career-sized difference in lifetime earnings.`,
+ how:`Know your BATNA — best alternative to a negotiated agreement — before you sit down; it sets your real walk-away power, not whatever position you state out loud. Anchor first when you hold good information, since the first credible number pulls the final outcome toward it. Use silence deliberately after making an offer — the next person to speak often concedes. Separate the people from the problem (principled negotiation) so the relationship survives the deal.`,
+ when:`Use distributive, harder tactics for one-off, low-relationship deals (a single purchase). Use integrative, expand-the-pie tactics for ongoing relationships (a long-term client or partner).`,
+ where:`Cultural norms shift what "aggressive" means — direct haggling is expected in some markets and reads as rude in others; calibrate to context.`,
+ who:`Every professional, not just salespeople — this shows up in salary talks, rent, contracts, and partnerships alike.`,
+ topics:[`BATNA & ZOPA`,`Anchoring & framing`,`Concessions & pacing`,`Silence as a deliberate tool`,`Principled vs positional negotiation`,`Salary-specific tactics`,`Recognizing manipulation & dark patterns`,`Multi-party negotiation`]},
+
+{id:'marketing',num:8,title:'Marketing',tag:`Making sales easier — or unnecessary — before it happens`,
+ what:`Creating and communicating value to the right audience so that sales becomes easier, or unnecessary.`,
+ why:`Strong marketing lowers customer acquisition cost and builds a brand moat that outlasts any single product feature a competitor could copy.`,
+ how:`Nail positioning before spending on any channel — a clean line like "for [who], who needs [need], [product] is a [category] that [benefit], unlike [alternative]" forces clarity. Pick one or two channels that match where your specific buyer already spends attention, rather than spreading thin across everything. Measure relentlessly against the ratio of lifetime value to acquisition cost — 3:1 or better is a common healthy benchmark.`,
+ when:`Paid acquisition earns its keep once you have a proven, repeatable conversion funnel; before that it just burns cash faster than an unproven funnel deserves.`,
+ where:`B2B marketing runs through content, referrals, and direct outreach; consumer marketing leans harder on brand, social proof, and paid channels.`,
+ who:`Marketers own the execution, but early-stage marketing is almost always founder-led — and the customer's own language, not internal jargon, should shape the copy.`,
+ topics:[`Positioning & differentiation`,`Segmentation & ICP`,`Funnels — AIDA`,`Content & SEO`,`Paid acquisition & CAC`,`Retention & LTV`,`Brand vs performance marketing`,`Virality & word of mouth`]},
+
+{id:'finance',num:9,title:'Finance & Money',tag:`The mechanics of cash — behavior beats information`,
+ what:`The mechanics of cash: where it comes from, where it goes, and how to keep more of it working for you than against you.`,
+ why:`Financial literacy is leverage-neutral — it protects a small income and multiplies a large one. Most financial damage traces to behavior (debt, lifestyle inflation), not a lack of information.`,
+ how:`Separate fixed from variable expenses so you know your real monthly floor. Automate savings before spending reaches your account — pay yourself first. Build three to six months of expenses as an emergency fund before investing aggressively. Treat high-interest debt as a guaranteed negative return that should usually be cleared before most investing, because no reliable investment beats an 18–40% credit-card rate after tax.`,
+ when:`Order of operations: emergency fund and high-interest debt first, then tax-advantaged investing, then everything else.`,
+ where:`Identical logic applies everywhere, but the specific instruments — tax-advantaged accounts, emergency-fund size — are jurisdiction-specific.`,
+ who:`Salaried employees, freelancers (who need a bigger buffer — 6–12 months — because income is irregular), and business owners, who should separate personal and business finances from day one.`,
+ topics:[`Income vs wealth`,`Budgeting systems`,`Debt — good vs bad`,`Emergency funds`,`Compounding`,`Taxes — concept level`,`Insurance`,`Lifestyle inflation`]},
+
+{id:'investing',num:10,title:'Investing',tag:`Deploying capital to grow purchasing power over time`,
+ what:`Deploying capital today in exchange for a claim on future cash flows or value, to grow purchasing power over time.`,
+ why:`Cash loses value to inflation every year it sits idle. Investing is how money is made to work instead of just held.`,
+ how:`Default to diversified, low-cost index funds for the core of a portfolio — most active managers underperform their benchmark index after fees over long periods. Rebalance on a schedule rather than chasing whatever just outperformed. Size any position by conviction and risk, never by excitement.`,
+ when:`Time horizon should set risk tolerance more than personality does — money needed within three years has no business in volatile assets, regardless of appetite for risk.`,
+ where:`Vehicle choice is jurisdiction-specific — India offers SIPs, PPF, and index funds with their own tax treatment that differs from equivalent US or UK vehicles.`,
+ who:`Retail investors, professional fund managers, and founders — whose own equity is a concentrated, illiquid investment carrying its own distinct risk.`,
+ topics:[`Asset classes — equity, debt, real estate, gold, alternatives`,`Diversification & asset allocation`,`Valuation basics`,`Behavioral finance — why investors underperform their own funds`,`Market cycles`,`Risk vs return`,`India-specific vehicles (SIP, PPF, index funds)`,`Common investing myths`]},
+
+{id:'economics',num:11,title:'Markets & Economics',tag:`The environment every business decision happens inside`,
+ what:`How prices, wages, and resources get set across an economy through the interaction of supply, demand, and competition.`,
+ why:`Every business decision happens inside a macro environment. Interest rates, inflation, and labor-market conditions set the outer boundary of what's possible, whether or not any individual business notices.`,
+ how:`Track the direction, not the exact number, of a handful of indicators — interest rates, inflation, unemployment — to read whether capital is cheap or expensive and whether consumers are spending or saving.`,
+ when:`Rising rates make capital more expensive, which compresses valuations and slows hiring. Falling rates tend to do the reverse.`,
+ where:`Applies globally but with local texture — labor-market flexibility, inflation sensitivity, and currency stability vary sharply by country.`,
+ who:`Central banks set the rules of the environment; businesses operate inside them; individuals feel the effects through jobs, prices, and loan costs.`,
+ topics:[`Supply & demand`,`Market structures — competition to monopoly`,`Inflation & interest rates`,`Business cycles — expansion & recession`,`Central banks & monetary policy`,`Currency & trade`,`Labor markets`,`How macro connects to your job, salary, and investments`]},
+
+{id:'psychology',num:12,title:'Psychology',tag:`The mental shortcuts behind real decisions, not stated ones`,
+ what:`The mental shortcuts and biases that drive real — not stated — human decisions in business, money, and negotiation.`,
+ why:`Rational-actor models fail constantly in practice. Understanding actual decision psychology explains why marketing, pricing, and negotiation work the way they do, rather than the way theory predicts.`,
+ how:`Learn to spot each pattern in yourself first — loss aversion, sunk cost, anchoring, confirmation bias — before attempting to use any of it with others. Self-awareness is the real skill; technique is secondary and often backfires without it.`,
+ when:`Highest leverage in pricing (anchoring), sales (social proof, scarcity), and any high-stakes one-time decision — biases bite hardest under time pressure and uncertainty.`,
+ where:`These patterns are close to universal across cultures, though the specific triggers (what counts as high-status, what counts as scarce) are culturally shaped.`,
+ who:`Everyone is subject to these biases regardless of intelligence. Awareness reduces the effect; it never fully removes it.`,
+ topics:[`Loss aversion & sunk cost`,`Anchoring & framing`,`Social proof & scarcity`,`Confirmation bias`,`Dunning-Kruger effect`,`Groupthink & herd behavior`,`Prospect theory`,`Ethical use vs exploitative use`]},
+
+{id:'mindset',num:13,title:'Mindset & Personal Development',tag:`The multiplier on every other skill in this manual`,
+ what:`The internal operating patterns — discipline, focus, risk tolerance — that determine whether knowledge actually turns into results.`,
+ why:`Most failure is inconsistent execution, not missing information. Mindset is the multiplier applied to every other skill in this manual; a mediocre plan run consistently usually beats a great plan run sporadically.`,
+ how:`Build systems you run daily rather than goals you check quarterly. Practice first-principles thinking — break a belief down to its most basic, verifiable truth and rebuild the conclusion from there, instead of reasoning by analogy to what others do. Treat failure as data collection, not identity.`,
+ when:`Delayed gratification and patience compound hardest wherever payoff is measured in years, not weeks — careers, investing, relationships.`,
+ where:`Especially high-leverage for founders and freelancers, who lack the external structure a manager or team would otherwise provide.`,
+ who:`A universal skill, but the return on improving it is largest for anyone whose work depends on self-direction.`,
+ topics:[`Systems vs goals`,`First-principles vs analogy thinking`,`Delayed gratification`,`Overthinking & decision fatigue`,`Handling failure without collapsing identity into it`,`Ego & feedback`,`Long-term & probabilistic thinking`,`Burnout prevention`]},
+
+{id:'leadership',num:14,title:'Leadership & Management',tag:`Scaling output past what one person can produce alone`,
+ what:`Getting results through other people — setting direction, removing obstacles, and holding a team accountable to a real standard.`,
+ why:`Individual output caps at your own hours. Leadership is the mechanism by which output scales past one person.`,
+ how:`Delegate outcomes, not tasks — define the "what" and the standard, then let the person own the "how." Give feedback close to the moment it's earned rather than saving it for a scheduled review. When a team underperforms, diagnose it as a system or incentive problem first, before assuming it's a people problem.`,
+ when:`Manage tightly — clear tasks, frequent check-ins — with junior or new team members. Manage loosely — outcomes, autonomy — with senior, proven ones. Applying the wrong mode to either group is a common, avoidable failure.`,
+ where:`Remote teams need more explicit, written process than co-located ones, since informal hallway coordination disappears.`,
+ who:`Team leads, founders managing their first hires, and executives running larger organizations.`,
+ topics:[`Delegation`,`Hiring & firing`,`Feedback & performance reviews`,`Incentive design`,`Culture — what actually gets repeated, not what's on the wall`,`Conflict resolution`,`Remote team management`,`Crisis leadership`]},
+
+{id:'communication',num:15,title:'Communication',tag:`The ceiling on every other skill you build`,
+ what:`The transfer of meaning — clearly, persuasively, and with the right amount of information for the audience and the stakes involved.`,
+ why:`Most professional failures downstream trace back to unclear communication — mismatched expectations, missing context — more often than to an actual skill gap.`,
+ how:`Lead with the point before the reasoning (bottom-line-up-front). Match the channel to the message — sensitive or hard conversations happen live, never over text. In writing, cut every sentence that doesn't change what the reader does next.`,
+ when:`Over-communicate during ambiguity or crisis. Pull back to concise, low-frequency updates once trust and routine are established.`,
+ where:`Written async communication (docs, email) needs more explicit context than live conversation, which can rely on tone and back-and-forth to fill gaps.`,
+ who:`A universal skill — the ceiling on how far every other skill in this manual can actually take you is set by how well you can communicate it.`,
+ topics:[`Written communication — email & docs`,`Public speaking & presentations`,`Active listening & questioning`,`Difficult conversations`,`Executive communication — brevity plus clarity`,`Storytelling`,`Persuasion vs manipulation`]},
+
+{id:'pitching',num:16,title:'Pitching',tag:`Compressing an idea into the shortest path to yes`,
+ what:`Compressing a complex idea, product, or ask into the shortest path that gets someone to say yes.`,
+ why:`Good ideas die from bad pitches constantly. Pitching is a distinct skill from the underlying work, and it's frequently under-practiced relative to how much rides on it.`,
+ how:`Structure as Problem → Insight → Solution → Value → Proof → Differentiation → Economics → Ask. Open with the problem the audience already feels, not your solution — a solution to a problem they don't yet recognize lands flat. Close with one small, specific ask, never a vague one.`,
+ when:`Compress harder as stakes and available attention shrink — a thirty-second elevator pitch, a fifteen-minute investor deck, and a one-line hallway pitch are three different disciplines, not the same pitch at different lengths.`,
+ where:`Investor pitches emphasize market size and defensibility; sales pitches emphasize the buyer's specific pain and ROI; internal pitches emphasize resourcing and risk to the org.`,
+ who:`Founders pitching investors, salespeople pitching clients, employees pitching ideas internally, freelancers pitching proposals.`,
+ topics:[`Problem-first framing`,`The eight-part pitch structure`,`Investor vs sales vs internal pitches`,`Handling objections live`,`Common pitch failure modes`,`Elevator pitch compression`]},
+
+{id:'strategy',num:17,title:'Business Strategy',tag:`Where to compete, and how to win there sustainably`,
+ what:`The set of choices about where to compete and how to win there sustainably — including, deliberately, what you will not do.`,
+ why:`Without a real moat, every advantage gets copied and margins collapse toward zero under competition. Strategy is the discipline of building defensibility on purpose.`,
+ how:`Identify your actual moat type honestly — network effects, switching costs, brand, scale economies, proprietary technology, or regulation. Most founders overestimate how defensible their business really is. Use frameworks like Porter's Five Forces or SWOT as structured questions to ask, not as the answer itself.`,
+ when:`Revisit strategy at every major inflection — a new competitor, a channel shift, a funding round. A strategy set once at founding and never revisited usually goes stale quietly.`,
+ where:`Moats that work in one market (regulatory barriers, for instance) frequently don't transfer to another market with different rules.`,
+ who:`Founders and executives set it; operators translate it into day-to-day priorities that front-line decisions actually follow.`,
+ topics:[`Competitive moats`,`Porter's Five Forces`,`Cost leadership vs differentiation vs focus`,`Market entry & timing`,`Vertical vs horizontal integration`,`M&A basics`,`Game theory in competition`,`Network effects & switching costs`]},
+
+{id:'operations',num:18,title:'Operations',tag:`Turning strategy into consistent, repeatable execution`,
+ what:`The repeatable systems that turn strategy into consistent day-to-day execution — supply chain, process, quality.`,
+ why:`Strategy sets direction; operations determines whether the business can actually deliver at the promised quality and cost, repeatedly, without the founder personally holding it together.`,
+ how:`Document a process into an SOP the moment it's been repeated a third time. Automate only after a manual process is proven and stable — automating a broken process just breaks it faster and at greater scale. Track a small number of leading operational metrics rather than trying to watch everything.`,
+ when:`Over-invest in process rigor as headcount grows past the point where informal coordination breaks down — commonly somewhere around 8–15 people.`,
+ where:`Physical-goods operations (supply chain, inventory) differ sharply from service operations (capacity, scheduling) — the discipline transfers, the specifics don't.`,
+ who:`Operations leads own it formally; in the early stage, the founder is operations until there's budget to hire for it.`,
+ topics:[`SOPs & process design`,`Supply chain & procurement basics`,`Quality control`,`Project management fundamentals`,`Resource & capacity planning`,`Business continuity & operational risk`]},
+
+{id:'legal',num:19,title:'Legal & Professional Basics',tag:`Conceptual scaffolding — not a substitute for a lawyer`,
+ what:`The conceptual legal scaffolding around contracts, IP, and business structure every professional should recognize. This is education, not legal advice.`,
+ why:`Not knowing the difference between a contractor and an employee, or what an NDA actually covers, causes avoidable and expensive mistakes.`,
+ how:`Put anything with real money or IP at stake in writing, always. Understand what your specific business structure — sole proprietorship, LLP, private limited company — actually protects you from and what it doesn't. Treat verbal agreements as stated intentions, not binding commitments.`,
+ when:`Bring in an actual lawyer for anything above a threshold you would genuinely regret losing. This module exists to help you recognize when that threshold has been crossed, not to replace the lawyer.`,
+ where:`Laws vary by country and even by state or region within a country — always verify locally before acting on anything here.`,
+ who:`Freelancers signing their first contract, founders incorporating a company, employees reading the fine print in an offer letter.`,
+ topics:[`Contracts & NDAs — the basics`,`IP: copyright vs trademark vs patent`,`Employment vs contractor status`,`Business structures (India: sole prop, LLP, Pvt Ltd)`,`Liability basics`,`Data privacy concepts`,`Jurisdiction always matters — verify locally`]},
+
+{id:'technology',num:20,title:'Technology & Business',tag:`How AI and software reshape which skills hold value`,
+ what:`How software, data, and AI are reshaping which jobs, companies, and skills hold value, and how fast.`,
+ why:`Technology shifts are consistently the largest single driver of career and business disruption in any given decade. Ignoring the trend doesn't exempt you from its effects.`,
+ how:`Track technology adoption as a curve, not a switch — early, majority, laggard. The right moment to adopt usually isn't "first" or "last," but wherever your specific risk tolerance and resources actually fit on that curve. Treat AI as leverage on an existing skill, not a replacement for having none.`,
+ when:`Reassess your own skill's exposure to automation honestly every one to two years — the pace of change makes a longer gap risky.`,
+ where:`Adoption speed and regulatory response to new technology (AI in particular) differ sharply by industry and by country.`,
+ who:`Nearly everyone whose job touches a computer — which by 2026 is most professional work, including creative and technical fields like animation.`,
+ topics:[`AI & automation's impact on jobs`,`SaaS & cloud basics`,`Data & analytics literacy`,`Platform & marketplace dynamics`,`Technology adoption curves`,`Cybersecurity basics`,`Digital transformation`]},
+
+{id:'politics',num:21,title:'Professional Politics & Power',tag:`The system running alongside the official org chart`,
+ what:`The unofficial system of influence, reputation, and coalitions that determines who actually gets resources and decisions — running alongside, not instead of, the official org chart.`,
+ why:`Ignoring politics doesn't remove you from it. It just means decisions get made about you instead of with you.`,
+ how:`Identify who the real gatekeepers and informal decision-influencers are — not just whoever holds the title. Build reputation through visible, attributable wins rather than invisible effort. Manage up by making your manager's job easier and surfacing their risks to them early, before those risks become their surprise.`,
+ when:`Political skill matters more as organizations grow past roughly fifty people, where informal, everyone-knows-everyone trust networks stop covering the whole org.`,
+ where:`Applies inside any organization with more than a couple of decision-makers — corporate, nonprofit, even a freelance agency juggling multiple stakeholders.`,
+ who:`Everyone inside an organization is a participant whether they choose to be or not.`,
+ topics:[`Gatekeepers & informal influence`,`Reputation & visibility`,`Coalitions & alliances`,`Managing up`,`Information control`,`A realistic, not cynical, view of office politics`]},
+
+{id:'ethics',num:22,title:'Ethics & Dark Sides',tag:`Recognizing manipulation, fraud, and exploitation — not running it`,
+ what:`The mechanics of fraud, manipulation, and exploitation in business, documented so they can be recognized — deliberately not as operational instructions.`,
+ why:`Every legitimate technique in this manual — scarcity, urgency, authority, social proof — has an exploitative twin. Knowing where the line sits protects you both as an operator and as a target.`,
+ how:`Watch for the tells that repeat across most scams: pressure to decide fast, secrecy disproportionate to the stakes, promised returns that don't match the stated risk, and payment structures that reward recruiting new people over producing anything real.`,
+ when:`Apply extra scrutiny whenever an opportunity resists normal diligence — won't put terms in writing, discourages you from consulting anyone else, or moves faster than the actual stakes justify.`,
+ where:`These patterns repeat across geographies and eras with only the packaging changing — the underlying mechanics are old.`,
+ who:`Everyone is a potential target regardless of intelligence or experience; sophistication reduces but never eliminates the risk.`,
+ topics:[`Common fraud patterns — Ponzi & pyramid structures (conceptual only)`,`Dark patterns in pricing & marketing`,`Conflicts of interest`,`Insider information — the concept, and why it's restricted`,`Manipulation vs legitimate persuasion`,`A practical self-protection checklist`]}
+];
+const FRAMEWORKS = [
+{id:'swot',name:'SWOT Analysis',cat:'Strategy',
+ what:`A four-box snapshot of Strengths, Weaknesses (internal) against Opportunities, Threats (external).`,
+ how:`List each honestly and specifically — "strong retention" beats "good product." Then look at the intersections: strengths that address opportunities are your best moves; weaknesses that overlap threats are what could actually kill you.`,
+ when:`Fast situational snapshots — before a planning cycle, a new market entry, or a board update.`,
+ fails:`Becomes a listing exercise with no decision attached. A SWOT that doesn't produce three prioritized actions afterward wasn't worth doing.`,
+ example:`A freelance 3D artist: Strength — fast turnaround; Weakness — no agency-scale capacity; Opportunity — growing product-animation demand; Threat — AI tools compressing junior-tier pricing.`},
+
+{id:'porter5',name:"Porter's Five Forces",cat:'Strategy',
+ what:`Analyzes industry attractiveness through five competitive pressures: rivalry among existing players, threat of new entrants, supplier power, buyer power, and threat of substitutes.`,
+ how:`Score each force low/medium/high for your specific market. An industry with high forces across the board (like most restaurants) structurally can't sustain fat margins no matter how good any single operator is.`,
+ when:`Evaluating whether to enter a market, or diagnosing why margins are under pressure in one you're already in.`,
+ fails:`Treated as a one-time exercise — forces shift as a market matures, especially entrant threat and substitute threat, which both tend to rise over time.`,
+ example:`Freelance video editing: low entry barriers + easy substitutes (AI editing tools) + low switching costs for clients = structurally thin margins unless you build a specific moat (speed, niche, relationship).`},
+
+{id:'bmc',name:'Business Model Canvas',cat:'Strategy',
+ what:`A nine-block map of a business — customer segments, value propositions, channels, relationships, revenue streams, key resources, key activities, key partners, cost structure — on one page.`,
+ how:`Fill it in from the customer segment and value proposition outward; those two blocks should be written first and drive every other block's answer.`,
+ when:`Mapping an existing business to find gaps, or sketching a new one before writing a full plan.`,
+ fails:`Filled in isolation from real customer conversations — becomes an internally consistent fiction.`,
+ example:`Used to notice that a freelance business's "channel" block (how clients find you) is nearly empty — that's the actual growth bottleneck, not the work itself.`},
+
+{id:'leancanvas',name:'Lean Canvas',cat:'Strategy',
+ what:`A startup-specific adaptation of the Business Model Canvas that leads with problem, not solution, and adds an unfair-advantage block.`,
+ how:`Start with the top three problems your target customer actually has today, then map your solution only against those — not against every feature you could imagine building.`,
+ when:`Early-stage validation, before a business model is proven.`,
+ fails:`The problem block gets skipped or written from assumption instead of real customer conversations.`,
+ example:`A freelance studio idea's biggest risk usually sits in the "unfair advantage" block — if that's blank, competitors with more capital can outcompete on price alone.`},
+
+{id:'jtbd',name:'Jobs-to-be-Done',cat:'Marketing / Product',
+ what:`Reframes purchases as "hiring" a product to do a specific job in the customer's life, rather than buying a bundle of features.`,
+ how:`Ask what the customer was trying to accomplish right before they bought, and what they "fired" (an old solution, doing nothing) to hire your product instead.`,
+ when:`Positioning and messaging work, and any time growth stalls despite a technically good product.`,
+ fails:`Confusing the stated job with the real one — customers rationalize purchases after the fact, so interview around the moment of decision, not general opinions.`,
+ example:`A client doesn't "hire" a 3D animator to make a video — they hire the animator to make their product look credible enough that a buyer trusts it. Sell the trust, not the render.`},
+
+{id:'eisenhower',name:'Eisenhower Matrix',cat:'Productivity',
+ what:`Sorts tasks into four quadrants by urgent/not-urgent crossed with important/not-important.`,
+ how:`Do important+urgent now. Schedule important+not-urgent (this is where almost all long-term value actually lives). Delegate urgent+not-important. Delete not-urgent+not-important.`,
+ when:`Weekly planning, or any time the to-do list has stopped reflecting actual priorities.`,
+ fails:`Everything gets marked "urgent" — the tool only works if you're honest that most fires aren't actually important.`,
+ example:`Client emails feel urgent constantly; skill development and portfolio work rarely feel urgent — which is exactly why they get skipped, and exactly why they need to be scheduled deliberately.`},
+
+{id:'pareto',name:'Pareto Principle (80/20)',cat:'Productivity / Strategy',
+ what:`Roughly 80% of outcomes typically come from about 20% of causes — a leverage-finding heuristic, not a precise law.`,
+ how:`Rank your clients, tasks, or channels by output, then look hard at whatever's producing the top slice — and consider cutting or delegating the bottom slice entirely.`,
+ when:`Deciding what to cut when everything feels equally busy but results have stalled.`,
+ fails:`Used to justify neglecting genuinely important low-frequency work — some 20% items (compliance, a single key relationship) matter regardless of volume.`,
+ example:`Frequently, 2 of 10 freelance clients generate most of the revenue and the least friction — the other 8 may be worth firing, not just deprioritizing.`},
+
+{id:'okr',name:'OKRs (Objectives & Key Results)',cat:'Management',
+ what:`A goal-setting system pairing a qualitative Objective (where you want to go) with 2–4 quantitative Key Results (how you'll know you got there).`,
+ how:`Write the objective as inspiring and directional; write key results as numbers that would be embarrassing to fudge.`,
+ when:`Team or personal quarterly planning, where you need both direction and a way to know if you actually moved.`,
+ fails:`Key results get set as tasks ("launch the website") instead of outcomes ("grow qualified inbound leads to X") — a launched website that changes nothing still counts as "done" under the flawed version.`,
+ example:`Objective: become the go-to product-animation freelancer in a niche. Key result: 3 signed retainer clients in that niche by quarter end.`},
+
+{id:'rice',name:'RICE / ICE Scoring',cat:'Prioritization',
+ what:`Scores competing initiatives by Reach × Impact × Confidence ÷ Effort (RICE), or the lighter Impact × Confidence × Ease (ICE), to rank what to do first.`,
+ how:`Score each dimension 1–10 (or use real numbers for reach), multiply/divide, and sort. The number matters less than the forced comparison across options.`,
+ when:`Too many plausible next moves and no obvious way to choose between them.`,
+ fails:`Scores get reverse-engineered to justify whatever you already wanted to do — keep the scoring honest by doing it before you have a favorite.`,
+ example:`Comparing "build a new portfolio piece" vs "cold-outreach 20 studios" vs "raise prices" — scoring forces you to actually compare effort and confidence, not just gut feel.`},
+
+{id:'batna-zopa',name:'BATNA & ZOPA',cat:'Negotiation',
+ what:`BATNA is your Best Alternative To a Negotiated Agreement — what you do if this deal falls through. ZOPA is the Zone Of Possible Agreement — the overlap between both sides' acceptable ranges, if one exists.`,
+ how:`Define your BATNA in writing before any negotiation starts; it's your real power, not your stated ask. Estimate the other side's BATNA too — a weak BATNA on their side is where your leverage actually comes from.`,
+ when:`Every negotiation with real stakes — salary, contracts, pricing, partnerships.`,
+ fails:`Entering without having defined a BATNA at all, which leaves you negotiating from fear rather than from a real floor.`,
+ example:`A freelancer with three warm leads has a strong BATNA in a price negotiation with one client; a freelancer with zero other leads doesn't, and it shows in the room even if unstated.`},
+
+{id:'spin',name:'SPIN Selling',cat:'Sales',
+ what:`A discovery-call question sequence: Situation, Problem, Implication, Need-payoff — designed to let the buyer articulate their own urgency rather than being told it.`,
+ how:`Ask situation questions to get context, problem questions to surface pain, implication questions to make the cost of that pain concrete ("what does that delay cost you monthly?"), then need-payoff questions to get them to state the value of solving it themselves.`,
+ when:`Higher-value, longer-cycle, consultative sales where the buyer doesn't yet feel urgency.`,
+ fails:`Skipping straight to need-payoff questions before the pain is concrete — it reads as a manipulative script instead of genuine discovery.`,
+ example:`Instead of "our animation increases conversion," ask "what happens to a deal when your product demo doesn't visually match your ambition?" — let them say the cost out loud.`},
+
+{id:'meddic',name:'MEDDIC',cat:'Sales',
+ what:`An enterprise sales qualification checklist: Metrics, Economic buyer, Decision criteria, Decision process, Identify pain, Champion.`,
+ how:`Before investing serious time in a deal, confirm you can answer all six — especially who the actual economic buyer is (the person who can say yes and pay) and who your internal champion is (the person who sells for you when you're not in the room).`,
+ when:`Complex, multi-stakeholder deals where a deal can quietly stall for months without a clear qualification checkpoint.`,
+ fails:`Mistaking an enthusiastic user for the champion, when the real champion needs organizational credibility to move the deal, not just enthusiasm.`,
+ example:`A large studio expressing interest in an animator isn't a deal until you know who signs the PO and what their internal approval process actually requires.`},
+
+{id:'aida',name:'AIDA',cat:'Marketing',
+ what:`A classic funnel model of persuasion: Attention, Interest, Desire, Action.`,
+ how:`Design each stage of a piece of marketing (an ad, a landing page, a pitch) to move the audience through all four in order — skipping a stage (jumping straight to Action) usually kills conversion.`,
+ when:`Any single piece of persuasive content — an ad, a cold email, a portfolio landing page.`,
+ fails:`Treated as the whole marketing strategy rather than a copy-structuring tool for one piece of content at a time.`,
+ example:`A portfolio reel: Attention — the strongest shot first; Interest — variety of range; Desire — a testimonial or client logo; Action — one clear contact link, not five competing ones.`},
+
+{id:'stp',name:'STP — Segmentation, Targeting, Positioning',cat:'Marketing',
+ what:`Segment the total market into meaningful groups, target the one(s) you can actually serve best, then position clearly against alternatives for that group.`,
+ how:`Segment by need, not just demographics (two 25-year-olds can have completely different needs). Target the segment where you have a real, defensible advantage, not the biggest segment. Position with a single clear sentence a prospect could repeat back to someone else.`,
+ when:`Before spending on any marketing channel — this decides what to even say.`,
+ fails:`Trying to serve every segment at once ("animation for everyone") — this usually means resonating with no one specifically.`,
+ example:`"3D animation" is a segment description a hundred studios share. "Product animation for early-stage D2C brands who need to look credible before they can afford a full studio" is a position.`},
+
+{id:'firstprinciples',name:'First-Principles Thinking',cat:'Mindset',
+ what:`Breaking a problem down to its most basic, verifiable truths and reasoning back up from there, instead of reasoning by analogy to what everyone else already does.`,
+ how:`Ask "what do I actually know to be true here, independent of convention?" repeatedly, stripping away assumptions until you hit bedrock facts, then rebuild a solution from those facts alone.`,
+ when:`Pricing, career pivots, or any decision where "that's just how it's done" is the only justification on offer.`,
+ fails:`Used as a excuse to ignore genuinely useful accumulated experience — first principles should question convention, not automatically discard it.`,
+ example:`"Freelancers charge by the hour" is analogy reasoning. First principles: the client is actually buying an outcome, not your time — which opens the door to value-based pricing.`}
+];
+const TECHNIQUES = [
+{id:'anchor-first',name:'Anchoring First',domain:'Negotiation',difficulty:'Intermediate',risk:'medium',
+ what:`Making the first credible offer in a negotiation, because the first number stated tends to pull the final agreed number toward itself.`,
+ mechanism:`People adjust from a reference point rather than calculating a "fair" price from scratch. Whoever sets the reference point shapes the whole rest of the conversation, even for the other party.`,
+ how:[`Research a defensible range before the conversation — a number with no basis is easy to dismiss.`,`State your anchor first, confidently, without over-justifying it.`,`Pause after stating it. Let the other side respond before you add anything.`,`If they counter far off your anchor, don't split the difference immediately — ask what's driving their number.`],
+ when:`You have solid market information and reasonable confidence in your position.`,
+ whenNot:`You genuinely don't know the market range yet — a bad anchor can undercut you more than staying quiet would.`,
+ example:`Quoting a project at a value-based number before the client states a budget, rather than asking "what's your budget" first and being anchored by their (often lower) number.`,
+ countermeasure:`If someone anchors you, don't respond with a counter-number immediately — restate their anchor back as a question ("help me understand how you landed on that") to reopen the frame before countering.`},
+
+{id:'flinch',name:'The Flinch',domain:'Negotiation',difficulty:'Beginner',risk:'low',
+ what:`A visible, brief reaction of surprise to an offer, signaling — without arguing — that it's outside what you consider reasonable.`,
+ mechanism:`Many people soften an offer automatically when they see a genuine (or convincingly performed) negative reaction, even before a word is said.`,
+ how:[`Pause visibly when you hear the number.`,`Let a short, natural reaction show — don't perform it theatrically.`,`Ask an open question after the pause: "how did you arrive at that?"`],
+ when:`Any early offer that's clearly below (or above) your range, especially in person or on a call.`,
+ whenNot:`Written negotiation (email) where tone doesn't transfer — the flinch only works with visible or audible reaction.`,
+ example:`A client states a budget well under your rate. A brief pause and "oh — okay, help me understand the scope you're picturing for that" often reopens the number without you naming a figure first.`,
+ countermeasure:`If you sense the other party is performing a reaction, hold your number and ask them to justify their reaction with specifics — a genuine flinch usually has one, a performed one usually doesn't.`},
+
+{id:'silence-offer',name:'Silence After the Offer',domain:'Negotiation',difficulty:'Beginner',risk:'low',
+ what:`Deliberately staying quiet after stating a number or making an offer, resisting the urge to fill the silence with justification or a discount.`,
+ mechanism:`Silence is uncomfortable, and the discomfort pulls the next person to speak — often to concede or fill the gap with information you can use.`,
+ how:[`State your number clearly.`,`Stop talking completely, even if the pause feels long.`,`Let them respond first, whatever they say.`],
+ when:`Immediately after any offer, ask, or price statement.`,
+ whenNot:`When the other side has clear, real time pressure (a hard deadline) that makes them wait you out instead — silence loses power against a genuine deadline.`,
+ example:`Stating your day rate and then saying nothing further, instead of immediately adding "...but I'm flexible" before they've even responded.`,
+ countermeasure:`Recognize the tactic and simply wait it out — you're allowed to sit in the silence just as long as they are.`},
+
+{id:'vise',name:'The Vise',domain:'Negotiation',difficulty:'Intermediate',risk:'medium',
+ what:`Responding to an offer with a simple, non-specific push-back — "you'll have to do better than that" — without stating your own number, forcing the other side to move first.`,
+ mechanism:`It extracts a concession without revealing your own position or walk-away point, preserving your information advantage.`,
+ how:[`Receive the offer.`,`Respond with a brief, calm push-back with no number attached.`,`Stay silent afterward and let them counter.`,`Repeat once more if needed before finally engaging with a number.`],
+ when:`Early in a negotiation where you want to test how much room actually exists before committing to a position.`,
+ whenNot:`Repeated more than twice — it starts to read as stalling rather than negotiating, and damages trust in an ongoing relationship.`,
+ example:`A client's first proposal number gets a simple "that doesn't quite work for the scope we discussed — what flexibility do you have?" rather than a counter-number.`,
+ countermeasure:`Ask them to name a specific number or specific concern instead of a vague pushback — "what specifically doesn't work — is it the number, the timeline, or the scope?" forces precision.`},
+
+{id:'batna-discovery',name:'BATNA Discovery',domain:'Negotiation',difficulty:'Advanced',risk:'low',
+ what:`Probing questions designed to learn the other side's real alternative — how strong their walk-away option actually is — without asking directly.`,
+ mechanism:`People rarely state their BATNA outright, but it usually leaks through timeline pressure, how many alternatives they mention, and how they react to a firm "no."`,
+ how:[`Ask about timeline — a tight, specific deadline usually signals a weaker BATNA.`,`Ask what else they're considering, framed as helpfulness ("so I can tailor this well, what else are you evaluating?").`,`Notice how they react to a firm price hold — genuine alternatives make people calm; a weak BATNA makes people push harder.`],
+ when:`Higher-stakes deals where understanding real leverage changes your strategy meaningfully.`,
+ whenNot:`Low-stakes, one-off transactions where the extra effort isn't worth the information gained.`,
+ example:`A client with "we need this live by Friday for an investor demo" has revealed a weak BATNA and real time pressure — that changes what you should hold firm on.`,
+ countermeasure:`Don't reveal your own BATNA in the process of asking about theirs — keep the questions one-directional.`},
+
+{id:'spin-question',name:'SPIN Questioning in Practice',domain:'Sales',difficulty:'Intermediate',risk:'low',
+ what:`Running an actual discovery call through the Situation → Problem → Implication → Need-payoff sequence rather than pitching features early.`,
+ mechanism:`People act on urgency they've stated themselves far more than urgency someone else tells them they should feel.`,
+ how:[`Situation: ask a few short, factual context questions — don't over-ask, it feels like an interrogation.`,`Problem: ask what's not working well right now.`,`Implication: ask what that problem costs them — in time, money, or risk — if left unsolved.`,`Need-payoff: ask what solving it would be worth to them, and let them say it.`],
+ when:`Consultative, longer-cycle sales where the buyer hasn't fully diagnosed their own problem yet.`,
+ whenNot:`Transactional, price-shopping buyers who already know exactly what they want — the sequence just adds friction there.`,
+ example:`Instead of opening with your portfolio, ask what's currently happening when their product demo underperforms — let the client state the cost before you propose the fix.`,
+ countermeasure:`As a buyer, it's fine to answer these honestly — the technique only becomes manipulative if the seller invents implications you didn't actually state.`},
+
+{id:'isolation-close',name:'Objection Isolation',domain:'Sales',difficulty:'Intermediate',risk:'low',
+ what:`Confirming that a single named objection is the only thing standing between the prospect and a yes, before spending more effort addressing it.`,
+ mechanism:`Prospects sometimes raise a surface objection ("price") while the real blocker is something else ("I'm not the real decision-maker") — isolating first avoids solving the wrong problem.`,
+ how:[`When an objection comes up, ask "if we solved that specifically, is there anything else that would stop you moving forward?"`,`Wait for a genuine "no, that's it" before addressing the objection itself.`,`If more objections surface, isolate again before responding to any of them.`],
+ when:`Any objection late in a sales conversation, before investing effort in a rebuttal.`,
+ whenNot:`Very early in a relationship, where isolating feels like pressure rather than genuine discovery.`,
+ example:`"If we adjusted the price to fit, would you move forward today?" — a "well, I'd also need to check with my partner" reveals the real remaining blocker before you waste effort negotiating price alone.`,
+ countermeasure:`As a buyer, it's fine to name every real concern up front rather than one at a time — it saves both sides time.`},
+
+{id:'value-pricing-pitch',name:'Value-Based Pricing Pitch',domain:'Freelancing',difficulty:'Advanced',risk:'medium',
+ what:`Presenting a price anchored to the outcome or value delivered to the client, instead of to your hours or effort.`,
+ mechanism:`Clients pay for outcomes, not inputs — framing around hours invites them to negotiate your hourly rate down; framing around outcome shifts the comparison to what the outcome is worth to them.`,
+ how:[`Before quoting, establish the value in the client's own terms (a launch date, a fundraising deck, a specific conversion goal).`,`Present three tiered options anchored to outcome scope, not hours — this also uses a decoy/anchor effect across the tiers.`,`State the price once, clearly, without volunteering an hourly breakdown.`],
+ when:`You have enough proof (portfolio, testimonials, case studies) that clients believe the outcome claim.`,
+ whenNot:`Early in a freelance career with no track record yet — value pricing without proof reads as unjustified confidence.`,
+ example:`Quoting "a product launch animation package: ₹X" instead of "40 hours at ₹Y/hour" — the first invites a conversation about the launch, the second invites a conversation about your rate.`,
+ countermeasure:`As a client, it's reasonable to ask directly what's included and what happens if scope changes — a fair value-based quote should have clear boundaries.`},
+
+{id:'warm-referral-ask',name:'The Warm Referral Ask',domain:'Career / Freelancing',difficulty:'Beginner',risk:'low',
+ what:`A direct, specific ask to an existing contact for an introduction, rather than a vague "let me know if you hear of anything."`,
+ mechanism:`Vague asks are easy to forget and hard to act on; specific asks give the other person a concrete, low-effort action they can actually take.`,
+ how:[`Name the exact type of person or company you want introduced to.`,`Make it easy to forward — write a short paragraph they can copy-paste, don't make them draft it.`,`Follow up once, politely, after a week or two if you haven't heard back.`],
+ when:`Any time you're job-hunting, client-hunting, or building a network with intention rather than passively.`,
+ whenNot:`With very new or weak-tie contacts — a specific ask that early can feel presumptuous; build the relationship first.`,
+ example:`"Do you know anyone at a mid-size studio hiring 3D generalists?" gets acted on far more often than "let me know if you hear of anything."`,
+ countermeasure:`If you can't help with the specific ask, say so plainly and quickly rather than leaving it open — a fast "no" is more useful than a slow silence.`},
+
+{id:'star-storytelling',name:'STAR Storytelling',domain:'Career',difficulty:'Beginner',risk:'low',
+ what:`A structure for answering behavioral interview questions: Situation, Task, Action, Result.`,
+ mechanism:`Interviewers are pattern-matching for evidence of how you actually behave under real conditions, not for a general opinion of yourself — a concrete story is far more persuasive than a claim.`,
+ how:[`Situation: one or two sentences of real context.`,`Task: what you specifically were responsible for.`,`Action: what you actually did — this is the longest part, be specific.`,`Result: the measurable or observable outcome, plus what you learned.`],
+ when:`Any "tell me about a time..." interview question.`,
+ whenNot:`Purely technical or knowledge-check questions, where a direct answer is better than a story structure.`,
+ example:`"Tell me about a difficult client" answered with a specific project, the specific conflict, the specific action taken, and the specific outcome — not a general philosophy of client management.`,
+ countermeasure:`Interviewers can push past a rehearsed answer by asking a specific follow-up detail — a real story survives that; an invented one usually doesn't.`},
+
+{id:'salary-range-anchor',name:'Salary Anchoring with a Range',domain:'Career',difficulty:'Intermediate',risk:'low',
+ what:`Stating a salary expectation as a tight range with the bottom number set at what you'd actually be happy with, rather than a single number or an open-ended "flexible."`,
+ mechanism:`A range still anchors (the top number pulls upward) while giving the employer room to land somewhere you're satisfied with — a single hard number invites a straight negotiation down from it.`,
+ how:[`Research the real market range for the role and location first.`,`Set your range's bottom at your true walk-away-happy number, not lower.`,`State it once, confidently, without over-explaining the reasoning.`],
+ when:`Any point you're asked for salary expectations, ideally after the employer has expressed interest, not before.`,
+ whenNot:`Very early in a process before either side knows if it's a fit — delaying the number ("let's see if it's a mutual fit first") is often fine and legal to do where local law permits.`,
+ example:`"₹X–Y lakh, depending on scope" instead of a single figure or "I'm flexible" — the latter tends to anchor low by default.`,
+ countermeasure:`Employers can ask what's driving the top of the range — a well-prepared candidate can justify it with market data or scope specifics.`},
+
+{id:'premortem',name:'The Pre-Mortem',domain:'Strategy / Mindset',difficulty:'Intermediate',risk:'low',
+ what:`Before committing to a decision, imagining it has already failed a year later, and working backward to figure out why.`,
+ mechanism:`It bypasses the optimism bias that suppresses risk-naming during normal planning — imagining failure as already-real makes people much more willing to name real risks out loud.`,
+ how:[`State the decision and a future date.`,`Assume it failed completely by that date.`,`List every plausible reason it failed, without filtering for how likely each one is yet.`,`Sort the list by which risks are both likely and within your control — address those first.`],
+ when:`Any high-stakes, hard-to-reverse decision — taking on a big client, a business pivot, a major purchase.`,
+ whenNot:`Small, cheap, easily-reversible decisions, where the exercise costs more time than the decision is worth.`,
+ example:`Before signing a large retainer client: "it's a year from now and this relationship ended badly — why?" often surfaces scope-creep and payment-term risks that weren't visible in the excitement of landing the deal.`,
+ countermeasure:`Not applicable — this is a self-directed technique, not one used on another party.`}
+];
+const METRICS = [
+{id:'revenue',name:'Revenue',formula:`Price × Units sold`,def:`Total money earned from sales before any costs are subtracted.`,warn:`Growing revenue with shrinking margin can still mean a business is dying slowly — always read revenue next to margin.`},
+{id:'gross-margin',name:'Gross Margin',formula:`(Revenue − Cost of Goods Sold) ÷ Revenue`,def:`The percentage of revenue left after the direct cost of delivering the product or service.`,warn:`What counts as "cost of goods" varies by industry — compare margins only within the same industry, not across very different business types.`},
+{id:'net-margin',name:'Net Margin',formula:`Net Profit ÷ Revenue`,def:`The percentage of revenue left after every cost — including overhead, tax, and interest.`,warn:`One-time items (an asset sale, a legal settlement) can distort a single period's net margin — check whether a number is "adjusted" or "as reported."`},
+{id:'ebitda',name:'EBITDA',formula:`Earnings before Interest, Tax, Depreciation & Amortization`,def:`A profitability measure that strips out financing and accounting choices to compare operating performance.`,warn:`EBITDA ignores real cash costs like debt payments and capital spending — a business can show healthy EBITDA and still run out of cash.`},
+{id:'cash-flow',name:'Cash Flow',formula:`Cash in − Cash out, over a period`,def:`The actual movement of cash, distinct from accounting profit (which can include non-cash items).`,warn:`A profitable business can still fail from a cash-flow gap — profit is an opinion, cash is a fact.`},
+{id:'cac',name:'CAC (Customer Acquisition Cost)',formula:`Total sales & marketing spend ÷ New customers acquired`,def:`What it costs, on average, to acquire one new paying customer.`,warn:`Blending all channels into one CAC number hides that some channels are far more efficient than others — break it down by channel when deciding where to spend.`},
+{id:'ltv',name:'LTV (Customer Lifetime Value)',formula:`Average purchase value × Purchase frequency × Average customer lifespan`,def:`The total revenue expected from one customer over the entire relationship.`,warn:`Early-stage LTV estimates are frequently overconfident — the "lifespan" assumption is the weakest link, based on too little churn data.`},
+{id:'ltv-cac',name:'LTV : CAC Ratio',formula:`LTV ÷ CAC`,def:`How many times over a customer's value repays what it cost to acquire them; roughly 3:1 or higher is a common healthy benchmark.`,warn:`A very high ratio (10:1+) isn't automatically great — it can mean you're under-investing in growth, not that you've found perfect efficiency.`},
+{id:'churn',name:'Churn Rate',formula:`Customers lost in period ÷ Customers at start of period`,def:`The rate customers stop paying or leave, usually measured monthly or annually.`,warn:`Logo churn (customers lost) and revenue churn (money lost) can tell very different stories — losing many small customers looks worse on logo churn than losing one large one, even if the revenue impact is smaller.`},
+{id:'retention',name:'Retention Rate',formula:`1 − Churn Rate`,def:`The share of customers or revenue kept over a period — the inverse framing of churn.`,warn:`"Net" retention (which includes upsells) can exceed 100% even while some customers are actively leaving — always check whether a number is gross or net.`},
+{id:'conversion',name:'Conversion Rate',formula:`Actions taken ÷ Total opportunities`,def:`The percentage of people who complete a desired step — a sale, a signup, a reply.`,warn:`Comparing conversion rates across very different traffic sources or funnel stages without context is close to meaningless.`},
+{id:'roi',name:'ROI (Return on Investment)',formula:`(Gain from investment − Cost of investment) ÷ Cost of investment`,def:`How much return an investment generated relative to what was put in.`,warn:`ROI alone ignores time — a 20% return in one month is very different from a 20% return over five years; always check the time period.`},
+{id:'roas',name:'ROAS (Return on Ad Spend)',formula:`Revenue from ads ÷ Ad spend`,def:`Revenue generated for every unit of money spent on advertising.`,warn:`ROAS ignores margin — a 4:1 ROAS on a low-margin product can still lose money once cost of goods is factored in.`},
+{id:'roic',name:'ROIC (Return on Invested Capital)',formula:`Net Operating Profit After Tax ÷ Invested Capital`,def:`How efficiently a company turns capital invested in the business into profit.`,warn:`Useful mainly for comparing companies within the same capital-intensity industry — comparing a software company's ROIC to a manufacturer's tells you little.`},
+{id:'roe',name:'ROE (Return on Equity)',formula:`Net Income ÷ Shareholder Equity`,def:`How much profit a company generates per unit of shareholder equity invested.`,warn:`High ROE can come from high debt (leverage) rather than genuine efficiency — check debt levels alongside ROE, not in isolation.`},
+{id:'burn-rate',name:'Burn Rate',formula:`Cash spent per month (net of revenue)`,def:`How fast a business is spending its cash reserves — usually quoted monthly for startups.`,warn:`"Gross burn" (total spend) and "net burn" (spend minus incoming revenue) are very different numbers — always confirm which one is being cited.`},
+{id:'runway',name:'Runway',formula:`Cash in bank ÷ Monthly burn rate`,def:`How many months a business can keep operating at the current burn rate before running out of cash.`,warn:`A single large upcoming expense or a burn rate that's rising month over month can make a stated runway wildly optimistic.`},
+{id:'valuation',name:'Valuation',formula:`Varies — often Revenue × Industry multiple, or discounted future cash flows`,def:`An estimate of what a business is worth, used for fundraising, acquisition, or exit.`,warn:`Private company valuations (especially at the funding-round stage) reflect what one investor agreed to pay under specific terms, not a market-tested price — treat headline valuations skeptically.`},
+{id:'revenue-multiple',name:'Revenue Multiple',formula:`Valuation ÷ Annual Revenue`,def:`A shorthand way to price a business relative to its revenue, common in SaaS and startup contexts.`,warn:`Multiples swing hard with market sentiment (interest rates, sector hype) — the same business can be "worth" very different multiples eighteen months apart with no operational change.`},
+{id:'cagr',name:'CAGR (Compound Annual Growth Rate)',formula:`(Ending Value ÷ Starting Value)^(1 ÷ Years) − 1`,def:`The smoothed annual growth rate that would take a starting value to an ending value over a period, ignoring year-to-year volatility.`,warn:`CAGR can make a genuinely volatile, risky path look smooth and safe in hindsight — it hides the bumps entirely.`},
+{id:'irr',name:'IRR (Internal Rate of Return)',formula:`The discount rate that makes an investment's net present value equal zero`,def:`A single percentage summarizing the annualized return of an investment with cash flows at different times.`,warn:`IRR can be misleadingly inflated for investments with an early large cash return, even if the total money made is modest — always look at it next to the actual multiple of money returned.`},
+{id:'npv',name:'NPV (Net Present Value)',formula:`Sum of future cash flows, each discounted back to today's value, minus the initial investment`,def:`Whether an investment creates value once you account for the fact that money today is worth more than money later.`,warn:`Wildly sensitive to the discount rate chosen — a small change in assumed discount rate can flip a project from apparently profitable to apparently unprofitable.`},
+{id:'market-share',name:'Market Share',formula:`Your revenue (or units) ÷ Total market revenue (or units)`,def:`The portion of a defined market that one company controls.`,warn:`Highly dependent on how the "market" is defined — a company can plausibly claim a large share of a narrowly-defined market and a tiny share of a broadly-defined one.`},
+{id:'payback',name:'CAC Payback Period',formula:`CAC ÷ Monthly revenue per customer`,def:`How many months it takes for a customer's revenue to repay the cost of acquiring them.`,warn:`Ignores churn — a customer with a 14-month payback period who typically churns at month 10 never actually pays back, even though the formula suggests they will.`},
+{id:'mrr-arr',name:'MRR / ARR',formula:`MRR = total recurring revenue per month; ARR = MRR × 12`,def:`Monthly and Annual Recurring Revenue — the predictable, subscription portion of revenue.`,warn:`One-time or usage-based revenue sometimes gets folded into "recurring" figures to inflate them — check what's actually included.`},
+{id:'nps',name:'NPS (Net Promoter Score)',formula:`% Promoters (score 9–10) − % Detractors (score 0–6), on a 0–10 "would you recommend" question`,def:`A single-question proxy for customer satisfaction and likely word-of-mouth growth.`,warn:`Highly sensitive to when and how it's asked (right after a great experience vs. cold) — treat trend over time as more meaningful than any single snapshot.`},
+{id:'break-even',name:'Break-Even Point',formula:`Fixed Costs ÷ (Price per unit − Variable cost per unit)`,def:`The sales volume at which total revenue equals total costs — the point profit starts.`,warn:`Assumes price and variable cost per unit stay constant, which often isn't true at higher volumes (discounts, supply constraints) — treat it as an estimate, not a guarantee.`}
+];
+const PLAYBOOKS = [
+{id:'first-client',name:'Landing Your First Freelance Client',cat:'Freelancing',
+ steps:[
+ `List everyone in your existing network who might need your skill, or knows someone who does — this list is almost always longer than it first feels.`,
+ `Reach out with a specific, low-pressure message: what you do, one relevant example, and a direct but soft ask ("would this be useful for you, or anyone you know?").`,
+ `For the first project, price to build proof, not to maximize revenue — a strong first case study is worth more than the fee.`,
+ `Put scope and payment terms in writing even for a small first job — this is the habit, not the money, that matters here.`,
+ `Deliver slightly beyond what was promised on the first project specifically — it's the single highest-leverage thing you can do for referrals.`,
+ `Ask directly for a testimonial and a referral immediately after a good delivery, while the good feeling is fresh.`]},
+
+{id:'salary-negotiation',name:'Salary Negotiation',cat:'Career',
+ steps:[
+ `Research the real market range for the role, level, and location before any number gets discussed.`,
+ `Let the employer state a number or range first if possible — delay your own number until after interest is established.`,
+ `When you do give a number, use a range anchored at your true walk-away-happy floor.`,
+ `Negotiate the full package, not just base — bonus, equity, leave, remote flexibility, start date, and signing bonus are all movable.`,
+ `Get any verbal agreement confirmed in writing before treating it as final.`,
+ `If declining a counter, do it clearly and professionally — this industry is smaller than it feels.`]},
+
+{id:'job-search',name:'Job Search',cat:'Career',
+ steps:[
+ `Define the actual target — role, level, industry, location — specifically enough that you could name ten real companies that fit.`,
+ `Rebuild the resume around the target's language, not a generic version sent everywhere.`,
+ `Prioritize warm referrals over cold applications for at least the first half of your effort.`,
+ `Prepare STAR stories for your five most likely behavioral questions before the first interview, not after.`,
+ `Track every application and its stage in one place — a search with more than a handful of live threads is unmanageable from memory alone.`,
+ `Negotiate every offer, even ones that already feel generous.`]},
+
+{id:'difficult-client',name:'Handling a Difficult Client',cat:'Freelancing',
+ steps:[
+ `Get specific about what's actually happening — vague dissatisfaction ("difficult") usually has a concrete root cause once named.`,
+ `Re-read the original scope document together — most client conflict is a scope-interpretation gap, not bad faith.`,
+ `Address it in writing, calmly, stating the gap and proposed resolution — avoid resolving high-stakes disputes only verbally.`,
+ `Offer one clear path forward with a boundary attached (a revised scope, a change-order fee, or a firm deadline).`,
+ `If the relationship is unrecoverable, exit professionally and promptly rather than dragging out a bad fit — protect the reputation cost of a messy public exit.`]},
+
+{id:'idea-validation',name:'Business Idea Validation',cat:'Entrepreneurship',
+ steps:[
+ `Write the problem you think exists in one sentence, before writing anything about the solution.`,
+ `Find and talk to at least ten people who plausibly have that problem — ask about their current behavior, not their opinion of your idea.`,
+ `Look specifically for people already paying for a worse solution — that's a much stronger signal than polite interest.`,
+ `Build the smallest possible version that tests the riskiest assumption, not the easiest feature to build.`,
+ `Get a real commitment (a pre-order, a deposit, a signed letter of intent) before building further — opinions are free, commitments aren't.`,
+ `Set a specific kill criterion in advance — decide now what result would mean you stop, so a sunk-cost feeling can't make that call for you later.`]},
+
+{id:'cold-outreach',name:'Cold Outreach',cat:'Sales / Freelancing',
+ steps:[
+ `Build a short, specific list of real targets — quality over volume; twenty well-researched contacts beat two hundred generic ones.`,
+ `Reference something specific and true about them in the first line — proof you didn't mass-copy the message.`,
+ `Lead with their likely problem, not your service — make the first line about them.`,
+ `Keep the ask small and specific — a fifteen-minute call, not "let's work together."`,
+ `Follow up two to three times, spaced out, before moving on — most replies come after the first message, not from it.`,
+ `Track response rates by message version so you're improving the template, not just repeating it.`]},
+
+{id:'layoff-resignation',name:'Layoff or Resignation',cat:'Career',
+ steps:[
+ `If resigning: line up the next step (offer signed, or a real financial runway) before giving notice, not after.`,
+ `If laid off: confirm the exact terms in writing — severance, notice period, benefit continuation, reference policy — before signing anything.`,
+ `In either case, request a reference conversation while goodwill is still warm.`,
+ `Update your resume and LinkedIn the same week, while the details are fresh.`,
+ `File for any applicable unemployment or transition benefits promptly — eligibility windows are often shorter than expected.`,
+ `Give yourself a real, bounded reset period rather than starting the next search in a panic the same day.`]},
+
+{id:'investment-research',name:'Researching an Investment Before Buying',cat:'Investing',
+ steps:[
+ `Write down what you actually understand about how this asset makes money or grows in value — if you can't explain it simply, that's a signal.`,
+ `Check the fee structure — small ongoing fee differences compound into large amounts over decades.`,
+ `Compare the claimed return against a relevant, boring benchmark (an index fund) over the same period.`,
+ `Size the position by what you'd genuinely be fine losing, not by how confident the pitch made you feel.`,
+ `Decide your exit or rebalancing rule before buying, not after — plans made after a price move are usually driven by emotion.`]}
+];
+const SCRIPTS = [
+{id:'salary-ask',name:'Salary Negotiation — Initial Ask',cat:'Career',
+ note:`Use after an offer is extended, once interest is clearly established.`,
+ body:`Thank you for the offer — I'm genuinely excited about [specific detail about the role/team]. Based on my research into this role and level in [location/market], and the scope we discussed, I was expecting something closer to [target number/range]. Is there flexibility to get there?`},
+
+{id:'counter-lowball',name:'Countering a Lowball Offer',cat:'Career / Freelancing',
+ note:`Stay factual and specific, not emotional — the goal is to reopen the number, not to argue.`,
+ body:`I appreciate you sharing that. Based on [specific market data / comparable scope], I was expecting [target number]. Can you help me understand how this number was arrived at, and whether there's room to move?`},
+
+{id:'cold-email',name:'Cold Outreach Email',cat:'Sales / Freelancing',
+ note:`Keep it under 100 words. The specific detail in line one is what separates this from spam.`,
+ body:`Hi [Name] — I noticed [specific, true detail about their work/company]. I work with [type of client] on [specific outcome, not a generic service description], most recently helping [brief, concrete result]. Would a fifteen-minute call make sense to see if it's relevant for [their specific situation]? No worries if not.`},
+
+{id:'discovery-open',name:'Discovery Call Opening Questions',cat:'Sales',
+ note:`Ask, then stop talking — resist the urge to fill silence while they think.`,
+ body:`Before I share anything about what I do, I'd love to understand your side first — what's prompting you to look into this right now? And what does the current situation actually look like day to day?`},
+
+{id:'objection-price',name:`Handling "It's Too Expensive"`,cat:'Sales / Freelancing',
+ note:`Isolate before defending the number — "too expensive" sometimes means "not convinced of the value yet," which is a different conversation.`,
+ body:`That's fair to raise. Can I ask — is it the number itself, or is it more that the value isn't clear yet relative to the number? [If value] Let's walk through what this actually changes for you. [If number] What range were you expecting, and let's see what scope fits it.`},
+
+{id:'late-payment',name:'Late Payment Follow-Up',cat:'Freelancing',
+ note:`Stay professional and factual on the first follow-up — assume oversight before assuming bad faith.`,
+ body:`Hi [Name] — following up on invoice [number], due on [date]. Just checking this hasn't gotten buried — could you confirm when payment is expected? Happy to resend anything you need on my end.`},
+
+{id:'decline-client',name:'Declining a Bad-Fit Client or Project',cat:'Freelancing',
+ note:`Be clear and brief — over-explaining a decline often invites negotiation you don't want.`,
+ body:`Thanks so much for thinking of me for this. After reviewing the scope, I don't think I'm the right fit for this one — [one honest, brief reason if useful]. I'd be glad to point you toward [alternative/referral] if that's helpful.`},
+
+{id:'resignation-open',name:'Resignation Conversation Opener',cat:'Career',
+ note:`Keep the initial conversation short and factual; save details for the written notice.`,
+ body:`I wanted to let you know directly, before it's official anywhere else — I've decided to move on and my last day will be [date]. I've valued my time here and want to make the transition as smooth as possible.`},
+
+{id:'ask-promotion',name:'Asking for a Promotion',cat:'Career',
+ note:`Bring specific evidence, not just tenure — the ask should already answer "why now, why me."`,
+ body:`I'd like to talk about my path to [target level/title]. Over the last [period], I've [specific outcome 1], [specific outcome 2], and taken on [specific expanded scope]. I'd like to understand what's needed to formalize a move to [level], and on what timeline.`}
+];
+const CASES = [
+{id:'netflix-pivot',name:'Netflix — DVD-by-Mail to Streaming',cat:'Business Model / Strategy',
+ context:`Netflix built a large, profitable DVD-by-mail rental business in the 2000s, competing successfully against video rental chains.`,
+ decision:`Rather than defend the DVD business indefinitely, Netflix invested heavily in streaming technology and licensing well before DVD revenue had actually declined — deliberately cannibalizing its own profitable core business.`,
+ incentives:`Management judged that someone was going to disrupt physical rental with streaming eventually; the only choice was whether Netflix did it to itself or a competitor did it to them.`,
+ result:`Netflix became the dominant global streaming platform; most of its DVD-era competitors, including large rental chains, did not survive the transition.`,
+ mistakes:`A separate 2011 attempt to split DVD and streaming into two services and brands (with an unpopular price restructuring) was reversed quickly after strong customer backlash — a reminder that even a correct long-term strategic bet can be executed poorly in the short term.`,
+ lessons:`Cannibalizing your own profitable business on your own terms is often safer than waiting for a competitor to do it on theirs — but execution and communication of a strategic shift matter as much as the strategic call itself.`},
+
+{id:'kodak-digital',name:"Kodak and the Digital Camera",cat:'Innovation / Strategy',
+ context:`Kodak's engineers built one of the earliest working digital camera prototypes in the 1970s, well ahead of the market.`,
+ decision:`Kodak chose to slow-walk digital photography for years, protecting its highly profitable film and print business rather than aggressively commercializing its own invention.`,
+ incentives:`Film and print processing were Kodak's core profit engines; internally, digital cameras looked like a threat to that revenue rather than the future replacement for it.`,
+ result:`Competitors moved faster into digital cameras and, later, camera phones displaced dedicated cameras almost entirely. Kodak filed for bankruptcy protection in 2012.`,
+ mistakes:`Treating a genuinely disruptive technology as a threat to manage slowly, rather than a new business to build aggressively, even at the cost of the old one.`,
+ lessons:`Commonly cited as the textbook case of the "innovator's dilemma" — a company can invent the future and still lose to it, if existing profit incentives make leadership protect the past instead.`},
+
+{id:'airbnb-craigslist',name:'Airbnb — Early Distribution via Craigslist',cat:'Growth / Distribution',
+ context:`In its very early days, Airbnb had a good product but almost no way to reach potential hosts and guests at scale.`,
+ decision:`The founders built a tool letting Airbnb hosts cross-post their listings to Craigslist — a much larger, existing marketplace — routing that traffic back into Airbnb.`,
+ incentives:`Building a new audience from zero is far slower than borrowing distribution from a platform that already has one; the tradeoff was operating in a technical and reputational gray area on a platform that hadn't authorized the integration.`,
+ result:`It meaningfully accelerated Airbnb's early listing growth during a period when the company badly needed traction to survive.`,
+ mistakes:`The tactic depended on Craigslist not blocking the integration — a real platform-dependency risk that a growth tactic like this always carries.`,
+ lessons:`Early-stage distribution can legitimately come from piggybacking on someone else's existing audience — but it's a bridge tactic, not a durable long-term channel, and it shouldn't be confused with sustainable growth infrastructure.`},
+
+{id:'slack-pivot',name:'Slack — Pivoting from a Failed Game',cat:'Entrepreneurship / Pivoting',
+ context:`The team behind Slack originally built an online multiplayer game (first Glitch's predecessor, then Glitch itself) that failed to gain a sustainable audience.`,
+ decision:`Rather than shut down entirely, the team recognized that the internal communication tool they'd built for their own game-development team was more valuable than the game itself, and pivoted the company around that tool.`,
+ incentives:`With investor money already raised and a strong engineering team assembled, the founders judged the team and technology were the real asset — worth redirecting rather than disbanding.`,
+ result:`Slack became one of the fastest-growing enterprise software companies of its era and was later acquired by Salesforce for a large sum.`,
+ mistakes:`Not a mistake so much as a reminder — the original product thesis was wrong twice before the team found the right one; persistence on the team and capability mattered more than persistence on the original idea.`,
+ lessons:`A pivot isn't a failure of the underlying company if the team honestly separates "was this specific idea right" from "is this team and what we've learned still valuable."`},
+
+{id:'overexpansion-edtech',name:'Rapid Overexpansion in Indian Ed-Tech',cat:'Growth / Unit Economics',
+ context:`Several Indian ed-tech companies expanded very aggressively during 2020–2022, fueled by high valuations and large acquisition-driven growth, adding large sales teams and acquiring numerous smaller companies.`,
+ decision:`Growth was prioritized heavily over near-term unit economics and profitability, on the assumption that scale and market share would eventually convert into durable margins.`,
+ incentives:`Investor capital was cheap and readily available during that period, which rewarded visible growth metrics more than it rewarded careful cost discipline.`,
+ result:`As funding conditions tightened afterward, several of these companies faced significant valuation markdowns, layoffs, and, in some cases, governance and accounting scrutiny.`,
+ mistakes:`Scaling costs (sales teams, acquisitions) faster than the underlying unit economics (cost to acquire and retain a paying student versus revenue per student) had actually been proven at a smaller scale.`,
+ lessons:`Growth funded by cheap capital can mask weak unit economics for a long time — but it doesn't fix them. Validating that a smaller version of the business is genuinely profitable, or on a believable path to it, should generally come before scaling it aggressively.`}
+];
+const HEURISTICS = [
+{id:'pareto-h',rule:'The 80/20 Rule',logic:`Roughly 80% of results tend to come from about 20% of causes — an observation, not a mathematical law.`,use:`Finding leverage — which clients, tasks, or channels to double down on.`,misuse:`Used to justify neglecting the "unimportant" 80% entirely — some of it is low-frequency but non-negotiable (compliance, a key relationship).`},
+{id:'parkinson',rule:"Parkinson's Law",logic:`Work expands to fill the time allotted for it — a two-week deadline for a two-day task will usually take close to two weeks.`,use:`Setting tighter, more realistic deadlines to force focus.`,misuse:`Compressing deadlines so far that quality genuinely suffers — the law describes slack, not infinite compressibility.`},
+{id:'hofstadter',rule:"Hofstadter's Law",logic:`"It always takes longer than expected, even when you account for Hofstadter's Law" — a joke about the persistence of planning-time optimism.`,use:`Padding project estimates deliberately, especially for creative or technical work with unknown unknowns.`,misuse:`Used as an excuse to stop estimating carefully at all — the point is to correct for bias, not to abandon planning.`},
+{id:'occam',rule:"Occam's Razor",logic:`Among competing explanations that fit the evidence equally well, the simplest one is usually the right starting bet.`,use:`Diagnosing a business or technical problem — check the boring explanation before the exotic one.`,misuse:`Used to dismiss a genuinely more complex but correct explanation just because it's more complex.`},
+{id:'rule72',rule:'The Rule of 72',logic:`Divide 72 by an annual growth or interest rate to roughly estimate how many years it takes to double.`,use:`Quick mental math for comparing investment returns or growth rates without a calculator.`,misuse:`Treated as precise rather than a fast approximation — it degrades in accuracy at very high or very low rates.`},
+{id:'chesterton',rule:"Chesterton's Fence",logic:`Don't remove a rule, process, or system until you understand why it was put there in the first place.`,use:`Joining a new team or business and evaluating existing processes before changing them.`,misuse:`Used to justify never changing anything — the point is to understand first, not to preserve everything forever.`},
+{id:'two-pizza',rule:'The Two-Pizza Rule',logic:`A team too large to be fed by two pizzas is usually too large to communicate and decide efficiently.`,use:`Sizing project teams or meeting attendee lists.`,misuse:`Applied rigidly to teams whose work genuinely requires broader coordination (large-scale operations, certain manufacturing contexts).`},
+{id:'never-split',rule:"Don't Reflexively Split the Difference",logic:`Meeting exactly in the middle of two anchored numbers rewards whoever anchored more aggressively, not whoever has the fairer position.`,use:`Any negotiation where the other side's opening number was clearly an aggressive anchor, not a fair midpoint.`,misuse:`A midpoint split genuinely is reasonable and fast for low-stakes, good-faith negotiations — the heuristic isn't "never compromise," it's "don't compromise reflexively."`},
+{id:'sturgeon',rule:"Sturgeon's Law",logic:`Roughly 90% of everything produced in any field is mediocre — a bar-setting heuristic for judging your own early work fairly.`,use:`Reducing perfectionism-driven paralysis on early creative or professional work.`,misuse:`Used to excuse not improving at all — the point is to ship the "90%" and iterate, not to stop caring about quality.`},
+{id:'premortem-h',rule:'Assume It Fails, Then Ask Why',logic:`Imagining a decision has already failed makes people far more willing to name real risks than asking "what could go wrong?" in the abstract.`,use:`Any significant, hard-to-reverse decision before committing to it.`,misuse:`Applied to every trivial decision, where the exercise costs more time than the decision is worth.`}
+];
+
+const SIGNALS = [
+{id:'client-signals',title:'Vetting a New Client',
+ good:[`Answers scope and budget questions directly and promptly`,`Has worked with freelancers/agencies before and understands the process`,`References or a track record you can verify`,`Comfortable putting terms in writing`],
+ bad:[`Repeatedly dodges budget questions while pushing for "just a quick proposal" first`,`Wants to skip a written contract "since we trust each other"`,`Scope keeps expanding before the first payment is even made`,`Asks you to start work before terms are finalized "to save time"`]},
+{id:'employer-signals',title:'Evaluating an Employer',
+ good:[`Interviewers give specific, concrete answers about the role and team, not vague pitches`,`Clear, verifiable information about compensation structure and review cycles`,`Reasonable, respected notice periods for departing employees`,`Low, explainable turnover on the specific team you'd join`],
+ bad:[`Interview process is unusually secretive about basic role details`,`Heavy emphasis on "passion" and "hustle" in place of clarity on compensation`,`Consistently high turnover on the team, explained away vaguely`,`Pressure to accept an offer within an unreasonably short window`],},
+{id:'investment-signals',title:'Evaluating an Investment Opportunity',
+ good:[`Returns claimed are in a plausible range for the stated risk level`,`Fee structure is disclosed clearly and up front`,`You can explain, in your own words, exactly how the underlying asset makes money`,`No pressure to decide within an artificially short window`],
+ bad:[`Guaranteed high returns with "no risk" — a genuine mismatch between the two`,`Returns depend heavily on recruiting other investors, not on an underlying product or asset`,`Reluctance to put terms or structure in writing`,`Heavy pressure to decide immediately, often paired with claims of scarcity ("limited slots")`]},
+{id:'business-health-signals',title:`Reading a Business's Health`,
+ good:[`Revenue growth is accompanied by stable or improving margin, not just top-line growth`,`Customer concentration is reasonably spread — no single client is an existential risk`,`Cash runway is tracked and known precisely, not estimated loosely`,`Churn is measured and actively worked on, not just reported`],
+ bad:[`Growth achieved mainly through heavy discounting or unsustainable spend`,`A small number of clients or one channel account for most of the revenue`,`Founders or leadership are vague or evasive about basic financial metrics`,`Rising customer acquisition cost with no corresponding plan to address it`]}
+];
+
+/* ================= RENDER ENGINE ================= */
+const SYSTEMS_META = [
+ {id:'frameworks',title:'Framework Library',d:`Structured mental models — when to reach for each one, and when it fails.`,data:FRAMEWORKS},
+ {id:'techniques',title:'Technique Database',d:`Named, field-tested tactics with mechanism, execution, and counter-tactics.`,data:TECHNIQUES},
+ {id:'metrics',title:'Metrics Glossary',d:`The numbers behind business — formula, meaning, and where each one lies.`,data:METRICS},
+ {id:'playbooks',title:'Playbooks',d:`Ordered, repeatable sequences for recurring high-stakes situations.`,data:PLAYBOOKS},
+ {id:'scripts',title:'Scripts',d:`Adaptable language patterns — templates, not magic phrases.`,data:SCRIPTS},
+ {id:'cases',title:'Case Studies',d:`Context → Decision → Incentives → Result → Mistakes → Lessons.`,data:CASES},
+ {id:'heuristics',title:'Heuristics & Rules of Thumb',d:`Fast rules — with the honest limits of each one.`,data:HEURISTICS},
+ {id:'signals',title:'Pattern Recognition',d:`Red flags and green flags across clients, employers, money, and business health.`,data:SIGNALS}
+];
+
+const content = document.getElementById('content');
+let currentView = {type:'home'};
+let pendingFocus = null;
+
+function esc(s){return String(s);}
+function highlightPh(s){return s.replace(/\[([^\]]+)\]/g,'<span class="ph">[$1]</span>');}
+
+function fieldRow(label,text){
+  return `<div class="field"><div class="fieldLabel">${label}</div><div class="fieldText">${text}</div></div>`;
+}
+
+function stamp(text,cls){return `<span class="stamp2 ${cls}">${text}</span>`;}
+
+function cardShell(id,title,sub,stampsHTML,bodyHTML){
+  return `<div class="card" id="c-${id}">
+    <button class="cardHead" onclick="toggleCard('${id}')">
+      <div class="cardHeadL"><div class="cardTitle">${title}</div><div class="cardSub">${sub}</div></div>
+      <div style="display:flex;align-items:center;gap:10px;">
+        <div class="stampRow">${stampsHTML}</div>
+        <div class="chev">▸</div>
+      </div>
+    </button>
+    <div class="cardBody"><div class="cardBodyIn">${bodyHTML}</div></div>
+  </div>`;
+}
+
+function toggleCard(id){
+  const el = document.getElementById('c-'+id);
+  if(el) el.classList.toggle('open');
+}
+window.toggleCard = toggleCard;
+
+/* ---------- HOME ---------- */
+function renderHome(){
+  const totalTech = TECHNIQUES.length, totalFw = FRAMEWORKS.length, totalMetrics = METRICS.length, totalDomains = DOMAINS.length;
+  let h = `
+  <div class="heroRow">
+    <div>
+      <div class="heroKicker">Field Manual · Volume I</div>
+      <h2 class="heroTitle">Business, Career &amp;<br>Professional Life</h2>
+      <div class="heroDesc">Twenty-two knowledge domains and eight practical systems — frameworks, techniques, scripts, playbooks — built to answer one question over and over: what should I actually do here?</div>
+    </div>
+    <div class="heroStamp">${totalDomains} DOMAINS<br>${totalFw} FRAMEWORKS<br>${totalTech} TECHNIQUES<br>${totalMetrics} METRICS</div>
+  </div>
+  <div class="sectionLabel">Domains</div>
+  <div class="gridCards">`;
+  DOMAINS.forEach(d=>{
+    h += `<button class="miniCard" onclick="navigate({type:'domain',id:'${d.id}'})">
+      <div class="n">MODULE ${String(d.num).padStart(2,'0')}</div>
+      <div class="t">${d.title}</div>
+      <div class="d">${d.tag}</div>
+    </button>`;
+  });
+  h += `</div><div class="sectionLabel">The Practical Layer</div><div class="gridCards">`;
+  SYSTEMS_META.forEach(s=>{
+    h += `<button class="miniCard" onclick="navigate({type:'system',id:'${s.id}'})">
+      <div class="n">SYSTEM</div>
+      <div class="t">${s.title}</div>
+      <div class="d">${s.d}</div>
+    </button>`;
+  });
+  h += `</div>`;
+  content.innerHTML = h;
+}
+
+/* ---------- DOMAIN PAGE ---------- */
+function relatedFor(domain){
+  const kw = domain.title.toLowerCase().split(/[^a-z]+/).filter(w=>w.length>3);
+  const matchTech = TECHNIQUES.filter(t=>kw.some(k=>t.domain.toLowerCase().includes(k)));
+  const matchFw = FRAMEWORKS.filter(f=>kw.some(k=>f.cat.toLowerCase().includes(k)));
+  return {matchTech,matchFw};
+}
+
+function renderDomain(id){
+  const d = DOMAINS.find(x=>x.id===id);
+  if(!d){renderHome();return;}
+  const {matchTech,matchFw} = relatedFor(d);
+  let h = `<button class="backBtn" onclick="navigate({type:'home'})">← Index</button>
+  <div class="pageHead">
+    <div class="pageEyebrow">Module ${String(d.num).padStart(2,'0')} of ${DOMAINS.length}</div>
+    <h2 class="pageTitle">${d.title}</h2>
+    <div class="pageTag">${d.tag}</div>
+  </div>
+  <div class="wwhBlock">
+    ${wwhRow('WHAT',d.what)}
+    ${wwhRow('WHY',d.why)}
+    ${wwhRow('HOW',d.how)}
+    ${wwhRow('WHEN',d.when)}
+    ${wwhRow('WHERE',d.where)}
+    ${wwhRow('WHO',d.who)}
+  </div>
+  <div class="sectionLabel">Key Topics</div>
+  <div class="topicList">${d.topics.map(t=>`<div class="topicItem">${t}</div>`).join('')}</div>`;
+
+  if(matchTech.length || matchFw.length){
+    h += `<div class="crossRef"><b>Related in the practical layer —</b> `;
+    const links = [];
+    matchFw.forEach(f=>links.push(`<a href="#" onclick="navigate({type:'system',id:'frameworks'},'${f.id}');return false;">${f.name}</a>`));
+    matchTech.forEach(t=>links.push(`<a href="#" onclick="navigate({type:'system',id:'techniques'},'${t.id}');return false;">${t.name}</a>`));
+    h += links.join(', ') + `.</div>`;
+  }
+  content.innerHTML = h;
+}
+function wwhRow(label,text){
+  return `<div class="wwhRow"><div class="wwhLabel">${label}</div><div class="wwhText">${text}</div></div>`;
+}
+
+/* ---------- SYSTEM SECTIONS ---------- */
+function renderSystem(id){
+  const meta = SYSTEMS_META.find(s=>s.id===id);
+  if(!meta){renderHome();return;}
+  let h = `<button class="backBtn" onclick="navigate({type:'home'})">← Index</button>
+  <div class="pageHead">
+    <div class="pageEyebrow">Practical Layer</div>
+    <h2 class="pageTitle">${meta.title}</h2>
+    <div class="pageTag">${meta.d}</div>
+  </div>`;
+
+  if(id==='frameworks') h += meta.data.map(renderFrameworkCard).join('');
+  else if(id==='techniques') h += meta.data.map(renderTechniqueCard).join('');
+  else if(id==='metrics') h += `<div class="metricGrid">` + meta.data.map(renderMetricCard).join('') + `</div>`;
+  else if(id==='playbooks') h += meta.data.map(renderPlaybookCard).join('');
+  else if(id==='scripts') h += meta.data.map(renderScriptCard).join('');
+  else if(id==='cases') h += meta.data.map(renderCaseCard).join('');
+  else if(id==='heuristics') h += `<div class="metricGrid">` + meta.data.map(renderHeuristicCard).join('') + `</div>`;
+  else if(id==='signals') h += meta.data.map(renderSignalBlock).join('');
+
+  content.innerHTML = h;
+
+  if(pendingFocus){
+    const el = document.getElementById('c-'+pendingFocus) || document.getElementById('m-'+pendingFocus);
+    if(el){
+      el.classList.add('open');
+      setTimeout(()=>el.scrollIntoView({behavior:'smooth',block:'center'}),60);
+      el.style.borderColor='var(--gold-dim)';
+      setTimeout(()=>{el.style.borderColor='';},2200);
+    }
+    pendingFocus = null;
+  }
+}
+
+function renderFrameworkCard(f){
+  const body = `<div class="fieldGrid">
+    ${fieldRow('WHAT',f.what)}
+    ${fieldRow('HOW',f.how)}
+    ${fieldRow('WHEN TO USE',f.when)}
+    ${fieldRow('WHEN IT FAILS',f.fails)}
+    ${fieldRow('EXAMPLE',f.example)}
+  </div>`;
+  return cardShell(f.id, f.name, f.cat, stamp(f.cat,'stamp-neutral'), body);
+}
+
+function renderTechniqueCard(t){
+  const steps = t.how.map(s=>`<li>${s}</li>`).join('');
+  const body = `<div class="fieldGrid">
+    ${fieldRow('WHAT',t.what)}
+    ${fieldRow('MECHANISM',t.mechanism)}
+    <div class="field"><div class="fieldLabel">HOW TO EXECUTE</div><div class="fieldText"><ul class="stepList">${steps}</ul></div></div>
+    ${fieldRow('WHEN TO USE',t.when)}
+    ${fieldRow('WHEN NOT TO',t.whenNot)}
+    ${fieldRow('EXAMPLE',t.example)}
+    ${fieldRow('COUNTERMEASURE',t.countermeasure)}
+  </div>`;
+  const stamps = stamp(t.domain,'stamp-neutral') + stamp(t.difficulty,'stamp-medium') + stamp('Risk: '+t.risk,'stamp-'+t.risk);
+  return cardShell(t.id, t.name, t.domain, stamps, body);
+}
+
+function renderMetricCard(m){
+  return `<div class="metricCard" id="c-${m.id}">
+    <div class="mt">${m.name}</div>
+    <div class="mf">${m.formula}</div>
+    <div class="md">${m.def}</div>
+    <div class="mw"><b>Misleading when —</b> ${m.warn}</div>
+  </div>`;
+}
+
+function renderPlaybookCard(p){
+  const steps = p.steps.map(s=>`<li>${s}</li>`).join('');
+  const body = `<ul class="stepList">${steps}</ul>`;
+  return cardShell(p.id, p.name, p.cat, stamp(p.cat,'stamp-neutral'), body);
+}
+
+function renderScriptCard(s){
+  const body = `<div class="fieldGrid">
+    ${fieldRow('WHEN',s.note)}
+  </div>
+  <div class="scriptBox">${highlightPh(s.body)}</div>`;
+  return cardShell(s.id, s.name, s.cat, stamp(s.cat,'stamp-neutral'), body);
+}
+
+function renderCaseCard(c){
+  const body = `<div class="fieldGrid">
+    ${fieldRow('CONTEXT',c.context)}
+    ${fieldRow('DECISION',c.decision)}
+    ${fieldRow('INCENTIVES',c.incentives)}
+    ${fieldRow('RESULT',c.result)}
+    ${fieldRow('MISTAKES',c.mistakes)}
+    ${fieldRow('LESSONS',c.lessons)}
+  </div>`;
+  return cardShell(c.id, c.name, c.cat, stamp(c.cat,'stamp-neutral'), body);
+}
+
+function renderHeuristicCard(h){
+  return `<div class="metricCard" id="c-${h.id}">
+    <div class="mt">${h.rule}</div>
+    <div class="md" style="margin-bottom:8px;">${h.logic}</div>
+    <div class="md"><b style="color:var(--olive);">Use —</b> ${h.use}</div>
+    <div class="mw"><b>Misuse —</b> ${h.misuse}</div>
+  </div>`;
+}
+
+function renderSignalBlock(s){
+  return `<div class="card open" id="c-${s.id}" style="margin-bottom:20px;">
+    <div class="cardHead" style="cursor:default;"><div class="cardHeadL"><div class="cardTitle">${s.title}</div></div></div>
+    <div class="cardBody" style="max-height:none;"><div class="cardBodyIn">
+      <div class="flagCols">
+        <div class="flagCol good"><h4>Green Flags</h4><ul>${s.good.map(g=>`<li>${g}</li>`).join('')}</ul></div>
+        <div class="flagCol bad"><h4>Red Flags</h4><ul>${s.bad.map(b=>`<li>${b}</li>`).join('')}</ul></div>
+      </div>
+    </div></div>
+  </div>`;
+}
+
+/* ---------- NAV ---------- */
+function buildNav(){
+  const rail = document.getElementById('railNav');
+  let h = `<div class="navGroup"><div class="navGroupLabel">Domains</div>`;
+  DOMAINS.forEach(d=>{
+    h += `<button class="navItem" data-nav="domain:${d.id}" onclick="navigate({type:'domain',id:'${d.id}'})">
+      <span class="n">${String(d.num).padStart(2,'0')}</span><span>${d.title}</span></button>`;
+  });
+  h += `</div><div class="navGroup"><div class="navGroupLabel">Practical Layer</div>`;
+  SYSTEMS_META.forEach(s=>{
+    h += `<button class="navItem" data-nav="system:${s.id}" onclick="navigate({type:'system',id:'${s.id}'})">
+      <span class="n">·</span><span>${s.title}</span></button>`;
+  });
+  h += `</div>`;
+  rail.innerHTML = h;
+}
+
+function updateNavActive(){
+  document.querySelectorAll('.navItem').forEach(el=>el.classList.remove('active'));
+  let key = null;
+  if(currentView.type==='domain') key = 'domain:'+currentView.id;
+  else if(currentView.type==='system') key = 'system:'+currentView.id;
+  if(key){
+    const el = document.querySelector(`[data-nav="${key}"]`);
+    if(el) el.classList.add('active');
+  }
+}
+
+function navigate(view, focusId){
+  currentView = view;
+  pendingFocus = focusId || null;
+  if(view.type==='home') renderHome();
+  else if(view.type==='domain') renderDomain(view.id);
+  else if(view.type==='system') renderSystem(view.id);
+  updateNavActive();
+  document.getElementById('searchResults').classList.remove('show');
+  document.getElementById('searchInput').value='';
+  closeRailMobile();
+  window.scrollTo(0,0);
+}
+window.navigate = navigate;
+
+/* ---------- STAT PILLS ---------- */
+function renderStatPills(){
+  document.getElementById('statPills').innerHTML = `
+    <div class="pill"><b>${DOMAINS.length}</b> domains</div>
+    <div class="pill"><b>${TECHNIQUES.length + FRAMEWORKS.length}</b> techniques &amp; frameworks</div>
+    <div class="pill"><b>${PLAYBOOKS.length + SCRIPTS.length}</b> playbooks &amp; scripts</div>`;
+}
+
+/* ---------- SEARCH ---------- */
+let SEARCH_INDEX = [];
+function buildSearchIndex(){
+  DOMAINS.forEach(d=>SEARCH_INDEX.push({type:'Domain',view:{type:'domain',id:d.id},title:d.title,meta:d.tag,text:(d.what+' '+d.topics.join(' ')).toLowerCase()}));
+  FRAMEWORKS.forEach(f=>SEARCH_INDEX.push({type:'Framework',view:{type:'system',id:'frameworks'},focus:f.id,title:f.name,meta:f.cat,text:(f.what+' '+f.how).toLowerCase()}));
+  TECHNIQUES.forEach(t=>SEARCH_INDEX.push({type:'Technique',view:{type:'system',id:'techniques'},focus:t.id,title:t.name,meta:t.domain,text:(t.what+' '+t.mechanism).toLowerCase()}));
+  METRICS.forEach(m=>SEARCH_INDEX.push({type:'Metric',view:{type:'system',id:'metrics'},focus:m.id,title:m.name,meta:m.formula,text:(m.def+' '+m.warn).toLowerCase()}));
+  PLAYBOOKS.forEach(p=>SEARCH_INDEX.push({type:'Playbook',view:{type:'system',id:'playbooks'},focus:p.id,title:p.name,meta:p.cat,text:p.steps.join(' ').toLowerCase()}));
+  SCRIPTS.forEach(s=>SEARCH_INDEX.push({type:'Script',view:{type:'system',id:'scripts'},focus:s.id,title:s.name,meta:s.cat,text:s.body.toLowerCase()}));
+  CASES.forEach(c=>SEARCH_INDEX.push({type:'Case',view:{type:'system',id:'cases'},focus:c.id,title:c.name,meta:c.cat,text:(c.context+' '+c.lessons).toLowerCase()}));
+  HEURISTICS.forEach(h=>SEARCH_INDEX.push({type:'Heuristic',view:{type:'system',id:'heuristics'},focus:h.id,title:h.rule,meta:'',text:h.logic.toLowerCase()}));
+}
+
+function runSearch(q){
+  const results = document.getElementById('searchResults');
+  q = q.trim().toLowerCase();
+  if(q.length<2){results.classList.remove('show');results.innerHTML='';return;}
+  const hits = SEARCH_INDEX.filter(it=>it.title.toLowerCase().includes(q) || it.text.includes(q) || (it.meta||'').toLowerCase().includes(q)).slice(0,18);
+  if(!hits.length){results.innerHTML = `<div class="srItem"><div class="srMeta">No matches. Try a shorter term.</div></div>`;results.classList.add('show');return;}
+  results.innerHTML = hits.map((h,i)=>`<button class="srItem" style="width:100%;background:none;border:none;text-align:left;" onclick='searchNavigate(${i})'>
+    <div class="srType">${h.type}</div><div class="srTitle">${h.title}</div><div class="srMeta">${h.meta||''}</div>
+  </button>`).join('');
+  window.__hits = hits;
+  results.classList.add('show');
+}
+function searchNavigate(i){
+  const h = window.__hits[i];
+  navigate(h.view, h.focus);
+}
+window.searchNavigate = searchNavigate;
+
+/* ---------- MOBILE RAIL ---------- */
+function closeRailMobile(){
+  document.getElementById('rail').classList.remove('open');
+  document.getElementById('railScrim').classList.remove('show');
+}
+document.getElementById('railToggle').addEventListener('click',()=>{
+  document.getElementById('rail').classList.toggle('open');
+  document.getElementById('railScrim').classList.toggle('show');
+});
+document.getElementById('railScrim').addEventListener('click',closeRailMobile);
+
+/* ---------- INIT ---------- */
+document.getElementById('searchInput').addEventListener('input',e=>runSearch(e.target.value));
+document.addEventListener('click',e=>{
+  if(!document.getElementById('searchWrap').contains(e.target)){
+    document.getElementById('searchResults').classList.remove('show');
+  }
+});
+
+buildNav();
+renderStatPills();
+buildSearchIndex();
+navigate({type:'home'});
+</script>
+</body>
+</html>
