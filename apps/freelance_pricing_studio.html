@@ -1,0 +1,1137 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1.0">
+<meta name="theme-color" content="#0b1020">
+<title>Freelance Pricing Studio</title>
+<style>
+:root{
+  --bg:#f5f7fb; --panel:#ffffff; --panel-2:#f8fafc; --text:#111827; --muted:#6b7280;
+  --line:#e5e7eb; --primary:#4f46e5; --primary-2:#3730a3; --success:#15803d;
+  --warn:#b45309; --danger:#b91c1c; --shadow:0 10px 30px rgba(15,23,42,.07);
+  --radius:16px; --sidebar:250px;
+}
+*{box-sizing:border-box}
+html,body{margin:0;padding:0;background:var(--bg);color:var(--text);font-family:Inter,ui-sans-serif,system-ui,-apple-system,BlinkMacSystemFont,"Segoe UI",sans-serif}
+button,input,select,textarea{font:inherit}
+button{cursor:pointer}
+.app{min-height:100vh}
+.sidebar{position:fixed;left:0;top:0;bottom:0;width:var(--sidebar);background:#0b1020;color:#cbd5e1;padding:22px 16px;display:flex;flex-direction:column;z-index:20}
+.brand{display:flex;align-items:center;gap:11px;padding:4px 8px 20px}
+.brand-mark{width:36px;height:36px;border-radius:11px;background:linear-gradient(145deg,#6366f1,#22c55e);display:grid;place-items:center;color:#fff;font-weight:900}
+.brand strong{color:#fff;font-size:15px}.brand small{display:block;color:#94a3b8;margin-top:2px}
+.nav{display:grid;gap:4px}.nav button{border:0;background:transparent;color:#94a3b8;text-align:left;padding:11px 12px;border-radius:10px;display:flex;gap:10px;align-items:center}
+.nav button:hover,.nav button.active{background:rgba(255,255,255,.08);color:#fff}
+.sidebar-foot{margin-top:auto;border-top:1px solid rgba(255,255,255,.08);padding:15px 8px;font-size:12px;color:#64748b;line-height:1.5}
+.main{margin-left:var(--sidebar);min-height:100vh}
+.topbar{height:72px;background:rgba(255,255,255,.9);backdrop-filter:blur(12px);border-bottom:1px solid var(--line);display:flex;align-items:center;justify-content:space-between;padding:0 28px;position:sticky;top:0;z-index:10}
+.page-title h1{font-size:20px;margin:0}.page-title p{margin:3px 0 0;color:var(--muted);font-size:12px}
+.view{padding:28px;max-width:1500px;margin:0 auto}
+.hidden{display:none!important}
+.grid{display:grid;gap:18px}.grid-4{grid-template-columns:repeat(4,minmax(0,1fr))}.grid-3{grid-template-columns:repeat(3,minmax(0,1fr))}.grid-2{grid-template-columns:repeat(2,minmax(0,1fr))}
+.card{background:var(--panel);border:1px solid var(--line);border-radius:var(--radius);box-shadow:var(--shadow);padding:20px}
+.card h2,.card h3{margin:0 0 8px}.muted{color:var(--muted)}.small{font-size:12px}.tiny{font-size:11px}
+.metric{padding:18px}.metric .label{font-size:12px;color:var(--muted)}.metric .value{font-size:28px;font-weight:800;margin-top:8px}.metric .sub{margin-top:6px;font-size:12px;color:var(--muted)}
+.btn{border:1px solid var(--line);background:#fff;color:var(--text);padding:10px 14px;border-radius:10px;font-weight:650}
+.btn:hover{border-color:#c7cbd4;background:#fafafa}.btn.primary{background:var(--primary);border-color:var(--primary);color:#fff}.btn.primary:hover{background:var(--primary-2)}
+.btn.success{background:#eaf8ef;border-color:#b7ebc4;color:#166534}.btn.danger{background:#fff1f2;border-color:#fecdd3;color:#9f1239}.btn.ghost{background:transparent}
+.btn:disabled{opacity:.45;cursor:not-allowed}
+.actions{display:flex;gap:8px;align-items:center;flex-wrap:wrap}
+.section-head{display:flex;justify-content:space-between;gap:12px;align-items:flex-start;margin-bottom:16px}
+.badge{display:inline-flex;align-items:center;padding:5px 9px;border-radius:999px;font-size:11px;font-weight:750;background:#eef2ff;color:#3730a3}
+.badge.green{background:#ecfdf3;color:#166534}.badge.amber{background:#fffbeb;color:#92400e}.badge.red{background:#fef2f2;color:#991b1b}.badge.gray{background:#f3f4f6;color:#4b5563}
+.form-grid{display:grid;grid-template-columns:repeat(2,minmax(0,1fr));gap:14px}.form-grid.three{grid-template-columns:repeat(3,minmax(0,1fr))}
+.field label{display:flex;justify-content:space-between;gap:12px;font-size:12px;font-weight:700;margin:0 0 7px}
+.field label span{font-weight:500;color:var(--muted)}
+.field input,.field select,.field textarea{width:100%;border:1px solid #d8dde6;background:#fff;border-radius:10px;padding:10px 12px;outline:none}
+.field input:focus,.field select:focus,.field textarea:focus{border-color:#818cf8;box-shadow:0 0 0 3px rgba(99,102,241,.12)}
+.field textarea{min-height:90px;resize:vertical}
+.help{font-size:11px;color:var(--muted);margin-top:5px;line-height:1.45}
+.stepper{display:flex;gap:6px;overflow:auto;padding-bottom:8px;margin-bottom:20px}
+.step{min-width:88px;border:1px solid var(--line);border-radius:12px;background:#fff;padding:10px 12px;color:var(--muted);font-size:11px;font-weight:700}
+.step.active{border-color:#a5b4fc;background:#eef2ff;color:#3730a3}.step.done{background:#f0fdf4;border-color:#bbf7d0;color:#166534}
+.quote-hero{border:1px solid #c7d2fe;background:linear-gradient(180deg,#fafaff,#fff);border-radius:18px;padding:22px}
+.quote-price{font-size:42px;font-weight:900;letter-spacing:-1.5px}.price-range{display:grid;grid-template-columns:repeat(3,1fr);gap:10px;margin-top:14px}
+.range-box{border:1px solid var(--line);border-radius:12px;padding:12px}.range-box strong{font-size:18px;display:block;margin-top:3px}.range-box .muted{font-size:11px}
+.list{display:grid;gap:8px;margin:10px 0 0;padding:0;list-style:none}.list li{font-size:12px;line-height:1.45;padding-left:18px;position:relative}.list li::before{content:"✓";position:absolute;left:0;color:#16a34a;font-weight:800}.list.exclude li::before{content:"×";color:#dc2626}
+.split{display:flex;justify-content:space-between;gap:12px;align-items:center}.row{display:flex;justify-content:space-between;gap:14px;padding:9px 0;border-bottom:1px dashed #e5e7eb;font-size:12px}.row:last-child{border-bottom:0}.row strong{font-size:13px}
+.table-wrap{overflow:auto;border:1px solid var(--line);border-radius:12px}.table{width:100%;border-collapse:collapse;min-width:900px}.table th,.table td{padding:11px 12px;border-bottom:1px solid var(--line);font-size:11px;text-align:left;vertical-align:top}.table th{background:#f8fafc;color:#475569;font-weight:800;position:sticky;top:0}.table tr:last-child td{border-bottom:0}.table .recommended{background:#f5f7ff}
+.notice{padding:12px 14px;border-radius:12px;border:1px solid #e2e8f0;background:#f8fafc;font-size:12px;line-height:1.55}.notice.warn{background:#fffbeb;border-color:#fde68a}.notice.danger{background:#fef2f2;border-color:#fecaca}.notice.success{background:#f0fdf4;border-color:#bbf7d0}
+.toolbar{display:flex;justify-content:space-between;gap:12px;align-items:center;margin-bottom:18px;flex-wrap:wrap}
+.search{max-width:320px;position:relative}.search input{width:100%;padding:10px 12px;border:1px solid var(--line);border-radius:10px}
+.project-list{display:grid;gap:10px}.project-item{border:1px solid var(--line);border-radius:12px;padding:14px;background:#fff;display:flex;justify-content:space-between;gap:14px;align-items:center}.project-item:hover{border-color:#c7d2fe}
+.empty{padding:38px 20px;text-align:center;color:var(--muted);border:1px dashed #d1d5db;border-radius:14px}
+.kpi{display:flex;gap:10px;flex-wrap:wrap}.kpi span{padding:6px 9px;border-radius:8px;background:#f8fafc;border:1px solid var(--line);font-size:11px}
+.callout{border-left:3px solid var(--primary);padding:9px 12px;background:#fafaff;border-radius:0 10px 10px 0;font-size:12px;line-height:1.5}
+.modal-backdrop{position:fixed;inset:0;background:rgba(15,23,42,.5);display:grid;place-items:center;z-index:100;padding:20px}
+.modal{background:#fff;border-radius:18px;max-width:720px;width:100%;max-height:90vh;overflow:auto;box-shadow:0 30px 100px rgba(0,0,0,.2);padding:22px}
+.toast{position:fixed;right:22px;bottom:22px;background:#0f172a;color:#fff;padding:12px 14px;border-radius:10px;font-size:12px;box-shadow:var(--shadow);z-index:120;opacity:0;transform:translateY(10px);pointer-events:none;transition:.25s}.toast.show{opacity:1;transform:none}
+.inline-add{display:flex;gap:8px}.inline-add input{flex:1}
+.bar{height:7px;border-radius:999px;background:#eef2f7;overflow:hidden}.bar i{display:block;height:100%;background:var(--primary);border-radius:999px}
+.suitable{color:#166534}.not-suitable{color:#9f1239}.available{color:#374151}
+.quote-print{display:none}
+.mobile-menu{display:none}
+@media (max-width:1100px){.grid-4{grid-template-columns:repeat(2,minmax(0,1fr))}.grid-3{grid-template-columns:repeat(2,minmax(0,1fr))}}
+@media (max-width:800px){
+  .sidebar{transform:translateX(-100%);transition:.2s}.sidebar.open{transform:none}.main{margin-left:0}.mobile-menu{display:block}.topbar{padding:0 15px}.view{padding:18px}.grid-4,.grid-3,.grid-2,.form-grid,.form-grid.three{grid-template-columns:1fr}.price-range{grid-template-columns:1fr}.quote-price{font-size:34px}
+}
+@media print{
+  .sidebar,.topbar,.no-print{display:none!important}.main{margin:0}.view{padding:0;max-width:none}.print-only{display:block!important}.card,.quote-hero{box-shadow:none;border:1px solid #ddd;break-inside:avoid}.quote-print{display:block}
+  body{background:#fff;color:#111}.result-screen>.grid>.card{box-shadow:none}
+}
+.print-only{display:none}
+/* ============================================================
+   V2 — OBSIDIAN CREATIVE WORKSTATION THEME
+   ============================================================ */
+:root{
+  --bg:#07090d; --panel:#0f1319; --panel-2:#141922; --text:#f2f4f7; --muted:#8f9aaa;
+  --line:#222a35; --primary:#8b5cf6; --primary-2:#a78bfa; --success:#8eea8a;
+  --warn:#f6c453; --danger:#ff6b76; --shadow:0 16px 45px rgba(0,0,0,.28); --radius:14px; --sidebar:258px;
+}
+html,body{background:var(--bg);color:var(--text)}
+body{background-image:radial-gradient(circle at 80% -10%,rgba(139,92,246,.10),transparent 28%),radial-gradient(circle at 12% 20%,rgba(184,255,0,.035),transparent 22%)}
+.sidebar{background:#090b10;border-right:1px solid #1d232d;box-shadow:12px 0 40px rgba(0,0,0,.18);padding:18px 14px}
+.brand{padding:7px 9px 22px}.brand-mark{background:#151a22;border:1px solid #323b49;box-shadow:0 0 0 4px rgba(139,92,246,.06);color:#bdfb67}.brand strong{color:#f8fafc}.brand small{color:#718096}
+.nav{gap:3px}.nav button{color:#748094;border:1px solid transparent;transition:.16s ease;position:relative}.nav button:hover{background:#11161e;color:#dbe4ef;border-color:#202935}.nav button.active{background:#141a23;color:#fff;border-color:#2b3543}.nav button.active:before{content:"";position:absolute;left:-1px;top:7px;bottom:7px;width:2px;border-radius:2px;background:#b7ff61;box-shadow:0 0 14px rgba(183,255,97,.65)}
+.sidebar-foot{border-color:#1c232c;color:#566273}
+.topbar{background:rgba(8,10,14,.84);border-bottom:1px solid #202732}.page-title h1{color:#f8fafc}.page-title p{color:#6f7b8c}
+.main{position:relative;overflow:hidden}.main:before{content:"";position:fixed;inset:72px 0 0 var(--sidebar);pointer-events:none;opacity:.20;background-image:linear-gradient(rgba(255,255,255,.025) 1px,transparent 1px),linear-gradient(90deg,rgba(255,255,255,.025) 1px,transparent 1px);background-size:32px 32px;mask-image:linear-gradient(to bottom,black,transparent 75%)}
+.view{position:relative;z-index:1}.card,.project-item{background:rgba(15,19,25,.92);border-color:#222a35;box-shadow:var(--shadow)}
+.card{backdrop-filter:blur(5px)}.metric{background:linear-gradient(180deg,#11161e,#0d1117);border-color:#222b38}.metric .value{color:#fff}.metric .sub,.muted{color:var(--muted)}
+.btn{background:#10151c;border-color:#29323e;color:#dbe2eb}.btn:hover{background:#151b23;border-color:#3a4655}.btn.primary{background:#8b5cf6;border-color:#8b5cf6;color:#fff;box-shadow:0 8px 24px rgba(139,92,246,.20)}.btn.primary:hover{background:#9b74f7}.btn.success{background:#102014;border-color:#28492d;color:#9ae99c}.btn.danger{background:#241216;border-color:#51232c;color:#ff939d}
+.badge{background:#1a1730;color:#bda9ff;border-color:#332867}.badge.green{background:#112015;color:#9be99c;border-color:#24452b}.badge.amber{background:#241e0e;color:#f5cc6b;border-color:#4a3b1b}.badge.red{background:#281317;color:#ff98a1;border-color:#55232b}.badge.gray{background:#171b21;color:#9aa5b5;border-color:#2a3039}
+.field label{color:#d6dce5}.field label span{color:#718094}.field input,.field select,.field textarea,.search input{background:#0b0f14;color:#eef2f7;border-color:#28313d}.field input:focus,.field select:focus,.field textarea:focus{border-color:#8b5cf6;box-shadow:0 0 0 3px rgba(139,92,246,.12)}
+.help{color:#687587}.step{background:#0c1015;border-color:#232c38;color:#6f7d8f}.step.active{background:#19152c;color:#c5b5ff;border-color:#53458c}.step.done{background:#101b13;color:#a4eaa4;border-color:#29452f}
+.quote-hero{background:linear-gradient(135deg,#11141c 0%,#141022 58%,#0f1512 100%);border-color:#38304e;box-shadow:0 22px 55px rgba(0,0,0,.3)}.quote-price{color:#fff;text-shadow:0 0 28px rgba(139,92,246,.22)}.range-box{background:#0d1218;border-color:#242c37}.range-box strong{color:#fff}
+.notice,.callout{background:#0c1117;border-color:#252f3b;color:#cdd5df}.notice.warn{background:#1b160b;border-color:#4a3a18}.notice.danger{background:#241116;border-color:#51232c}.notice.success{background:#101b13;border-color:#2a4930}.callout{border-left-color:#8b5cf6}
+.row{border-color:#202732}.table-wrap{border-color:#252e3b}.table{background:#0c1117}.table th{background:#121820;color:#9da8b8;border-color:#232c37}.table td{border-color:#1d2630;color:#cdd5df}.table .recommended{background:#161329}.table .muted{color:#768396}.table input{background:#0a0e13;color:#eef2f7}
+.list li::before{color:#95ea75}.list.exclude li::before{color:#ff7e89}
+.empty{border-color:#2a3441;color:#707d8d;background:#0c1015}.kpi span{background:#0d1218;border-color:#252e3a;color:#a5afbd}
+.modal-backdrop{background:rgba(0,0,0,.76);backdrop-filter:blur(7px)}.modal{background:#0d1117;color:#eff3f7;border:1px solid #28313e;box-shadow:0 30px 100px rgba(0,0,0,.55)}
+.toast{background:#eff3f7;color:#0b0f14}.bar{background:#1c232d}.bar i{background:#9f7aea}
+.project-item:hover{border-color:#4a3b70;background:#121721}.project-item .badge{box-shadow:none}
+h2,h3,strong{color:#f3f6fa}.small,.tiny{color:var(--muted)}
+@media (max-width:800px){.main:before{inset:72px 0 0 0}}
+@media print{body{background:#fff!important;color:#111}.main:before{display:none!important}.modal-backdrop{position:static!important;background:#fff!important;backdrop-filter:none!important;padding:0!important;display:block!important}.modal{max-width:none!important;border:0!important;box-shadow:none!important;background:#fff!important;color:#111!important}.modal h1,.modal h2,.modal h3,.modal strong{color:#111!important}}
+.package-section{margin-top:14px;padding-top:13px;border-top:1px solid #202832}.package-label{font-size:10px;letter-spacing:.12em;font-weight:900;color:#9cf06e;margin-bottom:7px}.excluded-label{color:#ff7c88}.list.compact{margin-top:5px}.list.compact li{font-size:11px}.package-meta{display:flex;gap:6px;flex-wrap:wrap;margin-top:14px}.package-meta span{font-size:10px;padding:5px 7px;border:1px solid #28313d;border-radius:7px;color:#8d99aa;background:#0b1015}.package-card{position:relative;overflow:hidden}.package-card:after{content:"";position:absolute;right:-30px;top:-30px;width:90px;height:90px;border-radius:50%;border:1px solid rgba(139,92,246,.13);box-shadow:0 0 0 18px rgba(139,92,246,.025),0 0 0 36px rgba(139,92,246,.018);pointer-events:none}</style>
+</head>
+<body>
+<div class="app">
+  <aside class="sidebar" id="sidebar">
+    <div class="brand">
+      <div class="brand-mark">P</div>
+      <div><strong>Pricing Studio</strong><small>Freelance business tool</small></div>
+    </div>
+    <nav class="nav">
+      <button data-view="dashboard">⌂ <span>Dashboard</span></button>
+      <button data-view="builder">＋ <span>Quick Quote</span></button>
+      <button data-view="projects">▤ <span>Projects</span></button>
+      <button data-view="pricing">◈ <span>Pricing Settings</span></button>
+      <button data-view="services">◉ <span>Services</span></button>
+      <button data-view="packages">◆ <span>Packages</span></button>
+      <button data-view="addons">＋ <span>Add-ons</span></button>
+      <button data-view="review">↗ <span>Pricing Health</span></button>
+      <button data-view="settings">⚙ <span>Settings</span></button>
+    </nav>
+    <div class="sidebar-foot">Stored locally in this browser.<br>No backend. No external API required.</div>
+  </aside>
+
+  <main class="main">
+    <header class="topbar">
+      <div class="actions">
+        <button class="btn ghost mobile-menu" id="mobileMenu">☰</button>
+        <div class="page-title"><h1 id="pageTitle">Dashboard</h1><p id="pageSubtitle">Price the work, scope, responsibility and value.</p></div>
+      </div>
+      <div class="actions no-print">
+        <button class="btn" id="quickExport">Export Data</button>
+        <button class="btn primary" id="topNewQuote">New Quote</button>
+      </div>
+    </header>
+
+    <section class="view" id="view-dashboard"></section>
+    <section class="view hidden" id="view-builder"></section>
+    <section class="view hidden" id="view-projects"></section>
+    <section class="view hidden" id="view-pricing"></section>
+    <section class="view hidden" id="view-services"></section>
+    <section class="view hidden" id="view-packages"></section>
+    <section class="view hidden" id="view-addons"></section>
+    <section class="view hidden" id="view-review"></section>
+    <section class="view hidden" id="view-settings"></section>
+  </main>
+</div>
+
+<div class="modal-backdrop hidden" id="setupModal">
+  <div class="modal">
+    <div class="section-head">
+      <div><span class="badge">First-run setup</span><h2 style="margin-top:9px">Configure your pricing system</h2><p class="muted small">These values become the starting assumptions. You can change everything later.</p></div>
+    </div>
+    <div class="form-grid">
+      <div class="field"><label>Business / freelancer name</label><input id="setupBusiness" placeholder="Your studio or name"></div>
+      <div class="field"><label>Currency</label><select id="setupCurrency"><option>INR</option><option>USD</option><option>EUR</option><option>GBP</option><option>AED</option><option>CUSTOM</option></select></div>
+      <div class="field"><label>Experience level</label><select id="setupLevel"><option>Beginner</option><option>Developing</option><option>Intermediate</option><option>Professional</option><option>Premium</option></select></div>
+      <div class="field"><label>Minimum project fee</label><input id="setupMinFee" type="number" min="0" step="50" value="1000"></div>
+      <div class="field"><label>Base hourly rate</label><input id="setupBaseRate" type="number" min="0" step="50" value="500"></div>
+      <div class="field"><label>Target hourly rate</label><input id="setupTargetRate" type="number" min="0" step="50" value="700"></div>
+      <div class="field"><label>Premium hourly rate</label><input id="setupPremiumRate" type="number" min="0" step="50" value="1000"></div>
+      <div class="field"><label>Main services</label><input value="Graphic Design, Video Editing, 3D / CGI" id="setupServices"></div>
+    </div>
+    <div class="notice" style="margin-top:15px">Pricing is model-based, not a claim about the “correct” market price. Your configuration controls the output.</div>
+    <div class="actions" style="justify-content:flex-end;margin-top:18px"><button class="btn primary" id="finishSetup">Create pricing system</button></div>
+  </div>
+</div>
+
+<div class="toast" id="toast"></div>
+
+<script>
+"use strict";
+
+/* ============================================================
+   DATA / CONFIGURATION
+   ============================================================ */
+const STORAGE_KEY = "pricingStudio_v1";
+const VERSION = 1;
+
+const DEFAULT = {
+  version: VERSION,
+  business: {
+    name: "My Freelance Studio",
+    freelancer: "",
+    currency: "INR",
+    currencySymbol: "₹",
+    experience: "Developing",
+    taxEnabled: false,
+    taxRate: 0,
+    paymentTerms: "50% upfront, 50% before final delivery",
+    quoteValidityDays: 7,
+    minimumHourlyRate: 350,
+    baseHourlyRate: 500,
+    targetHourlyRate: 700,
+    premiumHourlyRate: 1000,
+    minimumProjectFee: 1000
+  },
+  modifiers: {
+    quality: {Basic:0.90, Professional:1.00, Premium:1.20, Cinematic:1.35},
+    complexity: {Low:0.85, Medium:1.00, High:1.25, VeryHigh:1.55},
+    usage: {Personal:0.90, Creator:0.95, Commercial:1.10, Advertising:1.22, "Extended Commercial":1.35},
+    urgency: {Flexible:0.90, Normal:1.00, Fast:1.10, Rush:1.30, Emergency:1.60},
+    clientContext: {Individual:0.95, Student:0.85, Creator:0.95, "Small Business":1.00, Startup:1.00, Agency:1.05, "Established Business":1.08, Corporate:1.10, Brand:1.10, "Advertising Campaign":1.15, "High-value Commercial Project":1.15}
+  },
+  charges: {
+    revisionRate: 350,
+    sourceFileFee: 500,
+    renderingFee: 0,
+    consultationFee: 500,
+    travelPerKm: 12,
+    rushMultiplierNote: "Urgency modifiers apply to labor effort; configurable values are intentionally moderate.",
+    extraDeliverableRate: 350
+  },
+  packageDefaults: [
+    {id:"starter",name:"Starter",minScore:0,maxScore:14,multiplier:.85,revisions:1,concepts:1,priority:"Standard",support:"Basic",turnaround:"Flexible",maxDeliverables:1,sourceFiles:false,commercialUsage:false,description:"A tightly defined entry package for simple, low-risk work.",included:["1 agreed deliverable","1 creative direction","1 revision round","Standard delivery","High-resolution final export"],excluded:["Source/editable files","Commercial usage rights","Rush production","Additional deliverables"]},
+    {id:"essential",name:"Essential",minScore:15,maxScore:24,multiplier:.92,revisions:2,concepts:2,priority:"Standard",support:"Basic",turnaround:"Normal",maxDeliverables:2,sourceFiles:false,commercialUsage:false,description:"A practical professional package for normal straightforward requirements.",included:["Up to 2 agreed deliverables","2 creative directions","2 revision rounds","High-resolution delivery","Standard support"],excluded:["Source/editable files","Extended commercial usage","Priority production","Large scope changes"]},
+    {id:"standard",name:"Standard",minScore:25,maxScore:34,multiplier:1.00,revisions:3,concepts:2,priority:"Standard",support:"Standard",turnaround:"Normal",maxDeliverables:3,sourceFiles:true,commercialUsage:false,description:"A complete professional package with stronger delivery coverage.",included:["Up to 3 agreed deliverables","2–3 creative directions","3 revision rounds","High-resolution exports","Source/editable file where applicable","Standard support"],excluded:["Priority production","Extended usage rights","Unlimited revisions","Unapproved deliverables"]},
+    {id:"professional",name:"Professional",minScore:35,maxScore:46,multiplier:1.12,revisions:4,concepts:3,priority:"Priority",support:"Priority",turnaround:"Faster",maxDeliverables:5,sourceFiles:true,commercialUsage:true,description:"Serious commercial work with higher customization and stronger service coverage.",included:["Up to 5 agreed deliverables","3 creative directions","4 revision rounds","Commercial usage as defined","Source/editable file where applicable","Priority production","Priority support"],excluded:["Unlimited revisions","Undefined campaign expansion","Third-party costs not listed"]},
+    {id:"advanced",name:"Advanced",minScore:47,maxScore:58,multiplier:1.25,revisions:5,concepts:4,priority:"Priority",support:"Priority+",turnaround:"Fast",maxDeliverables:7,sourceFiles:true,commercialUsage:true,description:"For complex requirements, deeper customization and higher production effort.",included:["Up to 7 agreed deliverables","4 creative directions","5 revision rounds","Commercial usage as defined","Source/editable file where applicable","Priority production","Priority+ support","Advanced production treatment"],excluded:["Unlimited revisions","Unscoped new deliverables","Unapproved rush work"]},
+    {id:"elite",name:"Elite",minScore:59,maxScore:70,multiplier:1.40,revisions:6,concepts:5,priority:"High",support:"Premium",turnaround:"Priority",maxDeliverables:10,sourceFiles:true,commercialUsage:true,description:"High-customization production with premium support and broader scope capacity.",included:["Up to 10 agreed deliverables","5 creative directions","6 revision rounds","Commercial usage as defined","Source/editable file where applicable","High production priority","Premium support","Creative direction allowance"],excluded:["Unlimited revisions","Undefined strategy work","Third-party production expenses"]},
+    {id:"luxury",name:"Luxury",minScore:71,maxScore:82,multiplier:1.58,revisions:7,concepts:6,priority:"High",support:"Premium+",turnaround:"Priority",maxDeliverables:14,sourceFiles:true,commercialUsage:true,description:"Full creative treatment for highly customized, high-touch engagements.",included:["Up to 14 agreed deliverables","6 creative directions","7 revision rounds","Commercial usage as defined","Source/editable file where applicable","Priority production","Premium+ support","Creative treatment and integration"],excluded:["Unlimited revisions","Open-ended campaign management","Unapproved services"]},
+    {id:"signature",name:"Signature",minScore:83,maxScore:94,multiplier:1.78,revisions:8,concepts:7,priority:"Dedicated",support:"Strategic",turnaround:"Managed",maxDeliverables:20,sourceFiles:true,commercialUsage:true,description:"Strategic + creative service for demanding projects requiring close collaboration.",included:["Up to 20 agreed deliverables","7 creative directions","8 revision rounds","Commercial usage as defined","Source/editable file where applicable","Dedicated production priority","Strategic support","Creative + production planning"],excluded:["Unlimited revisions","Undefined ongoing retainer work","Unapproved production categories"]},
+    {id:"flagship",name:"Flagship",minScore:95,maxScore:999,multiplier:2.05,revisions:10,concepts:8,priority:"Dedicated",support:"White-glove",turnaround:"Custom",maxDeliverables:999,sourceFiles:true,commercialUsage:true,description:"A fully customized high-end engagement with a negotiated scope and high-touch service level.",included:["Custom deliverable count","8 creative directions","10 revision rounds","Commercial usage as defined","Source/editable file where applicable","Dedicated priority","White-glove support","Strategy + creative direction","Custom production planning"],excluded:["Unlimited revisions","Open-ended scope","Services not explicitly listed in the agreement"]}
+  ],
+  addons: [
+    {id:"extraRevision",name:"Extra revision round",type:"fixed",price:350,description:"One additional consolidated feedback cycle.",condition:"Applies after included revisions."},
+    {id:"extraConcept",name:"Extra concept",type:"fixed",price:500,description:"One additional creative direction.",condition:"Best used for concept-heavy work."},
+    {id:"extraDesign",name:"Extra design / deliverable",type:"fixed",price:350,description:"One additional design asset.",condition:"Same general scope as the main deliverable."},
+    {id:"extraVideoMinute",name:"Extra final video minute",type:"fixed",price:1200,description:"Additional final runtime.",condition:"Adjust with service-specific rate if needed."},
+    {id:"extraRender",name:"Extra render",type:"fixed",price:700,description:"One additional render output.",condition:"Same scene / asset basis."},
+    {id:"extraCamera",name:"Extra camera angle",type:"fixed",price:450,description:"Additional camera view.",condition:"Same asset, lighting and scene."},
+    {id:"sourceFile",name:"Source file",type:"fixed",price:500,description:"Editable working/source files.",condition:"Subject to licensing and third-party asset rules."},
+    {id:"rush",name:"Rush delivery",type:"percent",price:20,description:"Accelerated production window.",condition:"Only when capacity allows."},
+    {id:"commercial",name:"Commercial usage",type:"percent",price:10,description:"Commercial/public-facing use uplift.",condition:"Define channels and duration in contract."},
+    {id:"extendedUsage",name:"Extended usage",type:"percent",price:15,description:"Broader or longer usage rights.",condition:"Define territory, duration and channels."},
+    {id:"extraFormat",name:"Additional format",type:"fixed",price:250,description:"One additional export format / dimension.",condition:"Per agreed format."},
+    {id:"extraPlatform",name:"Additional platform",type:"fixed",price:300,description:"Adaptation for one additional platform.",condition:"Per platform."},
+    {id:"shootHour",name:"Extra shoot hour",type:"fixed",price:900,description:"Additional production/shooting hour.",condition:"Travel and equipment may be separate."},
+    {id:"travel",name:"Travel",type:"fixed",price:12,description:"Travel cost per kilometer.",condition:"Configure actual travel policy."},
+    {id:"customAsset",name:"Custom asset creation",type:"fixed",price:800,description:"Custom asset built for the project.",condition:"Price varies with complexity."},
+    {id:"advancedVFX",name:"Advanced VFX",type:"fixed",price:1500,description:"Advanced compositing/VFX work.",condition:"Per shot baseline; scope must be defined."},
+    {id:"advancedAnimation",name:"Advanced animation",type:"fixed",price:1800,description:"Higher-detail animation work.",condition:"Per defined shot/segment."},
+    {id:"extraSupport",name:"Extra support",type:"fixed",price:500,description:"Additional post-delivery support.",condition:"Define duration and response time."}
+  ],
+  services: [
+    {
+      id:"graphic",name:"Graphic Design",icon:"GD",
+      projects:[
+        {id:"poster",name:"Poster",baseHours:2.5,unitHours:.8,unit:"design",fields:["dimensions","quantity","customIllustration","photoManipulation","typography","brandGuidelines","printing","sourceFile","usage"]},
+        {id:"banner",name:"Banner",baseHours:1.5,unitHours:.5,unit:"design",fields:["dimensions","quantity","customIllustration","photoManipulation","brandGuidelines","sourceFile","usage"]},
+        {id:"social",name:"Social Media Post",baseHours:1.1,unitHours:.35,unit:"post",fields:["dimensions","quantity","customIllustration","photoManipulation","brandGuidelines","sourceFile","usage"]},
+        {id:"carousel",name:"Instagram Carousel",baseHours:2,unitHours:.55,unit:"slide",fields:["dimensions","quantity","customIllustration","photoManipulation","brandGuidelines","sourceFile","usage"]},
+        {id:"story",name:"Story Design",baseHours:1,unitHours:.35,unit:"story",fields:["quantity","customIllustration","photoManipulation","brandGuidelines","sourceFile","usage"]},
+        {id:"thumbnail",name:"Thumbnail",baseHours:.9,unitHours:.3,unit:"thumbnail",fields:["quantity","customIllustration","photoManipulation","brandGuidelines","sourceFile","usage"]},
+        {id:"flyer",name:"Flyer",baseHours:2.2,unitHours:.7,unit:"design",fields:["dimensions","quantity","customIllustration","photoManipulation","typography","brandGuidelines","printing","sourceFile","usage"]},
+        {id:"brochure",name:"Brochure",baseHours:4,unitHours:1.1,unit:"page",fields:["dimensions","quantity","customIllustration","photoManipulation","typography","brandGuidelines","printing","sourceFile","usage"]},
+        {id:"menu",name:"Menu",baseHours:3,unitHours:.9,unit:"page",fields:["dimensions","quantity","photoManipulation","typography","brandGuidelines","printing","sourceFile","usage"]},
+        {id:"businessCard",name:"Business Card",baseHours:2,unitHours:.5,unit:"variant",fields:["dimensions","quantity","typography","brandGuidelines","printing","sourceFile","usage"]},
+        {id:"logo",name:"Logo",baseHours:5,unitHours:1.5,unit:"concept",fields:["quantity","customIllustration","typography","brandGuidelines","sourceFile","usage"]},
+        {id:"brandIdentity",name:"Brand Identity",baseHours:10,unitHours:2.5,unit:"asset",fields:["quantity","customIllustration","typography","brandGuidelines","sourceFile","usage"]},
+        {id:"packaging",name:"Packaging Design",baseHours:6,unitHours:1.8,unit:"panel",fields:["dimensions","quantity","customIllustration","photoManipulation","typography","brandGuidelines","printing","sourceFile","usage"]},
+        {id:"adCreative",name:"Advertisement Creative",baseHours:3.2,unitHours:1,unit:"creative",fields:["dimensions","quantity","customIllustration","photoManipulation","typography","brandGuidelines","printing","sourceFile","usage"]},
+        {id:"event",name:"Event Creative",baseHours:2.5,unitHours:.8,unit:"creative",fields:["dimensions","quantity","customIllustration","photoManipulation","brandGuidelines","printing","sourceFile","usage"]},
+        {id:"presentation",name:"Presentation Design",baseHours:3,unitHours:.55,unit:"slide",fields:["quantity","customIllustration","photoManipulation","typography","brandGuidelines","sourceFile","usage"]},
+        {id:"infographic",name:"Infographic",baseHours:4,unitHours:1.2,unit:"graphic",fields:["dimensions","quantity","customIllustration","photoManipulation","typography","brandGuidelines","sourceFile","usage"]},
+        {id:"certificate",name:"Certificate",baseHours:1.5,unitHours:.35,unit:"variant",fields:["quantity","typography","brandGuidelines","sourceFile","usage"]},
+        {id:"invitation",name:"Invitation",baseHours:2,unitHours:.6,unit:"design",fields:["dimensions","quantity","customIllustration","photoManipulation","typography","brandGuidelines","printing","sourceFile","usage"]},
+        {id:"cover",name:"Album / Cover Art",baseHours:3,unitHours:.8,unit:"design",fields:["dimensions","quantity","customIllustration","photoManipulation","typography","brandGuidelines","sourceFile","usage"]},
+        {id:"custom",name:"Other / Custom",baseHours:4,unitHours:1,unit:"deliverable",fields:["quantity","customIllustration","photoManipulation","typography","brandGuidelines","sourceFile","usage"]}
+      ]
+    },
+    {
+      id:"video",name:"Video Editing",icon:"VE",
+      projects:[
+        {id:"short",name:"Short-form Video / Reel",baseHours:1.5,unitHours:1.2,unit:"final minute",fields:["rawMinutes","finalMinutes","clips","motionGraphics","audioCleanup","colorGrading","subtitles","broll","vfx","thumbnail","captions"]},
+        {id:"youtube",name:"YouTube Video",baseHours:3,unitHours:1.8,unit:"final minute",fields:["rawMinutes","finalMinutes","clips","motionGraphics","audioCleanup","colorGrading","subtitles","broll","vfx","thumbnail","captions"]},
+        {id:"long",name:"Long-form Video",baseHours:4,unitHours:2,unit:"final minute",fields:["rawMinutes","finalMinutes","clips","motionGraphics","audioCleanup","colorGrading","subtitles","broll","vfx","thumbnail","captions"]},
+        {id:"gaming",name:"Gaming Video",baseHours:2.5,unitHours:1.3,unit:"final minute",fields:["rawMinutes","finalMinutes","clips","motionGraphics","audioCleanup","colorGrading","subtitles","broll","vfx","thumbnail","captions"]},
+        {id:"ad",name:"Advertisement",baseHours:4,unitHours:3,unit:"final minute",fields:["rawMinutes","finalMinutes","clips","motionGraphics","audioCleanup","colorGrading","subtitles","broll","vfx","thumbnail","captions"]},
+        {id:"product",name:"Product Video",baseHours:4,unitHours:2.6,unit:"final minute",fields:["rawMinutes","finalMinutes","clips","motionGraphics","audioCleanup","colorGrading","subtitles","broll","vfx","thumbnail","captions"]},
+        {id:"corporate",name:"Corporate Video",baseHours:4,unitHours:2.2,unit:"final minute",fields:["rawMinutes","finalMinutes","clips","motionGraphics","audioCleanup","colorGrading","subtitles","broll","vfx","thumbnail","captions"]},
+        {id:"promo",name:"Promotional Video",baseHours:3,unitHours:2.2,unit:"final minute",fields:["rawMinutes","finalMinutes","clips","motionGraphics","audioCleanup","colorGrading","subtitles","broll","vfx","thumbnail","captions"]},
+        {id:"event",name:"Event Video",baseHours:3,unitHours:1.5,unit:"final minute",fields:["rawMinutes","finalMinutes","clips","motionGraphics","audioCleanup","colorGrading","subtitles","broll","vfx","thumbnail","captions"]},
+        {id:"music",name:"Music Video",baseHours:5,unitHours:3,unit:"final minute",fields:["rawMinutes","finalMinutes","clips","motionGraphics","audioCleanup","colorGrading","subtitles","broll","vfx","thumbnail","captions"]},
+        {id:"documentary",name:"Documentary",baseHours:6,unitHours:2.5,unit:"final minute",fields:["rawMinutes","finalMinutes","clips","motionGraphics","audioCleanup","colorGrading","subtitles","broll","vfx","thumbnail","captions"]},
+        {id:"wedding",name:"Wedding / Event Edit",baseHours:5,unitHours:2,unit:"final minute",fields:["rawMinutes","finalMinutes","clips","motionGraphics","audioCleanup","colorGrading","subtitles","broll","vfx","thumbnail","captions"]},
+        {id:"content",name:"Social Content Package",baseHours:2,unitHours:1.0,unit:"final minute",fields:["rawMinutes","finalMinutes","clips","motionGraphics","audioCleanup","colorGrading","subtitles","broll","vfx","thumbnail","captions"]}
+      ]
+    },
+    {
+      id:"cgi",name:"3D / CGI",icon:"3D",
+      projects:[
+        {id:"productModel",name:"Product Modeling",baseHours:4,unitHours:2,unit:"object",fields:["complexity3d","objects","materials","angles","sourceFile","usage"]},
+        {id:"hardSurface",name:"Hard Surface",baseHours:5,unitHours:2.4,unit:"object",fields:["complexity3d","objects","materials","angles","sourceFile","usage"]},
+        {id:"props",name:"Props",baseHours:3,unitHours:1.5,unit:"asset",fields:["complexity3d","objects","materials","angles","sourceFile","usage"]},
+        {id:"environment",name:"Environment",baseHours:8,unitHours:3.5,unit:"area",fields:["complexity3d","objects","materials","angles","sourceFile","usage"]},
+        {id:"character",name:"Character",baseHours:12,unitHours:4.5,unit:"character",fields:["complexity3d","objects","materials","angles","sourceFile","usage"]},
+        {id:"archObject",name:"Architectural Object",baseHours:5,unitHours:2,unit:"object",fields:["complexity3d","objects","materials","angles","sourceFile","usage"]},
+        {id:"packaging",name:"Packaging",baseHours:5,unitHours:2,unit:"panel",fields:["complexity3d","objects","materials","angles","sourceFile","usage"]},
+        {id:"vehicle",name:"Vehicle",baseHours:14,unitHours:5,unit:"asset",fields:["complexity3d","objects","materials","angles","sourceFile","usage"]},
+        {id:"mechanical",name:"Mechanical Object",baseHours:8,unitHours:3,unit:"asset",fields:["complexity3d","objects","materials","angles","sourceFile","usage"]},
+        {id:"customAsset",name:"Custom Asset",baseHours:5,unitHours:2,unit:"asset",fields:["complexity3d","objects","materials","angles","sourceFile","usage"]}
+      ]
+    },
+    {
+      id:"animation3d",name:"3D Animation",icon:"AN",
+      projects:[
+        {id:"productAnimation",name:"Product Animation",baseHours:6,unitHours:3.5,unit:"final second",fields:["animationSeconds","shots","resolution","renderQuality","simulation","lightingComplexity","angles","sourceFile","usage"]},
+        {id:"logoAnimation",name:"Logo Animation",baseHours:3,unitHours:1.8,unit:"final second",fields:["animationSeconds","shots","resolution","renderQuality","simulation","lightingComplexity","angles","sourceFile","usage"]},
+        {id:"explainer",name:"Explainer Animation",baseHours:5,unitHours:2.5,unit:"final second",fields:["animationSeconds","shots","resolution","renderQuality","simulation","lightingComplexity","angles","sourceFile","usage"]},
+        {id:"camera",name:"Camera Animation",baseHours:4,unitHours:1.5,unit:"final second",fields:["animationSeconds","shots","resolution","renderQuality","simulation","lightingComplexity","angles","sourceFile","usage"]},
+        {id:"mechanicalAnimation",name:"Mechanical Animation",baseHours:8,unitHours:2.8,unit:"final second",fields:["animationSeconds","shots","resolution","renderQuality","simulation","lightingComplexity","angles","sourceFile","usage"]},
+        {id:"characterAnimation",name:"Character Animation",baseHours:10,unitHours:4,unit:"final second",fields:["animationSeconds","shots","resolution","renderQuality","simulation","lightingComplexity","angles","sourceFile","usage"]},
+        {id:"simulation",name:"Simulation",baseHours:10,unitHours:4,unit:"final second",fields:["animationSeconds","shots","resolution","renderQuality","simulation","lightingComplexity","angles","sourceFile","usage"]},
+        {id:"vfxIntegration",name:"VFX Integration",baseHours:8,unitHours:3.2,unit:"shot",fields:["animationSeconds","shots","resolution","renderQuality","simulation","lightingComplexity","angles","sourceFile","usage"]}
+      ]
+    },
+    {
+      id:"photo",name:"Photography / Content",icon:"PH",
+      projects:[
+        {id:"productPhoto",name:"Product Photography",baseHours:2,unitHours:1.5,unit:"shoot hour",fields:["shootHours","finalImages","retouching","travelKm","studio","assistant","usage"]},
+        {id:"eventPhoto",name:"Event Photography",baseHours:2,unitHours:1.4,unit:"shoot hour",fields:["shootHours","finalImages","retouching","travelKm","studio","assistant","usage"]},
+        {id:"socialPhoto",name:"Social Media Photography",baseHours:2,unitHours:1.2,unit:"shoot hour",fields:["shootHours","finalImages","retouching","travelKm","studio","assistant","usage"]},
+        {id:"portrait",name:"Portrait Photography",baseHours:1.5,unitHours:1.3,unit:"shoot hour",fields:["shootHours","finalImages","retouching","travelKm","studio","assistant","usage"]},
+        {id:"commercialPhoto",name:"Commercial Photography",baseHours:3,unitHours:2,unit:"shoot hour",fields:["shootHours","finalImages","retouching","travelKm","studio","assistant","usage"]},
+        {id:"productVideo",name:"Product Video Shoot",baseHours:3,unitHours:2,unit:"shoot hour",fields:["shootHours","finalImages","retouching","travelKm","studio","assistant","usage"]},
+        {id:"contentShoot",name:"Content Shoot",baseHours:2,unitHours:1.5,unit:"shoot hour",fields:["shootHours","finalImages","retouching","travelKm","studio","assistant","usage"]},
+        {id:"reelsShoot",name:"Reels Shooting",baseHours:2,unitHours:1.2,unit:"shoot hour",fields:["shootHours","finalImages","retouching","travelKm","studio","assistant","usage"]},
+        {id:"editingPackage",name:"Editing Package",baseHours:2,unitHours:.8,unit:"final asset",fields:["shootHours","finalImages","retouching","travelKm","studio","assistant","usage"]}
+      ]
+    }
+  ],
+  demoProjects: []
+};
+
+const FIELD_META = {
+  dimensions:{label:"Dimensions / format",type:"text",default:"1080x1350",help:"Use actual output dimensions or format when known."},
+  quantity:{label:"Quantity",type:"number",default:1,min:1,help:"Number of deliverables, slides, variants or agreed units."},
+  customIllustration:{label:"Custom illustrations",type:"select",options:["No","Simple","Detailed"],default:"No"},
+  photoManipulation:{label:"Photo manipulation",type:"select",options:["No","Basic","Advanced"],default:"No"},
+  typography:{label:"Typography complexity",type:"select",options:["Basic","Normal","Advanced"],default:"Normal"},
+  brandGuidelines:{label:"Brand guidelines supplied",type:"select",options:["Yes","No"],default:"Yes"},
+  printing:{label:"Printing requirements",type:"select",options:["Not required","Digital only","Print-ready"],default:"Not required"},
+  sourceFile:{label:"Source file",type:"select",options:["Not required","Required"],default:"Not required"},
+  usage:{label:"Usage",type:"select",options:["Personal","Creator","Commercial","Advertising","Extended Commercial"],default:"Commercial"},
+  rawMinutes:{label:"Raw footage (minutes)",type:"number",default:30,min:1,help:"Total footage supplied before editing."},
+  finalMinutes:{label:"Final video (minutes)",type:"number",default:1,min:.1,step:.1,help:"Expected final runtime."},
+  clips:{label:"Approx. clips / cuts",type:"number",default:30,min:1},
+  motionGraphics:{label:"Motion graphics",type:"select",options:["None","Basic","Advanced"],default:"Basic"},
+  audioCleanup:{label:"Audio cleanup",type:"select",options:["None","Basic","Advanced"],default:"Basic"},
+  colorGrading:{label:"Color work",type:"select",options:["Correction","Grading","Advanced look"],default:"Correction"},
+  subtitles:{label:"Subtitles",type:"select",options:["No","Basic","Styled"],default:"No"},
+  broll:{label:"B-roll / stock",type:"select",options:["None","Client supplied","Editor sourced"],default:"None"},
+  vfx:{label:"VFX",type:"select",options:["None","Basic","Advanced"],default:"None"},
+  thumbnail:{label:"Thumbnail",type:"select",options:["No","Yes"],default:"No"},
+  captions:{label:"Captions / platform versions",type:"select",options:["None","Captions","Multiple versions"],default:"None"},
+  complexity3d:{label:"Model complexity",type:"select",options:["Low","Medium","High","VeryHigh"],default:"Medium"},
+  objects:{label:"Number of objects / assets",type:"number",default:1,min:1},
+  materials:{label:"Materials",type:"select",options:["Basic","PBR","Detailed","Procedural / custom"],default:"PBR"},
+  angles:{label:"Camera angles / renders",type:"number",default:1,min:1},
+  animationSeconds:{label:"Animation duration (seconds)",type:"number",default:10,min:.5,step:.5},
+  shots:{label:"Number of shots",type:"number",default:1,min:1},
+  resolution:{label:"Resolution",type:"select",options:["1080p","2K","4K","6K+"],default:"1080p"},
+  renderQuality:{label:"Render quality",type:"select",options:["Draft","Production","High","Hero"],default:"Production"},
+  simulation:{label:"Simulation requirement",type:"select",options:["None","Simple","Advanced","Heavy"],default:"None"},
+  lightingComplexity:{label:"Lighting complexity",type:"select",options:["Studio","Product","Cinematic","Complex"],default:"Product"},
+  shootHours:{label:"Shooting hours",type:"number",default:2,min:.5,step:.5},
+  finalImages:{label:"Final images",type:"number",default:20,min:1},
+  retouching:{label:"Retouching",type:"select",options:["Basic","Detailed","High-end"],default:"Basic"},
+  travelKm:{label:"Travel (km)",type:"number",default:0,min:0},
+  studio:{label:"Studio required",type:"select",options:["No","Client location","Studio"],default:"No"},
+  assistant:{label:"Assistant required",type:"select",options:["No","Yes"],default:"No"}
+};
+
+const STEP_NAMES = ["Service","Project","Scope","Complexity","Quality","Usage","Deadline","Revisions","Deliverables","Client","Add-ons","Summary"];
+
+/* ============================================================
+   STATE
+   ============================================================ */
+let state = {
+  config: structuredClone(DEFAULT),
+  projects: [],
+  currentView: "dashboard",
+  currentStep: 0,
+  editingProjectId: null,
+  form: newForm()
+};
+
+function newForm(){
+  return {
+    clientName:"", projectName:"", serviceId:"graphic", projectId:"poster",
+    complexity:"Medium", quality:"Professional", urgency:"Normal",
+    deadlineDays:7, revisions:3, quantity:3,
+    clientType:"Small Business", purpose:"Commercial", usage:"Commercial",
+    deliverables:["High-resolution final files"], exclusions:["Unused concepts","Work outside approved scope"],
+    notes:"", budget:"", directCosts:0, consultation:false, additionalDeliverables:0,
+    advanced:{}, selectedAddons:{}
+  };
+}
+
+function deepMerge(a,b){
+  if(!b || typeof b!=="object") return a;
+  for(const k of Object.keys(b)){
+    if(b[k] && typeof b[k]==="object" && !Array.isArray(b[k]) && a[k] && typeof a[k]==="object" && !Array.isArray(a[k])) deepMerge(a[k],b[k]);
+    else a[k]=b[k];
+  }
+  return a;
+}
+function normalizePackages(){
+  const fallback=DEFAULT.packageDefaults;
+  state.config.packageDefaults=(state.config.packageDefaults||fallback).map((p,i)=>{
+    const d=fallback[i]||fallback[fallback.length-1];
+    return Object.assign({},d,p,{
+      included:Array.isArray(p.included)&&p.included.length?p.included:d.included.slice(),
+      excluded:Array.isArray(p.excluded)&&p.excluded.length?p.excluded:d.excluded.slice(),
+      maxDeliverables:Number.isFinite(Number(p.maxDeliverables))?Number(p.maxDeliverables):d.maxDeliverables,
+      sourceFiles:typeof p.sourceFiles==='boolean'?p.sourceFiles:d.sourceFiles,
+      commercialUsage:typeof p.commercialUsage==='boolean'?p.commercialUsage:d.commercialUsage
+    });
+  });
+}
+function loadState(){
+  try{
+    const raw=localStorage.getItem(STORAGE_KEY);
+    if(raw){
+      const saved=JSON.parse(raw);
+      state.config=deepMerge(structuredClone(DEFAULT),saved.config||{});
+      state.projects=Array.isArray(saved.projects)?saved.projects:[];
+    }
+    normalizePackages();
+  }catch(e){console.warn("Could not load saved data",e);normalizePackages()}
+}
+function persist(){
+  localStorage.setItem(STORAGE_KEY,JSON.stringify({version:VERSION,config:state.config,projects:state.projects}));
+}
+function currency(n, code=state.config.business.currency){
+  const symbols={INR:"₹",USD:"$",EUR:"€",GBP:"£",AED:"د.إ",CUSTOM:""};
+  const symbol=state.config.business.currencySymbol || symbols[code] || "";
+  const decimals=code==="INR"?0:2;
+  return (symbol ? symbol+" " : "") + Number(n||0).toLocaleString(undefined,{minimumFractionDigits:decimals,maximumFractionDigits:decimals});
+}
+function pct(n){return `${Math.round(n*100)}%`}
+function clamp(n,a,b){return Math.min(b,Math.max(a,n))}
+function getService(){return state.config.services.find(s=>s.id===state.form.serviceId)||state.config.services[0]}
+function getProjectType(){const s=getService();return s.projects.find(p=>p.id===state.form.projectId)||s.projects[0]}
+function toast(msg){
+  const el=document.getElementById("toast");el.textContent=msg;el.classList.add("show");clearTimeout(window.__toastTimer);
+  window.__toastTimer=setTimeout(()=>el.classList.remove("show"),2600);
+}
+
+/* ============================================================
+   PRICING ENGINE
+   ============================================================ */
+function getFieldNumber(key,fallback){
+  const v=Number(state.form.advanced[key]);
+  return Number.isFinite(v)?v:fallback;
+}
+function selectedAddons(){
+  return state.config.addons.filter(a=>state.form.selectedAddons[a.id]);
+}
+function addonCharges(baseSubtotal){
+  let fixed=0, percent=0, rows=[];
+  for(const addon of selectedAddons()){
+    if(addon.type==="percent"){
+      const amount=baseSubtotal*(Number(addon.price)/100);
+      percent+=amount; rows.push({label:addon.name,amount,reason:addon.description});
+    }else{
+      let amount=Number(addon.price);
+      if(addon.id==="travel") amount=getFieldNumber("travelKm",0)*Number(addon.price);
+      fixed+=amount; rows.push({label:addon.name,amount,reason:addon.description});
+    }
+  }
+  return {fixed,percent,rows};
+}
+function estimateEffort(){
+  const type=getProjectType(), f=state.form, a=f.advanced;
+  let production=Number(type.baseHours)||2;
+  const qty=Math.max(1,Number(a.quantity ?? f.quantity ?? 1));
+  production += Math.max(0,qty-1)*(Number(type.unitHours)||.5);
+
+  if(f.serviceId==="graphic"){
+    const add={Simple:0.8,Detailed:2};
+    production += add[a.customIllustration]||0;
+    production += ({Basic:.5,Advanced:1.5}[a.photoManipulation]||0);
+    production += ({Advanced:.5}[a.typography]||0);
+  }
+  if(f.serviceId==="video"){
+    const raw=getFieldNumber("rawMinutes",30), finalM=getFieldNumber("finalMinutes",1), clips=getFieldNumber("clips",30);
+    production += Math.max(0,finalM-1)*(Number(type.unitHours)||1.5);
+    production += raw/30*.5 + clips/50*.5;
+    const bonus={Basic:.5,Advanced:1.5}; production+=bonus[a.motionGraphics]||0;
+    production += bonus[a.audioCleanup]||0;
+    production += ({Correction:.3,Grading:.8,"Advanced look":1.5}[a.colorGrading]||0);
+    production += ({Basic:.3,Styled:.7}[a.subtitles]||0);
+    production += ({ "Client supplied":.3,"Editor sourced":1}[a.broll]||0);
+    production += ({Basic:.7,Advanced:2}[a.vfx]||0);
+    production += a.thumbnail==="Yes"?.5:0;
+    production += ({Captions:.3,"Multiple versions":.8}[a.captions]||0);
+  }
+  if(f.serviceId==="cgi"){
+    production += Math.max(0,getFieldNumber("objects",1)-1)*.5;
+    production *= ({Low:.8,Medium:1,High:1.3,VeryHigh:1.7}[a.complexity3d]||1);
+    production += ({Basic:0,PBR:.8,Detailed:1.5,"Procedural / custom":2.5}[a.materials]||0);
+    production += Math.max(0,getFieldNumber("angles",1)-1)*.35;
+  }
+  if(f.serviceId==="animation3d"){
+    production += Math.max(0,getFieldNumber("animationSeconds",10)-5)*.18;
+    production += Math.max(0,getFieldNumber("shots",1)-1)*1.2;
+    production += ({"1080p":0,"2K":.7,"4K":1.6,"6K+":3}[a.resolution]||0);
+    production += ({Draft:-.8,Production:0,High:1.2,Hero:2.5}[a.renderQuality]||0);
+    production += ({None:0,Simple:1,Advanced:3,Heavy:6}[a.simulation]||0);
+    production += ({Studio:0,Product:.3,Cinematic:1,Complex:2}[a.lightingComplexity]||0);
+  }
+  if(f.serviceId==="photo"){
+    production = (Number(type.baseHours)||2) + Math.max(.5,getFieldNumber("shootHours",2))*(Number(type.unitHours)||1.2);
+    production += getFieldNumber("finalImages",20)/30*.8;
+    production += ({Basic:.5,Detailed:1.3,"High-end":2.4}[a.retouching]||0);
+    production += a.assistant==="Yes"?.5:0;
+    production += a.studio==="Studio"?1:0;
+  }
+  const complexityMult=state.config.modifiers.complexity[f.complexity]||1;
+  production*=complexityMult;
+  const research=production*.10, communication=production*.10, planning=production*.08;
+  const revisions=Math.max(0,Number(f.revisions)||0);
+  const revisionHours=revisions*.45;
+  const renderExport=(f.serviceId==="video"||f.serviceId==="cgi"||f.serviceId==="animation3d")?production*.10:.25;
+  const direct=Math.max(0,Number(f.directCosts)||0);
+  const total=production+research+communication+planning+revisionHours+renderExport;
+  const low=total*.88, high=total*1.18;
+  return {production,research,communication,planning,revisionHours,renderExport,total,low,high,direct};
+}
+function scopeScore(){
+  const f=state.form,a=f.advanced;
+  let score=0;
+  score += {Low:0,Medium:7,High:14,VeryHigh:22}[f.complexity]||0;
+  score += {Basic:0,Professional:6,Premium:13,Cinematic:18}[f.quality]||0;
+  score += {Flexible:0,Normal:2,Fast:6,Rush:12,Emergency:20}[f.urgency]||0;
+  score += Math.max(0,Number(f.revisions||0)-1)*2.5;
+  score += ({Personal:0,Creator:1,Commercial:6,Advertising:10,"Extended Commercial":14}[f.usage]||0);
+  score += ({Student:-2,Individual:0,Creator:1,"Small Business":2,Startup:3,Agency:4,"Established Business":5,Corporate:6,Brand:6,"Advertising Campaign":8,"High-value Commercial Project":10}[f.clientType]||0);
+  score += state.form.consultation?2:0;
+  score += Number(f.additionalDeliverables||0)*2;
+  if(a.sourceFile==="Required") score+=4;
+  if(a.customIllustration==="Detailed") score+=5;
+  if(a.photoManipulation==="Advanced") score+=4;
+  if(a.vfx==="Advanced") score+=7;
+  if(a.simulation==="Heavy") score+=10;
+  if(a.renderQuality==="Hero") score+=8;
+  if(a.studio==="Studio") score+=3;
+  if(getProjectType().id==="brandIdentity") score+=12;
+  if(getProjectType().id==="vehicle") score+=10;
+  return clamp(Math.round(score),0,120);
+}
+function packageStatus(p,score=fScopeScoreForPackage()){
+  const f=state.form;
+  if(score<p.minScore) return {label:"Not suitable",type:"not-suitable",rank:0,reason:"This scope is below the package boundary."};
+  if(score>p.maxScore && p!==state.config.packageDefaults.at(-1)) return {label:"Requires higher package",type:"not-suitable",rank:0,reason:"The scope score is above this package's intended boundary."};
+  if(Number(f.revisions||0)>Number(p.revisions||0)) return {label:"Needs more revisions",type:"amber",rank:0,reason:`The project requests ${f.revisions} revision rounds while this package includes ${p.revisions}.`};
+  if(f.advanced.sourceFile==='Required' && !p.sourceFiles) return {label:"Source file add-on",type:"amber",rank:0,reason:"Source/editable files are not included in this package."};
+  if((f.usage==='Commercial'||f.usage==='Advertising'||f.usage==='Extended Commercial') && !p.commercialUsage) return {label:"Usage add-on",type:"amber",rank:0,reason:"Commercial usage is not included in this package."};
+  if(Number(f.additionalDeliverables||0)+1>Number(p.maxDeliverables||1)) return {label:"More deliverables",type:"amber",rank:0,reason:`This package supports up to ${p.maxDeliverables} listed deliverables.`};
+  return {label:"Available",type:"available",rank:1,reason:"The selected scope can be covered by this package."};
+}
+function fScopeScoreForPackage(){return scopeScore()}
+function recommendPackage(score){
+  const packages=state.config.packageDefaults;
+  const exact=packages.find(p=>score>=p.minScore && score<=p.maxScore);
+  if(exact){
+    const status=packageStatus(exact,score);
+    if(status.rank) return exact;
+  }
+  const candidates=packages.filter(p=>packageStatus(p,score).rank).sort((a,b)=>a.multiplier-b.multiplier);
+  return candidates[0] || packages[packages.length-1];
+}
+function calculate(){
+  const effort=estimateEffort(), score=scopeScore(), pkg=recommendPackage(score);
+  const b=state.config.business, m=state.config.modifiers;
+  const baseRate=Math.max(b.minimumHourlyRate,b.targetHourlyRate);
+  const labor=effort.total*baseRate;
+  const qualityMult=m.quality[state.form.quality]||1;
+  const usageMult=m.usage[state.form.usage]||1;
+  const urgencyMult=m.urgency[state.form.urgency]||1;
+  const clientMult=m.clientContext[state.form.clientType]||1;
+  // Multipliers represent distinct dimensions; effort already captures complexity.
+  const adjustedLabor=labor*qualityMult*usageMult*urgencyMult*clientMult;
+  const fixedScopeCharges=(state.form.consultation?Number(state.config.charges.consultationFee):0)
+    +(state.form.additionalDeliverables||0)*Number(state.config.charges.extraDeliverableRate||0)
+    +(state.form.advanced.sourceFile==="Required"?Number(state.config.charges.sourceFileFee):0)
+    +effort.direct;
+  const addon=addonCharges(adjustedLabor);
+  const rawBeforePackage=adjustedLabor+fixedScopeCharges+addon.fixed+addon.percent;
+  const packagePrice=rawBeforePackage*(pkg.multiplier||1);
+  const target=Math.max(Number(b.minimumProjectFee)||0,packagePrice);
+  const minimum=Math.max(Number(b.minimumProjectFee)||0,target*.82);
+  const premium=target*1.30;
+  const tax=b.taxEnabled?(target*(Number(b.taxRate)||0)/100):0;
+  const totalWithTax=target+tax;
+  const budget=Number(state.form.budget);
+  const effective=target/Math.max(effort.total,0.1);
+  const confidence=confidenceLevel();
+  const risks=buildRisks(effort);
+  const breakdown=[
+    {label:"Estimated labor / production",amount:labor},
+    {label:"Quality level",amount:labor*(qualityMult-1)},
+    {label:"Usage context",amount:labor*qualityMult*(usageMult-1)},
+    {label:"Urgency / schedule pressure",amount:labor*qualityMult*usageMult*(urgencyMult-1)},
+    {label:"Client / procurement context",amount:labor*qualityMult*usageMult*urgencyMult*(clientMult-1)},
+    {label:"Fixed scope requirements",amount:fixedScopeCharges},
+    ...addon.rows
+  ].filter(x=>Math.abs(x.amount)>.01);
+  return {effort,score,pkg,labor,qualityMult,usageMult,urgencyMult,clientMult,fixedScopeCharges,addon,rawBeforePackage,target,minimum,premium,tax,totalWithTax,budget,effective,confidence,risks,breakdown};
+}
+function confidenceLevel(){
+  const f=state.form,a=f.advanced;let missing=0,uncertain=0;
+  if(!f.clientName) uncertain++; if(!f.projectName) uncertain++;
+  if(f.serviceId==="video"){if(!a.finalMinutes) missing++;if(!a.rawMinutes) missing++}
+  if(f.serviceId==="cgi"){if(!a.objects) uncertain++;if(!a.angles) uncertain++}
+  if(f.serviceId==="animation3d"){if(!a.animationSeconds) missing++;if(!a.shots) uncertain++}
+  if(f.serviceId==="photo"){if(!a.shootHours) missing++;if(!a.finalImages) uncertain++}
+  if(f.deadlineDays<=1) uncertain++;
+  if(!state.form.revisions && state.form.revisions!==0) uncertain++;
+  if(missing>0) return {level:"Low",reason:"Important production inputs are missing."};
+  if(uncertain>=3) return {level:"Medium",reason:"Several requirements are still approximate or incomplete."};
+  return {level:"High",reason:"Scope, quantity, timeline and deliverables are sufficiently defined for this configured model."};
+}
+function buildRisks(effort){
+  const f=state.form,a=f.advanced,r=[];
+  if(f.revisions>=7) r.push({kind:"warn",text:"Revision allowance is very high. Define the feedback process and out-of-scope revision rate."});
+  if(f.deadlineDays<=1) r.push({kind:"danger",text:"Deadline is unusually short. Confirm capacity before accepting the schedule."});
+  if(f.deadlineDays<=2 && effort.total>10) r.push({kind:"danger",text:"Required effort is high for the selected deadline. Rush pricing alone does not solve capacity risk."});
+  if(a.sourceFile==="Required") r.push({kind:"warn",text:"Source files are requested. Confirm which editable files are included and third-party asset licensing."});
+  if(f.usage==="Advertising" || f.usage==="Extended Commercial") r.push({kind:"warn",text:"Commercial exposure is significant. Define channels, territory and usage duration in the agreement."});
+  if(f.additionalDeliverables>0) r.push({kind:"warn",text:"Additional deliverables increase scope. Name every output format and quantity in the quote."});
+  if(!f.projectName) r.push({kind:"warn",text:"Project name is not defined. Clarify exactly what is being produced before sending the quote."});
+  if(f.budget && Number(f.budget)<effort.total*state.config.business.minimumHourlyRate) r.push({kind:"danger",text:"The supplied budget is below the configured minimum hourly economics. Negotiate scope rather than simply cutting price."});
+  if(Object.keys(a).length===0) r.push({kind:"warn",text:"Detailed service-specific requirements are not yet configured."});
+  return r;
+}
+
+/* ============================================================
+   RENDERING
+   ============================================================ */
+const titles={
+  dashboard:["Dashboard","Price the work, scope, responsibility and value."],
+  builder:["Quick Quote","Select → configure → review → get a model-based price."],
+  projects:["Projects","Saved calculations, quotations and reusable scope definitions."],
+  pricing:["Pricing Settings","Control rates, modifiers, minimums and business economics."],
+  services:["Services","Manage scalable service and project definitions."],
+  packages:["Packages","Define the value ladder and package boundaries."],
+  addons:["Add-ons","Create transparent scope extensions and additional charges."],
+  review:["Pricing Health","Review pricing using business signals rather than automatic price inflation."],
+  settings:["Settings","Business information, currency, taxes and data controls."]
+};
+function setView(view){
+  state.currentView=view;
+  document.querySelectorAll(".view").forEach(x=>x.classList.add("hidden"));
+  document.getElementById("view-"+view).classList.remove("hidden");
+  document.querySelectorAll(".nav button").forEach(b=>b.classList.toggle("active",b.dataset.view===view));
+  document.getElementById("pageTitle").textContent=titles[view][0];
+  document.getElementById("pageSubtitle").textContent=titles[view][1];
+  if(view==="dashboard") renderDashboard();
+  if(view==="builder") renderBuilder();
+  if(view==="projects") renderProjects();
+  if(view==="pricing") renderPricing();
+  if(view==="services") renderServices();
+  if(view==="packages") renderPackages();
+  if(view==="addons") renderAddons();
+  if(view==="review") renderReview();
+  if(view==="settings") renderSettings();
+  window.scrollTo({top:0,behavior:"smooth"});
+}
+function metric(label,value,sub){return `<div class="card metric"><div class="label">${label}</div><div class="value">${value}</div><div class="sub">${sub||""}</div></div>`}
+function renderDashboard(){
+  const c=state.config, p=state.projects;
+  const avg=p.length?p.reduce((s,x)=>s+(Number(x.calculation?.target)||0),0)/p.length:0;
+  const total=p.reduce((s,x)=>s+(Number(x.calculation?.target)||0),0);
+  document.getElementById("view-dashboard").innerHTML=`
+    <div class="toolbar"><div><span class="badge">Production-ready local tool</span><h2 style="margin:10px 0 4px">Your pricing command center</h2><p class="muted small">Model the scope before you negotiate the number.</p></div><button class="btn primary" onclick="startNewQuote()">＋ Create project quote</button></div>
+    <div class="grid grid-4">
+      ${metric("Saved projects",p.length,"Local browser records")}
+      ${metric("Average quoted value",p.length?currency(avg):"—","Across saved calculations")}
+      ${metric("Configured target rate",currency(c.business.targetHourlyRate)+"/h","Your current pricing assumption")}
+      ${metric("Minimum project fee",currency(c.business.minimumProjectFee),"Global floor")}
+    </div>
+    <div class="grid grid-2" style="margin-top:18px">
+      <div class="card">
+        <div class="section-head"><div><h3>Quick workflow</h3><p class="muted small">Keep the UI simple while the model stays detailed.</p></div><span class="badge green">SELECT → CONFIGURE → REVIEW</span></div>
+        <div class="grid grid-2">
+          <div class="notice"><strong>1. Capture scope</strong><br><span class="muted">Service, project type, quantity, complexity, usage and deadline.</span></div>
+          <div class="notice"><strong>2. Estimate effort</strong><br><span class="muted">Production + communication + planning + revisions + export.</span></div>
+          <div class="notice"><strong>3. Apply context</strong><br><span class="muted">Quality, usage, urgency and client procurement context.</span></div>
+          <div class="notice"><strong>4. Protect the deal</strong><br><span class="muted">Show exclusions, risks, add-ons and negotiation scope options.</span></div>
+        </div>
+      </div>
+      <div class="card">
+        <div class="section-head"><div><h3>Recent projects</h3><p class="muted small">${p.length?`Latest ${Math.min(5,p.length)} saved records`:"No project history yet."}</p></div><button class="btn" onclick="setView('projects')">View all</button></div>
+        ${p.length?`<div class="project-list">${p.slice(-5).reverse().map(projectCard).join("")}</div>`:`<div class="empty">Create your first quote to build your pricing history.</div>`}
+      </div>
+    </div>
+  `;
+}
+function projectCard(p){
+  return `<div class="project-item"><div><strong>${esc(p.form?.projectName||"Untitled project")}</strong><div class="muted tiny">${esc(p.form?.clientName||"No client")} · ${esc(p.calculation?.pkg?.name||"—")} · ${esc(p.savedAt?new Date(p.savedAt).toLocaleDateString():"—")}</div></div><div class="actions"><span class="badge">${currency(p.calculation?.target||0)}</span><button class="btn" onclick="loadProject('${p.id}')">Open</button><button class="btn danger" onclick="deleteProject('${p.id}')">Delete</button></div></div>`
+}
+function renderBuilder(){
+  const v=document.getElementById("view-builder");
+  const f=state.form, type=getProjectType(), calc=calculate();
+  let html=`<div class="stepper">${STEP_NAMES.map((s,i)=>`<button class="step ${i===state.currentStep?"active":i<state.currentStep?"done":""}" onclick="gotoStep(${i})">${String(i+1).padStart(2,"0")} · ${s}</button>`).join("")}</div>`;
+  html+=`<div class="toolbar"><div><span class="badge">Step ${String(state.currentStep+1).padStart(2,"0")} / 12</span><h2 style="margin:10px 0 4px">${STEP_NAMES[state.currentStep]}</h2><p class="muted small">${stepDescription(state.currentStep)}</p></div><div class="actions"><button class="btn" onclick="saveDraft()">Save project</button><button class="btn" onclick="resetQuote()">Reset</button></div></div>`;
+  html+=`<div class="card">${renderStep(state.currentStep)}</div>`;
+  html+=`<div class="actions" style="justify-content:space-between;margin-top:16px"><button class="btn" ${state.currentStep===0?"disabled":""} onclick="prevStep()">← Back</button><div class="actions">${state.currentStep===11?`<button class="btn success" onclick="saveCurrentProject()">Save quote</button><button class="btn primary" onclick="showQuote()">Generate quote</button>`:`<button class="btn primary" onclick="nextStep()">Continue →</button>`}</div></div>`;
+  if(state.currentStep===11){html+=`<div style="margin-top:18px">${renderResult(calc,true)}</div>`}
+  v.innerHTML=html;
+}
+function stepDescription(i){
+  return [
+    "Choose the core service family. Only relevant project types will follow.",
+    "Define exactly what is being created.",
+    "Describe quantity and production scope.",
+    "Set difficulty and production complexity.",
+    "Set expected output quality.",
+    "Define usage and commercial context.",
+    "Set the required delivery window.",
+    "Define revision allowance and feedback boundaries.",
+    "Define source files, formats and additional deliverables.",
+    "Classify the client by business context, not wealth.",
+    "Add transparent scope extensions where required.",
+    "Review all assumptions before generating the quote."
+  ][i];
+}
+function renderStep(i){
+  const f=state.form,a=f.advanced,type=getProjectType(),service=getService();
+  if(i===0)return `<div class="form-grid">${selectField("serviceId","Service",state.config.services.map(s=>({v:s.id,t:s.name})),f.serviceId,"Changing service updates the project-specific questions.")}</div>`;
+  if(i===1)return `<div class="form-grid">${selectField("projectId","Project type",service.projects.map(p=>({v:p.id,t:p.name})),f.projectId,"Only projects for the selected service are shown.")}<div class="field"><label>Project name <span>Required for quote clarity</span></label><input id="projectName" value="${esc(f.projectName)}" oninput="setForm('projectName',this.value)" placeholder="e.g. Product launch poster set"></div><div class="field"><label>Client name</label><input id="clientName" value="${esc(f.clientName)}" oninput="setForm('clientName',this.value)" placeholder="Client / company"></div></div>`;
+  if(i===2)return `<div class="form-grid">${renderFields(type.fields)}<div class="field"><label>Overall project quantity <span>Use when the service has additional outputs</span></label><input type="number" min="1" value="${Number(f.quantity)||1}" oninput="setForm('quantity',Math.max(1,Number(this.value)||1))"></div><div class="field"><label>Additional deliverables <span>Beyond the main scope</span></label><input type="number" min="0" value="${Number(f.additionalDeliverables)||0}" oninput="setForm('additionalDeliverables',Math.max(0,Number(this.value)||0))"></div></div>`;
+  if(i===3)return `<div class="form-grid three">${selectField("complexity","Complexity",[["Low","Low"],["Medium","Medium"],["High","High"],["VeryHigh","Very high"]].map(x=>({v:x[0],t:x[1]})),f.complexity)}${fieldText("Complexity meaning","Low = straightforward execution; high = more problem-solving, exceptions, technical risk and iterations.","")}<div class="field"><label>Direct project costs <span>Optional</span></label><input type="number" min="0" value="${Number(f.directCosts)||0}" oninput="setForm('directCosts',Math.max(0,Number(this.value)||0))"></div></div>`;
+  if(i===4)return `<div class="form-grid three">${selectField("quality","Quality level",[["Basic","Basic"],["Professional","Professional"],["Premium","Premium"],["Cinematic","Cinematic"]].map(x=>({v:x[0],t:x[1]})),f.quality)}${fieldText("Production level","Quality affects expected production standards and review pressure; complexity is already reflected in effort.","")}<div class="field"><label>Consultation / strategy <span>Optional</span></label><select onchange="setForm('consultation',this.value==='Yes')"><option ${!f.consultation?"selected":""}>No</option><option ${f.consultation?"selected":""}>Yes</option></select></div></div>`;
+  if(i===5)return `<div class="form-grid three">${selectField("usage","Usage",[["Personal","Personal"],["Creator","Creator"],["Commercial","Commercial"],["Advertising","Advertising"],["Extended Commercial","Extended commercial"]].map(x=>({v:x[0],t:x[1]})),f.usage)}${selectField("purpose","Purpose",[["Personal","Personal"],["Portfolio","Portfolio"],["Content","Content"],["Commercial","Commercial"],["Advertising","Advertising"],["Internal","Internal"]].map(x=>({v:x[0],t:x[1]})),f.purpose)}${fieldText("Why usage changes price","Commercial distribution can increase responsibility, exposure and rights requirements. It is not a wealth-based surcharge.","")}</div>`;
+  if(i===6)return `<div class="form-grid three">${selectField("urgency","Delivery pressure",[["Flexible","Flexible"],["Normal","Normal"],["Fast","Fast"],["Rush","Rush"],["Emergency","Emergency"]].map(x=>({v:x[0],t:x[1]})),f.urgency)}<div class="field"><label>Deadline <span>Calendar days</span></label><input type="number" min="1" value="${Number(f.deadlineDays)||7}" oninput="setForm('deadlineDays',Math.max(1,Number(this.value)||1))"></div>${fieldText("Rush principle","Urgency compensates for schedule disruption and capacity pressure. It does not guarantee a deadline you cannot safely deliver.","")}</div>`;
+  if(i===7)return `<div class="form-grid three"><div class="field"><label>Included revision rounds</label><input type="number" min="0" max="20" value="${Number(f.revisions)||0}" oninput="setForm('revisions',clamp(Number(this.value)||0,0,20))"><div class="help">One round = one consolidated feedback cycle on one agreed deliverable.</div></div>${fieldText("Unlimited revisions","Unlimited revisions are not recommended for fixed-price work because the production boundary becomes undefined.","")}<div class="notice"><strong>Current package allowance</strong><br><span class="muted">The package engine will compare your required revision count with the selected package.</span></div></div>`;
+  if(i===8)return `<div class="form-grid">${renderFieldIf("sourceFile",type.fields)}<div class="field"><label>Output / deliverables</label><textarea oninput="setForm('deliverables',this.value.split('\\n').map(x=>x.trim()).filter(Boolean))">${esc((f.deliverables||[]).join("\\n"))}</textarea><div class="help">One deliverable per line.</div></div><div class="field"><label>Exclusions</label><textarea oninput="setForm('exclusions',this.value.split('\\n').map(x=>x.trim()).filter(Boolean))">${esc((f.exclusions||[]).join("\\n"))}</textarea><div class="help">Explicitly protect the scope.</div></div></div>`;
+  if(i===9)return `<div class="form-grid three">${selectField("clientType","Client type",[["Individual","Individual"],["Student","Student"],["Creator","Creator"],["Small Business","Small business"],["Startup","Startup"],["Agency","Agency"],["Established Business","Established business"],["Corporate","Corporate"],["Brand","Brand"],["Advertising Campaign","Advertising campaign"],["High-value Commercial Project","High-value commercial project"]].map(x=>({v:x[0],t:x[1]})),f.clientType)}<div class="field"><label>Client budget <span>Optional</span></label><input type="number" min="0" value="${f.budget||""}" oninput="setForm('budget',this.value)" placeholder="e.g. 5000"></div>${fieldText("Classification principle","Client type changes context, procurement complexity and expected service—not a simplistic “rich client = higher price” rule.","")}</div>`;
+  if(i===10)return `${renderAddonsStep()}`;
+  return renderSummaryStep();
+}
+function renderFields(keys){
+  return keys.map(k=>renderFieldIf(k,getProjectType().fields)).join("");
+}
+function renderFieldIf(k,allowed){
+  if(!allowed?.includes(k))return "";
+  const meta=FIELD_META[k]; if(!meta)return "";
+  const val=state.form.advanced[k]!==undefined?state.form.advanced[k]:meta.default;
+  let input="";
+  if(meta.type==="select")input=`<select onchange="setAdvanced('${k}',this.value)">${meta.options.map(o=>`<option ${String(val)===String(o)?"selected":""}>${esc(o)}</option>`).join("")}</select>`;
+  else input=`<input type="${meta.type}" ${meta.min!==undefined?`min="${meta.min}"`:""} ${meta.step!==undefined?`step="${meta.step}"`:""} value="${esc(val)}" oninput="setAdvanced('${k}',this.value)">`;
+  return `<div class="field"><label>${esc(meta.label)} ${meta.help?`<span>${esc(meta.help)}</span>`:""}</label>${input}</div>`;
+}
+function selectField(key,label,opts,val,help=""){
+  return `<div class="field"><label>${esc(label)}</label><select onchange="setForm('${key}',this.value)">${opts.map(o=>`<option value="${esc(o.v)}" ${String(val)===String(o.v)?"selected":""}>${esc(o.t)}</option>`).join("")}</select>${help?`<div class="help">${esc(help)}</div>`:""}</div>`
+}
+function textField(){return ""}
+function fieldText(title,body,_){return `<div class="notice"><strong>${esc(title)}</strong><br><span class="muted">${esc(body)}</span></div>`}
+function renderAddonsStep(){
+  return `<div class="form-grid">${state.config.addons.map(a=>`<div class="card" style="padding:14px;box-shadow:none"><div class="split"><strong>${esc(a.name)}</strong><label style="font-size:11px"><input type="checkbox" ${state.form.selectedAddons[a.id]?"checked":""} onchange="toggleAddon('${a.id}',this.checked)"> Add</label></div><p class="muted tiny">${esc(a.description)}</p><div><span class="badge">${a.type==="percent"?a.price+"%":currency(a.price)}</span></div><div class="help">${esc(a.condition)}</div></div>`).join("")}</div>`;
+}
+function renderSummaryStep(){
+  const c=calculate(),f=state.form,type=getProjectType();
+  return `<div class="grid grid-2">
+    <div>
+      <div class="kpi"><span>${esc(getService().name)}</span><span>${esc(type.name)}</span><span>${esc(f.complexity)} complexity</span><span>${esc(f.usage)} usage</span></div>
+      <h3 style="margin-top:18px">${esc(f.projectName||"Untitled project")}</h3>
+      <div class="row"><span>Client</span><strong>${esc(f.clientName||"Not provided")}</strong></div>
+      <div class="row"><span>Scope score</span><strong>${c.score}/120</strong></div>
+      <div class="row"><span>Estimated effort</span><strong>${c.effort.low.toFixed(1)}–${c.effort.high.toFixed(1)} h</strong></div>
+      <div class="row"><span>Recommended package</span><strong>${esc(c.pkg.name)}</strong></div>
+      <div class="row"><span>Target quote</span><strong>${currency(c.target)}</strong></div>
+      <div class="row"><span>Effective hourly rate</span><strong>${currency(c.effective)}/h</strong></div>
+    </div>
+    <div>
+      <div class="notice"><strong>Price confidence: ${c.confidence.level}</strong><br><span class="muted">${esc(c.confidence.reason)}</span></div>
+      <div style="margin-top:12px" class="notice"><strong>Scope protection</strong>${c.risks.length?`<ul class="list" style="margin-bottom:0">${c.risks.slice(0,6).map(r=>`<li style="color:${r.kind==="danger"?"#991b1b":r.kind==="warn"?"#92400e":"#166534"}">${esc(r.text)}</li>`).join("")}</ul>`:"<br><span class='muted'>No major automatic warnings.</span>"}</div>
+    </div>
+  </div>
+  <div class="callout" style="margin-top:16px">Review every assumption before sending the quote. The number is a configured recommendation, not a claim that it is an objectively correct market price.</div>`;
+}
+function renderResult(calc,compact=false){
+  const c=calc,f=state.form,p=c.pkg;
+  const include=[
+    `${p.concepts} concept / direction allowance`,
+    `${Math.max(p.revisions,f.revisions)} revision round${Math.max(p.revisions,f.revisions)===1?"":"s"}`,
+    "Agreed final deliverables and exports",
+    p.support+" support",
+    p.priority+" production priority"
+  ];
+  if(f.advanced.sourceFile==="Required"||state.form.selectedAddons.sourceFile)include.push("Source/editable file where permitted");
+  if(f.usage==="Commercial"||f.usage==="Advertising"||f.usage==="Extended Commercial")include.push("Defined commercial usage");
+  const exclude=(f.exclusions||[]).length?f.exclusions:["Unapproved scope changes","Unlimited revision cycles","Third-party licenses not listed in scope"];
+  return `<div class="result-screen">
+    <div class="quote-hero">
+      <div class="section-head"><div><span class="badge">RECOMMENDED PACKAGE</span><h2 style="font-size:28px;margin:9px 0 2px">${esc(p.name)}</h2><p class="muted">${esc(p.description)}</p></div><span class="badge ${c.confidence.level==="High"?"green":c.confidence.level==="Medium"?"amber":"red"}">Price confidence: ${c.confidence.level}</span></div>
+      <div class="quote-price">${currency(c.target)}</div>
+      <div class="muted small">Recommended target quote · ${c.effort.low.toFixed(1)}–${c.effort.high.toFixed(1)} estimated hours · ${Math.max(1,Math.ceil(c.effort.low/6))}–${Math.max(1,Math.ceil(c.effort.high/6))+Math.max(0,Math.ceil((7-f.deadlineDays)/3))} delivery days</div>
+      <div class="price-range"><div class="range-box"><span class="muted">MINIMUM</span><strong>${currency(c.minimum)}</strong><small class="muted">Reasonable floor for this scope</small></div><div class="range-box"><span class="muted">TARGET</span><strong>${currency(c.target)}</strong><small class="muted">Normal recommended quote</small></div><div class="range-box"><span class="muted">PREMIUM</span><strong>${currency(c.premium)}</strong><small class="muted">Higher-touch / stronger value case</small></div></div>
+    </div>
+    <div class="grid grid-2" style="margin-top:18px">
+      <div class="card"><h3>Why this package?</h3><ul class="list">${reasonList(c).map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
+      <div class="card"><h3>Project snapshot</h3>${[
+        ["Service",getService().name],["Project",getProjectType().name],["Quantity",state.form.quantity],["Complexity",f.complexity],["Usage",f.usage],["Revisions",f.revisions],["Deadline",f.deadlineDays+" days"],["Scope score",c.score+"/120"]
+      ].map(r=>`<div class="row"><span>${esc(r[0])}</span><strong>${esc(String(r[1]))}</strong></div>`).join("")}</div>
+    </div>
+    <div class="grid grid-2" style="margin-top:18px">
+      <div class="card"><h3>Included</h3><ul class="list">${include.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
+      <div class="card"><h3>Excluded / scope protection</h3><ul class="list exclude">${exclude.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
+    </div>
+    <div class="card" style="margin-top:18px"><div class="section-head"><div><h3>Package definition</h3><p class="muted small">This is what makes the recommendation a package rather than a naked price.</p></div><span class="badge">${esc(p.name)}</span></div><div class="grid grid-2"><div><div class="package-label">PACKAGE INCLUDES</div><ul class="list compact">${p.included.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div><div><div class="package-label excluded-label">PACKAGE EXCLUDES</div><ul class="list exclude compact">${p.excluded.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div></div><div class="package-meta"><span>${p.revisions} included revisions</span><span>${p.maxDeliverables>=999?"Custom":p.maxDeliverables+" deliverables max"}</span><span>${p.sourceFiles?"Source files included":"Source files extra"}</span><span>${p.commercialUsage?"Commercial usage included":"Commercial usage extra"}</span><span>${esc(p.priority)} priority</span><span>${esc(p.support)} support</span></div></div>
+    <div class="card" style="margin-top:18px"><div class="section-head"><div><h3>Price breakdown</h3><p class="muted small">Each row comes from the configured model.</p></div><span class="badge">Raw before package: ${currency(c.rawBeforePackage)}</span></div>
+      ${c.breakdown.map(x=>`<div class="row"><span>${esc(x.label)}</span><strong>${x.amount<0?"− ":""}${currency(Math.abs(x.amount))}</strong></div>`).join("")}
+      <div class="row"><span>Package value multiplier · ${esc(p.name)}</span><strong>× ${Number(p.multiplier).toFixed(2)}</strong></div>
+      <div class="row"><span>Configured minimum project fee</span><strong>${currency(state.config.business.minimumProjectFee)}</strong></div>
+      <div class="row"><span>Recommended quote</span><strong>${currency(c.target)}</strong></div>
+      ${c.tax?`<div class="row"><span>Configured tax</span><strong>${currency(c.tax)}</strong></div><div class="row"><span>Total incl. tax</span><strong>${currency(c.totalWithTax)}</strong></div>`:""}
+    </div>
+    ${c.risks.length?`<div class="card" style="margin-top:18px"><h3>Scope protection</h3><div class="grid grid-2">${c.risks.map(r=>`<div class="notice ${r.kind}">⚠ ${esc(r.text)}</div>`).join("")}</div></div>`:""}
+    <div class="card" style="margin-top:18px"><h3>All packages</h3>${renderPackageTable(c.score)}</div>
+    ${!compact?`<div class="actions no-print" style="margin-top:18px"><button class="btn primary" onclick="showQuote()">Generate professional quote</button><button class="btn" onclick="saveCurrentProject()">Save project</button></div>`:""}
+  </div>`;
+}
+function reasonList(c){
+  const f=state.form,r=[];
+  if(c.score>=35)r.push(`The scope score is ${c.score}/120, placing the project beyond entry-level package boundaries.`);
+  if(f.complexity==="High"||f.complexity==="VeryHigh")r.push(`The selected ${f.complexity.toLowerCase()} complexity implies more problem-solving and production effort.`);
+  if(f.usage==="Commercial"||f.usage==="Advertising"||f.usage==="Extended Commercial")r.push(`The selected ${f.usage.toLowerCase()} usage increases commercial responsibility and exposure.`);
+  if(f.advanced.sourceFile==="Required"||f.selectedAddons?.sourceFile)r.push("Source/editable files introduce additional delivery and licensing responsibility.");
+  if(f.revisions>=4)r.push(`${f.revisions} revision rounds require more review capacity than lower packages.`);
+  if(f.urgency==="Rush"||f.urgency==="Emergency")r.push(`The ${f.urgency.toLowerCase()} schedule applies a configurable urgency premium and capacity pressure.`);
+  if(f.additionalDeliverables>0)r.push(`${f.additionalDeliverables} additional deliverable(s) expand scope beyond the main output.`);
+  if(!r.length)r.push("The requirements fit the configured scope boundaries for this package.");
+  return r;
+}
+function renderPackageTable(score){
+  return `<div class="table-wrap"><table class="table"><thead><tr><th>Package</th><th>Fit</th><th>Price</th><th>Included revisions</th><th>Deliverables</th><th>What is included</th><th>What is not</th></tr></thead><tbody>${state.config.packageDefaults.map(p=>{
+    const status=packageStatus(p,score);
+    const recommended=p.id===calculate().pkg.id;
+    const cls=recommended?"recommended":"";
+    return `<tr class="${cls}"><td><strong>${esc(p.name)}</strong>${recommended?` <span class="badge green">Selected</span>`:""}<div class="muted tiny">×${Number(p.multiplier).toFixed(2)} · ${p.minScore}–${p.maxScore}</div></td><td class="${status.type}">${esc(status.label)}<div class="muted tiny">${esc(status.reason)}</div></td><td><strong>${currency(Math.max(state.config.business.minimumProjectFee,calculate().rawBeforePackage*(p.multiplier||1)))}</strong></td><td>${p.revisions}</td><td>${p.maxDeliverables>=999?"Custom":p.maxDeliverables+" max"}</td><td><ul class="list">${p.included.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></td><td><ul class="list exclude">${p.excluded.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></td></tr>`
+  }).join("")}</tbody></table></div>`;
+}
+function showQuote(){
+  const calc=calculate();
+  state.currentView="builder";state.currentStep=11;
+  renderBuilder();
+  document.getElementById("view-builder").insertAdjacentHTML("beforeend",`<div class="modal-backdrop" id="quoteModal"><div class="modal" style="max-width:900px"><div class="section-head no-print"><div><span class="badge">Client quote</span><h2 style="margin-top:9px">Professional quotation</h2></div><div class="actions"><button class="btn" onclick="window.print()">Print / Save PDF</button><button class="btn primary" onclick="closeQuote()">Close</button></div></div><div id="quoteOutput">${renderQuoteDocument(calc)}</div></div></div>`);
+}
+function closeQuote(){document.getElementById("quoteModal")?.remove()}
+function renderQuoteDocument(c){
+  const b=state.config.business,f=state.form,valid=new Date(Date.now()+b.quoteValidityDays*86400000).toLocaleDateString();
+  return `<div class="quote-print" style="display:block"><div style="border-bottom:2px solid #111;padding-bottom:16px;margin-bottom:20px"><div style="font-size:24px;font-weight:900">${esc(b.name)}</div><div class="muted">${esc(b.freelancer||"Freelance creative services")}</div></div>
+  <div class="grid grid-2"><div><div class="muted tiny">CLIENT</div><strong>${esc(f.clientName||"Client")}</strong></div><div><div class="muted tiny">DATE / VALIDITY</div><strong>${new Date().toLocaleDateString()} · ${valid}</strong></div></div>
+  <h1 style="margin:25px 0 7px">${esc(f.projectName||getProjectType().name)}</h1><p class="muted">${esc(getService().name)} · ${esc(getProjectType().name)} · ${esc(c.pkg.name)} package</p>
+  <h3 style="margin-top:24px">Scope</h3><ul class="list">${(f.deliverables||[]).map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
+  <h3 style="margin-top:24px">Commercial terms</h3><div class="row"><span>Project fee</span><strong>${currency(c.target)}</strong></div><div class="row"><span>Payment terms</span><strong>${esc(b.paymentTerms)}</strong></div><div class="row"><span>Estimated delivery</span><strong>${Math.max(1,Math.ceil(c.effort.low/6))}–${Math.max(1,Math.ceil(c.effort.high/6))} working days</strong></div><div class="row"><span>Included revisions</span><strong>${Math.max(c.pkg.revisions,f.revisions)} rounds</strong></div>
+  <h3 style="margin-top:24px">Exclusions</h3><ul class="list exclude">${(f.exclusions||[]).map(x=>`<li>${esc(x)}</li>`).join("")}</ul>
+  <div class="notice" style="margin-top:24px">${esc(f.notes||"Scope changes, additional deliverables, additional revision rounds and rush work are billed according to the agreed pricing policy.")}</div>
+  </div>`;
+}
+
+/* ============================================================
+   ADMIN VIEWS
+   ============================================================ */
+function renderProjects(){
+  const p=state.projects;
+  document.getElementById("view-projects").innerHTML=`<div class="toolbar"><div><h2>Projects</h2><p class="muted small">Your locally stored pricing history.</p></div><div class="actions"><button class="btn" onclick="exportProjects()">Export projects</button><button class="btn primary" onclick="startNewQuote()">＋ New quote</button></div></div>
+  ${p.length?`<div class="project-list">${p.slice().reverse().map(projectCard).join("")}</div>`:`<div class="empty">No saved projects yet.</div>`}`;
+}
+function renderPricing(){
+  const c=state.config;
+  document.getElementById("view-pricing").innerHTML=`<div class="toolbar"><div><h2>Pricing engine configuration</h2><p class="muted small">Centralized values. Change assumptions here rather than editing calculation logic.</p></div><button class="btn primary" onclick="saveAllSettings()">Save changes</button></div>
+  <div class="grid grid-2">
+    <div class="card"><h3>Rate ladder</h3><div class="form-grid">
+      ${numCfg("business.minimumHourlyRate","Minimum hourly rate","business",c.business.minimumHourlyRate)}
+      ${numCfg("business.baseHourlyRate","Base hourly rate","business",c.business.baseHourlyRate)}
+      ${numCfg("business.targetHourlyRate","Target hourly rate","business",c.business.targetHourlyRate)}
+      ${numCfg("business.premiumHourlyRate","Premium hourly rate","business",c.business.premiumHourlyRate)}
+      ${numCfg("business.minimumProjectFee","Minimum project fee","business",c.business.minimumProjectFee)}
+      ${numCfg("charges.revisionRate","Additional revision rate","charges",c.charges.revisionRate)}
+      ${numCfg("charges.sourceFileFee","Source file fee","charges",c.charges.sourceFileFee)}
+      ${numCfg("charges.extraDeliverableRate","Additional deliverable fee","charges",c.charges.extraDeliverableRate)}
+    </div></div>
+    <div class="card"><h3>Modifiers</h3><p class="muted small">These are configurable economics, not market truths.</p>${modifierTable("quality",c.modifiers.quality)}${modifierTable("complexity",c.modifiers.complexity)}${modifierTable("usage",c.modifiers.usage)}${modifierTable("urgency",c.modifiers.urgency)}</div>
+  </div>`;
+}
+function numCfg(path,label,group,val){
+  return `<div class="field"><label>${esc(label)}</label><input type="number" min="0" step="50" value="${Number(val)||0}" onchange="setConfigPath('${path}',Number(this.value)||0)"></div>`;
+}
+function modifierTable(group,obj){
+  return `<div style="margin-top:15px"><strong>${esc(group[0].toUpperCase()+group.slice(1))}</strong>${Object.entries(obj).map(([k,v])=>`<div class="row"><span>${esc(k)}</span><input style="width:110px;padding:6px 8px;border:1px solid var(--line);border-radius:8px" type="number" step=".01" min="0" value="${v}" onchange="state.config.modifiers.${group}['${escapeAttr(k)}']=Number(this.value)||0;persist();"></div>`).join("")}</div>`
+}
+function renderServices(){
+  document.getElementById("view-services").innerHTML=`<div class="toolbar"><div><h2>Services</h2><p class="muted small">Expandable service hierarchy: category → project type → fields → time model.</p></div><button class="btn primary" onclick="promptAddService()">＋ Add service</button></div>
+  <div class="grid grid-2">${state.config.services.map((s,si)=>`<div class="card"><div class="section-head"><div><span class="badge">${esc(s.icon||"SV")}</span><h3 style="margin-top:8px">${esc(s.name)}</h3></div><button class="btn danger" onclick="deleteService(${si})">Delete</button></div><div class="muted small">${s.projects.length} project types</div><div class="project-list" style="margin-top:12px">${s.projects.map((p,pi)=>`<div class="project-item"><div><strong>${esc(p.name)}</strong><div class="muted tiny">${p.baseHours}h base · ${p.unitHours}h / unit · ${p.fields.length} conditional fields</div></div><button class="btn" onclick="editProjectType(${si},${pi})">Edit</button></div>`).join("")}</div><button class="btn" style="margin-top:12px" onclick="addProjectType(${si})">＋ Project type</button></div>`).join("")}</div>`;
+}
+function renderPackages(){
+  document.getElementById("view-packages").innerHTML=`<div class="toolbar"><div><span class="badge">Package architecture</span><h2 style="margin-top:10px">What the client actually buys</h2><p class="muted small">A package is a defined scope bundle: deliverables + service level + revisions + rights + support + production priority. The price is a consequence of that definition.</p></div><div class="actions"><button class="btn" onclick="resetPackages()">Reset package defaults</button></div></div>
+  <div class="grid grid-3">${state.config.packageDefaults.map((p,i)=>`<div class="card package-card"><div class="section-head"><div><span class="badge">${String(i+1).padStart(2,"0")} · ${esc(p.id)}</span><h3 style="margin-top:9px">${esc(p.name)}</h3></div><button class="btn" onclick="editPackage(${i})">Edit</button></div><p class="muted small">${esc(p.description)}</p>
+    <div class="row"><span>Scope band</span><strong>${p.minScore}–${p.maxScore}</strong></div><div class="row"><span>Price multiplier</span><strong>×${Number(p.multiplier).toFixed(2)}</strong></div><div class="row"><span>Revision rounds</span><strong>${p.revisions}</strong></div><div class="row"><span>Deliverables</span><strong>${p.maxDeliverables>=999?"Custom":p.maxDeliverables+" max"}</strong></div><div class="row"><span>Source files</span><strong>${p.sourceFiles?"Included":"Not included"}</strong></div><div class="row"><span>Commercial usage</span><strong>${p.commercialUsage?"Included by scope":"Not included"}</strong></div>
+    <div class="package-section"><div class="package-label">INCLUDED</div><ul class="list compact">${p.included.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
+    <div class="package-section"><div class="package-label excluded-label">NOT INCLUDED</div><ul class="list exclude compact">${p.excluded.map(x=>`<li>${esc(x)}</li>`).join("")}</ul></div>
+    <div class="package-meta"><span>${esc(p.priority)} priority</span><span>${esc(p.support)} support</span><span>${esc(p.turnaround)}</span></div>
+  </div>`).join("")}</div>
+  <div class="card" style="margin-top:18px"><div class="section-head"><div><h3>Package design rule</h3><p class="muted small">Higher tiers must change the actual engagement, not just the number.</p></div><span class="badge green">SCOPE → SERVICE → VALUE</span></div><div class="grid grid-4"><div class="notice"><strong>Scope</strong><br><span class="muted">More deliverables, complexity and customization.</span></div><div class="notice"><strong>Service</strong><br><span class="muted">More revisions, priority and support.</span></div><div class="notice"><strong>Rights</strong><br><span class="muted">Source files and commercial usage can become included at defined tiers.</span></div><div class="notice"><strong>Responsibility</strong><br><span class="muted">Higher tiers carry more planning and production responsibility.</span></div></div></div>`;
+}
+
+function renderAddons(){
+  document.getElementById("view-addons").innerHTML=`<div class="toolbar"><div><h2>Add-ons</h2><p class="muted small">Transparent ways to extend scope instead of silently stretching the base quote.</p></div><button class="btn primary" onclick="addAddon()">＋ Add add-on</button></div>
+  <div class="table-wrap"><table class="table"><thead><tr><th>Addon</th><th>Type</th><th>Price</th><th>Purpose</th><th>Condition</th><th></th></tr></thead><tbody>${state.config.addons.map((a,i)=>`<tr><td><strong>${esc(a.name)}</strong></td><td>${a.type}</td><td>${a.type==="percent"?a.price+"%":currency(a.price)}</td><td>${esc(a.description)}</td><td>${esc(a.condition)}</td><td><button class="btn" onclick="editAddon(${i})">Edit</button> <button class="btn danger" onclick="deleteAddon(${i})">Delete</button></td></tr>`).join("")}</tbody></table></div>`;
+}
+function renderReview(){
+  document.getElementById("view-review").innerHTML=`<div class="grid grid-2">
+    <div class="card"><span class="badge">Pricing health</span><h2 style="margin-top:10px">When to review your pricing</h2><p class="muted small">The tool does not auto-raise prices. It gives you business signals to discuss with the AI assistant.</p>
+      ${reviewBlock("Consider a review when",["You are consistently booked.","You reject work because capacity is constrained.","Clients rarely question your price.","You consistently deliver faster than estimated.","Skill quality or portfolio quality has materially improved.","You have stronger / more demanding clients.","Demand has increased.","Average project complexity has increased.","Your turnaround has improved.","Operating costs increased.","You specialized into a valuable niche."])}
+    </div>
+    <div class="card"><h3>Do not raise automatically when</h3>${reviewBlock("",["Quality is inconsistent.","Delivery reliability is poor.","Your portfolio does not yet support the intended positioning.","You frequently revise your own work because the process is still unstable.","Clients reject quotes for reasons unrelated to scope/value.","The change has no clear business justification."])}
+      <div class="notice" style="margin-top:16px"><strong>Use this section with the AI assistant.</strong><br><span class="muted">Tell the assistant what changed in your business, and ask it to analyze which variables deserve review: hourly rates, minimum fee, revision pricing, package boundaries, add-ons or positioning.</span></div>
+    </div>
+  </div>`;
+}
+function reviewBlock(title,items){return `${title?`<h3 style="margin-top:18px">${esc(title)}</h3>`:""}<ul class="list">${items.map(x=>`<li>${esc(x)}</li>`).join("")}</ul>`}
+function renderSettings(){
+  const b=state.config.business;
+  document.getElementById("view-settings").innerHTML=`<div class="grid grid-2">
+    <div class="card"><h3>Business</h3><div class="form-grid">
+      ${textCfg("business.name","Business / studio name",b.name)}
+      ${textCfg("business.freelancer","Freelancer name",b.freelancer)}
+      ${selectCfg("business.currency","Currency",["INR","USD","EUR","GBP","AED","CUSTOM"],b.currency)}
+      ${textCfg("business.currencySymbol","Currency symbol",b.currencySymbol)}
+      ${selectCfg("business.experience","Experience level",["Beginner","Developing","Intermediate","Professional","Premium"],b.experience)}
+      ${numCfg("business.quoteValidityDays","Quote validity (days)","business",b.quoteValidityDays)}
+      ${numCfg("business.taxRate","Tax rate (%)","business",b.taxRate)}
+      <div class="field"><label>Tax enabled</label><select onchange="setConfigPath('business.taxEnabled',this.value==='Yes')"><option ${!b.taxEnabled?"selected":""}>No</option><option ${b.taxEnabled?"selected":""}>Yes</option></select></div>
+    </div><div class="field" style="margin-top:14px"><label>Payment terms</label><textarea onchange="setConfigPath('business.paymentTerms',this.value)">${esc(b.paymentTerms)}</textarea></div></div>
+    <div class="card"><h3>Data controls</h3><div class="grid">
+      <button class="btn" onclick="downloadJSON({config:state.config,projects:state.projects},'pricing-studio-backup.json')">Export full backup</button>
+      <button class="btn" onclick="document.getElementById('importFile').click()">Import backup</button>
+      <input id="importFile" type="file" accept=".json,application/json" class="hidden" onchange="importBackup(this.files[0])">
+      <button class="btn" onclick="downloadJSON(state.config,'pricing-config.json')">Export configuration</button>
+      <button class="btn danger" onclick="factoryReset()">Reset application</button>
+    </div><div class="notice warn" style="margin-top:16px">Reset removes locally stored projects and restores the built-in configuration.</div></div>
+  </div>`;
+}
+function textCfg(path,label,val){return `<div class="field"><label>${esc(label)}</label><input value="${esc(val||"")}" onchange="setConfigPath('${path}',this.value)"></div>`}
+function selectCfg(path,label,options,val){return `<div class="field"><label>${esc(label)}</label><select onchange="setConfigPath('${path}',this.value)">${options.map(o=>`<option ${String(o)===String(val)?"selected":""}>${esc(o)}</option>`).join("")}</select></div>`}
+
+/* ============================================================
+   ACTIONS / EDITORS
+   ============================================================ */
+function setForm(k,v){state.form[k]=v; if(k==="serviceId"){const s=getService();state.form.projectId=s.projects[0]?.id||"";state.form.advanced={}} if(k==="projectId"){state.form.advanced={}};renderBuilder()}
+function setAdvanced(k,v){state.form.advanced[k]=v;renderBuilder()}
+function toggleAddon(id,on){state.form.selectedAddons[id]=on;renderBuilder()}
+function nextStep(){if(validateStep(state.currentStep)){state.currentStep=clamp(state.currentStep+1,0,11);renderBuilder()}}
+function prevStep(){state.currentStep=clamp(state.currentStep-1,0,11);renderBuilder()}
+function gotoStep(i){if(i>state.currentStep && !validateStep(state.currentStep))return;state.currentStep=i;renderBuilder()}
+function validateStep(i){
+  if(i===0&&!getService())return false;
+  if(i===1&&!state.form.projectId){toast("Select a project type.");return false}
+  if(i===6&&(!state.form.deadlineDays||state.form.deadlineDays<1)){toast("Enter a valid deadline.");return false}
+  if(i===7&&(state.form.revisions<0||state.form.revisions>20)){toast("Revision allowance must be between 0 and 20.");return false}
+  return true;
+}
+function startNewQuote(){resetQuote();setView("builder")}
+function resetQuote(){
+  state.form=newForm();state.currentStep=0;state.editingProjectId=null;
+  const s=getService();state.form.projectId=s.projects[0]?.id||"";
+  renderBuilder();
+}
+function saveCurrentProject(){
+  const calc=calculate();
+  if(!state.form.projectName){toast("Add a project name before saving.");state.currentStep=1;renderBuilder();return}
+  const obj={id:state.editingProjectId||crypto.randomUUID(),savedAt:new Date().toISOString(),form:structuredClone(state.form),calculation:calc};
+  const idx=state.projects.findIndex(p=>p.id===obj.id);
+  if(idx>=0)state.projects[idx]=obj;else state.projects.push(obj);
+  persist();state.editingProjectId=obj.id;toast("Project saved locally.");renderBuilder();
+}
+function saveDraft(){saveCurrentProject()}
+function loadProject(id){
+  const p=state.projects.find(x=>x.id===id);if(!p)return;
+  state.form=structuredClone(p.form);state.editingProjectId=p.id;state.currentStep=11;setView("builder");toast("Project loaded.");
+}
+function deleteProject(id){
+  if(!confirm("Delete this saved project?"))return;
+  state.projects=state.projects.filter(p=>p.id!==id);persist();renderProjects();toast("Project deleted.");
+}
+function editProjectType(si,pi){
+  const p=state.config.services[si].projects[pi];
+  const name=prompt("Project type name",p.name);if(name===null)return;
+  const base=Number(prompt("Base hours",p.baseHours));const unit=Number(prompt("Hours per additional unit",p.unitHours));
+  if(!name.trim()||!Number.isFinite(base)||!Number.isFinite(unit)||base<0||unit<0){toast("Invalid project type values.");return}
+  p.name=name.trim();p.baseHours=base;p.unitHours=unit;persist();renderServices();
+}
+function addProjectType(si){
+  const name=prompt("Project type name");if(!name)return;
+  const base=Number(prompt("Base hours","2"));const unit=Number(prompt("Hours per additional unit",".5"));
+  if(!Number.isFinite(base)||!Number.isFinite(unit)||base<0||unit<0)return;
+  state.config.services[si].projects.push({id:slug(name)+Date.now(),name,baseHours:base,unitHours:unit,unit:"deliverable",fields:["quantity"]});
+  persist();renderServices();
+}
+function promptAddService(){
+  const name=prompt("Service name");if(!name)return;
+  const id=slug(name)+Date.now();state.config.services.push({id,name,icon:"SV",projects:[{id:"custom",name:"Custom Project",baseHours:2,unitHours:.5,unit:"deliverable",fields:["quantity"]}]});
+  persist();renderServices();toast("Service added.");
+}
+function deleteService(i){
+  if(state.config.services.length<=1){toast("Keep at least one service.");return}
+  if(!confirm(`Delete ${state.config.services[i].name}?`))return;
+  state.config.services.splice(i,1);persist();renderServices();
+}
+function editPackage(i){
+  const p=state.config.packageDefaults[i];
+  const name=prompt("Package name",p.name);if(name===null)return;
+  const multiplier=Number(prompt("Price multiplier",p.multiplier));
+  const min=Number(prompt("Minimum scope score",p.minScore));
+  const max=Number(prompt("Maximum scope score",p.maxScore));
+  const revisions=Number(prompt("Included revision rounds",p.revisions));
+  const maxDeliverables=Number(prompt("Maximum deliverables (999 = custom)",p.maxDeliverables));
+  const includedText=prompt("Included features / deliverables — one per line",p.included.join("\n"));
+  if(includedText===null)return;
+  const excludedText=prompt("Excluded items — one per line",p.excluded.join("\n"));
+  if(excludedText===null)return;
+  const sourceFiles=confirm("Should SOURCE / EDITABLE FILES be included in this package?\nOK = Included, Cancel = Extra");
+  const commercialUsage=confirm("Should COMMERCIAL USAGE be included in this package?\nOK = Included, Cancel = Extra");
+  const priority=prompt("Priority level",p.priority);
+  const support=prompt("Support level",p.support);
+  const turnaround=prompt("Turnaround positioning",p.turnaround);
+  const description=prompt("Package description",p.description);
+  if(!name.trim()||!Number.isFinite(multiplier)||multiplier<=0||!Number.isFinite(min)||!Number.isFinite(max)||max<min||!Number.isFinite(revisions)||revisions<0||!Number.isFinite(maxDeliverables)||maxDeliverables<1)return;
+  Object.assign(p,{name:name.trim(),multiplier,minScore:min,maxScore:max,revisions,maxDeliverables,sourceFiles,commercialUsage,priority:priority||p.priority,support:support||p.support,turnaround:turnaround||p.turnaround,description:description||p.description,included:includedText.split("\n").map(x=>x.trim()).filter(Boolean),excluded:excludedText.split("\n").map(x=>x.trim()).filter(Boolean)});
+  persist();renderPackages();toast("Package definition updated.");
+}
+function resetPackages(){
+  if(!confirm("Restore all package definitions and their inclusions/exclusions to defaults?"))return;
+  state.config.packageDefaults=structuredClone(DEFAULT.packageDefaults);persist();renderPackages();toast("Package defaults restored.");
+}
+function addAddon(){
+  const name=prompt("Add-on name");if(!name)return;
+  const type=prompt("Type: fixed or percent","fixed");const price=Number(prompt("Price / percentage","500"));if(!Number.isFinite(price)||price<0)return;
+  state.config.addons.push({id:slug(name)+Date.now(),name,type:type==="percent"?"percent":"fixed",price,description:"Custom add-on.",condition:"Define conditions in your agreement."});
+  persist();renderAddons();
+}
+function editAddon(i){
+  const a=state.config.addons[i],name=prompt("Name",a.name);if(name===null)return;
+  const price=Number(prompt("Price / percentage",a.price));if(!name.trim()||!Number.isFinite(price)||price<0)return;
+  a.name=name.trim();a.price=price;persist();renderAddons();
+}
+function deleteAddon(i){if(!confirm("Delete this add-on?"))return;state.config.addons.splice(i,1);persist();renderAddons()}
+function setConfigPath(path,val){
+  const parts=path.split(".");let obj=state.config;for(let i=0;i<parts.length-1;i++)obj=obj[parts[i]];
+  obj[parts.at(-1)]=val; if(path==="business.currency"){const map={INR:"₹",USD:"$",EUR:"€",GBP:"£",AED:"د.إ",CUSTOM:""};state.config.business.currencySymbol=map[val]??""}
+  persist();if(state.currentView==="pricing")renderPricing();if(state.currentView==="settings")renderSettings();
+}
+function saveAllSettings(){persist();toast("Pricing configuration saved.")}
+function factoryReset(){if(!confirm("Reset all local data and restore the default pricing system?"))return;localStorage.removeItem(STORAGE_KEY);location.reload()}
+function saveCurrentConfigToStorage(){persist()}
+
+/* ============================================================
+   IMPORT / EXPORT
+   ============================================================ */
+function downloadJSON(obj,name){
+  const blob=new Blob([JSON.stringify(obj,null,2)],{type:"application/json"}),url=URL.createObjectURL(blob);
+  const a=document.createElement("a");a.href=url;a.download=name;a.click();URL.revokeObjectURL(url);toast("Export created.");
+}
+function exportProjects(){downloadJSON(state.projects,"pricing-studio-projects.json")}
+function importBackup(file){
+  if(!file)return;const reader=new FileReader();
+  reader.onload=()=>{try{
+    const data=JSON.parse(reader.result);if(data.config)state.config=deepMerge(structuredClone(DEFAULT),data.config);if(Array.isArray(data.projects))state.projects=data.projects;
+    persist();toast("Backup imported.");setView("dashboard");
+  }catch(e){toast("Invalid JSON backup.")}};
+  reader.readAsText(file);
+}
+function quickExport(){downloadJSON({config:state.config,projects:state.projects},"pricing-studio-backup.json")}
+
+/* ============================================================
+   HELPERS / FIRST RUN
+   ============================================================ */
+function esc(v){return String(v??"").replace(/[&<>"']/g,m=>({"&":"&amp;","<":"&lt;",">":"&gt;",'"':"&quot;","'":"&#039;"}[m]))}
+function escapeAttr(v){return esc(v).replace(/`/g,"&#096;")}
+function slug(v){return String(v).toLowerCase().replace(/[^a-z0-9]+/g,"-").replace(/(^-|-$)/g,"")}
+function completeFirstRun(){
+  state.config.business.name=document.getElementById("setupBusiness").value.trim()||"My Freelance Studio";
+  state.config.business.currency=document.getElementById("setupCurrency").value;
+  const symbols={INR:"₹",USD:"$",EUR:"€",GBP:"£",AED:"د.إ",CUSTOM:""};
+  state.config.business.currencySymbol=symbols[state.config.business.currency]||"";
+  state.config.business.experience=document.getElementById("setupLevel").value;
+  state.config.business.minimumProjectFee=Number(document.getElementById("setupMinFee").value)||0;
+  state.config.business.baseHourlyRate=Number(document.getElementById("setupBaseRate").value)||0;
+  state.config.business.targetHourlyRate=Number(document.getElementById("setupTargetRate").value)||0;
+  state.config.business.premiumHourlyRate=Number(document.getElementById("setupPremiumRate").value)||0;
+  persist();document.getElementById("setupModal").classList.add("hidden");toast("Pricing system configured.");
+}
+function maybeSetup(){
+  const raw=localStorage.getItem(STORAGE_KEY);
+  if(!raw)document.getElementById("setupModal").classList.remove("hidden");
+}
+
+/* ============================================================
+   EVENTS / INIT
+   ============================================================ */
+document.querySelectorAll(".nav button").forEach(b=>b.addEventListener("click",()=>{setView(b.dataset.view);document.getElementById("sidebar").classList.remove("open")}));
+document.getElementById("topNewQuote").addEventListener("click",startNewQuote);
+document.getElementById("quickExport").addEventListener("click",quickExport);
+document.getElementById("mobileMenu").addEventListener("click",()=>document.getElementById("sidebar").classList.toggle("open"));
+document.getElementById("finishSetup").addEventListener("click",completeFirstRun);
+loadState();
+setView("dashboard");
+maybeSetup();
+window.startNewQuote=startNewQuote;window.setView=setView;window.gotoStep=gotoStep;window.prevStep=prevStep;window.nextStep=nextStep;window.saveCurrentProject=saveCurrentProject;window.saveDraft=saveDraft;window.resetQuote=resetQuote;window.showQuote=showQuote;window.closeQuote=closeQuote;window.loadProject=loadProject;window.deleteProject=deleteProject;window.setForm=setForm;window.setAdvanced=setAdvanced;window.toggleAddon=toggleAddon;window.editProjectType=editProjectType;window.addProjectType=addProjectType;window.promptAddService=promptAddService;window.deleteService=deleteService;window.editPackage=editPackage;window.resetPackages=resetPackages;window.addAddon=addAddon;window.editAddon=editAddon;window.deleteAddon=deleteAddon;window.setConfigPath=setConfigPath;window.saveAllSettings=saveAllSettings;window.factoryReset=factoryReset;window.downloadJSON=downloadJSON;window.exportProjects=exportProjects;window.importBackup=importBackup;
+
+/* basic runtime self-check */
+console.assert(Array.isArray(DEFAULT.services) && DEFAULT.services.length >= 5,"Service defaults missing");
+console.assert(DEFAULT.packageDefaults.length===9,"Package ladder should contain 9 defaults");
+</script>
+</body>
+</html>
