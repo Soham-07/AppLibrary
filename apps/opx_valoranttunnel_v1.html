@@ -693,7 +693,7 @@ function renderOverview(){
       </div>
       <div class="card">
         <div class="card-title">Sensitivity Finder</div>
-        <p style="font-size:13px;">${hasSens ? `Your current setup: <b class="mono" style="color:var(--text)">${App.sens.dpi} DPI &times; ${App.sens.sens}</b> sens &mdash; <b class="mono" style="color:var(--cyan)">${fmt(edpi,0)} eDPI</b>.` : 'DPI, eDPI, cm/360 and a real method for landing on a number and sticking with it.'}</p>
+        <p style="font-size:13px;">${hasSens ? `Your current setup: <b class="mono" style="color:var(--text)">${App.sens.dpi} DPI &times; ${App.sens.sens}</b> sens &mdash; <b class="mono" style="color:var(--cyan)">${fmt(edpi,0)} eDPI</b>.` : 'Enter your sens, get 5 faster and 5 slower options to test, then narrow down round by round.'}</p>
         <button class="btn btn-cyan btn-block" data-goto="sensitivity">Open Finder &rarr;</button>
       </div>
       <div class="card">
@@ -1093,30 +1093,49 @@ function renderSavedList(){
   }));
 }
 
-/* ---------------- Sensitivity Finder ---------------- */
+/* ---------------- Sensitivity Finder (Ladder system) ----------------
+   You enter the sens you play on today. The tool builds a ladder:
+   5 faster + 5 slower options, spaced by a geometric step (so the jump
+   in cm/360 feels equal in both directions). Test each, mark how it felt,
+   hit "Center here" on the best one -> the step halves -> repeat.        */
 const VALORANT_YAW = 0.07;
 function calcEdpi(dpi, sens){ return dpi*sens; }
 function calcCm360(dpi, sens){ return (2.54*360)/(dpi*sens*VALORANT_YAW); }
 function calcIn360(dpi, sens){ return calcCm360(dpi,sens)/2.54; }
 
+const STEP_OPTIONS = [2,3,5,8,10,15,20];
+function buildLadder(sens, stepPct){
+  const r = 1 + stepPct/100;
+  const round3 = v => Math.round(v*1000)/1000;
+  const rows = [];
+  for(let k=5;k>=1;k--) rows.push({kind:'fast', k, sens: round3(sens*Math.pow(r,k))});
+  rows.push({kind:'current', k:0, sens: round3(sens)});
+  for(let k=1;k<=5;k++) rows.push({kind:'slow', k, sens: Math.max(0.001, round3(sens/Math.pow(r,k)))});
+  return rows;
+}
+function ratingKey(dpi, sens){ return dpi+'x'+sens.toFixed(3); }
+
 function renderSensitivitySection(){
   const el = document.getElementById('sec-sensitivity');
   const s = App.sens;
-  const edpi = calcEdpi(s.dpi, s.sens);
-  const cm360 = calcCm360(s.dpi, s.sens);
-  const in360 = calcIn360(s.dpi, s.sens);
+  if(!s.step) s.step = 10;
+  App.sensRatings = App.sensRatings || Store.get('tunnel_sens_ratings', {});
+  App.sensRounds  = App.sensRounds  || Store.get('tunnel_sens_rounds', []);
 
   el.innerHTML = `
     <div class="grid-2" style="align-items:start;">
       <div class="card">
-        <div class="card-title">Your Setup</div>
+        <div class="card-title">Your Starting Point</div>
         <div class="grid-2">
           <div class="field"><label>Mouse DPI</label>
             <input type="number" class="text-input mono" id="inDpi" value="${s.dpi}" min="100" step="1">
           </div>
-          <div class="field"><label>In-game Sensitivity</label>
-            <input type="number" class="text-input mono" id="inSens" value="${s.sens}" min="0.01" step="0.001">
+          <div class="field"><label>Sens you play on now</label>
+            <input type="number" class="text-input mono" id="inSens" value="${s.sens}" min="0.001" step="0.001">
           </div>
+        </div>
+        <div class="field"><label>Step size between options <span class="val" id="stepVal">${s.step}%</span></label>
+          <select class="text-input" id="inStep">${STEP_OPTIONS.map(o=>`<option value="${o}" ${o==s.step?'selected':''}>${o}% per step${o===10?' (default)':''}</option>`).join('')}</select>
         </div>
         <div class="grid-2">
           <div class="field"><label>Mouse (optional)</label>
@@ -1127,46 +1146,53 @@ function renderSensitivitySection(){
           </div>
         </div>
         <button class="btn btn-accent btn-sm" id="saveSensBtn">Save Setup</button>
-
         <div class="divider"></div>
         <div class="grid-3">
-          <div class="stat-box"><div class="num mono" id="statEdpi">${fmt(edpi,0)}</div><div class="lbl">eDPI</div></div>
-          <div class="stat-box"><div class="num mono" id="statCm">${fmt(cm360,1)}</div><div class="lbl">cm / 360&deg;</div></div>
-          <div class="stat-box"><div class="num mono" id="statIn">${fmt(in360,1)}</div><div class="lbl">in / 360&deg;</div></div>
+          <div class="stat-box"><div class="num mono" id="statEdpi">&mdash;</div><div class="lbl">eDPI</div></div>
+          <div class="stat-box"><div class="num mono" id="statCm">&mdash;</div><div class="lbl">cm / 360&deg;</div></div>
+          <div class="stat-box"><div class="num mono" id="statIn">&mdash;</div><div class="lbl">in / 360&deg;</div></div>
         </div>
-        <p style="font-size:11.5px;margin-top:12px;">Most VCT pros sit between <b style="color:var(--text-dim)">200&ndash;400 eDPI</b> (roughly 25&ndash;45 cm/360). That's a reference zone, not a target &mdash; see the method below before you copy a number blindly.</p>
       </div>
 
       <div class="card">
-        <div class="card-title">Convert cm/360 to a Target Sens</div>
-        <p style="font-size:12.5px;">Know the physical distance you want your mouse to travel for a full turn? Enter it, pick your DPI, and get the exact in-game sensitivity.</p>
-        <div class="grid-2">
-          <div class="field"><label>Target cm/360</label>
-            <input type="number" class="text-input mono" id="convCm" value="${fmt(cm360,1)}" step="0.1">
-          </div>
-          <div class="field"><label>Mouse DPI</label>
-            <input type="number" class="text-input mono" id="convDpi" value="${s.dpi}" step="1">
-          </div>
-        </div>
-        <div class="stat-box" style="margin-top:6px;"><div class="num mono" id="convResult">&mdash;</div><div class="lbl">Resulting Sensitivity</div></div>
-        <button class="btn btn-cyan btn-sm btn-block" id="convApplyBtn" style="margin-top:12px;">Use This Sensitivity</button>
+        <div class="card-title">How To Run The Ladder</div>
+        ${[
+          ['1','Lock your DPI. Only in-game sens changes from now on.'],
+          ['2','Enter the sens you can actually play on today — not a pro\'s number.'],
+          ['3','Test each option in Range or Deathmatch (never ranked): head flicks, strafing bots, a spray, a 180° turn.'],
+          ['4','Mark each one: Too slow = you undershoot or run out of pad. Too fast = you overshoot or the crosshair feels shaky.'],
+          ['5','Press "Center here" on the best one. The step halves, a fresh ladder appears. Repeat 2–3 rounds.'],
+          ['6','When neighbours feel the same, stop. Lock it and don\'t touch it for weeks.']
+        ].map(([n,t])=>`<div style="display:flex;gap:12px;margin-bottom:9px;"><div class="mono" style="color:var(--accent);font-weight:700;font-size:13px;width:14px;flex-shrink:0;">${n}</div><div style="font-size:12.5px;color:var(--text-dim);line-height:1.5;">${t}</div></div>`).join('')}
+        <p style="font-size:11.5px;margin:6px 0 0;">Sens fields in VALORANT take up to 3 decimals, so every option below is rounded to 3.</p>
       </div>
     </div>
 
-    <div class="hr-label">The Method — Finding Your Actual Sensitivity</div>
+    <div class="hr-label">Sens Ladder</div>
     <div class="card">
-      <div class="grid-3">
-        ${[
-          ['WHAT','A repeatable process to land on a sensitivity that fits your hand — not a copy-pasted pro number.'],
-          ['WHY','eDPI is a comparison tool, not a target. Arm length, desk space and grip style change what "feels right" per person.'],
-          ['HOW','Lock DPI, pick a starting eDPI, test for days not minutes, then commit for a full month before judging it.'],
-          ['WHEN','Any time your aim feels inconsistent for more than a week straight — not after one bad match.'],
-          ['WHERE','Range mode and Deathmatch. Ranked is the wrong lab — you\'ll tilt before you learn anything.'],
-          ['WHO','You, mainly. Pro settings are a starting reference zone, never a rule you\'re breaking by ignoring them.']
-        ].map(([k,v])=>`<div style="margin-bottom:14px;"><div style="font-family:var(--font-display);font-size:12px;color:var(--cyan);letter-spacing:0.08em;margin-bottom:5px;">${k}</div><div style="font-size:12.5px;color:var(--text-dim);line-height:1.55;">${v}</div></div>`).join('')}
+      <div style="display:flex;justify-content:space-between;align-items:center;flex-wrap:wrap;gap:10px;margin-bottom:6px;">
+        <div style="font-size:12.5px;color:var(--text-dim);">5 faster on top &middot; your current in the middle &middot; 5 slower below</div>
+        <button class="btn btn-ghost btn-sm" id="clearRatingsBtn">Clear my ratings</button>
       </div>
-      <div class="divider"></div>
-      <div id="sensSteps"></div>
+      <div id="ladderWrap"></div>
+      <div id="shortlistWrap" style="margin-top:12px;"></div>
+    </div>
+
+    <div class="hr-label">Rounds So Far</div>
+    <div class="card" id="roundsWrap"></div>
+
+    <div class="hr-label">Know Your Target cm/360?</div>
+    <div class="card">
+      <div class="grid-3" style="align-items:end;">
+        <div class="field" style="margin:0;"><label>Target cm/360</label>
+          <input type="number" class="text-input mono" id="convCm" value="40" step="0.1">
+        </div>
+        <div class="field" style="margin:0;"><label>Mouse DPI</label>
+          <input type="number" class="text-input mono" id="convDpi" value="${s.dpi}" step="1">
+        </div>
+        <div class="stat-box"><div class="num mono" id="convResult">&mdash;</div><div class="lbl">Resulting Sensitivity</div></div>
+      </div>
+      <button class="btn btn-cyan btn-sm" id="convApplyBtn" style="margin-top:12px;">Use As My Starting Point</button>
     </div>
 
     <div class="hr-label">Pro Reference Table</div>
@@ -1184,7 +1210,7 @@ function renderSensitivitySection(){
               <td style="padding:9px 10px;color:var(--text-dim);">${p.role}</td>
               <td style="padding:9px 10px;" class="mono">${p.dpi}</td>
               <td style="padding:9px 10px;" class="mono">${p.sens}</td>
-              <td style="padding:9px 10px;" class="mono" style="color:var(--cyan);">${fmt(e,0)}</td>
+              <td style="padding:9px 10px;color:var(--cyan);" class="mono">${fmt(e,0)}</td>
               <td style="padding:9px 10px;" class="mono">${fmt(c,1)}</td>
               <td style="padding:9px 10px;text-align:right;"><button class="btn btn-sm" data-loadprosens="${p.id}">Use</button></td>
             </tr>`;
@@ -1195,69 +1221,146 @@ function renderSensitivitySection(){
     </div>
   `;
 
-  const steps = [
-    ['1. Lock your DPI', 'Pick a value your sensor natively supports — 400, 800 or 1600 are the safest bets — and never touch it again. Every future adjustment happens through in-game sensitivity only, so you always have one dial, not two.'],
-    ['2. Start inside the reference zone', 'Set your eDPI somewhere between 240 and 320 to begin. Not because a pro uses it — because it\'s a sane starting point that won\'t force you to relearn everything if it turns out to be wrong.'],
-    ['3. Run the 180° check', 'Aim at a fixed point on your screen. Turn your mouse until your crosshair has spun exactly 180°. Measure the distance moved. Double it — that\'s your real cm/360. Compare it to what the calculator above predicts.'],
-    ['4. Test for days, not minutes', 'Play Deathmatch and Range for at least 3–5 days on the new number before judging it. The first few hours on any new sensitivity feel wrong regardless of whether it\'s actually right — that\'s motor adaptation, not a verdict.'],
-    ['5. Judge on two things only', 'Can you flick onto a head-height target without consistently over- or under-shooting? Can you hold a spray pattern without your arm fighting the mouse? If both are yes, stop touching it.'],
-    ['6. Commit for a full month', 'Once it passes step 5, leave it alone for at least four weeks minimum. Muscle memory needs repetition without interference far more than it needs the "perfect" number.']
-  ];
-  document.getElementById('sensSteps').innerHTML = steps.map(([t,d])=>`
-    <div style="display:flex;gap:14px;margin-bottom:14px;">
-      <div style="font-family:var(--font-mono);color:var(--accent);font-weight:700;font-size:13px;flex-shrink:0;width:20px;">${t.split('.')[0]}</div>
-      <div><div style="font-weight:600;font-size:13.5px;margin-bottom:3px;">${t.split('. ')[1]}</div><div style="font-size:12.5px;color:var(--text-dim);line-height:1.55;">${d}</div></div>
-    </div>
-  `).join('');
+  const $ = id => document.getElementById(id);
+  const live = () => ({
+    dpi: parseFloat($('inDpi').value) || 800,
+    sens: Math.max(0.001, parseFloat($('inSens').value) || 0.35),
+    step: parseFloat($('inStep').value) || 10
+  });
 
   function refreshStats(){
-    const dpi = parseFloat(document.getElementById('inDpi').value)||1;
-    const sn = parseFloat(document.getElementById('inSens').value)||0;
-    document.getElementById('statEdpi').textContent = fmt(calcEdpi(dpi,sn),0);
-    document.getElementById('statCm').textContent = fmt(calcCm360(dpi,sn),1);
-    document.getElementById('statIn').textContent = fmt(calcIn360(dpi,sn),1);
+    const v = live();
+    $('statEdpi').textContent = fmt(calcEdpi(v.dpi,v.sens),0);
+    $('statCm').textContent   = fmt(calcCm360(v.dpi,v.sens),1);
+    $('statIn').textContent   = fmt(calcIn360(v.dpi,v.sens),1);
+    $('stepVal').textContent  = v.step+'%';
   }
-  document.getElementById('inDpi').addEventListener('input', refreshStats);
-  document.getElementById('inSens').addEventListener('input', refreshStats);
-  document.getElementById('saveSensBtn').addEventListener('click', ()=>{
-    App.sens = {
-      dpi: parseFloat(document.getElementById('inDpi').value)||800,
-      sens: parseFloat(document.getElementById('inSens').value)||0.35,
-      mouse: document.getElementById('inMouse').value.trim(),
-      pad: document.getElementById('inPad').value.trim()
-    };
+
+  function refreshLadder(){
+    const v = live();
+    refreshStats();
+    const cur = calcCm360(v.dpi, v.sens);
+    const rows = buildLadder(v.sens, v.step);
+    $('ladderWrap').innerHTML = rows.map(r=>{
+      const e = calcEdpi(v.dpi, r.sens), cm = calcCm360(v.dpi, r.sens);
+      const delta = (cm/cur - 1)*100;
+      const key = ratingKey(v.dpi, r.sens);
+      const rate = App.sensRatings[key];
+      const isCur = r.kind==='current';
+      const label = isCur ? 'Current' : (r.kind==='fast' ? 'Faster +'+r.k : 'Slower \u2212'+r.k);
+      const tagCls = isCur ? 'tag-cyan' : (r.kind==='fast' ? 'tag-accent' : 'tag-lime');
+      const bl = rate==='good' ? 'var(--lime)' : (rate ? 'var(--text-faint)' : (isCur ? 'var(--cyan)' : 'transparent'));
+      const btn = (val, txt) => `<button class="btn btn-sm ${rate===val?'btn-accent':''}" data-rate="${key}|${val}" style="padding:5px 9px;">${txt}</button>`;
+      return `<div style="display:flex;align-items:center;gap:12px;flex-wrap:wrap;padding:11px 0 11px 12px;border-top:1px solid var(--border);border-left:3px solid ${bl};${isCur?'background:rgba(0,240,224,0.04);':''}">
+        <span class="tag ${tagCls}" style="width:84px;justify-content:center;">${label}</span>
+        <div class="mono" style="font-size:20px;font-weight:700;width:86px;">${r.sens.toFixed(3)}</div>
+        <div class="mono" style="font-size:12px;color:var(--text-dim);width:150px;">${fmt(e,0)} eDPI &middot; ${fmt(cm,1)} cm
+          ${isCur?'':`<span style="color:var(--text-faint);"> (${delta>0?'+':''}${fmt(delta,0)}%)</span>`}</div>
+        <div style="display:flex;gap:6px;flex-wrap:wrap;flex:1;">
+          ${btn('slow','Too slow')}${btn('good','Good')}${btn('fast','Too fast')}
+        </div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-sm" data-copy="${r.sens.toFixed(3)}">Copy</button>
+          <button class="btn btn-cyan btn-sm" data-center="${r.sens}">Center here</button>
+        </div>
+      </div>`;
+    }).join('');
+
+    const good = rows.filter(r=>App.sensRatings[ratingKey(v.dpi,r.sens)]==='good');
+    $('shortlistWrap').innerHTML = good.length
+      ? `<div style="font-size:12.5px;color:var(--text-dim);">Marked Good: ${good.map(g=>`<b class="mono" style="color:var(--lime)">${g.sens.toFixed(3)}</b>`).join(', ')}. ${good.length>1?'If neighbours both feel good, pick the middle one with "Center here" and the next ladder will be tighter.':'Hit "Center here" on it to run a tighter round around it.'}</div>`
+      : `<div style="font-size:12px;color:var(--text-faint);">Nothing marked Good yet.</div>`;
+  }
+
+  function refreshRounds(){
+    const wrap = $('roundsWrap');
+    if(!App.sensRounds.length){ wrap.innerHTML = `<div class="empty">No rounds yet. Each time you press "Center here", it is logged here.</div>`; return; }
+    wrap.innerHTML = App.sensRounds.slice().reverse().slice(0,10).map((r,i,arr)=>`
+      <div style="display:flex;justify-content:space-between;gap:10px;padding:8px 0;${i?'border-top:1px solid var(--border);':''}font-size:13px;">
+        <div><span class="mono" style="color:var(--text-faint);">${r.from.toFixed(3)}</span> <span style="color:var(--text-faint);">&rarr;</span> <b class="mono" style="color:var(--cyan);">${r.picked.toFixed(3)}</b> <span style="color:var(--text-faint);font-size:11.5px;">&nbsp;@ ${r.dpi} DPI &middot; ${r.step}% steps</span></div>
+        <div style="color:var(--text-faint);font-size:11.5px;">${new Date(r.ts).toLocaleDateString()}</div>
+      </div>`).join('') + `<button class="btn btn-ghost btn-sm" id="clearRoundsBtn" style="margin-top:8px;">Clear history</button>`;
+    const cb = $('clearRoundsBtn');
+    if(cb) cb.addEventListener('click', ()=>{ App.sensRounds=[]; Store.set('tunnel_sens_rounds', []); refreshRounds(); });
+  }
+
+  ['inDpi','inSens','inStep'].forEach(id=>{
+    $(id).addEventListener('input', refreshLadder);
+    $(id).addEventListener('change', refreshLadder);
+  });
+
+  $('ladderWrap').addEventListener('click', e=>{
+    const t = e.target.closest('button'); if(!t) return;
+    const v = live();
+    if(t.dataset.rate){
+      const [key, val] = t.dataset.rate.split('|');
+      if(App.sensRatings[key]===val) delete App.sensRatings[key]; else App.sensRatings[key]=val;
+      Store.set('tunnel_sens_ratings', App.sensRatings);
+      refreshLadder();
+    } else if(t.dataset.copy){
+      if(navigator.clipboard) navigator.clipboard.writeText(t.dataset.copy).catch(()=>{});
+      toast('Copied '+t.dataset.copy);
+    } else if(t.dataset.center){
+      const picked = parseFloat(t.dataset.center);
+      App.sensRounds.push({ts:Date.now(), from:v.sens, picked, step:v.step, dpi:v.dpi});
+      Store.set('tunnel_sens_rounds', App.sensRounds);
+      let idx = STEP_OPTIONS.indexOf(v.step);
+      if(idx<0) idx = STEP_OPTIONS.findIndex(o=>o>=v.step);
+      const nextStep = STEP_OPTIONS[Math.max(0, idx-1)];
+      $('inSens').value = picked.toFixed(3);
+      $('inStep').value = nextStep;
+      refreshLadder(); refreshRounds();
+      toast('Centered on '+picked.toFixed(3)+' \u2014 step is now '+nextStep+'%');
+    }
+  });
+
+  $('clearRatingsBtn').addEventListener('click', ()=>{
+    App.sensRatings = {}; Store.set('tunnel_sens_ratings', {});
+    refreshLadder(); toast('Ratings cleared');
+  });
+
+  $('saveSensBtn').addEventListener('click', ()=>{
+    const v = live();
+    App.sens = {dpi:v.dpi, sens:v.sens, step:v.step, mouse:$('inMouse').value.trim(), pad:$('inPad').value.trim()};
     saveSens();
     toast('Setup saved');
     renderOverview();
   });
 
   function refreshConv(){
-    const cm = parseFloat(document.getElementById('convCm').value)||0;
-    const dpi = parseFloat(document.getElementById('convDpi').value)||800;
-    const sens = (2.54*360)/(dpi*cm*VALORANT_YAW);
-    document.getElementById('convResult').textContent = fmt(sens,4);
+    const cm = parseFloat($('convCm').value)||0;
+    const dpi = parseFloat($('convDpi').value)||800;
+    const sens = cm>0 ? (2.54*360)/(dpi*cm*VALORANT_YAW) : 0;
+    $('convResult').textContent = fmt(sens,3);
     App._convSens = sens; App._convDpi = dpi;
   }
-  document.getElementById('convCm').addEventListener('input', refreshConv);
-  document.getElementById('convDpi').addEventListener('input', refreshConv);
-  document.getElementById('convApplyBtn').addEventListener('click', ()=>{
+  $('convCm').addEventListener('input', refreshConv);
+  $('convDpi').addEventListener('input', refreshConv);
+  $('convApplyBtn').addEventListener('click', ()=>{
     refreshConv();
-    document.getElementById('inDpi').value = App._convDpi;
-    document.getElementById('inSens').value = fmt(App._convSens,4);
-    refreshStats();
-    toast('Applied — hit Save Setup to keep it');
+    if(!App._convSens) return;
+    $('inDpi').value = App._convDpi;
+    $('inSens').value = (Math.round(App._convSens*1000)/1000).toFixed(3);
+    refreshLadder();
+    toast('Ladder rebuilt around that sens \u2014 Save Setup to keep it');
+    window.scrollTo({top:0,behavior:'smooth'});
   });
-  refreshConv();
 
   el.querySelectorAll('[data-loadprosens]').forEach(b=>b.addEventListener('click', ()=>{
     const p = PROS.find(x=>x.id===b.dataset.loadprosens);
     if(!p) return;
-    document.getElementById('inDpi').value = p.dpi;
-    document.getElementById('inSens').value = p.sens;
-    refreshStats();
-    toast(`Loaded ${p.name}'s sensitivity — hit Save Setup to keep it`);
+    $('inDpi').value = p.dpi;
+    $('inSens').value = p.sens;
+    refreshLadder();
+    toast(`Ladder rebuilt around ${p.name}'s sens \u2014 Save Setup to keep it`);
+    window.scrollTo({top:0,behavior:'smooth'});
   }));
+
+  refreshConv();
+  refreshLadder();
+  refreshRounds();
 }
+
 
 /* ---------------- Aim Routines ---------------- */
 function totalMinutes(drills){ return drills.reduce((a,d)=>a+Number(d.minutes||0),0); }
