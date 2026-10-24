@@ -225,6 +225,7 @@ textarea.text-input{resize:vertical;min-height:60px;font-family:var(--font-mono)
 
       <div class="nav-group-label">Build</div>
       <div class="nav-item" data-section="crosshair"><span class="nav-ic">&#10010;</span>Crosshair Lab</div>
+      <div class="nav-item" data-section="library"><span class="nav-ic">&#9638;</span>Crosshair Library</div>
       <div class="nav-item" data-section="sensitivity"><span class="nav-ic">&#9673;</span>Sensitivity Finder</div>
       <div class="nav-item" data-section="routines"><span class="nav-ic">&#9642;</span>Aim Routines</div>
 
@@ -254,6 +255,9 @@ textarea.text-input{resize:vertical;min-height:60px;font-family:var(--font-mono)
 
     <!-- ============ CROSSHAIR LAB ============ -->
     <section class="section" id="sec-crosshair"></section>
+
+    <!-- ============ CROSSHAIR LIBRARY ============ -->
+    <section class="section" id="sec-library"></section>
 
     <!-- ============ SENSITIVITY FINDER ============ -->
     <section class="section" id="sec-sensitivity"></section>
@@ -651,7 +655,8 @@ const PRESET_ROUTINES = [
 /* ---------------- App state ---------------- */
 const App = {
   cx: Store.get('tunnel_cx', null) || defaultCrosshair(),
-  saved: Store.get('tunnel_saved_crosshairs', []),
+  saved: (function(){ const s = Store.get('tunnel_saved_crosshairs', []); return Array.isArray(s) ? s : []; })(),
+  activeId: Store.get('tunnel_active_cx_id', null),
   sens: Store.get('tunnel_sens', {dpi:800, sens:0.35, mouse:'', pad:'', notes:''}),
   routines: Store.get('tunnel_routines', []),
   builder: [], // in-progress drill list for the routine builder
@@ -895,12 +900,14 @@ function renderCrosshairSection(){
       </div>
 
       <div class="card">
-        <div class="card-title">Save Locally</div>
+        <div class="card-title">Crosshair Library <span class="tag" id="libCount"></span></div>
+        <div id="editingBanner"></div>
         <div style="display:flex;gap:8px;margin-bottom:14px;">
-          <input type="text" class="text-input" id="saveNameInput" placeholder="Name this crosshair (e.g. Ranked Cyan)">
-          <button class="btn btn-accent btn-sm" id="saveCxBtn" style="flex-shrink:0;">Save</button>
+          <input type="text" class="text-input" id="saveNameInput" placeholder="Name it (e.g. Ranked Cyan)">
+          <button class="btn btn-accent btn-sm" id="saveCxBtn" style="flex-shrink:0;">Save as new</button>
         </div>
         <div id="savedList"></div>
+        <button class="btn btn-block btn-sm" id="openLibBtn" style="margin-top:12px;">Open full Library &rarr;</button>
       </div>
     </div>
   `;
@@ -935,24 +942,24 @@ function renderCrosshairSection(){
     if(!raw){ toast('Paste a code first'); return; }
     const {cx, ok} = decodeCrosshair(raw);
     if(!ok){ toast('Could not find a "P" primary block in that code'); return; }
-    App.cx = cx; saveCx();
+    App.cx = cx; saveCx(); setActiveCx(null);
     renderCrosshairPanes();
-    updateCrosshairPreview();
-    toast('Crosshair imported');
+    updateCrosshairPreview(); renderSavedList();
+    toast('Crosshair imported \u2014 hit "Save as new" to keep it');
   });
   document.getElementById('resetCxBtn').addEventListener('click', ()=>{
-    App.cx = defaultCrosshair(); saveCx();
-    renderCrosshairPanes(); updateCrosshairPreview();
+    App.cx = defaultCrosshair(); saveCx(); setActiveCx(null);
+    renderCrosshairPanes(); updateCrosshairPreview(); renderSavedList();
     toast('Reset to default');
   });
   document.getElementById('saveCxBtn').addEventListener('click', ()=>{
-    const name = document.getElementById('saveNameInput').value.trim() || ('Crosshair '+(App.saved.length+1));
-    App.saved.push({id:uid(), name, cx:JSON.parse(JSON.stringify(App.cx)), ts:Date.now()});
-    saveAll();
+    const e = libAdd(document.getElementById('saveNameInput').value, App.cx);
+    setActiveCx(e.id);
     document.getElementById('saveNameInput').value='';
     renderSavedList();
-    toast('Saved "'+name+'"');
+    toast('Saved "'+e.name+'" to the Library');
   });
+  document.getElementById('openLibBtn').addEventListener('click', ()=>go('library'));
 
   document.getElementById('matchFrom').addEventListener('change', updateMatcher);
   document.getElementById('matchTo').addEventListener('change', updateMatcher);
@@ -1061,36 +1068,322 @@ function applyMatcher(){
   toast('Applied — values scaled to the new resolution');
 }
 
+/* ---------------- Crosshair Library ----------------
+   App.saved is the library (array of {id, name, cx, ts, fav}). It lives in
+   localStorage under 'tunnel_saved_crosshairs'. App.activeId remembers which
+   library entry is currently loaded in the Crosshair Lab, so you can Update
+   it in place instead of only ever saving new copies. */
+const LIB_BGS = [
+  {id:'#3a3f4a', label:'Grey'}, {id:'#0d1a12', label:'Dark'},
+  {id:'#c9c2b0', label:'Sand'}, {id:'#101820', label:'Sky'}
+];
+function cloneCx(cx){ return JSON.parse(JSON.stringify(cx)); }
+function setActiveCx(id){ App.activeId = id || null; Store.set('tunnel_active_cx_id', App.activeId); }
+function libEntry(id){ return App.saved.find(x=>x.id===id); }
+function persistLibrary(){
+  const ok = Store.set('tunnel_saved_crosshairs', App.saved);
+  if(!ok) toast('Browser blocked saving \u2014 use Backup (Export) so you don\'t lose these');
+  return ok;
+}
+function libAdd(name, cx){
+  const entry = {id:uid(), name:(name||'').trim() || ('Crosshair '+(App.saved.length+1)), cx:cloneCx(cx), ts:Date.now(), fav:false};
+  App.saved.push(entry);
+  persistLibrary();
+  return entry;
+}
+function cxExtent(cx){
+  const ot = cx.outlines ? cx.outlineThickness : 0;
+  let e = 4;
+  if(cx.centerDot) e = Math.max(e, cx.dotThickness + ot + 1);
+  if(cx.innerLines) e = Math.max(e, cx.innerOffset + Math.max(cx.innerLength, cx.innerLengthLinked?0:cx.innerVLength) + ot + 1);
+  if(cx.outerLines) e = Math.max(e, cx.outerOffset + Math.max(cx.outerLength, cx.outerLengthLinked?0:cx.outerVLength) + ot + 1);
+  return e;
+}
+function renderCxFit(canvas, cx, bg){
+  const half = Math.min(canvas.width, canvas.height)/2;
+  const scale = Math.min(6, (half-6)/cxExtent(cx));
+  renderCrosshairBg(canvas, cx, scale, bg);
+}
+
+/* compact list + editing banner inside the Crosshair Lab */
 function renderSavedList(){
   const wrap = document.getElementById('savedList');
+  const banner = document.getElementById('editingBanner');
+  const count = document.getElementById('libCount');
+  if(count) count.textContent = App.saved.length + ' saved';
+  if(banner){
+    const act = App.activeId ? libEntry(App.activeId) : null;
+    if(App.activeId && !act) setActiveCx(null);
+    banner.innerHTML = act ? `
+      <div style="display:flex;align-items:center;justify-content:space-between;gap:8px;flex-wrap:wrap;background:rgba(0,240,224,0.06);border:1px solid var(--cyan-dim);border-radius:8px;padding:9px 12px;margin-bottom:12px;">
+        <div style="font-size:12.5px;">Editing <b>${escHtml(act.name)}</b></div>
+        <div style="display:flex;gap:6px;">
+          <button class="btn btn-cyan btn-sm" id="updateActiveBtn">Update it</button>
+          <button class="btn btn-ghost btn-sm" id="stopEditBtn">Stop editing</button>
+        </div>
+      </div>` : '';
+    const u = document.getElementById('updateActiveBtn');
+    if(u) u.addEventListener('click', ()=>{
+      const e = libEntry(App.activeId); if(!e) return;
+      e.cx = cloneCx(App.cx); e.updated = Date.now();
+      persistLibrary(); renderSavedList(); toast('Updated "'+e.name+'"');
+    });
+    const s = document.getElementById('stopEditBtn');
+    if(s) s.addEventListener('click', ()=>{ setActiveCx(null); renderSavedList(); });
+  }
   if(!wrap) return;
-  if(!App.saved.length){ wrap.innerHTML = `<div class="empty">No saved crosshairs yet. Build one and hit Save.</div>`; return; }
-  wrap.innerHTML = App.saved.slice().reverse().map(s=>`
-    <div style="display:flex;align-items:center;gap:12px;padding:10px 0;border-top:1px solid var(--border);">
-      <canvas width="60" height="60" data-savedcanvas="${s.id}" style="width:44px;height:44px;border-radius:6px;background:#2b2f38;flex-shrink:0;"></canvas>
-      <div style="flex:1;min-width:0;">
-        <div style="font-size:13px;font-weight:600;">${s.name}</div>
-        <div style="font-size:11px;color:var(--text-faint);">${new Date(s.ts).toLocaleDateString()}</div>
-      </div>
+  if(!App.saved.length){ wrap.innerHTML = `<div class="empty" style="padding:16px;">Library is empty. Build one and hit "Save as new".</div>`; return; }
+  const recent = App.saved.slice().sort((a,b)=>b.ts-a.ts).slice(0,4);
+  wrap.innerHTML = recent.map(s=>`
+    <div style="display:flex;align-items:center;gap:12px;padding:9px 0;border-top:1px solid var(--border);">
+      <canvas width="60" height="60" data-savedcanvas="${s.id}" style="width:40px;height:40px;border-radius:6px;background:#2b2f38;flex-shrink:0;"></canvas>
+      <div style="flex:1;min-width:0;font-size:13px;font-weight:600;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;">${escHtml(s.name)}</div>
       <button class="btn btn-sm" data-loadcx="${s.id}">Load</button>
-      <button class="btn btn-ghost btn-sm" data-delcx="${s.id}">&times;</button>
-    </div>
-  `).join('');
-  App.saved.forEach(s=>{
+    </div>`).join('') + (App.saved.length>4 ? `<div style="font-size:11.5px;color:var(--text-faint);padding-top:8px;">+ ${App.saved.length-4} more in the Library</div>` : '');
+  recent.forEach(s=>{
     const c = wrap.querySelector(`[data-savedcanvas="${s.id}"]`);
-    if(c) renderCrosshairBg(c, s.cx, 0.9, '#2b2f38');
+    if(c) renderCxFit(c, s.cx, '#2b2f38');
   });
   wrap.querySelectorAll('[data-loadcx]').forEach(b=>b.addEventListener('click', ()=>{
-    const s = App.saved.find(x=>x.id===b.dataset.loadcx);
-    if(!s) return;
-    App.cx = JSON.parse(JSON.stringify(s.cx));
-    saveCx(); renderCrosshairPanes();
+    const s = libEntry(b.dataset.loadcx); if(!s) return;
+    App.cx = cloneCx(s.cx); saveCx(); setActiveCx(s.id);
+    renderCrosshairPanes(); renderSavedList();
     toast('Loaded "'+s.name+'"');
   }));
-  wrap.querySelectorAll('[data-delcx]').forEach(b=>b.addEventListener('click', ()=>{
-    App.saved = App.saved.filter(x=>x.id!==b.dataset.delcx);
-    saveAll(); renderSavedList();
+}
+function escHtml(str){ return String(str).replace(/[&<>"']/g, c=>({'&':'&amp;','<':'&lt;','>':'&gt;','"':'&quot;',"'":'&#39;'}[c])); }
+
+/* full Library page */
+function renderLibrarySection(){
+  const el = document.getElementById('sec-library');
+  App._libBg = App._libBg || '#3a3f4a';
+  App._libView = App._libView || {q:'', filter:'all', sort:'new'};
+  el.innerHTML = `
+    <div class="grid-2" style="align-items:start;">
+      <div class="card">
+        <div class="card-title">Add To Library</div>
+        <div style="display:flex;gap:8px;margin-bottom:10px;">
+          <input type="text" class="text-input" id="libNewName" placeholder="Name (optional)">
+          <button class="btn btn-accent btn-sm" id="libSaveEditorBtn" style="flex-shrink:0;">Save editor's crosshair</button>
+        </div>
+        <div class="field" style="margin-bottom:8px;"><label style="display:block;line-height:1.5;">Or paste codes, one per line. Use <span class="mono" style="color:var(--cyan)">Name | code</span> to name them</label>
+          <textarea class="text-input" id="libBulk" rows="4" placeholder="Ranked Cyan | 0;P;c;5;h;0;0l;4;0o;2;0a;1;0f;0;1b;0&#10;0;P;c;1;d;1;..."></textarea>
+        </div>
+        <button class="btn btn-sm" id="libBulkBtn">Add Codes</button>
+      </div>
+      <div class="card">
+        <div class="card-title">Backup &amp; Restore</div>
+        <p style="font-size:12.5px;">Your library is stored in this browser only. Clearing site data, switching browser or moving the file to another folder can lose it &mdash; export a backup file now and then.</p>
+        <div style="display:flex;gap:8px;flex-wrap:wrap;">
+          <button class="btn btn-cyan btn-sm" id="libExportBtn">Export Backup (.json)</button>
+          <button class="btn btn-sm" id="libImportBtn">Import Backup</button>
+          <input type="file" id="libImportFile" accept=".json,application/json" style="display:none;">
+        </div>
+        <div style="font-size:11.5px;color:var(--text-faint);margin-top:12px;" id="libStorageNote"></div>
+      </div>
+    </div>
+
+    <div class="hr-label">Your Crosshairs</div>
+    <div style="display:flex;gap:10px;flex-wrap:wrap;align-items:center;margin-bottom:14px;">
+      <input type="text" class="text-input" id="libSearch" placeholder="Search by name&hellip;" style="max-width:240px;" value="${escHtml(App._libView.q)}">
+      <select class="text-input" id="libFilter" style="max-width:150px;">
+        <option value="all">All</option><option value="fav">Favorites</option>
+      </select>
+      <select class="text-input" id="libSort" style="max-width:170px;">
+        <option value="new">Newest first</option><option value="old">Oldest first</option><option value="name">Name A&ndash;Z</option><option value="fav">Favorites first</option>
+      </select>
+      <div style="display:flex;gap:6px;margin-left:auto;">
+        ${LIB_BGS.map(b=>`<button class="btn btn-sm lib-bg ${App._libBg===b.id?'active':''}" data-bg="${b.id}" style="background:${b.id};${b.label==='Sand'?'color:#111;':''}${App._libBg===b.id?'border-color:var(--text);':''}">${b.label}</button>`).join('')}
+      </div>
+    </div>
+    <div id="libCountLine" style="font-size:12px;color:var(--text-faint);margin-bottom:10px;"></div>
+    <div id="libGrid" style="display:grid;grid-template-columns:repeat(auto-fill,minmax(250px,1fr));gap:14px;"></div>
+  `;
+  const $ = id => document.getElementById(id);
+  $('libFilter').value = App._libView.filter;
+  $('libSort').value = App._libView.sort;
+
+  function drawGrid(){
+    const v = App._libView;
+    let list = App.saved.slice();
+    if(v.q) list = list.filter(s=>s.name.toLowerCase().includes(v.q.toLowerCase()));
+    if(v.filter==='fav') list = list.filter(s=>s.fav);
+    if(v.sort==='new') list.sort((a,b)=>b.ts-a.ts);
+    else if(v.sort==='old') list.sort((a,b)=>a.ts-b.ts);
+    else if(v.sort==='name') list.sort((a,b)=>a.name.localeCompare(b.name));
+    else if(v.sort==='fav') list.sort((a,b)=>(b.fav?1:0)-(a.fav?1:0) || b.ts-a.ts);
+    $('libCountLine').textContent = App.saved.length
+      ? `${list.length} of ${App.saved.length} shown`
+      : '';
+    const grid = $('libGrid');
+    if(!App.saved.length){
+      grid.style.display = 'block';
+      grid.innerHTML = `<div class="card empty">Nothing here yet. Save the crosshair from the Lab, paste codes above, or add the pros from Pro Vault.</div>`;
+      return;
+    }
+    if(!list.length){
+      grid.style.display = 'block';
+      grid.innerHTML = `<div class="card empty">No crosshair matches that search/filter.</div>`;
+      return;
+    }
+    grid.style.display = 'grid';
+    grid.innerHTML = list.map(s=>{
+      const code = encodeCrosshair(s.cx);
+      const isActive = s.id===App.activeId;
+      const renaming = App._renamingId===s.id;
+      const arm = App._delArm===s.id;
+      return `<div class="card" style="margin:0;padding:14px;${isActive?'border-color:var(--cyan-dim);':''}">
+        <canvas width="260" height="150" data-libcanvas="${s.id}" style="width:100%;border-radius:8px;border:1px solid var(--border-bright);"></canvas>
+        <div style="display:flex;align-items:center;gap:8px;margin-top:10px;">
+          ${renaming
+            ? `<input type="text" class="text-input" data-renameinput="${s.id}" value="${escHtml(s.name)}" style="flex:1;padding:6px 9px;">
+               <button class="btn btn-accent btn-sm" data-renamesave="${s.id}">OK</button>`
+            : `<div style="flex:1;min-width:0;font-weight:600;font-size:14px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${escHtml(s.name)}">${escHtml(s.name)}</div>
+               <button class="btn btn-ghost btn-sm" data-fav="${s.id}" title="Favorite" style="padding:4px 8px;font-size:16px;color:${s.fav?'var(--amber)':'var(--text-faint)'};">${s.fav?'\u2605':'\u2606'}</button>`}
+        </div>
+        <div style="display:flex;justify-content:space-between;align-items:center;margin:2px 0 8px;font-size:11px;color:var(--text-faint);">
+          <span>${new Date(s.ts).toLocaleDateString()}</span>
+          ${isActive?'<span class="tag tag-cyan">In editor</span>':''}
+        </div>
+        <div class="mono" style="font-size:10.5px;color:var(--text-faint);background:var(--bg-elevated);border:1px solid var(--border);border-radius:6px;padding:6px 8px;white-space:nowrap;overflow:hidden;text-overflow:ellipsis;" title="${escHtml(code)}">${escHtml(code)}</div>
+        <div style="display:flex;gap:6px;margin-top:10px;flex-wrap:wrap;">
+          <button class="btn btn-accent btn-sm" data-edit="${s.id}">Edit</button>
+          <button class="btn btn-sm" data-copycode="${s.id}">Copy code</button>
+        </div>
+        <div style="display:flex;gap:6px;margin-top:6px;flex-wrap:wrap;">
+          <button class="btn btn-ghost btn-sm" data-rename="${s.id}">Rename</button>
+          <button class="btn btn-ghost btn-sm" data-dup="${s.id}">Duplicate</button>
+          <button class="btn btn-ghost btn-sm" data-del="${s.id}" style="${arm?'color:var(--accent);border-color:var(--accent-dim);':''}">${arm?'Sure?':'Delete'}</button>
+        </div>
+      </div>`;
+    }).join('');
+    list.forEach(s=>{
+      const c = grid.querySelector(`[data-libcanvas="${s.id}"]`);
+      if(c) renderCxFit(c, s.cx, App._libBg);
+    });
+    const ri = grid.querySelector('[data-renameinput]');
+    if(ri){ ri.focus(); ri.select(); }
+  }
+
+  function saveRename(id){
+    const inp = el.querySelector(`[data-renameinput="${id}"]`);
+    const e = libEntry(id);
+    if(e && inp && inp.value.trim()) e.name = inp.value.trim();
+    App._renamingId = null;
+    persistLibrary(); drawGrid();
+  }
+
+  $('libGrid').addEventListener('click', ev=>{
+    const t = ev.target.closest('button'); if(!t) return;
+    const d = t.dataset;
+    if(d.edit){
+      const e = libEntry(d.edit); if(!e) return;
+      App.cx = cloneCx(e.cx); saveCx(); setActiveCx(e.id);
+      go('crosshair'); toast('Editing "'+e.name+'" \u2014 hit "Update it" to save changes');
+    } else if(d.copycode){
+      const e = libEntry(d.copycode); if(!e) return;
+      const code = encodeCrosshair(e.cx);
+      if(navigator.clipboard) navigator.clipboard.writeText(code).catch(()=>{});
+      toast('Code copied \u2014 paste it in VALORANT');
+    } else if(d.fav){
+      const e = libEntry(d.fav); if(!e) return;
+      e.fav = !e.fav; persistLibrary(); drawGrid();
+    } else if(d.rename){
+      App._renamingId = d.rename; drawGrid();
+    } else if(d.renamesave){
+      saveRename(d.renamesave);
+    } else if(d.dup){
+      const e = libEntry(d.dup); if(!e) return;
+      libAdd(e.name+' (copy)', e.cx); drawGrid(); toast('Duplicated');
+    } else if(d.del){
+      if(App._delArm===d.del){
+        App.saved = App.saved.filter(x=>x.id!==d.del);
+        if(App.activeId===d.del) setActiveCx(null);
+        App._delArm = null; persistLibrary(); drawGrid(); toast('Deleted');
+      } else {
+        App._delArm = d.del; drawGrid();
+        clearTimeout(App._delTimer);
+        App._delTimer = setTimeout(()=>{ App._delArm=null; if(document.getElementById('libGrid')) drawGrid(); }, 2500);
+      }
+    }
+  });
+  $('libGrid').addEventListener('keydown', ev=>{
+    if(ev.key==='Enter' && ev.target.dataset.renameinput) saveRename(ev.target.dataset.renameinput);
+    if(ev.key==='Escape' && ev.target.dataset.renameinput){ App._renamingId=null; drawGrid(); }
+  });
+
+  $('libSearch').addEventListener('input', ()=>{ App._libView.q = $('libSearch').value.trim(); drawGrid(); });
+  $('libFilter').addEventListener('change', ()=>{ App._libView.filter = $('libFilter').value; drawGrid(); });
+  $('libSort').addEventListener('change', ()=>{ App._libView.sort = $('libSort').value; drawGrid(); });
+  el.querySelectorAll('.lib-bg').forEach(b=>b.addEventListener('click', ()=>{
+    App._libBg = b.dataset.bg;
+    el.querySelectorAll('.lib-bg').forEach(x=>{ const on = x.dataset.bg===App._libBg; x.classList.toggle('active', on); x.style.borderColor = on?'var(--text)':''; });
+    drawGrid();
   }));
+
+  $('libSaveEditorBtn').addEventListener('click', ()=>{
+    const e = libAdd($('libNewName').value, App.cx);
+    $('libNewName').value = ''; drawGrid(); toast('Saved "'+e.name+'"');
+  });
+
+  $('libBulkBtn').addEventListener('click', ()=>{
+    const lines = $('libBulk').value.split('\n').map(l=>l.trim()).filter(Boolean);
+    if(!lines.length){ toast('Paste at least one code'); return; }
+    let added = 0, failed = 0;
+    lines.forEach(line=>{
+      let name = '', code = line;
+      const i = line.indexOf('|');
+      if(i>-1){ name = line.slice(0,i).trim(); code = line.slice(i+1).trim(); }
+      const {cx, ok} = decodeCrosshair(code);
+      if(!ok){ failed++; return; }
+      libAdd(name || ('Imported '+(App.saved.length+1)), cx); added++;
+    });
+    if(added) $('libBulk').value = '';
+    drawGrid();
+    toast(added+' added'+(failed?(', '+failed+' not recognised (need a "P" block)'):''));
+  });
+
+  $('libExportBtn').addEventListener('click', ()=>{
+    const data = {app:'the-tunnel', type:'crosshair-library', version:1, exported:new Date().toISOString(), crosshairs:App.saved};
+    const blob = new Blob([JSON.stringify(data,null,2)], {type:'application/json'});
+    const a = document.createElement('a');
+    a.href = URL.createObjectURL(blob);
+    a.download = 'tunnel-crosshair-library-'+new Date().toISOString().slice(0,10)+'.json';
+    document.body.appendChild(a); a.click(); a.remove();
+    setTimeout(()=>URL.revokeObjectURL(a.href), 1000);
+    toast('Backup downloaded ('+App.saved.length+' crosshairs)');
+  });
+  $('libImportBtn').addEventListener('click', ()=>$('libImportFile').click());
+  $('libImportFile').addEventListener('change', ()=>{
+    const f = $('libImportFile').files[0]; if(!f) return;
+    const r = new FileReader();
+    r.onload = ()=>{
+      try{
+        const data = JSON.parse(r.result);
+        const arr = Array.isArray(data) ? data : data.crosshairs;
+        if(!Array.isArray(arr)) throw new Error('bad');
+        let added = 0;
+        arr.forEach(s=>{
+          if(!s || !s.cx || typeof s.cx!=='object') return;
+          if(libEntry(s.id)) return;
+          App.saved.push({id:s.id||uid(), name:String(s.name||'Imported'), cx:Object.assign(defaultCrosshair(), s.cx), ts:s.ts||Date.now(), fav:!!s.fav});
+          added++;
+        });
+        persistLibrary(); drawGrid();
+        toast(added+' crosshair'+(added===1?'':'s')+' restored');
+      }catch(e){ toast('That file is not a Tunnel backup'); }
+      $('libImportFile').value = '';
+    };
+    r.readAsText(f);
+  });
+
+  let storageOk = false;
+  try{ localStorage.setItem('tunnel_probe','1'); localStorage.removeItem('tunnel_probe'); storageOk = true; }catch(e){}
+  $('libStorageNote').textContent = storageOk
+    ? 'Browser storage is working here.'
+    : 'Browser storage is BLOCKED in this window \u2014 nothing will persist. Open the file directly in Chrome/Edge.';
+
+  drawGrid();
 }
 
 /* ---------------- Sensitivity Finder (Ladder system) ----------------
@@ -1608,6 +1901,7 @@ function renderVaultSection(){
           <p style="font-size:12px;margin-top:10px;">${p.note}</p>
           <div style="display:flex;gap:8px;flex-wrap:wrap;margin-top:10px;">
             <button class="btn btn-sm" data-vloadcx="${p.id}">Load Crosshair</button>
+            <button class="btn btn-sm" data-vsavelib="${p.id}">Save to Library</button>
             <button class="btn btn-sm" data-vloadsens="${p.id}">Load Sens</button>
             <button class="btn btn-sm" data-vloadroutine="${p.id}">Load Routine</button>
           </div>
@@ -1619,10 +1913,16 @@ function renderVaultSection(){
     const c = el.querySelector(`[data-vaultcanvas="${p.id}"]`);
     if(c){ const {cx} = decodeCrosshair(p.code); renderCrosshairBg(c, cx, 3.2, '#2b2f38'); }
   });
+  el.querySelectorAll('[data-vsavelib]').forEach(b=>b.addEventListener('click', ()=>{
+    const p = PROS.find(x=>x.id===b.dataset.vsavelib);
+    const {cx} = decodeCrosshair(p.code);
+    libAdd(p.name+' (pro)', cx);
+    toast('Saved '+p.name+'\'s crosshair to your Library');
+  }));
   el.querySelectorAll('[data-vloadcx]').forEach(b=>b.addEventListener('click', ()=>{
     const p = PROS.find(x=>x.id===b.dataset.vloadcx);
     const {cx} = decodeCrosshair(p.code);
-    App.cx = cx; saveCx();
+    App.cx = cx; saveCx(); setActiveCx(null);
     go('crosshair');
     toast(`Loaded ${p.name}'s crosshair`);
   }));
@@ -1737,6 +2037,7 @@ function renderGamesSection(){
 const SECTION_META = {
   overview:   {title:'Overview', crumb:'Home'},
   crosshair:  {title:'Crosshair Lab', crumb:'Build'},
+  library:    {title:'Crosshair Library', crumb:'Build'},
   sensitivity:{title:'Sensitivity Finder', crumb:'Build'},
   routines:   {title:'Aim Routines', crumb:'Build'},
   vault:      {title:'Pro Vault', crumb:'Reference'},
@@ -1746,6 +2047,7 @@ const SECTION_META = {
 const RENDERERS = {
   overview: renderOverview,
   crosshair: renderCrosshairSection,
+  library: renderLibrarySection,
   sensitivity: renderSensitivitySection,
   routines: renderRoutinesSection,
   vault: renderVaultSection,
