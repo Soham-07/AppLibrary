@@ -6,11 +6,7 @@
 <title>Name → Number Calculator</title>
 
 <style>
-    * {
-        margin: 0;
-        padding: 0;
-        box-sizing: border-box;
-    }
+    * { margin: 0; padding: 0; box-sizing: border-box; }
 
     body {
         font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
@@ -20,32 +16,17 @@
         color: #222;
     }
 
-    .particles {
-        position: fixed;
-        top: 0;
-        left: 0;
-        width: 100%;
-        height: 100%;
-        pointer-events: none;
-        z-index: 0;
+    .particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
+    .particle { position: absolute; width: 4px; height: 4px; background: rgba(255,255,255,0.35); border-radius: 50%; animation: twinkle 6s infinite; }
+    @keyframes twinkle {
+        0%, 100% { opacity: 0; transform: translateY(0); }
+        50% { opacity: 1; transform: translateY(-14px); }
     }
-
-    .particle {
-        position: absolute;
-        width: 4px;
-        height: 4px;
-        background: rgba(255,255,255,0.3);
-        border-radius: 50%;
-        animation: float 6s infinite;
-    }
-
-    @keyframes float {
-        0%, 100% { transform: translateY(0) translateX(0); opacity: 0; }
-        50% { opacity: 1; }
-    }
+    @keyframes slideIn { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
+    @keyframes fadeIn { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
 
     .container {
-        max-width: 900px;
+        max-width: 960px;
         margin: auto;
         background: rgba(255,255,255,0.95);
         backdrop-filter: blur(10px);
@@ -57,371 +38,379 @@
         animation: slideIn 0.6s ease-out;
     }
 
-    @keyframes slideIn {
-        from { opacity: 0; transform: translateY(-30px); }
-        to { opacity: 1; transform: translateY(0); }
-    }
-
     h1 {
         text-align: center;
-        font-size: 2.5em;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
+        font-size: 2.4em;
+        background: linear-gradient(135deg, #667eea, #764ba2);
         -webkit-background-clip: text;
-        -webkit-text-fill-color: transparent;
         background-clip: text;
-        margin-bottom: 10px;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        gap: 15px;
-    }
-
-    .subtitle {
-        text-align: center;
-        color: #666;
-        margin-bottom: 30px;
-        font-size: 1.1em;
-    }
-
-    label {
-        display: block;
-        margin-top: 20px;
+        -webkit-text-fill-color: transparent;
         margin-bottom: 8px;
-        font-weight: 600;
+    }
+    .subtitle { text-align: center; color: #666; margin-bottom: 28px; font-size: 1.05em; }
+
+    .lbl {
+        display: block;
+        margin-top: 22px;
+        margin-bottom: 8px;
+        font-weight: 700;
         color: #444;
-        font-size: 0.95em;
+        font-size: 0.9em;
         text-transform: uppercase;
         letter-spacing: 0.5px;
     }
 
-    input, select {
+    input[type=text] {
         width: 100%;
         padding: 15px;
-        margin-top: 5px;
-        font-size: 16px;
+        font-size: 17px;
         border: 2px solid #e0e0e0;
         border-radius: 12px;
         transition: all 0.3s;
         background: #fafafa;
     }
-
-    input:focus, select:focus {
+    input[type=text]:focus {
         outline: none;
         border-color: #667eea;
-        background: white;
-        box-shadow: 0 0 0 4px rgba(102,126,234,0.1);
+        background: #fff;
+        box-shadow: 0 0 0 4px rgba(102,126,234,0.12);
     }
 
-    button {
-        width: 100%;
-        padding: 16px;
-        margin-top: 25px;
-        font-size: 18px;
+    /* ---------- method tabs ---------- */
+    .tabs { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
+    .tab {
+        padding: 14px 10px;
+        font-size: 16px;
         font-weight: 700;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        border: none;
+        border: 2px solid #e0e0e0;
+        background: #fafafa;
+        color: #444;
         border-radius: 12px;
         cursor: pointer;
-        transition: all 0.3s;
-        text-transform: uppercase;
-        letter-spacing: 1px;
-        box-shadow: 0 4px 15px rgba(102,126,234,0.4);
+        transition: all 0.25s;
     }
-
-    button:hover {
+    .tab small { display: block; font-weight: 500; font-size: 0.72em; opacity: 0.8; margin-top: 3px; }
+    .tab:hover { border-color: var(--c1); transform: translateY(-2px); }
+    .tab.active {
+        background: linear-gradient(135deg, var(--c1), var(--c2));
+        color: #fff;
+        border-color: transparent;
+        box-shadow: 0 6px 18px rgba(0,0,0,0.22);
         transform: translateY(-2px);
-        box-shadow: 0 6px 20px rgba(102,126,234,0.6);
     }
 
-    button:active {
-        transform: translateY(0);
+    .actions { display: flex; gap: 12px; margin-top: 26px; }
+    .primary {
+        flex: 1; padding: 16px; font-size: 18px; font-weight: 700;
+        background: linear-gradient(135deg, #667eea, #764ba2); color: #fff;
+        border: none; border-radius: 12px; cursor: pointer;
+        text-transform: uppercase; letter-spacing: 1px;
+        box-shadow: 0 4px 15px rgba(102,126,234,0.4); transition: all 0.3s;
+    }
+    .primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(102,126,234,0.6); }
+    .secondary {
+        padding: 16px 26px; font-size: 16px; font-weight: 700;
+        background: #ececf3; color: #555; border: none; border-radius: 12px; cursor: pointer; transition: all 0.3s;
+    }
+    .secondary:hover { background: #dfdfea; }
+
+    /* ---------- chart panel ---------- */
+    .empty {
+        margin-top: 24px; padding: 26px; text-align: center; color: #777;
+        border: 2px dashed #d5d8ee; border-radius: 16px; background: #fafbff;
     }
 
-    .section {
-        margin-top: 30px;
-        padding: 25px;
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        border-radius: 16px;
-        animation: fadeIn 0.5s ease-out;
-        border-left: 5px solid #667eea;
-    }
-
-    @keyframes fadeIn {
-        from { opacity: 0; transform: scale(0.95); }
-        to { opacity: 1; transform: scale(1); }
-    }
-
-    h2 {
-        color: #667eea;
-        margin-bottom: 15px;
-        font-size: 1.6em;
-        display: flex;
-        align-items: center;
-        gap: 10px;
-    }
-
-    h3 {
-        color: #764ba2;
-        margin-top: 20px;
-        margin-bottom: 10px;
-        font-size: 1.4em;
-    }
-
-    table {
-        width: 100%;
-        border-collapse: separate;
-        border-spacing: 0;
-        margin-top: 15px;
-        margin-bottom: 15px;
+    details.chart-card, details.result {
+        margin-top: 24px;
+        border-radius: 18px;
+        background: #fff;
+        box-shadow: 0 8px 28px rgba(0,0,0,0.12);
         overflow: hidden;
-        border-radius: 12px;
-        box-shadow: 0 4px 12px rgba(0,0,0,0.1);
+        border: 1px solid #eee;
+        animation: fadeIn 0.45s ease-out;
     }
+    details.chart-card > summary, details.result > summary {
+        cursor: pointer; list-style: none; padding: 18px 24px; color: #fff; font-weight: 700; font-size: 1.1em;
+        background: linear-gradient(135deg, var(--c1), var(--c2));
+        display: flex; align-items: center; gap: 12px;
+    }
+    details > summary::-webkit-details-marker { display: none; }
+    details.chart-card > summary::after { content: '\25BE'; margin-left: auto; transition: transform 0.2s; }
+    details.result > summary::after { content: '\25BE'; transition: transform 0.2s; }
+    details.chart-card:not([open]) > summary::after,
+    details.result:not([open]) > summary::after { transform: rotate(-90deg); }
+    .final-pill { margin-left: auto; background: rgba(255,255,255,0.22); padding: 6px 14px; border-radius: 999px; font-size: 0.9em; }
 
-    th, td {
-        padding: 14px;
-        text-align: center;
-        border: none;
-    }
+    .chart-body, .result-body { padding: 22px 24px 26px; }
+    .tagline { color: #555; margin-bottom: 10px; }
+    .sub { margin: 22px 0 8px; color: #764ba2; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.5px; }
 
-    th {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        font-weight: 600;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-        font-size: 0.9em;
-    }
+    .badge { display: inline-block; margin-top: 6px; padding: 8px 14px; border-radius: 999px; font-size: 0.85em; font-weight: 700; }
+    .badge.ok { background: #e6f7ee; color: #0b6b3a; border: 1px solid #b7e4c7; }
+    .badge.bad { background: #fde8e8; color: #9b1c1c; border: 1px solid #f5b5b5; }
 
-    td {
-        background: white;
-        border-bottom: 1px solid #f0f0f0;
-        font-size: 1.1em;
+    .num-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-top: 10px; }
+    .num-card { background: #f8f9ff; border-radius: 14px; padding: 14px; border: 2px solid hsl(var(--h) 60% 88%); }
+    .num-badge {
+        width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
+        font-weight: 900; font-size: 1.4em; color: #fff; background: hsl(var(--h) 65% 50%);
     }
+    .planet { font-size: 0.8em; font-weight: 700; color: hsl(var(--h) 55% 30%); margin-top: 8px; }
+    .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
+    .chip {
+        min-width: 34px; padding: 6px 8px; text-align: center; font-weight: 800; border-radius: 8px;
+        background: #fff; border: 2px solid hsl(var(--h) 60% 80%); color: hsl(var(--h) 55% 28%);
+        transition: all 0.2s; cursor: default;
+    }
+    .chip:hover { transform: translateY(-3px) scale(1.08); }
+    .no-letters { font-size: 0.82em; color: #777; line-height: 1.4; }
 
-    tr:last-child td {
-        border-bottom: none;
-    }
+    .az-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(54px, 1fr)); gap: 8px; margin-top: 10px; }
+    .az-cell { background: #f8f9ff; border: 2px solid #e6e8f5; border-radius: 10px; text-align: center; padding: 6px 0; transition: all 0.2s; cursor: default; }
+    .az-cell:hover { transform: translateY(-3px); }
+    .az-l { display: block; font-weight: 900; font-size: 1.15em; color: #444; }
+    .az-v { display: block; font-weight: 700; font-size: 0.95em; color: var(--c1); }
 
-    tr:hover td {
-        background: #f8f9ff;
+    .chip.used, .az-cell.used {
+        background: #ffe066; border-color: #f5b700; color: #4a3800; box-shadow: 0 0 0 3px rgba(245,183,0,0.25);
     }
+    .az-cell.used .az-l, .az-cell.used .az-v { color: #4a3800; }
+
+    .rules { margin: 8px 0 0; padding-left: 20px; }
+    .rules li { margin: 7px 0; line-height: 1.55; color: #444; }
+    .note { margin-top: 14px; padding: 12px 14px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 10px; color: #5c4700; font-size: 0.92em; line-height: 1.5; }
+
+    /* ---------- results ---------- */
+    .section {
+        margin-top: 28px; padding: 22px;
+        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
+        border-radius: 18px; border-left: 5px solid #667eea; animation: fadeIn 0.5s ease-out;
+    }
+    .section h2 { color: #667eea; margin-bottom: 12px; font-size: 1.4em; }
+    .info-block { background: #f8f9ff; padding: 14px 16px; border-radius: 10px; margin: 12px 0; border-left: 4px solid #667eea; }
+    .risk-block { background: #fff3cd; padding: 14px 16px; border-radius: 10px; margin: 14px 0; border-left: 4px solid #ffc107; }
+    .small { font-size: 0.9em; color: #555; margin-top: 6px; }
+    .pill { display: inline-block; padding: 2px 10px; background: #e9eaf7; border-radius: 999px; font-size: 0.9em; }
+    .warn { margin-top: 12px; padding: 12px 14px; background: #fde8e8; border-left: 4px solid #e03131; border-radius: 10px; color: #7a1414; font-size: 0.92em; line-height: 1.5; }
+
+    .char-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 10px; margin: 12px 0 18px; }
+    .char-card { background: #fff; padding: 12px 6px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border: 2px solid #f0f0f0; transition: all 0.25s; }
+    .char-card:hover { transform: translateY(-5px); border-color: var(--c1); box-shadow: 0 6px 18px rgba(0,0,0,0.15); }
+    .char-card.digit { background: #f3f7ff; }
+    .char-letter { font-size: 1.8em; font-weight: 900; color: var(--c1); }
+    .char-value { font-size: 1.15em; font-weight: 700; color: #777; }
+
+    .tbl-wrap { overflow-x: auto; margin: 6px 0 18px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
+    table { width: 100%; border-collapse: collapse; }
+    th, td { padding: 11px; text-align: center; }
+    th { background: linear-gradient(135deg, var(--c1, #667eea), var(--c2, #764ba2)); color: #fff; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.5px; }
+    td { background: #fff; border-bottom: 1px solid #f0f0f0; }
+    tr:hover td { background: #f8f9ff; }
+    .summary table { margin-top: 6px; border-radius: 12px; overflow: hidden; }
 
     .total-box {
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        color: white;
-        padding: 25px;
-        border-radius: 16px;
-        text-align: center;
-        margin: 20px 0;
-        box-shadow: 0 8px 25px rgba(102,126,234,0.4);
+        background: linear-gradient(135deg, var(--c1), var(--c2)); color: #fff; padding: 22px; border-radius: 16px;
+        text-align: center; margin: 16px 0; box-shadow: 0 8px 25px rgba(0,0,0,0.2);
     }
+    .total-box.alt { background: linear-gradient(135deg, var(--c2), var(--c1)); }
+    .total-box h3 { margin: 0 0 6px; font-size: 1.05em; opacity: 0.92; }
+    .total-number { font-size: 3.6em; font-weight: 900; text-shadow: 0 4px 10px rgba(0,0,0,0.2); line-height: 1.1; }
+    .eq { opacity: 0.92; margin-top: 8px; overflow-wrap: anywhere; font-family: Consolas, monospace; }
 
-    .total-box h3 {
-        color: white;
-        margin: 0 0 10px 0;
-        font-size: 1.2em;
-        opacity: 0.9;
-    }
+    .reduce-box { background: #f8f9ff; border: 2px solid #e6e8f5; border-radius: 14px; padding: 16px 20px; margin: 16px 0; }
+    .reduce-box h3 { color: #764ba2; font-size: 1em; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
+    .step { font-family: Consolas, monospace; font-size: 1.1em; margin: 6px 0; color: #333; }
 
-    .total-number {
-        font-size: 4em;
-        font-weight: 900;
-        margin: 10px 0;
-        text-shadow: 0 4px 10px rgba(0,0,0,0.2);
-    }
-
-    .profile-card {
-        background: white;
-        padding: 25px;
-        border-radius: 16px;
-        margin-top: 20px;
-        box-shadow: 0 4px 15px rgba(0,0,0,0.08);
-        border: 2px solid #f0f0f0;
-    }
-
-    .profile-header {
-        display: flex;
-        align-items: center;
-        gap: 15px;
-        margin-bottom: 20px;
-        padding-bottom: 15px;
-        border-bottom: 2px solid #f0f0f0;
-    }
-
+    .profile-card { background: #fff; padding: 22px; border-radius: 16px; margin-top: 18px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 2px solid #f0f0f0; }
+    .profile-header { display: flex; align-items: center; gap: 15px; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 2px solid #f0f0f0; }
     .profile-icon {
-        width: 60px;
-        height: 60px;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        border-radius: 50%;
-        display: flex;
-        align-items: center;
-        justify-content: center;
-        color: white;
-        font-size: 2em;
-        font-weight: 900;
-        box-shadow: 0 4px 15px rgba(102,126,234,0.3);
+        width: 60px; height: 60px; flex-shrink: 0; background: linear-gradient(135deg, var(--c1), var(--c2)); border-radius: 50%;
+        display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1.9em; font-weight: 900;
     }
+    .profile-title h3 { color: #333; font-size: 1.3em; }
+    .profile-subtitle { color: #888; font-size: 0.9em; margin-top: 3px; }
+    .profile-card ul { margin: 10px 0; padding-left: 20px; }
+    .profile-card li { margin: 6px 0; line-height: 1.5; color: #555; }
 
-    .profile-title {
-        flex: 1;
+    /* ---------- stale results ---------- */
+    #output[data-stale="1"]::before {
+        content: "Name or method changed. Press Calculate to refresh these results.";
+        display: block; margin-top: 26px; padding: 12px 16px; background: #fff3cd; border-left: 4px solid #ffc107;
+        border-radius: 10px; color: #6b5200; font-weight: 600;
     }
-
-    .profile-title h3 {
-        margin: 0;
-        color: #667eea;
-    }
-
-    .profile-subtitle {
-        color: #888;
-        font-size: 0.9em;
-        margin-top: 3px;
-    }
-
-    ul {
-        margin: 15px 0;
-        padding-left: 20px;
-    }
-
-    li {
-        margin: 8px 0;
-        line-height: 1.6;
-        color: #555;
-    }
-
-    strong {
-        color: #333;
-        font-weight: 700;
-    }
-
-    .info-block {
-        background: #f8f9ff;
-        padding: 15px;
-        border-radius: 10px;
-        margin: 15px 0;
-        border-left: 4px solid #667eea;
-    }
-
-    .risk-block {
-        background: #fff3cd;
-        padding: 15px;
-        border-radius: 10px;
-        margin: 15px 0;
-        border-left: 4px solid #ffc107;
-    }
-
-    .char-grid {
-        display: grid;
-        grid-template-columns: repeat(auto-fill, minmax(80px, 1fr));
-        gap: 12px;
-        margin: 20px 0;
-    }
-
-    .char-card {
-        background: white;
-        padding: 15px;
-        border-radius: 12px;
-        text-align: center;
-        box-shadow: 0 2px 8px rgba(0,0,0,0.08);
-        transition: all 0.3s;
-        border: 2px solid #f0f0f0;
-    }
-
-    .char-card:hover {
-        transform: translateY(-5px);
-        box-shadow: 0 6px 20px rgba(102,126,234,0.3);
-        border-color: #667eea;
-    }
-
-    .char-letter {
-        font-size: 2em;
-        font-weight: 900;
-        color: #667eea;
-        margin-bottom: 5px;
-    }
-
-    .char-value {
-        font-size: 1.2em;
-        color: #888;
-        font-weight: 600;
-    }
-
-    .icon {
-        display: inline-block;
-        width: 24px;
-        height: 24px;
-    }
+    #output[data-stale="1"] > * { opacity: 0.45; }
 
     @media (max-width: 768px) {
-        .container {
-            padding: 25px;
-        }
-        
-        h1 {
-            font-size: 2em;
-        }
-
-        .total-number {
-            font-size: 3em;
-        }
+        .container { padding: 22px; }
+        h1 { font-size: 1.8em; }
+        .total-number { font-size: 2.8em; }
+    }
+    @media (prefers-reduced-motion: reduce) {
+        * { animation: none !important; transition: none !important; }
     }
 </style>
 </head>
 
 <body>
 
-<div class="particles" id="particles"></div>
+<div class="particles" id="particles" aria-hidden="true"></div>
 
 <div class="container">
-    <h1>
-        <span>✨</span>
-        Name → Number Calculator
-        <span>🔢</span>
-    </h1>
-    <p class="subtitle">Transform names into meaningful numbers</p>
+    <h1>Name → Number Calculator</h1>
+    <p class="subtitle">Normal alphabet math and three numerology systems, each with its own letter chart</p>
 
-    <label>Enter Name (letters and numbers allowed)</label>
-    <input type="text" id="nameInput" placeholder="Type your name here...">
+    <label class="lbl" for="nameInput">Enter name (letters A–Z and digits 0–9 are counted)</label>
+    <input type="text" id="nameInput" placeholder="Type a name..." autocomplete="off">
 
-    <label>Select Mode</label>
-    <select id="mode">
-        <option value="">-- Select a mode --</option>
-        <option value="normal">🔤 Normal Alphabet Math</option>
-        <option value="numerology">🔮 Numerology Style</option>
-        <option value="both">✨ Both Modes</option>
-    </select>
+    <span class="lbl">Select method (its letter chart appears below)</span>
+    <div class="tabs" id="tabs">
+        <button type="button" class="tab" data-method="normal" aria-pressed="false" style="--c1:#3b82f6;--c2:#1d4ed8">Normal<small>A = 1 … Z = 26</small></button>
+        <button type="button" class="tab" data-method="vedic" aria-pressed="false" style="--c1:#f59e0b;--c2:#ea580c">Vedic<small>Chaldean letters + grahas</small></button>
+        <button type="button" class="tab" data-method="chaldean" aria-pressed="false" style="--c1:#8b5cf6;--c2:#6d28d9">Chaldean<small>Values 1–8, no letter is 9</small></button>
+        <button type="button" class="tab" data-method="pythagorean" aria-pressed="false" style="--c1:#14b8a6;--c2:#0f766e">Pythagorean<small>1–9 in alphabet order</small></button>
+        <button type="button" class="tab" data-method="all" aria-pressed="false" style="--c1:#667eea;--c2:#764ba2">Compare all<small>All four side by side</small></button>
+    </div>
 
-    <button onclick="calculate()">Calculate Now</button>
+    <div id="chartPanel"></div>
+
+    <div class="actions">
+        <button type="button" class="primary" id="calcBtn">Calculate</button>
+        <button type="button" class="secondary" id="resetBtn">Reset</button>
+    </div>
 
     <div id="output"></div>
 </div>
 
 <script>
-// Create floating particles
+// ---------- floating particles ----------
 const particlesContainer = document.getElementById('particles');
-for(let i = 0; i < 30; i++) {
-    const particle = document.createElement('div');
-    particle.className = 'particle';
-    particle.style.left = Math.random() * 100 + '%';
-    particle.style.top = Math.random() * 100 + '%';
-    particle.style.animationDelay = Math.random() * 6 + 's';
-    particle.style.animationDuration = (Math.random() * 3 + 3) + 's';
-    particlesContainer.appendChild(particle);
+for (let i = 0; i < 30; i++) {
+    const p = document.createElement('div');
+    p.className = 'particle';
+    p.style.left = Math.random() * 100 + '%';
+    p.style.top = Math.random() * 100 + '%';
+    p.style.animationDelay = Math.random() * 6 + 's';
+    p.style.animationDuration = (Math.random() * 3 + 3) + 's';
+    particlesContainer.appendChild(p);
 }
 
-const numerologyMap = {
-    A:1,J:1,S:1,
-    B:2,K:2,T:2,
-    C:3,L:3,U:3,
-    D:4,M:4,V:4,
-    E:5,N:5,W:5,
-    F:6,O:6,X:6,
-    G:7,P:7,Y:7,
-    H:8,Q:8,Z:8,
-    I:9,R:9
+const ORDER = ['normal', 'vedic', 'chaldean', 'pythagorean'];
+
+function esc(s) {
+    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+        .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
+}
+
+// =====================================================================
+// LETTER TABLES — single source of truth.
+// The chart you see and the maths used for calculation are BOTH built
+// from these objects, so they can never disagree with each other.
+// Format:  number -> letters that carry that number
+// =====================================================================
+const NORMAL_GROUPS = {};
+for (let i = 0; i < 26; i++) NORMAL_GROUPS[i + 1] = String.fromCharCode(65 + i);
+
+const PYTHAGOREAN_GROUPS = {
+    1: 'AJS', 2: 'BKT', 3: 'CLU', 4: 'DMV', 5: 'ENW', 6: 'FOX', 7: 'GPY', 8: 'HQZ', 9: 'IR'
 };
 
+// Classic Chaldean (Cheiro) chart. 9 is intentionally empty: no letter carries 9.
+// Vedic below deliberately reuses this exact table (see note shown in the Vedic chart).
+const CHALDEAN_GROUPS = {
+    1: 'AIJQY', 2: 'BKR', 3: 'CGLS', 4: 'DMT', 5: 'EHNX', 6: 'UVW', 7: 'OZ', 8: 'FP', 9: ''
+};
+
+// Vedic planetary rulers (graha) for numbers 1–9
+const GRAHA = {
+    1: 'Surya (Sun)', 2: 'Chandra (Moon)', 3: 'Guru (Jupiter)', 4: 'Rahu (North Node)',
+    5: 'Budh (Mercury)', 6: 'Shukra (Venus)', 7: 'Ketu (South Node)', 8: 'Shani (Saturn)', 9: 'Mangal (Mars)'
+};
+
+const DIGIT_RULE = 'Digits you type count at face value (a 7 counts as 7). Spaces and symbols are ignored.';
+const MASTER_RULE = 'Reduction adds the digits repeatedly. 11 and 22 are kept as master numbers (teachers differ on master numbers; some also keep 33).';
+
+const SYSTEMS = {
+    normal: {
+        key: 'normal', label: 'Normal Alphabet Math', short: 'Normal', kind: 'sequence',
+        c1: '#3b82f6', c2: '#1d4ed8', groups: NORMAL_GROUPS, keepMaster: false, graha: false,
+        totalLabel: 'Total sum', finalLabel: 'Reduced to',
+        tagline: 'Each letter equals its position in the alphabet.',
+        rules: [
+            'A = 1, B = 2, C = 3 ... Z = 26.',
+            DIGIT_RULE,
+            'The total is reduced to a single digit by adding its digits repeatedly. This mode has no master numbers.'
+        ],
+        note: ''
+    },
+    vedic: {
+        key: 'vedic', label: 'Vedic Numerology', short: 'Vedic', kind: 'groups',
+        c1: '#f59e0b', c2: '#ea580c', groups: CHALDEAN_GROUPS, keepMaster: true, graha: true,
+        totalLabel: 'Total (compound number)', finalLabel: 'Final number (Namank)',
+        tagline: 'Indian (Ank Jyotish) name numerology: Chaldean letter groups, read through the nine grahas.',
+        rules: [
+            'Letters use the Chaldean (Cheiro) groups shown above, the chart used for Roman-letter names in Indian numerology. Letters carry values 1–8 only.',
+            '9 (Mangal, Mars) has no letters. It appears only as a total or a final result.',
+            'Every number is ruled by a graha (planet), shown on each card.',
+            DIGIT_RULE,
+            'The raw total is the compound number. Reducing it gives the name number (Namank).',
+            MASTER_RULE
+        ],
+        note: 'No single universal Vedic letter table exists for Roman letters, and some websites print variants. This tool uses the Chaldean (Cheiro) letter groups with the Vedic graha rulers.'
+    },
+    chaldean: {
+        key: 'chaldean', label: 'Chaldean Numerology', short: 'Chaldean', kind: 'groups',
+        c1: '#8b5cf6', c2: '#6d28d9', groups: CHALDEAN_GROUPS, keepMaster: true, graha: false,
+        totalLabel: 'Total (compound number)', finalLabel: 'Final number (name number)',
+        tagline: 'Letters are grouped by sound vibration, not alphabet order. Values run 1–8 only.',
+        rules: [
+            'Classic Cheiro chart: letters are grouped by sound, not by alphabet position. Letters carry values 1–8 only.',
+            '9 is treated as sacred: no letter carries it. It appears only as a total or a final result.',
+            DIGIT_RULE,
+            'The raw total is the compound number. Reducing it gives the name number.',
+            MASTER_RULE
+        ],
+        note: 'Chaldean letter assignments are not identical in every source. This is the classic Cheiro chart, the most widely published version.'
+    },
+    pythagorean: {
+        key: 'pythagorean', label: 'Pythagorean Numerology', short: 'Pythagorean', kind: 'groups',
+        c1: '#14b8a6', c2: '#0f766e', groups: PYTHAGOREAN_GROUPS, keepMaster: true, graha: false,
+        totalLabel: 'Total sum', finalLabel: 'Final number',
+        tagline: 'Letters run through 1–9 in alphabet order, then the cycle repeats.',
+        rules: [
+            'A–I = 1–9, J–R = 1–9, S–Z = 1–8. The cycle restarts after every 9.',
+            DIGIT_RULE,
+            MASTER_RULE
+        ],
+        note: ''
+    }
+};
+
+// Build the letter -> number lookup from the groups and verify it.
+function buildMap(groups) {
+    const map = {};
+    const issues = [];
+    Object.entries(groups).forEach(([num, letters]) => {
+        Array.from(letters).forEach(L => {
+            if (!/^[A-Z]$/.test(L)) { issues.push('invalid symbol "' + L + '" under ' + num); return; }
+            if (map[L] !== undefined) { issues.push(L + ' appears under both ' + map[L] + ' and ' + num); return; }
+            map[L] = Number(num);
+        });
+    });
+    for (let c = 65; c <= 90; c++) {
+        const L = String.fromCharCode(c);
+        if (map[L] === undefined) issues.push(L + ' is missing');
+    }
+    return { map, issues };
+}
+
+Object.keys(SYSTEMS).forEach(k => {
+    const b = buildMap(SYSTEMS[k].groups);
+    SYSTEMS[k].map = b.map;
+    SYSTEMS[k].issues = b.issues;
+    SYSTEMS[k].ok = b.issues.length === 0;
+});
+
+// ---------- number profiles ----------
 const numberProfiles = {
   0:{title:"The Amplifier",what:"Potential, emptiness, magnifier",does:"Boosts whatever it touches",
     use:["Starting fresh","Wanting flexibility","Supporting another number"],
@@ -484,154 +473,265 @@ const numberProfiles = {
     risk:"Pressure and burnout"}
 };
 
-function reduceNumber(num){
-    while(num > 9 && num !== 11 && num !== 22){
-        num = num.toString().split('').reduce((a,b)=>a+Number(b),0);
+// ---------- maths ----------
+function digitRoot(n) {
+    while (n > 9) n = String(n).split('').reduce((a, b) => a + Number(b), 0);
+    return n;
+}
+
+// Adds digits repeatedly. If keepMaster, stops at 11 or 22.
+function reduce(total, keepMaster) {
+    const steps = [];
+    let n = total;
+    while (n > 9) {
+        if (keepMaster && (n === 11 || n === 22)) break;
+        const digits = String(n).split('').map(Number);
+        const s = digits.reduce((a, b) => a + b, 0);
+        steps.push({ from: n, expr: digits.join(' + '), to: s });
+        n = s;
     }
-    return num;
+    return { final: n, steps: steps, masterKept: keepMaster && (n === 11 || n === 22) };
 }
 
-function renderProfile(n){
+function parseInput(raw) {
+    const chars = [];
+    const ignored = [];
+    Array.from(raw).forEach(ch => {
+        if (/^[A-Za-z0-9]$/.test(ch)) chars.push(ch.toUpperCase());
+        else if (!ignored.includes(ch)) ignored.push(ch);
+    });
+    return { chars: chars, ignored: ignored };
+}
+
+function analyze(sys, chars) {
+    let running = 0;
+    const rows = chars.map((c, i) => {
+        const isDigit = c >= '0' && c <= '9';
+        const v = isDigit ? Number(c) : sys.map[c];
+        running += v;
+        return { n: i + 1, c: c, v: v, running: running, isDigit: isDigit };
+    });
+    return { rows: rows, total: running, red: reduce(running, sys.keepMaster) };
+}
+
+function showChar(ch) {
+    return ch === ' ' ? 'space' : (/\s/.test(ch) ? 'whitespace' : ch);
+}
+
+// ---------- chart rendering ----------
+function numCardHTML(sys, n) {
+    const letters = sys.groups[n] || '';
+    const hue = (n - 1) * 36;
+    const planet = sys.graha ? '<div class="planet">' + esc(GRAHA[n]) + '</div>' : '';
+    const chips = letters
+        ? Array.from(letters).map(L => '<span class="chip" data-letter="' + L + '" title="' + L + ' → ' + n + '">' + L + '</span>').join('')
+        : '<span class="no-letters">No letter carries ' + n + '. It appears only as a total or result.</span>';
+    return '<div class="num-card" style="--h:' + hue + '"><div class="num-badge">' + n + '</div>' + planet +
+           '<div class="chips">' + chips + '</div></div>';
+}
+
+function azHTML(sys) {
+    let h = '<div class="az-grid">';
+    for (let c = 65; c <= 90; c++) {
+        const L = String.fromCharCode(c);
+        const v = sys.map[L];
+        h += '<div class="az-cell" data-letter="' + L + '" title="' + L + ' → ' + v + '"><span class="az-l">' + L + '</span><span class="az-v">' + v + '</span></div>';
+    }
+    return h + '</div>';
+}
+
+function chartHTML(sys) {
+    const badge = sys.ok
+        ? '<div class="badge ok">Table check passed: all 26 letters mapped, each exactly once</div>'
+        : '<div class="badge bad">Table check failed: ' + esc(sys.issues.join('; ')) + '</div>';
+
+    let grid = '';
+    if (sys.ok && sys.kind === 'groups') {
+        grid = '<h4 class="sub">Chart: number → letters</h4><div class="num-grid">' +
+               [1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => numCardHTML(sys, n)).join('') + '</div>';
+    }
+    const az = sys.ok ? '<h4 class="sub">Lookup: letter → number</h4>' + azHTML(sys) : '';
+    const rules = '<h4 class="sub">How the conversion works</h4><ul class="rules">' +
+                  sys.rules.map(r => '<li>' + r + '</li>').join('') + '</ul>';
+    const note = sys.note ? '<div class="note">' + sys.note + '</div>' : '';
+
+    return '<details class="chart-card" open style="--c1:' + sys.c1 + ';--c2:' + sys.c2 + '">' +
+           '<summary>' + esc(sys.label) + ': letter to number chart</summary>' +
+           '<div class="chart-body"><p class="tagline">' + sys.tagline + '</p>' + badge + grid + az + rules + note + '</div></details>';
+}
+
+// ---------- result rendering ----------
+function reductionHTML(a) {
+    const red = a.red;
+    if (!red.steps.length) {
+        return red.masterKept
+            ? '<p class="small">' + a.total + ' is a master number, so it is kept as ' + a.total + '.</p>'
+            : '<p class="small">' + a.total + ' is already a single digit, so no reduction is needed.</p>';
+    }
+    const steps = red.steps.map(s =>
+        '<div class="step"><span>' + s.from + '</span> &rarr; <span>' + s.expr + '</span> = <strong>' + s.to + '</strong></div>'
+    ).join('');
+    const tail = red.masterKept ? '<p class="small">' + red.final + ' is a master number, so the reduction stops here.</p>' : '';
+    return steps + tail;
+}
+
+function profileHTML(n, sys) {
     const p = numberProfiles[n];
-    if(!p) return "";
-    return `
-    <div class="profile-card">
-        <div class="profile-header">
-            <div class="profile-icon">${n}</div>
-            <div class="profile-title">
-                <h3>${p.title}</h3>
-                <p class="profile-subtitle">${p.what}</p>
-            </div>
-        </div>
-
-        <div class="info-block">
-            <p><strong>What it does:</strong> ${p.does}</p>
-        </div>
-
-        <p><strong>Use ${n} when:</strong></p>
-        <ul>${p.use.map(i=>`<li>${i}</li>`).join("")}</ul>
-
-        <p><strong>Avoid ${n} when:</strong></p>
-        <ul>${p.avoid.map(i=>`<li>${i}</li>`).join("")}</ul>
-
-        <div class="risk-block">
-            <p><strong>⚠️ Risk / Truth:</strong> ${p.risk}</p>
-        </div>
-
-        <div class="info-block">
-            <p><strong>💡 Contextual Use:</strong><br>
-            Identity/Career: 8 • Creativity/Learning: 3 • Relationships: 2 or 6 • Change phase: 5 • Reset/Growth: 9
-            </p>
-        </div>
-    </div>`;
+    if (!p) return '';
+    const r = digitRoot(n);
+    const grahaBlock = (sys.graha && GRAHA[r])
+        ? '<div class="info-block"><p><strong>Ruling graha:</strong> ' + esc(GRAHA[r]) +
+          (n > 9 ? ' (master number ' + n + ' takes the graha of its root digit ' + r + ')' : '') + '</p></div>'
+        : '';
+    return '<div class="profile-card">' +
+        '<div class="profile-header"><div class="profile-icon">' + n + '</div>' +
+        '<div class="profile-title"><h3>' + esc(p.title) + '</h3><p class="profile-subtitle">' + esc(p.what) + '</p></div></div>' +
+        grahaBlock +
+        '<div class="info-block"><p><strong>What it does:</strong> ' + esc(p.does) + '</p></div>' +
+        '<p><strong>Use ' + n + ' when:</strong></p><ul>' + p.use.map(i => '<li>' + esc(i) + '</li>').join('') + '</ul>' +
+        '<p><strong>Avoid ' + n + ' when:</strong></p><ul>' + p.avoid.map(i => '<li>' + esc(i) + '</li>').join('') + '</ul>' +
+        '<div class="risk-block"><p><strong>Risk / Truth:</strong> ' + esc(p.risk) + '</p></div>' +
+        '<div class="info-block"><p><strong>Contextual use:</strong><br>Identity/Career: 8 &bull; Creativity/Learning: 3 &bull; Relationships: 2 or 6 &bull; Change phase: 5 &bull; Reset/Growth: 9</p></div>' +
+        '</div>';
 }
 
-function calculate(){
-    const name = document.getElementById("nameInput").value;
-    const mode = document.getElementById("mode").value;
-    const out = document.getElementById("output");
-    out.innerHTML = "";
+function resultHTML(sys, a) {
+    const eq = a.rows.map(r => r.v).join(' + ') + ' = ' + a.total;
+    const cards = a.rows.map(r =>
+        '<div class="char-card' + (r.isDigit ? ' digit' : '') + '" title="' + (r.isDigit ? 'Digit counted at face value' : r.c + ' → ' + r.v) + '">' +
+        '<div class="char-letter">' + r.c + '</div><div class="char-value">' + r.v + '</div></div>'
+    ).join('');
+    const trs = a.rows.map(r => '<tr><td>' + r.n + '</td><td>' + r.c + '</td><td>' + r.v + '</td><td>' + r.running + '</td></tr>').join('');
 
-    if(!name || !mode){
-        out.innerHTML = "<div class='section'><p>⚠️ Please enter a name and select a mode.</p></div>";
+    return '<details class="result" open style="--c1:' + sys.c1 + ';--c2:' + sys.c2 + '">' +
+        '<summary>' + esc(sys.label) + '<span class="final-pill">Final: ' + a.red.final + '</span></summary>' +
+        '<div class="result-body">' +
+        '<h4 class="sub">Letter by letter</h4><div class="char-grid">' + cards + '</div>' +
+        '<div class="tbl-wrap"><table><tr><th>#</th><th>Character</th><th>Value</th><th>Running total</th></tr>' + trs + '</table></div>' +
+        '<div class="total-box"><h3>' + sys.totalLabel + '</h3><div class="total-number">' + a.total + '</div><p class="eq">' + eq + '</p></div>' +
+        '<div class="reduce-box"><h3>Reduction</h3>' + reductionHTML(a) + '</div>' +
+        '<div class="total-box alt"><h3>' + sys.finalLabel + '</h3><div class="total-number">' + a.red.final + '</div></div>' +
+        (sys.kind === 'groups' ? profileHTML(a.red.final, sys) : '') +
+        '</div></details>';
+}
+
+function inputSummaryHTML(raw, parsed) {
+    const letters = parsed.chars.filter(c => c >= 'A' && c <= 'Z').length;
+    const digits = parsed.chars.length - letters;
+    const ign = parsed.ignored.length
+        ? '<p class="small">Ignored: ' + parsed.ignored.map(ch => '<span class="pill">' + esc(showChar(ch)) + '</span>').join(' ') + '</p>'
+        : '';
+    const skipped = parsed.ignored.filter(ch => /[\p{L}\p{N}]/u.test(ch));
+    const warn = skipped.length
+        ? '<div class="warn"><strong>Not counted:</strong> ' + skipped.map(ch => esc(ch)).join(' ') +
+          '. Only the plain letters A–Z and digits 0–9 are mapped. Type the name in plain Roman letters (for example e instead of é) for an exact result.</div>'
+        : '';
+    return '<div class="section"><h2>Input</h2><div class="info-block"><p><strong>NAME:</strong> ' + esc(raw) + '</p>' +
+           '<p class="small">Counted ' + parsed.chars.length + ' characters (' + letters + ' letters, ' + digits + ' digits).</p>' + ign + '</div>' + warn + '</div>';
+}
+
+function summaryHTML(results) {
+    const rows = results.map(r =>
+        '<tr><td>' + esc(r.sys.short) + '</td><td>' + r.a.total + '</td><td><strong>' + r.a.red.final + '</strong></td></tr>'
+    ).join('');
+    return '<div class="section summary"><h2>Side by side</h2><div class="tbl-wrap"><table style="--c1:#667eea;--c2:#764ba2">' +
+           '<tr><th>Method</th><th>Total</th><th>Final number</th></tr>' + rows + '</table></div></div>';
+}
+
+// ---------- state + interaction ----------
+const nameInput = document.getElementById('nameInput');
+const output = document.getElementById('output');
+const chartPanel = document.getElementById('chartPanel');
+let selected = '';
+
+function renderCharts() {
+    if (!selected) {
+        chartPanel.innerHTML = '<div class="empty">Select a method above to see how its letters convert to numbers.</div>';
+        return;
+    }
+    const keys = selected === 'all' ? ORDER : [selected];
+    chartPanel.innerHTML = keys.map(k => chartHTML(SYSTEMS[k])).join('');
+}
+
+function highlightUsed() {
+    const used = new Set(
+        Array.from(nameInput.value).filter(c => /^[A-Za-z]$/.test(c)).map(c => c.toUpperCase())
+    );
+    document.querySelectorAll('[data-letter]').forEach(el => {
+        el.classList.toggle('used', used.has(el.dataset.letter));
+    });
+}
+
+function markStale() {
+    if (output.dataset.has === '1') output.dataset.stale = '1';
+}
+
+function selectMethod(key) {
+    selected = key;
+    document.querySelectorAll('.tab').forEach(b => {
+        const on = b.dataset.method === key;
+        b.classList.toggle('active', on);
+        b.setAttribute('aria-pressed', on ? 'true' : 'false');
+    });
+    renderCharts();
+    highlightUsed();
+    markStale();
+}
+
+function showMsg(text) {
+    output.innerHTML = '<div class="section"><p>' + esc(text) + '</p></div>';
+    output.dataset.has = '';
+    output.removeAttribute('data-stale');
+}
+
+function calculate() {
+    const raw = nameInput.value;
+    if (!raw.trim()) { showMsg('Enter a name first.'); return; }
+    if (!selected) { showMsg('Select a method first.'); return; }
+
+    const keys = selected === 'all' ? ORDER : [selected];
+    const bad = keys.filter(k => !SYSTEMS[k].ok);
+    if (bad.length) {
+        showMsg('Calculation stopped: the letter table for ' + bad.map(k => SYSTEMS[k].short).join(', ') + ' failed its integrity check.');
         return;
     }
 
-    const chars = name.toUpperCase().split('').filter(c=>/[A-Z0-9]/.test(c));
+    const parsed = parseInput(raw);
+    if (!parsed.chars.length) {
+        showMsg('No letters A–Z or digits 0–9 were found, so there is nothing to add.');
+        return;
+    }
 
-    if(mode==="normal"||mode==="both") out.innerHTML += normal(chars,name);
-    if(mode==="numerology"||mode==="both") out.innerHTML += numerology(chars,name);
+    const results = keys.map(k => ({ sys: SYSTEMS[k], a: analyze(SYSTEMS[k], parsed.chars) }));
+    let html = inputSummaryHTML(raw, parsed);
+    if (results.length > 1) html += summaryHTML(results);
+    html += results.map(r => resultHTML(r.sys, r.a)).join('');
+
+    output.innerHTML = html;
+    output.dataset.has = '1';
+    output.removeAttribute('data-stale');
 }
 
-function normal(chars,name){
-    let sum=0;
-    const charData = chars.map(c => {
-        const v = /[A-Z]/.test(c)? c.charCodeAt(0)-64 : Number(c);
-        sum+=v;
-        return {char: c, value: v};
-    });
-    
-    const reduced = reduceNumber(sum);
-    
-    return `
-    <div class="section">
-        <h2>🔤 MODE 1: NORMAL ALPHABET MATH</h2>
-        <div class="info-block">
-            <p><strong>INPUT:</strong> ${name}</p>
-        </div>
-        
-        <div class="char-grid">
-            ${charData.map(d => `
-                <div class="char-card">
-                    <div class="char-letter">${d.char}</div>
-                    <div class="char-value">${d.value}</div>
-                </div>
-            `).join('')}
-        </div>
-
-        <table>
-            <tr><th>Character</th><th>Value</th></tr>
-            ${charData.map(d => `<tr><td>${d.char}</td><td>${d.value}</td></tr>`).join('')}
-        </table>
-
-        <div class="total-box">
-            <h3>TOTAL SUM</h3>
-            <div class="total-number">${sum}</div>
-            <p style="opacity: 0.9; margin-top: 10px;">${charData.map(d=>d.value).join(' + ')}</p>
-        </div>
-
-        <div class="total-box" style="background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);">
-            <h3>REDUCED TO</h3>
-            <div class="total-number">${reduced}</div>
-        </div>
-    </div>`;
+function reset() {
+    nameInput.value = '';
+    selected = '';
+    document.querySelectorAll('.tab').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-pressed', 'false'); });
+    renderCharts();
+    output.innerHTML = '';
+    output.dataset.has = '';
+    output.removeAttribute('data-stale');
 }
 
-function numerology(chars,name){
-    let sum=0;
-    const charData = chars.map(c => {
-        const v = /[A-Z]/.test(c)? numerologyMap[c] : Number(c);
-        sum+=v;
-        return {char: c, value: v};
-    });
-    
-    const finalNum = reduceNumber(sum);
-    
-    return `
-    <div class="section">
-        <h2>🔮 MODE 2: NUMEROLOGY STYLE</h2>
-        <div class="info-block">
-            <p><strong>INPUT:</strong> ${name}</p>
-        </div>
-        
-        <div class="char-grid">
-            ${charData.map(d => `
-                <div class="char-card">
-                    <div class="char-letter">${d.char}</div>
-                    <div class="char-value">${d.value}</div>
-                </div>
-            `).join('')}
-        </div>
+document.getElementById('tabs').addEventListener('click', e => {
+    const b = e.target.closest('.tab');
+    if (b) selectMethod(b.dataset.method);
+});
+nameInput.addEventListener('input', () => { highlightUsed(); markStale(); });
+nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') calculate(); });
+document.getElementById('calcBtn').addEventListener('click', calculate);
+document.getElementById('resetBtn').addEventListener('click', reset);
 
-        <table>
-            <tr><th>Character</th><th>Value</th></tr>
-            ${charData.map(d => `<tr><td>${d.char}</td><td>${d.value}</td></tr>`).join('')}
-        </table>
-
-        <div class="total-box">
-            <h3>TOTAL SUM</h3>
-            <div class="total-number">${sum}</div>
-            <p style="opacity: 0.9; margin-top: 10px;">${charData.map(d=>d.value).join(' + ')}</p>
-        </div>
-
-        <div class="total-box" style="background: linear-gradient(135deg, #764ba2 0%, #667eea 100%);">
-            <h3>FINAL NUMBER</h3>
-            <div class="total-number">${finalNum}</div>
-        </div>
-
-        ${renderProfile(finalNum)}
-    </div>`;
-}
+renderCharts();
 </script>
 
 </body>
