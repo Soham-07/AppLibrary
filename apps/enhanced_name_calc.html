@@ -3,340 +3,1054 @@
 <head>
 <meta charset="UTF-8">
 <meta name="viewport" content="width=device-width, initial-scale=1.0">
-<title>Name → Number Calculator</title>
+<title>Name → Number · Numerology Engine</title>
+
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Inter:wght@400;500;600;700;800&family=Instrument+Serif:ital@0;1&display=swap" rel="stylesheet">
 
 <style>
-    * { margin: 0; padding: 0; box-sizing: border-box; }
+/* ============================================================
+   TOKENS
+   ============================================================ */
+*, *::before, *::after { box-sizing: border-box; }
+html { scroll-behavior: smooth; -webkit-text-size-adjust: 100%; }
 
-    body {
-        font-family: 'Segoe UI', Tahoma, Geneva, Verdana, sans-serif;
-        background: linear-gradient(135deg, #667eea 0%, #764ba2 100%);
-        min-height: 100vh;
-        padding: 20px;
-        color: #222;
+:root {
+    color-scheme: dark;
+
+    --bg:        #07070b;
+    --ink:       #f2f3f8;
+    --muted:     #9ca0b8;
+    --muted-2:   #6b6f88;
+
+    --line:        rgba(255,255,255,.085);
+    --line-strong: rgba(255,255,255,.18);
+
+    --glass-hi:  rgba(255,255,255,.055);
+    --glass-lo:  rgba(255,255,255,.015);
+
+    --ease:        cubic-bezier(.22, 1, .36, 1);
+    --ease-spring: cubic-bezier(.34, 1.56, .64, 1);
+
+    --font:  'Inter', ui-sans-serif, system-ui, -apple-system, 'Segoe UI', sans-serif;
+    --serif: 'Instrument Serif', 'Iowan Old Style', Georgia, serif;
+    --mono:  ui-monospace, SFMono-Regular, 'SF Mono', Consolas, monospace;
+}
+
+/* ============================================================
+   BASE
+   ============================================================ */
+body {
+    margin: 0;
+    min-height: 100vh;
+    padding: clamp(18px, 4vw, 52px) clamp(14px, 4vw, 32px) 96px;
+    background: var(--bg);
+    color: var(--ink);
+    font-family: var(--font);
+    font-size: 16px;
+    line-height: 1.5;
+    -webkit-font-smoothing: antialiased;
+    -moz-osx-font-smoothing: grayscale;
+    text-rendering: optimizeLegibility;
+    overflow-x: hidden;
+}
+
+::selection { background: rgba(129,140,248,.35); color: #fff; }
+
+/* ============================================================
+   AMBIENT BACKGROUND
+   ============================================================ */
+.bg { position: fixed; inset: 0; z-index: 0; pointer-events: none; overflow: hidden; }
+
+.blob {
+    position: absolute;
+    border-radius: 50%;
+    filter: blur(90px);
+    opacity: .55;
+    will-change: transform;
+}
+.blob.b1 { width: 62vw; height: 62vw; left: -18vw; top: -22vw;
+    background: radial-gradient(circle at 35% 35%, #4338ca, transparent 68%);
+    animation: drift1 28s ease-in-out infinite alternate; }
+.blob.b2 { width: 55vw; height: 55vw; right: -16vw; top: -12vw;
+    background: radial-gradient(circle at 60% 40%, #7e22ce, transparent 68%);
+    animation: drift2 34s ease-in-out infinite alternate; }
+.blob.b3 { width: 50vw; height: 50vw; left: 12vw; bottom: -26vw;
+    background: radial-gradient(circle at 50% 50%, #0e7490, transparent 70%);
+    animation: drift3 31s ease-in-out infinite alternate; }
+.blob.b4 { width: 34vw; height: 34vw; right: 6vw; bottom: -14vw;
+    background: radial-gradient(circle at 50% 50%, #b45309, transparent 70%);
+    opacity: .32;
+    animation: drift1 24s ease-in-out infinite alternate-reverse; }
+
+@keyframes drift1 { from { transform: translate3d(0,0,0) scale(1); } to { transform: translate3d(6vw, 5vh, 0) scale(1.14); } }
+@keyframes drift2 { from { transform: translate3d(0,0,0) scale(1.06); } to { transform: translate3d(-7vw, 7vh, 0) scale(.94); } }
+@keyframes drift3 { from { transform: translate3d(0,0,0) scale(.96); } to { transform: translate3d(5vw, -6vh, 0) scale(1.12); } }
+
+.grid-overlay {
+    position: fixed; inset: 0; z-index: 1; pointer-events: none;
+    background-image:
+        linear-gradient(rgba(255,255,255,.028) 1px, transparent 1px),
+        linear-gradient(90deg, rgba(255,255,255,.028) 1px, transparent 1px);
+    background-size: 68px 68px;
+    -webkit-mask-image: radial-gradient(ellipse 85% 62% at 50% 0%, #000 15%, transparent 78%);
+            mask-image: radial-gradient(ellipse 85% 62% at 50% 0%, #000 15%, transparent 78%);
+}
+
+.grain {
+    position: fixed; inset: 0; z-index: 2; pointer-events: none; opacity: .035;
+    background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='220' height='220'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3'/%3E%3C/filter%3E%3Crect width='220' height='220' filter='url(%23n)'/%3E%3C/svg%3E");
+}
+
+/* ============================================================
+   SHELL / HERO
+   ============================================================ */
+.shell { position: relative; z-index: 3; max-width: 1080px; margin: 0 auto; }
+
+.hero { text-align: center; margin-bottom: clamp(30px, 5vw, 52px); }
+
+.eyebrow {
+    display: inline-flex; align-items: center; gap: 9px;
+    padding: 7px 15px; border-radius: 999px;
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,.04);
+    font-size: .7rem; font-weight: 600;
+    letter-spacing: .18em; text-transform: uppercase;
+    color: var(--muted);
+    animation: rise .8s var(--ease) both;
+}
+.eyebrow i {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: linear-gradient(135deg, #818cf8, #c084fc);
+    box-shadow: 0 0 12px #818cf8;
+    animation: pulseDot 3.2s ease-in-out infinite;
+}
+@keyframes pulseDot {
+    0%, 100% { transform: scale(1);   opacity: .85; }
+    50%      { transform: scale(1.5); opacity: 1; }
+}
+
+h1 {
+    margin: 22px 0 14px;
+    font-family: var(--serif);
+    font-weight: 400;
+    font-size: clamp(2.7rem, 7.4vw, 4.6rem);
+    line-height: 1.02;
+    letter-spacing: -.022em;
+    background: linear-gradient(178deg, #ffffff 24%, #9ba0c4 100%);
+    -webkit-background-clip: text; background-clip: text;
+    color: transparent;
+    animation: rise .9s .06s var(--ease) both;
+}
+h1 em {
+    font-style: italic;
+    background: linear-gradient(120deg, #818cf8, #c084fc 48%, #f0abfc);
+    -webkit-background-clip: text; background-clip: text;
+    color: transparent;
+}
+
+.lede {
+    max-width: 540px; margin: 0 auto;
+    color: var(--muted); font-size: .98rem; line-height: 1.62;
+    animation: rise .9s .12s var(--ease) both;
+}
+
+/* ============================================================
+   PANEL
+   ============================================================ */
+.panel {
+    position: relative;
+    border-radius: 26px;
+    padding: clamp(20px, 3vw, 32px);
+    border: 1px solid var(--line);
+    background: linear-gradient(180deg, var(--glass-hi), var(--glass-lo));
+    backdrop-filter: blur(26px) saturate(1.2);
+    -webkit-backdrop-filter: blur(26px) saturate(1.2);
+    box-shadow:
+        0 1px 0 rgba(255,255,255,.07) inset,
+        0 40px 90px -46px rgba(0,0,0,1);
+    animation: rise .9s .18s var(--ease) both;
+}
+
+.lbl {
+    display: block;
+    margin: 0 0 10px;
+    font-size: .7rem; font-weight: 700;
+    letter-spacing: .15em; text-transform: uppercase;
+    color: var(--muted-2);
+}
+.lbl.mt { margin-top: 28px; }
+
+/* ---------- input ---------- */
+.input-wrap { position: relative; }
+
+input[type=text] {
+    width: 100%;
+    padding: 16px 18px;
+    font-family: inherit;
+    font-size: 1.02rem;
+    color: var(--ink);
+    background: rgba(0,0,0,.34);
+    border: 1px solid var(--line);
+    border-radius: 16px;
+    transition: border-color .35s var(--ease), box-shadow .45s var(--ease), background .35s var(--ease);
+}
+input[type=text]::placeholder { color: var(--muted-2); }
+input[type=text]:focus {
+    outline: none;
+    border-color: rgba(129,140,248,.6);
+    background: rgba(0,0,0,.5);
+    box-shadow: 0 0 0 4px rgba(99,102,241,.13), 0 0 42px -10px rgba(99,102,241,.75);
+}
+
+/* ---------- live preview ---------- */
+.live {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 8px;
+    margin-top: 12px;
+    min-height: 0;
+    transition: opacity .4s var(--ease);
+}
+.live:empty { display: none; }
+
+.live-pill {
+    display: inline-flex; align-items: center; gap: 8px;
+    padding: 5px 12px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,.04);
+    font-size: .78rem; font-weight: 600; color: var(--muted);
+    font-variant-numeric: tabular-nums;
+    animation: pop .5s var(--ease-spring) both;
+}
+.live-pill .dot {
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--c1); box-shadow: 0 0 10px var(--c1);
+}
+.live-pill b { color: #fff; font-weight: 700; }
+.live-pill .arr { color: var(--muted-2); }
+
+/* ============================================================
+   TABS
+   ============================================================ */
+.tabs { display: grid; grid-template-columns: repeat(5, minmax(0, 1fr)); gap: 10px; }
+
+.tab {
+    position: relative;
+    isolation: isolate;
+    overflow: hidden;
+    text-align: left;
+    padding: 15px 14px;
+    border-radius: 16px;
+    border: 1px solid var(--line);
+    background: linear-gradient(180deg, rgba(255,255,255,.05), rgba(255,255,255,.012));
+    color: var(--ink);
+    font-family: inherit;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform .5s var(--ease), border-color .4s var(--ease), box-shadow .55s var(--ease);
+}
+.tab:hover { transform: translateY(-3px); border-color: var(--line-strong); box-shadow: 0 24px 44px -30px #000; }
+.tab:active { transform: translateY(-1px) scale(.985); transition-duration: .12s; }
+.tab:focus-visible { outline: 2px solid #8b93ff; outline-offset: 3px; }
+
+.tab::after {
+    content: '';
+    position: absolute; top: 0; left: -70%;
+    width: 45%; height: 100%;
+    background: linear-gradient(100deg, transparent, rgba(255,255,255,.2), transparent);
+    transform: skewX(-18deg);
+    transition: left .75s var(--ease);
+    pointer-events: none;
+}
+.tab:hover::after { left: 130%; }
+
+.tab-glow {
+    position: absolute; inset: 0;
+    background: linear-gradient(140deg, var(--c1), var(--c2));
+    opacity: 0;
+    transition: opacity .55s var(--ease);
+}
+.tab.active .tab-glow { opacity: 1; }
+.tab.active {
+    border-color: transparent;
+    box-shadow: 0 26px 48px -26px var(--c1), 0 0 0 1px rgba(255,255,255,.13) inset;
+}
+
+.tab-body { position: relative; display: block; }
+
+.tab-name {
+    display: flex; align-items: center; gap: 8px;
+    font-size: .93rem; font-weight: 700; letter-spacing: -.01em;
+}
+.tab-dot {
+    width: 7px; height: 7px; border-radius: 50%;
+    background: var(--c1); box-shadow: 0 0 10px var(--c1);
+    transition: background .4s var(--ease), box-shadow .4s var(--ease);
+}
+.tab.active .tab-dot { background: #fff; box-shadow: 0 0 14px #fff; }
+
+.tab-sub {
+    display: block;
+    margin-top: 5px;
+    font-size: .69rem; font-weight: 500; line-height: 1.35;
+    color: var(--muted-2);
+    transition: color .4s var(--ease);
+}
+.tab.active .tab-sub { color: rgba(255,255,255,.82); }
+
+/* ============================================================
+   CARDS (shared)
+   ============================================================ */
+.card {
+    position: relative;
+    border-radius: 20px;
+    border: 1px solid var(--line);
+    background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.012));
+    overflow: hidden;
+    animation: rise .75s var(--ease) both;
+    animation-delay: calc(var(--i, 0) * 70ms);
+}
+.card + .card { margin-top: 14px; }
+
+summary {
+    list-style: none;
+    display: flex; align-items: center; gap: 12px;
+    padding: 16px 20px;
+    cursor: pointer;
+    font-size: .95rem; font-weight: 650;
+    color: var(--ink);
+    transition: background .35s var(--ease);
+}
+summary::-webkit-details-marker { display: none; }
+summary:hover { background: rgba(255,255,255,.038); }
+summary:focus-visible { outline: 2px solid #8b93ff; outline-offset: -3px; }
+
+.sum-dot {
+    flex: none;
+    width: 10px; height: 10px; border-radius: 50%;
+    background: linear-gradient(135deg, var(--c1), var(--c2));
+    box-shadow: 0 0 18px -2px var(--c1);
+}
+.sum-title { letter-spacing: -.01em; }
+
+.chev {
+    flex: none;
+    width: 18px; height: 18px;
+    margin-left: auto;
+    color: var(--muted-2);
+    transition: transform .5s var(--ease), color .35s;
+}
+details[open] > summary .chev { transform: rotate(180deg); color: var(--muted); }
+
+.final-pill {
+    margin-left: auto;
+    display: inline-flex; align-items: center; gap: 5px;
+    padding: 5px 13px;
+    border-radius: 999px;
+    border: 1px solid rgba(255,255,255,.15);
+    background: rgba(255,255,255,.1);
+    font-size: .72rem; font-weight: 600; color: #e7e9fb;
+    white-space: nowrap;
+}
+.final-pill b { font-size: .9rem; color: #fff; }
+
+/* ============================================================
+   CHART
+   ============================================================ */
+.chartPanel { margin-top: 26px; }
+.chartPanel:empty { display: none; }
+
+.chart-body {
+    padding: 4px 20px 24px;
+    border-top: 1px solid var(--line);
+    animation: revealBody .55s var(--ease) both;
+}
+.result-body { padding: 20px; animation: revealBody .55s var(--ease) both; }
+
+@keyframes revealBody {
+    from { opacity: 0; transform: translateY(-8px); filter: blur(3px); }
+    to   { opacity: 1; transform: none; filter: none; }
+}
+
+.tagline { margin: 16px 0 0; color: var(--muted); font-size: .89rem; line-height: 1.6; }
+
+.badge {
+    display: inline-flex; align-items: center; gap: 7px;
+    margin-top: 13px; padding: 7px 13px;
+    border-radius: 999px;
+    font-size: .75rem; font-weight: 600;
+}
+.badge.ok  { background: rgba(52,211,153,.1);  color: #6ee7b7; border: 1px solid rgba(52,211,153,.25); }
+.badge.bad { background: rgba(248,113,113,.1); color: #fca5a5; border: 1px solid rgba(248,113,113,.3); }
+
+.sub {
+    margin: 24px 0 10px;
+    font-size: .68rem; font-weight: 700;
+    letter-spacing: .15em; text-transform: uppercase;
+    color: var(--muted-2);
+}
+
+/* ---------- number → letters grid ---------- */
+.num-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(152px, 1fr)); gap: 10px; }
+
+.num-card {
+    padding: 13px;
+    border-radius: 15px;
+    border: 1px solid hsl(var(--h) 70% 62% / .18);
+    background: linear-gradient(180deg, hsl(var(--h) 70% 62% / .1), hsl(var(--h) 70% 62% / .025));
+    transition: transform .5s var(--ease), border-color .4s var(--ease), box-shadow .5s var(--ease);
+    animation: rise .6s var(--ease) both;
+    animation-delay: calc(var(--i, 0) * 45ms + 90ms);
+}
+.num-card:hover {
+    transform: translateY(-4px);
+    border-color: hsl(var(--h) 80% 66% / .45);
+    box-shadow: 0 20px 42px -24px hsl(var(--h) 85% 58% / .95);
+}
+
+.num-top { display: flex; align-items: center; gap: 10px; }
+
+.num-badge {
+    flex: none;
+    width: 38px; height: 38px;
+    display: grid; place-items: center;
+    border-radius: 11px;
+    font-size: 1.02rem; font-weight: 800;
+    color: #0a0a0f;
+    background: linear-gradient(140deg, hsl(var(--h) 92% 76%), hsl(var(--h) 88% 56%));
+    box-shadow: 0 8px 18px -8px hsl(var(--h) 90% 58% / .95);
+}
+
+.planet { font-size: .71rem; font-weight: 600; line-height: 1.3; color: var(--muted); }
+
+.chips { display: flex; flex-wrap: wrap; gap: 5px; margin-top: 11px; }
+
+.chip {
+    min-width: 28px;
+    padding: 4px 6px;
+    text-align: center;
+    font-size: .8rem; font-weight: 700;
+    border-radius: 7px;
+    border: 1px solid hsl(var(--h) 70% 72% / .24);
+    background: rgba(255,255,255,.05);
+    color: hsl(var(--h) 85% 84%);
+    cursor: default;
+    transition: transform .38s var(--ease-spring), background .3s, color .3s, box-shadow .38s;
+}
+.chip:hover {
+    transform: translateY(-3px) scale(1.12);
+    background: hsl(var(--h) 85% 62%);
+    color: #0a0a0f;
+    box-shadow: 0 10px 22px -8px hsl(var(--h) 90% 60%);
+}
+
+.no-letters { font-size: .78rem; line-height: 1.45; color: var(--muted-2); }
+
+.chip.used {
+    background: #ffd166; color: #2a1e00;
+    border-color: #ffd166;
+    box-shadow: 0 0 0 3px rgba(255,209,102,.2), 0 0 20px -4px #ffd166;
+}
+.chip.used:hover { background: #ffd166; color: #2a1e00; }
+
+/* ---------- letter → number grid ---------- */
+.az-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(48px, 1fr)); gap: 6px; }
+
+.az-cell {
+    padding: 7px 0;
+    text-align: center;
+    border-radius: 9px;
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,.03);
+    cursor: default;
+    transition: transform .38s var(--ease-spring), border-color .3s, background .3s, box-shadow .38s;
+    animation: pop .45s var(--ease-spring) both;
+    animation-delay: calc(var(--i, 0) * 12ms + 120ms);
+}
+.az-cell:hover {
+    transform: translateY(-3px);
+    border-color: var(--line-strong);
+    background: rgba(255,255,255,.07);
+}
+
+.az-l { display: block; font-size: .88rem; font-weight: 700; color: #e8e9f5; }
+.az-v { display: block; font-size: .7rem; font-weight: 600; color: var(--c1); }
+
+.az-cell.used {
+    background: rgba(255,209,102,.14);
+    border-color: rgba(255,209,102,.55);
+    box-shadow: 0 0 0 3px rgba(255,209,102,.08);
+}
+.az-cell.used .az-l,
+.az-cell.used .az-v { color: #ffd166; }
+
+/* ---------- rules / notes ---------- */
+.rules { margin: 10px 0 0; padding: 0; list-style: none; display: grid; gap: 9px; }
+.rules li {
+    position: relative;
+    padding-left: 20px;
+    font-size: .86rem; line-height: 1.58;
+    color: #b9bdd4;
+}
+.rules li::before {
+    content: '';
+    position: absolute; left: 4px; top: .58em;
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--c1);
+    box-shadow: 0 0 9px var(--c1);
+}
+
+.note {
+    margin-top: 16px;
+    padding: 13px 15px;
+    border-radius: 12px;
+    border: 1px solid rgba(251,191,36,.24);
+    background: rgba(251,191,36,.07);
+    color: #fcd9a0;
+    font-size: .81rem; line-height: 1.58;
+}
+
+.warn {
+    margin-top: 12px;
+    padding: 13px 15px;
+    border-radius: 12px;
+    border: 1px solid rgba(248,113,113,.24);
+    background: rgba(248,113,113,.07);
+    color: #fbb4b4;
+    font-size: .81rem; line-height: 1.58;
+}
+
+.small { margin: 8px 0 0; font-size: .83rem; line-height: 1.58; color: var(--muted); }
+
+.pill {
+    display: inline-block;
+    margin: 2px 3px 2px 0;
+    padding: 2px 9px;
+    border-radius: 999px;
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,.06);
+    font-size: .76rem; color: #cfd2e6;
+}
+
+/* ============================================================
+   ACTIONS
+   ============================================================ */
+.actions { display: flex; gap: 12px; margin-top: 28px; }
+
+.btn {
+    position: relative;
+    overflow: hidden;
+    font-family: inherit;
+    font-weight: 700;
+    border: none;
+    border-radius: 16px;
+    cursor: pointer;
+    -webkit-tap-highlight-color: transparent;
+    transition: transform .45s var(--ease), box-shadow .55s var(--ease),
+                background .35s var(--ease), color .35s var(--ease), border-color .35s var(--ease);
+}
+.btn:active { transform: scale(.978); }
+.btn:focus-visible { outline: 2px solid #8b93ff; outline-offset: 3px; }
+
+.primary {
+    flex: 1;
+    padding: 17px 24px;
+    font-size: .9rem; letter-spacing: .1em; text-transform: uppercase;
+    color: #fff;
+    background: linear-gradient(135deg, #6366f1, #8b5cf6 52%, #a855f7);
+    box-shadow: 0 22px 44px -22px #7c3aed, 0 1px 0 rgba(255,255,255,.28) inset;
+}
+.primary:hover {
+    transform: translateY(-2px);
+    box-shadow: 0 30px 56px -22px #7c3aed, 0 1px 0 rgba(255,255,255,.34) inset;
+}
+.primary::after {
+    content: '';
+    position: absolute; top: 0; left: -70%;
+    width: 45%; height: 100%;
+    background: linear-gradient(100deg, transparent, rgba(255,255,255,.35), transparent);
+    transform: skewX(-18deg);
+    transition: left .8s var(--ease);
+    pointer-events: none;
+}
+.primary:hover::after { left: 130%; }
+
+.secondary {
+    padding: 17px 28px;
+    font-size: .86rem;
+    color: var(--muted);
+    background: rgba(255,255,255,.05);
+    border: 1px solid var(--line);
+}
+.secondary:hover {
+    transform: translateY(-2px);
+    color: #fff;
+    background: rgba(255,255,255,.09);
+    border-color: var(--line-strong);
+}
+
+/* ============================================================
+   OUTPUT
+   ============================================================ */
+#output { margin-top: 34px; scroll-margin-top: 28px; }
+#output > .card:first-child { margin-top: 0; }
+
+.empty-state {
+    padding: 38px 24px;
+    text-align: center;
+    border-radius: 20px;
+    border: 1px dashed rgba(255,255,255,.12);
+    background: rgba(255,255,255,.014);
+    color: var(--muted-2);
+    font-size: .9rem;
+    line-height: 1.6;
+    animation: rise .8s var(--ease) both;
+}
+
+.section { padding: 22px; }
+
+.section-head { display: flex; align-items: center; gap: 12px; margin-bottom: 16px; }
+.section-head h2 {
+    margin: 0;
+    font-size: 1rem; font-weight: 700; letter-spacing: .01em;
+    color: #fff;
+}
+
+.ghost-btn {
+    margin-left: auto;
+    padding: 8px 15px;
+    border-radius: 10px;
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,.04);
+    color: var(--muted);
+    font-family: inherit;
+    font-size: .77rem; font-weight: 600;
+    cursor: pointer;
+    transition: all .35s var(--ease);
+}
+.ghost-btn:hover {
+    color: #fff;
+    background: rgba(255,255,255,.09);
+    border-color: var(--line-strong);
+    transform: translateY(-1px);
+}
+.ghost-btn:focus-visible { outline: 2px solid #8b93ff; outline-offset: 2px; }
+
+.info-block {
+    padding: 13px 15px;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,.03);
+    font-size: .87rem; line-height: 1.6;
+    color: #c9cce0;
+}
+.info-block p { margin: 0; }
+.info-block p + p { margin-top: 6px; }
+
+/* ---------- character cards ---------- */
+.char-grid {
+    display: grid;
+    grid-template-columns: repeat(auto-fill, minmax(64px, 1fr));
+    gap: 8px;
+    margin-bottom: 6px;
+}
+
+.char-card {
+    padding: 10px 4px;
+    text-align: center;
+    border-radius: 12px;
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,.04);
+    transition: transform .4s var(--ease), border-color .3s, box-shadow .45s var(--ease);
+    animation: pop .5s var(--ease-spring) both;
+    animation-delay: calc(var(--i, 0) * 32ms + 80ms);
+}
+.char-card:hover {
+    transform: translateY(-4px);
+    border-color: rgba(255,255,255,.22);
+    box-shadow: 0 18px 32px -22px #000;
+}
+.char-card.digit {
+    background: rgba(99,102,241,.12);
+    border-color: rgba(99,102,241,.3);
+}
+
+.char-letter { font-size: 1.26rem; font-weight: 800; color: #eef0ff; line-height: 1.2; }
+.char-value  { font-size: .8rem; font-weight: 600; color: var(--muted); }
+
+/* ---------- tables ---------- */
+.tbl-wrap {
+    margin: 6px 0 4px;
+    border-radius: 14px;
+    border: 1px solid var(--line);
+    overflow: hidden;
+    overflow-x: auto;
+}
+table { width: 100%; border-collapse: collapse; font-variant-numeric: tabular-nums; }
+
+th {
+    padding: 11px 10px;
+    font-size: .66rem; font-weight: 700;
+    letter-spacing: .13em; text-transform: uppercase;
+    color: var(--muted-2);
+    background: rgba(255,255,255,.045);
+    border-bottom: 1px solid var(--line);
+    text-align: center;
+    white-space: nowrap;
+}
+td {
+    padding: 10px;
+    text-align: center;
+    font-size: .86rem;
+    color: #d7d9ea;
+    border-bottom: 1px solid rgba(255,255,255,.045);
+}
+tbody tr:last-child td { border-bottom: none; }
+tbody tr { transition: background .25s var(--ease); }
+tbody tr:hover td { background: rgba(255,255,255,.032); }
+
+/* ---------- totals ---------- */
+.total-box {
+    position: relative;
+    overflow: hidden;
+    margin: 18px 0;
+    padding: 26px 22px;
+    border-radius: 18px;
+    text-align: center;
+    color: #fff;
+    background: linear-gradient(140deg, var(--c1), var(--c2));
+    box-shadow: 0 30px 64px -34px var(--c1);
+    animation: rise .7s var(--ease) both;
+    animation-delay: calc(var(--i, 0) * 70ms + 160ms);
+}
+.total-box::after {
+    content: '';
+    position: absolute; inset: 0;
+    background: radial-gradient(120% 90% at 50% -18%, rgba(255,255,255,.4), transparent 62%);
+    pointer-events: none;
+}
+.total-box h3 {
+    position: relative;
+    margin: 0 0 6px;
+    font-size: .72rem; font-weight: 700;
+    letter-spacing: .16em; text-transform: uppercase;
+    opacity: .9;
+}
+.total-number {
+    position: relative;
+    font-size: clamp(3rem, 9vw, 4.2rem);
+    font-weight: 800;
+    line-height: 1.02;
+    letter-spacing: -.035em;
+    font-variant-numeric: tabular-nums;
+    text-shadow: 0 8px 26px rgba(0,0,0,.28);
+}
+.eq {
+    position: relative;
+    margin: 12px 0 0;
+    font-family: var(--mono);
+    font-size: .76rem;
+    line-height: 1.6;
+    opacity: .88;
+    word-break: break-word;
+}
+.total-box.alt { background: linear-gradient(140deg, var(--c2), var(--c1)); }
+
+/* ---------- reduction ---------- */
+.reduce-box {
+    margin: 18px 0;
+    padding: 18px 20px;
+    border-radius: 16px;
+    border: 1px solid var(--line);
+    background: rgba(255,255,255,.028);
+}
+.reduce-box h3 {
+    margin: 0 0 10px;
+    font-size: .68rem; font-weight: 700;
+    letter-spacing: .15em; text-transform: uppercase;
+    color: var(--muted-2);
+}
+.step {
+    display: flex; flex-wrap: wrap; align-items: center; gap: 9px;
+    padding: 7px 0;
+    font-family: var(--mono);
+    font-size: .87rem;
+    color: #cfd2e6;
+    animation: rise .5s var(--ease) both;
+    animation-delay: calc(var(--i, 0) * 90ms + 140ms);
+}
+.step .step-dot {
+    flex: none;
+    width: 6px; height: 6px; border-radius: 50%;
+    background: var(--c1);
+    box-shadow: 0 0 10px var(--c1);
+}
+.step .sep { color: var(--muted-2); }
+.step strong { color: #fff; font-size: 1rem; }
+
+/* ---------- profile ---------- */
+.profile-card {
+    margin-top: 20px;
+    padding: 22px;
+    border-radius: 18px;
+    border: 1px solid var(--line);
+    background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.012));
+    animation: rise .7s var(--ease) both;
+    animation-delay: .2s;
+}
+.profile-header {
+    display: flex; align-items: center; gap: 15px;
+    padding-bottom: 16px; margin-bottom: 16px;
+    border-bottom: 1px solid var(--line);
+}
+.profile-icon {
+    flex: none;
+    width: 58px; height: 58px;
+    display: grid; place-items: center;
+    border-radius: 17px;
+    font-size: 1.4rem; font-weight: 800;
+    color: #0a0a0f;
+    background: linear-gradient(140deg, var(--c1), var(--c2));
+    box-shadow: 0 16px 32px -16px var(--c1);
+}
+.profile-title h3 { margin: 0; font-size: 1.08rem; font-weight: 700; }
+.profile-subtitle { margin: 3px 0 0; font-size: .81rem; color: var(--muted); }
+
+.profile-card p { margin: 12px 0 0; font-size: .87rem; color: #d5d8ea; line-height: 1.55; }
+.profile-card p:first-of-type { margin-top: 0; }
+.profile-card ul {
+    margin: 8px 0 14px;
+    padding: 0;
+    list-style: none;
+    display: grid; gap: 6px;
+}
+.profile-card li {
+    position: relative;
+    padding-left: 18px;
+    font-size: .86rem; line-height: 1.5;
+    color: #c3c6dc;
+}
+.profile-card li::before {
+    content: '';
+    position: absolute; left: 4px; top: .62em;
+    width: 5px; height: 5px; border-radius: 50%;
+    background: var(--c2);
+}
+
+.risk-block {
+    margin: 14px 0;
+    padding: 13px 15px;
+    border-radius: 12px;
+    border: 1px solid rgba(255,183,77,.26);
+    background: rgba(255,183,77,.075);
+    font-size: .86rem; line-height: 1.55;
+    color: #ffd9a3;
+}
+.risk-block p { margin: 0; color: inherit; }
+
+/* ============================================================
+   STALE STATE
+   ============================================================ */
+#output[data-stale="1"]::before {
+    content: "Name or system changed — press Calculate to refresh these results.";
+    display: block;
+    margin-bottom: 14px;
+    padding: 13px 17px;
+    border-radius: 12px;
+    border: 1px solid rgba(251,191,36,.24);
+    background: rgba(251,191,36,.075);
+    color: #fcd9a0;
+    font-size: .82rem; font-weight: 600;
+    animation: rise .5s var(--ease) both;
+}
+#output[data-stale="1"] > .card {
+    opacity: .4;
+    filter: saturate(.55);
+    transition: opacity .4s var(--ease), filter .4s var(--ease);
+}
+
+/* ============================================================
+   KEYFRAMES
+   ============================================================ */
+@keyframes rise {
+    from { opacity: 0; transform: translateY(20px) scale(.988); filter: blur(6px); }
+    to   { opacity: 1; transform: none; filter: none; }
+}
+@keyframes pop {
+    from { opacity: 0; transform: scale(.82); }
+    to   { opacity: 1; transform: scale(1); }
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media (max-width: 880px) {
+    .tabs { grid-template-columns: repeat(2, minmax(0, 1fr)); }
+    .tab:last-child { grid-column: span 2; }
+}
+@media (max-width: 620px) {
+    .panel { border-radius: 22px; }
+    .actions { flex-direction: column-reverse; }
+    .secondary { width: 100%; }
+    .num-grid { grid-template-columns: repeat(auto-fill, minmax(132px, 1fr)); }
+    .char-grid { grid-template-columns: repeat(auto-fill, minmax(56px, 1fr)); }
+    summary { padding: 14px 16px; font-size: .9rem; }
+    .chart-body, .result-body, .section { padding-left: 16px; padding-right: 16px; }
+}
+@media (max-width: 420px) {
+    .tabs { grid-template-columns: 1fr; }
+    .tab:last-child { grid-column: auto; }
+}
+
+@media (prefers-reduced-motion: reduce) {
+    *, *::before, *::after {
+        animation-duration: .001ms !important;
+        animation-delay: 0ms !important;
+        transition-duration: .001ms !important;
+        scroll-behavior: auto !important;
     }
-
-    .particles { position: fixed; top: 0; left: 0; width: 100%; height: 100%; pointer-events: none; z-index: 0; }
-    .particle { position: absolute; width: 4px; height: 4px; background: rgba(255,255,255,0.35); border-radius: 50%; animation: twinkle 6s infinite; }
-    @keyframes twinkle {
-        0%, 100% { opacity: 0; transform: translateY(0); }
-        50% { opacity: 1; transform: translateY(-14px); }
-    }
-    @keyframes slideIn { from { opacity: 0; transform: translateY(-30px); } to { opacity: 1; transform: translateY(0); } }
-    @keyframes fadeIn { from { opacity: 0; transform: scale(0.97); } to { opacity: 1; transform: scale(1); } }
-
-    .container {
-        max-width: 960px;
-        margin: auto;
-        background: rgba(255,255,255,0.95);
-        backdrop-filter: blur(10px);
-        padding: 40px;
-        border-radius: 24px;
-        box-shadow: 0 20px 60px rgba(0,0,0,0.3);
-        position: relative;
-        z-index: 1;
-        animation: slideIn 0.6s ease-out;
-    }
-
-    h1 {
-        text-align: center;
-        font-size: 2.4em;
-        background: linear-gradient(135deg, #667eea, #764ba2);
-        -webkit-background-clip: text;
-        background-clip: text;
-        -webkit-text-fill-color: transparent;
-        margin-bottom: 8px;
-    }
-    .subtitle { text-align: center; color: #666; margin-bottom: 28px; font-size: 1.05em; }
-
-    .lbl {
-        display: block;
-        margin-top: 22px;
-        margin-bottom: 8px;
-        font-weight: 700;
-        color: #444;
-        font-size: 0.9em;
-        text-transform: uppercase;
-        letter-spacing: 0.5px;
-    }
-
-    input[type=text] {
-        width: 100%;
-        padding: 15px;
-        font-size: 17px;
-        border: 2px solid #e0e0e0;
-        border-radius: 12px;
-        transition: all 0.3s;
-        background: #fafafa;
-    }
-    input[type=text]:focus {
-        outline: none;
-        border-color: #667eea;
-        background: #fff;
-        box-shadow: 0 0 0 4px rgba(102,126,234,0.12);
-    }
-
-    /* ---------- method tabs ---------- */
-    .tabs { display: grid; grid-template-columns: repeat(auto-fit, minmax(150px, 1fr)); gap: 10px; }
-    .tab {
-        padding: 14px 10px;
-        font-size: 16px;
-        font-weight: 700;
-        border: 2px solid #e0e0e0;
-        background: #fafafa;
-        color: #444;
-        border-radius: 12px;
-        cursor: pointer;
-        transition: all 0.25s;
-    }
-    .tab small { display: block; font-weight: 500; font-size: 0.72em; opacity: 0.8; margin-top: 3px; }
-    .tab:hover { border-color: var(--c1); transform: translateY(-2px); }
-    .tab.active {
-        background: linear-gradient(135deg, var(--c1), var(--c2));
-        color: #fff;
-        border-color: transparent;
-        box-shadow: 0 6px 18px rgba(0,0,0,0.22);
-        transform: translateY(-2px);
-    }
-
-    .actions { display: flex; gap: 12px; margin-top: 26px; }
-    .primary {
-        flex: 1; padding: 16px; font-size: 18px; font-weight: 700;
-        background: linear-gradient(135deg, #667eea, #764ba2); color: #fff;
-        border: none; border-radius: 12px; cursor: pointer;
-        text-transform: uppercase; letter-spacing: 1px;
-        box-shadow: 0 4px 15px rgba(102,126,234,0.4); transition: all 0.3s;
-    }
-    .primary:hover { transform: translateY(-2px); box-shadow: 0 6px 20px rgba(102,126,234,0.6); }
-    .secondary {
-        padding: 16px 26px; font-size: 16px; font-weight: 700;
-        background: #ececf3; color: #555; border: none; border-radius: 12px; cursor: pointer; transition: all 0.3s;
-    }
-    .secondary:hover { background: #dfdfea; }
-
-    /* ---------- chart panel ---------- */
-    .empty {
-        margin-top: 24px; padding: 26px; text-align: center; color: #777;
-        border: 2px dashed #d5d8ee; border-radius: 16px; background: #fafbff;
-    }
-
-    details.chart-card, details.result {
-        margin-top: 24px;
-        border-radius: 18px;
-        background: #fff;
-        box-shadow: 0 8px 28px rgba(0,0,0,0.12);
-        overflow: hidden;
-        border: 1px solid #eee;
-        animation: fadeIn 0.45s ease-out;
-    }
-    details.chart-card > summary, details.result > summary {
-        cursor: pointer; list-style: none; padding: 18px 24px; color: #fff; font-weight: 700; font-size: 1.1em;
-        background: linear-gradient(135deg, var(--c1), var(--c2));
-        display: flex; align-items: center; gap: 12px;
-    }
-    details > summary::-webkit-details-marker { display: none; }
-    details.chart-card > summary::after { content: '\25BE'; margin-left: auto; transition: transform 0.2s; }
-    details.result > summary::after { content: '\25BE'; transition: transform 0.2s; }
-    details.chart-card:not([open]) > summary::after,
-    details.result:not([open]) > summary::after { transform: rotate(-90deg); }
-    .final-pill { margin-left: auto; background: rgba(255,255,255,0.22); padding: 6px 14px; border-radius: 999px; font-size: 0.9em; }
-
-    .chart-body, .result-body { padding: 22px 24px 26px; }
-    .tagline { color: #555; margin-bottom: 10px; }
-    .sub { margin: 22px 0 8px; color: #764ba2; font-size: 0.95rem; text-transform: uppercase; letter-spacing: 0.5px; }
-
-    .badge { display: inline-block; margin-top: 6px; padding: 8px 14px; border-radius: 999px; font-size: 0.85em; font-weight: 700; }
-    .badge.ok { background: #e6f7ee; color: #0b6b3a; border: 1px solid #b7e4c7; }
-    .badge.bad { background: #fde8e8; color: #9b1c1c; border: 1px solid #f5b5b5; }
-
-    .num-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(160px, 1fr)); gap: 12px; margin-top: 10px; }
-    .num-card { background: #f8f9ff; border-radius: 14px; padding: 14px; border: 2px solid hsl(var(--h) 60% 88%); }
-    .num-badge {
-        width: 42px; height: 42px; border-radius: 12px; display: flex; align-items: center; justify-content: center;
-        font-weight: 900; font-size: 1.4em; color: #fff; background: hsl(var(--h) 65% 50%);
-    }
-    .planet { font-size: 0.8em; font-weight: 700; color: hsl(var(--h) 55% 30%); margin-top: 8px; }
-    .chips { display: flex; flex-wrap: wrap; gap: 6px; margin-top: 10px; }
-    .chip {
-        min-width: 34px; padding: 6px 8px; text-align: center; font-weight: 800; border-radius: 8px;
-        background: #fff; border: 2px solid hsl(var(--h) 60% 80%); color: hsl(var(--h) 55% 28%);
-        transition: all 0.2s; cursor: default;
-    }
-    .chip:hover { transform: translateY(-3px) scale(1.08); }
-    .no-letters { font-size: 0.82em; color: #777; line-height: 1.4; }
-
-    .az-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(54px, 1fr)); gap: 8px; margin-top: 10px; }
-    .az-cell { background: #f8f9ff; border: 2px solid #e6e8f5; border-radius: 10px; text-align: center; padding: 6px 0; transition: all 0.2s; cursor: default; }
-    .az-cell:hover { transform: translateY(-3px); }
-    .az-l { display: block; font-weight: 900; font-size: 1.15em; color: #444; }
-    .az-v { display: block; font-weight: 700; font-size: 0.95em; color: var(--c1); }
-
-    .chip.used, .az-cell.used {
-        background: #ffe066; border-color: #f5b700; color: #4a3800; box-shadow: 0 0 0 3px rgba(245,183,0,0.25);
-    }
-    .az-cell.used .az-l, .az-cell.used .az-v { color: #4a3800; }
-
-    .rules { margin: 8px 0 0; padding-left: 20px; }
-    .rules li { margin: 7px 0; line-height: 1.55; color: #444; }
-    .note { margin-top: 14px; padding: 12px 14px; background: #fff3cd; border-left: 4px solid #ffc107; border-radius: 10px; color: #5c4700; font-size: 0.92em; line-height: 1.5; }
-
-    /* ---------- results ---------- */
-    .section {
-        margin-top: 28px; padding: 22px;
-        background: linear-gradient(135deg, #f5f7fa 0%, #c3cfe2 100%);
-        border-radius: 18px; border-left: 5px solid #667eea; animation: fadeIn 0.5s ease-out;
-    }
-    .section h2 { color: #667eea; margin-bottom: 12px; font-size: 1.4em; }
-    .info-block { background: #f8f9ff; padding: 14px 16px; border-radius: 10px; margin: 12px 0; border-left: 4px solid #667eea; }
-    .risk-block { background: #fff3cd; padding: 14px 16px; border-radius: 10px; margin: 14px 0; border-left: 4px solid #ffc107; }
-    .small { font-size: 0.9em; color: #555; margin-top: 6px; }
-    .pill { display: inline-block; padding: 2px 10px; background: #e9eaf7; border-radius: 999px; font-size: 0.9em; }
-    .warn { margin-top: 12px; padding: 12px 14px; background: #fde8e8; border-left: 4px solid #e03131; border-radius: 10px; color: #7a1414; font-size: 0.92em; line-height: 1.5; }
-
-    .char-grid { display: grid; grid-template-columns: repeat(auto-fill, minmax(72px, 1fr)); gap: 10px; margin: 12px 0 18px; }
-    .char-card { background: #fff; padding: 12px 6px; border-radius: 12px; text-align: center; box-shadow: 0 2px 8px rgba(0,0,0,0.08); border: 2px solid #f0f0f0; transition: all 0.25s; }
-    .char-card:hover { transform: translateY(-5px); border-color: var(--c1); box-shadow: 0 6px 18px rgba(0,0,0,0.15); }
-    .char-card.digit { background: #f3f7ff; }
-    .char-letter { font-size: 1.8em; font-weight: 900; color: var(--c1); }
-    .char-value { font-size: 1.15em; font-weight: 700; color: #777; }
-
-    .tbl-wrap { overflow-x: auto; margin: 6px 0 18px; border-radius: 12px; box-shadow: 0 4px 12px rgba(0,0,0,0.08); }
-    table { width: 100%; border-collapse: collapse; }
-    th, td { padding: 11px; text-align: center; }
-    th { background: linear-gradient(135deg, var(--c1, #667eea), var(--c2, #764ba2)); color: #fff; font-size: 0.85em; text-transform: uppercase; letter-spacing: 0.5px; }
-    td { background: #fff; border-bottom: 1px solid #f0f0f0; }
-    tr:hover td { background: #f8f9ff; }
-    .summary table { margin-top: 6px; border-radius: 12px; overflow: hidden; }
-
-    .total-box {
-        background: linear-gradient(135deg, var(--c1), var(--c2)); color: #fff; padding: 22px; border-radius: 16px;
-        text-align: center; margin: 16px 0; box-shadow: 0 8px 25px rgba(0,0,0,0.2);
-    }
-    .total-box.alt { background: linear-gradient(135deg, var(--c2), var(--c1)); }
-    .total-box h3 { margin: 0 0 6px; font-size: 1.05em; opacity: 0.92; }
-    .total-number { font-size: 3.6em; font-weight: 900; text-shadow: 0 4px 10px rgba(0,0,0,0.2); line-height: 1.1; }
-    .eq { opacity: 0.92; margin-top: 8px; overflow-wrap: anywhere; font-family: Consolas, monospace; }
-
-    .reduce-box { background: #f8f9ff; border: 2px solid #e6e8f5; border-radius: 14px; padding: 16px 20px; margin: 16px 0; }
-    .reduce-box h3 { color: #764ba2; font-size: 1em; margin-bottom: 8px; text-transform: uppercase; letter-spacing: 0.5px; }
-    .step { font-family: Consolas, monospace; font-size: 1.1em; margin: 6px 0; color: #333; }
-
-    .profile-card { background: #fff; padding: 22px; border-radius: 16px; margin-top: 18px; box-shadow: 0 4px 15px rgba(0,0,0,0.08); border: 2px solid #f0f0f0; }
-    .profile-header { display: flex; align-items: center; gap: 15px; margin-bottom: 16px; padding-bottom: 14px; border-bottom: 2px solid #f0f0f0; }
-    .profile-icon {
-        width: 60px; height: 60px; flex-shrink: 0; background: linear-gradient(135deg, var(--c1), var(--c2)); border-radius: 50%;
-        display: flex; align-items: center; justify-content: center; color: #fff; font-size: 1.9em; font-weight: 900;
-    }
-    .profile-title h3 { color: #333; font-size: 1.3em; }
-    .profile-subtitle { color: #888; font-size: 0.9em; margin-top: 3px; }
-    .profile-card ul { margin: 10px 0; padding-left: 20px; }
-    .profile-card li { margin: 6px 0; line-height: 1.5; color: #555; }
-
-    /* ---------- stale results ---------- */
-    #output[data-stale="1"]::before {
-        content: "Name or method changed. Press Calculate to refresh these results.";
-        display: block; margin-top: 26px; padding: 12px 16px; background: #fff3cd; border-left: 4px solid #ffc107;
-        border-radius: 10px; color: #6b5200; font-weight: 600;
-    }
-    #output[data-stale="1"] > * { opacity: 0.45; }
-
-    @media (max-width: 768px) {
-        .container { padding: 22px; }
-        h1 { font-size: 1.8em; }
-        .total-number { font-size: 2.8em; }
-    }
-    @media (prefers-reduced-motion: reduce) {
-        * { animation: none !important; transition: none !important; }
-    }
+    .blob { animation: none !important; }
+}
 </style>
 </head>
 
 <body>
 
-<div class="particles" id="particles" aria-hidden="true"></div>
-
-<div class="container">
-    <h1>Name → Number Calculator</h1>
-    <p class="subtitle">Normal alphabet math and three numerology systems, each with its own letter chart</p>
-
-    <label class="lbl" for="nameInput">Enter name (letters A–Z and digits 0–9 are counted)</label>
-    <input type="text" id="nameInput" placeholder="Type a name..." autocomplete="off">
-
-    <span class="lbl">Select method (its letter chart appears below)</span>
-    <div class="tabs" id="tabs">
-        <button type="button" class="tab" data-method="normal" aria-pressed="false" style="--c1:#3b82f6;--c2:#1d4ed8">Normal<small>A = 1 … Z = 26</small></button>
-        <button type="button" class="tab" data-method="vedic" aria-pressed="false" style="--c1:#f59e0b;--c2:#ea580c">Vedic<small>Chaldean letters + grahas</small></button>
-        <button type="button" class="tab" data-method="chaldean" aria-pressed="false" style="--c1:#8b5cf6;--c2:#6d28d9">Chaldean<small>Values 1–8, no letter is 9</small></button>
-        <button type="button" class="tab" data-method="pythagorean" aria-pressed="false" style="--c1:#14b8a6;--c2:#0f766e">Pythagorean<small>1–9 in alphabet order</small></button>
-        <button type="button" class="tab" data-method="all" aria-pressed="false" style="--c1:#667eea;--c2:#764ba2">Compare all<small>All four side by side</small></button>
-    </div>
-
-    <div id="chartPanel"></div>
-
-    <div class="actions">
-        <button type="button" class="primary" id="calcBtn">Calculate</button>
-        <button type="button" class="secondary" id="resetBtn">Reset</button>
-    </div>
-
-    <div id="output"></div>
+<!-- ambient layers -->
+<div class="bg" aria-hidden="true">
+    <span class="blob b1"></span>
+    <span class="blob b2"></span>
+    <span class="blob b3"></span>
+    <span class="blob b4"></span>
 </div>
+<div class="grid-overlay" aria-hidden="true"></div>
+<div class="grain" aria-hidden="true"></div>
+
+<main class="shell">
+
+    <header class="hero">
+        <span class="eyebrow"><i></i>Numerology Engine</span>
+        <h1>Name <em>to</em> Number</h1>
+        <p class="lede">
+            One name, four systems. Every letter chart is drawn from the exact same
+            table the maths uses — so the chart and the result can never disagree.
+        </p>
+    </header>
+
+    <section class="panel">
+
+        <label class="lbl" for="nameInput">The name</label>
+        <div class="input-wrap">
+            <input type="text" id="nameInput" placeholder="Type a name…" autocomplete="off" spellcheck="false">
+        </div>
+        <div class="live" id="live" aria-live="off"></div>
+
+        <span class="lbl mt">Choose a system</span>
+        <div class="tabs" id="tabs" role="group" aria-label="Calculation system">
+            <button type="button" class="tab" data-method="normal" aria-pressed="false" style="--c1:#4f8cff;--c2:#1d4ed8">
+                <span class="tab-glow"></span>
+                <span class="tab-body">
+                    <span class="tab-name"><span class="tab-dot"></span>Normal</span>
+                    <span class="tab-sub">A = 1 … Z = 26</span>
+                </span>
+            </button>
+            <button type="button" class="tab" data-method="vedic" aria-pressed="false" style="--c1:#fbbf24;--c2:#ea580c">
+                <span class="tab-glow"></span>
+                <span class="tab-body">
+                    <span class="tab-name"><span class="tab-dot"></span>Vedic</span>
+                    <span class="tab-sub">Chaldean letters + grahas</span>
+                </span>
+            </button>
+            <button type="button" class="tab" data-method="chaldean" aria-pressed="false" style="--c1:#a78bfa;--c2:#7c3aed">
+                <span class="tab-glow"></span>
+                <span class="tab-body">
+                    <span class="tab-name"><span class="tab-dot"></span>Chaldean</span>
+                    <span class="tab-sub">Values 1–8, no letter is 9</span>
+                </span>
+            </button>
+            <button type="button" class="tab" data-method="pythagorean" aria-pressed="false" style="--c1:#2dd4bf;--c2:#0f766e">
+                <span class="tab-glow"></span>
+                <span class="tab-body">
+                    <span class="tab-name"><span class="tab-dot"></span>Pythagorean</span>
+                    <span class="tab-sub">1–9 in alphabet order</span>
+                </span>
+            </button>
+            <button type="button" class="tab" data-method="all" aria-pressed="false" style="--c1:#818cf8;--c2:#c084fc">
+                <span class="tab-glow"></span>
+                <span class="tab-body">
+                    <span class="tab-name"><span class="tab-dot"></span>Compare all</span>
+                    <span class="tab-sub">All four, side by side</span>
+                </span>
+            </button>
+        </div>
+
+        <div class="chartPanel" id="chartPanel"></div>
+
+        <div class="actions">
+            <button type="button" class="btn primary" id="calcBtn">Calculate</button>
+            <button type="button" class="btn secondary" id="resetBtn">Reset</button>
+        </div>
+
+    </section>
+
+    <div id="output" aria-live="polite"></div>
+
+</main>
 
 <script>
-// ---------- floating particles ----------
-const particlesContainer = document.getElementById('particles');
-for (let i = 0; i < 30; i++) {
-    const p = document.createElement('div');
-    p.className = 'particle';
-    p.style.left = Math.random() * 100 + '%';
-    p.style.top = Math.random() * 100 + '%';
-    p.style.animationDelay = Math.random() * 6 + 's';
-    p.style.animationDuration = (Math.random() * 3 + 3) + 's';
-    particlesContainer.appendChild(p);
-}
-
+/* ============================================================
+   HELPERS
+   ============================================================ */
 const ORDER = ['normal', 'vedic', 'chaldean', 'pythagorean'];
+const reduceMotion = window.matchMedia('(prefers-reduced-motion: reduce)').matches;
 
 function esc(s) {
-    return String(s).replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
+    return String(s)
+        .replace(/&/g, '&amp;').replace(/</g, '&lt;').replace(/>/g, '&gt;')
         .replace(/"/g, '&quot;').replace(/'/g, '&#39;');
 }
 
-// =====================================================================
-// LETTER TABLES — single source of truth.
-// The chart you see and the maths used for calculation are BOTH built
-// from these objects, so they can never disagree with each other.
-// Format:  number -> letters that carry that number
-// =====================================================================
+const CHEV = '<svg class="chev" viewBox="0 0 24 24" fill="none" stroke="currentColor" ' +
+             'stroke-width="2" stroke-linecap="round" stroke-linejoin="round" aria-hidden="true">' +
+             '<path d="M6 9l6 6 6-6"/></svg>';
+
+/* ============================================================
+   LETTER TABLES — single source of truth.
+   The chart and the maths are both built from these objects,
+   so they can never disagree.
+   ============================================================ */
 const NORMAL_GROUPS = {};
 for (let i = 0; i < 26; i++) NORMAL_GROUPS[i + 1] = String.fromCharCode(65 + i);
 
 const PYTHAGOREAN_GROUPS = {
-    1: 'AJS', 2: 'BKT', 3: 'CLU', 4: 'DMV', 5: 'ENW', 6: 'FOX', 7: 'GPY', 8: 'HQZ', 9: 'IR'
+    1: 'AJS', 2: 'BKT', 3: 'CLU', 4: 'DMV', 5: 'ENW',
+    6: 'FOX', 7: 'GPY', 8: 'HQZ', 9: 'IR'
 };
 
-// Classic Chaldean (Cheiro) chart. 9 is intentionally empty: no letter carries 9.
-// Vedic below deliberately reuses this exact table (see note shown in the Vedic chart).
+/* Classic Chaldean (Cheiro). 9 is intentionally empty. */
 const CHALDEAN_GROUPS = {
-    1: 'AIJQY', 2: 'BKR', 3: 'CGLS', 4: 'DMT', 5: 'EHNX', 6: 'UVW', 7: 'OZ', 8: 'FP', 9: ''
+    1: 'AIJQY', 2: 'BKR', 3: 'CGLS', 4: 'DMT', 5: 'EHNX',
+    6: 'UVW', 7: 'OZ', 8: 'FP', 9: ''
 };
 
-// Vedic planetary rulers (graha) for numbers 1–9
 const GRAHA = {
     1: 'Surya (Sun)', 2: 'Chandra (Moon)', 3: 'Guru (Jupiter)', 4: 'Rahu (North Node)',
-    5: 'Budh (Mercury)', 6: 'Shukra (Venus)', 7: 'Ketu (South Node)', 8: 'Shani (Saturn)', 9: 'Mangal (Mars)'
+    5: 'Budh (Mercury)', 6: 'Shukra (Venus)', 7: 'Ketu (South Node)', 8: 'Shani (Saturn)',
+    9: 'Mangal (Mars)'
 };
 
-const DIGIT_RULE = 'Digits you type count at face value (a 7 counts as 7). Spaces and symbols are ignored.';
-const MASTER_RULE = 'Reduction adds the digits repeatedly. 11 and 22 are kept as master numbers (teachers differ on master numbers; some also keep 33).';
+const DIGIT_RULE  = 'Digits you type count at face value (a 7 counts as 7). Spaces and symbols are ignored.';
+const MASTER_RULE = 'Reduction adds digits repeatedly. 11 and 22 are kept as master numbers (teachers differ; some also keep 33).';
 
 const SYSTEMS = {
     normal: {
         key: 'normal', label: 'Normal Alphabet Math', short: 'Normal', kind: 'sequence',
-        c1: '#3b82f6', c2: '#1d4ed8', groups: NORMAL_GROUPS, keepMaster: false, graha: false,
+        c1: '#4f8cff', c2: '#1d4ed8', groups: NORMAL_GROUPS, keepMaster: false, graha: false,
         totalLabel: 'Total sum', finalLabel: 'Reduced to',
         tagline: 'Each letter equals its position in the alphabet.',
         rules: [
-            'A = 1, B = 2, C = 3 ... Z = 26.',
+            'A = 1, B = 2, C = 3 … Z = 26.',
             DIGIT_RULE,
             'The total is reduced to a single digit by adding its digits repeatedly. This mode has no master numbers.'
         ],
@@ -344,26 +1058,26 @@ const SYSTEMS = {
     },
     vedic: {
         key: 'vedic', label: 'Vedic Numerology', short: 'Vedic', kind: 'groups',
-        c1: '#f59e0b', c2: '#ea580c', groups: CHALDEAN_GROUPS, keepMaster: true, graha: true,
+        c1: '#fbbf24', c2: '#ea580c', groups: CHALDEAN_GROUPS, keepMaster: true, graha: true,
         totalLabel: 'Total (compound number)', finalLabel: 'Final number (Namank)',
         tagline: 'Indian (Ank Jyotish) name numerology: Chaldean letter groups, read through the nine grahas.',
         rules: [
-            'Letters use the Chaldean (Cheiro) groups shown above, the chart used for Roman-letter names in Indian numerology. Letters carry values 1–8 only.',
+            'Letters use the Chaldean (Cheiro) groups, the chart used for Roman-letter names in Indian numerology. Letters carry values 1–8 only.',
             '9 (Mangal, Mars) has no letters. It appears only as a total or a final result.',
             'Every number is ruled by a graha (planet), shown on each card.',
             DIGIT_RULE,
             'The raw total is the compound number. Reducing it gives the name number (Namank).',
             MASTER_RULE
         ],
-        note: 'No single universal Vedic letter table exists for Roman letters, and some websites print variants. This tool uses the Chaldean (Cheiro) letter groups with the Vedic graha rulers.'
+        note: 'No single universal Vedic letter table exists for Roman letters, and some sites print variants. This tool uses the Chaldean (Cheiro) groups with the Vedic graha rulers.'
     },
     chaldean: {
         key: 'chaldean', label: 'Chaldean Numerology', short: 'Chaldean', kind: 'groups',
-        c1: '#8b5cf6', c2: '#6d28d9', groups: CHALDEAN_GROUPS, keepMaster: true, graha: false,
+        c1: '#a78bfa', c2: '#7c3aed', groups: CHALDEAN_GROUPS, keepMaster: true, graha: false,
         totalLabel: 'Total (compound number)', finalLabel: 'Final number (name number)',
         tagline: 'Letters are grouped by sound vibration, not alphabet order. Values run 1–8 only.',
         rules: [
-            'Classic Cheiro chart: letters are grouped by sound, not by alphabet position. Letters carry values 1–8 only.',
+            'Classic Cheiro chart: letters are grouped by sound, not alphabet position. Values run 1–8 only.',
             '9 is treated as sacred: no letter carries it. It appears only as a total or a final result.',
             DIGIT_RULE,
             'The raw total is the compound number. Reducing it gives the name number.',
@@ -373,7 +1087,7 @@ const SYSTEMS = {
     },
     pythagorean: {
         key: 'pythagorean', label: 'Pythagorean Numerology', short: 'Pythagorean', kind: 'groups',
-        c1: '#14b8a6', c2: '#0f766e', groups: PYTHAGOREAN_GROUPS, keepMaster: true, graha: false,
+        c1: '#2dd4bf', c2: '#0f766e', groups: PYTHAGOREAN_GROUPS, keepMaster: true, graha: false,
         totalLabel: 'Total sum', finalLabel: 'Final number',
         tagline: 'Letters run through 1–9 in alphabet order, then the cycle repeats.',
         rules: [
@@ -385,7 +1099,7 @@ const SYSTEMS = {
     }
 };
 
-// Build the letter -> number lookup from the groups and verify it.
+/* Build & verify letter → number maps */
 function buildMap(groups) {
     const map = {};
     const issues = [];
@@ -410,76 +1124,79 @@ Object.keys(SYSTEMS).forEach(k => {
     SYSTEMS[k].ok = b.issues.length === 0;
 });
 
-// ---------- number profiles ----------
+/* ============================================================
+   NUMBER PROFILES
+   ============================================================ */
 const numberProfiles = {
-  0:{title:"The Amplifier",what:"Potential, emptiness, magnifier",does:"Boosts whatever it touches",
-    use:["Starting fresh","Wanting flexibility","Supporting another number"],
-    avoid:["You need stability","You feel lost or ungrounded"],
-    risk:"0 has no direction. It only amplifies."},
+    0: { title: 'The Amplifier', what: 'Potential, emptiness, magnifier', does: 'Boosts whatever it touches',
+         use: ['Starting fresh', 'Wanting flexibility', 'Supporting another number'],
+         avoid: ['You need stability', 'You feel lost or ungrounded'],
+         risk: '0 has no direction. It only amplifies.' },
 
-  1:{title:"The Initiator",what:"Leadership, ego, beginnings",does:"Pushes action and identity",
-    use:["Starting something new","Building confidence","Taking control"],
-    avoid:["You're angry or impulsive","Teamwork is required"],
-    risk:"Ego clashes, loneliness"},
+    1: { title: 'The Initiator', what: 'Leadership, ego, beginnings', does: 'Pushes action and identity',
+         use: ['Starting something new', 'Building confidence', 'Taking control'],
+         avoid: ['You are angry or impulsive', 'Teamwork is required'],
+         risk: 'Ego clashes, loneliness' },
 
-  2:{title:"The Harmonizer",what:"Balance, emotions, partnership",does:"Softens situations",
-    use:["Relationships matter","Negotiation is needed","Healing emotional tension"],
-    avoid:["Decisive action is required","You feel emotionally weak"],
-    risk:"Overthinking, dependence"},
+    2: { title: 'The Harmonizer', what: 'Balance, emotions, partnership', does: 'Softens situations',
+         use: ['Relationships matter', 'Negotiation is needed', 'Healing emotional tension'],
+         avoid: ['Decisive action is required', 'You feel emotionally weak'],
+         risk: 'Overthinking, dependence' },
 
-  3:{title:"The Communicator",what:"Creativity, ideas, expression",does:"Improves flow and mood",
-    use:["Learning","Content creation","Social visibility"],
-    avoid:["You need discipline","Long boring tasks exist"],
-    risk:"Distraction, unfinished work"},
+    3: { title: 'The Communicator', what: 'Creativity, ideas, expression', does: 'Improves flow and mood',
+         use: ['Learning', 'Content creation', 'Social visibility'],
+         avoid: ['You need discipline', 'Long boring tasks exist'],
+         risk: 'Distraction, unfinished work' },
 
-  4:{title:"The Foundation",what:"Structure, order, systems",does:"Builds slowly but solidly",
-    use:["Building routines","Studying","Creating discipline"],
-    avoid:["You feel stuck or depressed","Creativity is needed"],
-    risk:"Rigidity, boredom"},
+    4: { title: 'The Foundation', what: 'Structure, order, systems', does: 'Builds slowly but solidly',
+         use: ['Building routines', 'Studying', 'Creating discipline'],
+         avoid: ['You feel stuck or depressed', 'Creativity is needed'],
+         risk: 'Rigidity, boredom' },
 
-  5:{title:"The Explorer",what:"Change, movement, curiosity",does:"Breaks patterns",
-    use:["You feel stagnant","Exploring options","Short-term growth"],
-    avoid:["You need consistency","Making long-term commitments"],
-    risk:"Chaos, impulsive mistakes"},
+    5: { title: 'The Explorer', what: 'Change, movement, curiosity', does: 'Breaks patterns',
+         use: ['You feel stagnant', 'Exploring options', 'Short-term growth'],
+         avoid: ['You need consistency', 'Making long-term commitments'],
+         risk: 'Chaos, impulsive mistakes' },
 
-  6:{title:"The Builder",what:"Responsibility, care, harmony",does:"Stabilizes life",
-    use:["Creating comfort","Long-term work","Improving daily life"],
-    avoid:["You already feel burdened","You're being taken for granted"],
-    risk:"Over-giving, burnout"},
+    6: { title: 'The Builder', what: 'Responsibility, care, harmony', does: 'Stabilizes life',
+         use: ['Creating comfort', 'Long-term work', 'Improving daily life'],
+         avoid: ['You already feel burdened', 'You are being taken for granted'],
+         risk: 'Over-giving, burnout' },
 
-  7:{title:"The Thinker",what:"Analysis, depth, solitude",does:"Sharpens insight",
-    use:["Researching","Self-reflection","Skill mastery"],
-    avoid:["Social engagement is required","You're already isolated"],
-    risk:"Overthinking, detachment"},
+    7: { title: 'The Thinker', what: 'Analysis, depth, solitude', does: 'Sharpens insight',
+         use: ['Researching', 'Self-reflection', 'Skill mastery'],
+         avoid: ['Social engagement is required', 'You are already isolated'],
+         risk: 'Overthinking, detachment' },
 
-  8:{title:"The Powerhouse",what:"Authority, money, execution",does:"Converts effort into results",
-    use:["Career focus","Business","Long-term ambition"],
-    avoid:["You're emotionally unstable","You crave freedom"],
-    risk:"Stress, control issues"},
+    8: { title: 'The Powerhouse', what: 'Authority, money, execution', does: 'Converts effort into results',
+         use: ['Career focus', 'Business', 'Long-term ambition'],
+         avoid: ['You are emotionally unstable', 'You crave freedom'],
+         risk: 'Stress, control issues' },
 
-  9:{title:"The Transformer",what:"Endings, wisdom, service",does:"Forces growth through release",
-    use:["Ending cycles","Healing","Personal transformation"],
-    avoid:["Building foundations","Seeking stability"],
-    risk:"Emotional exhaustion"},
+    9: { title: 'The Transformer', what: 'Endings, wisdom, service', does: 'Forces growth through release',
+         use: ['Ending cycles', 'Healing', 'Personal transformation'],
+         avoid: ['Building foundations', 'Seeking stability'],
+         risk: 'Emotional exhaustion' },
 
-  11:{title:"Master Intuitive",what:"Vision, intuition, inspiration",does:"Connects insight with purpose",
-    use:["Spiritual growth","Creative vision"],
-    avoid:["Grounded execution needed"],
-    risk:"Mental overload"},
+    11: { title: 'Master Intuitive', what: 'Vision, intuition, inspiration', does: 'Connects insight with purpose',
+          use: ['Spiritual growth', 'Creative vision'],
+          avoid: ['Grounded execution needed'],
+          risk: 'Mental overload' },
 
-  22:{title:"Master Builder",what:"Large-scale vision, structure",does:"Turns dreams into systems",
-    use:["Long-term creation","Leadership"],
-    avoid:["Short-term thinking"],
-    risk:"Pressure and burnout"}
+    22: { title: 'Master Builder', what: 'Large-scale vision, structure', does: 'Turns dreams into systems',
+          use: ['Long-term creation', 'Leadership'],
+          avoid: ['Short-term thinking'],
+          risk: 'Pressure and burnout' }
 };
 
-// ---------- maths ----------
+/* ============================================================
+   MATHS
+   ============================================================ */
 function digitRoot(n) {
     while (n > 9) n = String(n).split('').reduce((a, b) => a + Number(b), 0);
     return n;
 }
 
-// Adds digits repeatedly. If keepMaster, stops at 11 or 22.
 function reduce(total, keepMaster) {
     const steps = [];
     let n = total;
@@ -490,7 +1207,7 @@ function reduce(total, keepMaster) {
         steps.push({ from: n, expr: digits.join(' + '), to: s });
         n = s;
     }
-    return { final: n, steps: steps, masterKept: keepMaster && (n === 11 || n === 22) };
+    return { final: n, steps, masterKept: keepMaster && (n === 11 || n === 22) };
 }
 
 function parseInput(raw) {
@@ -500,7 +1217,7 @@ function parseInput(raw) {
         if (/^[A-Za-z0-9]$/.test(ch)) chars.push(ch.toUpperCase());
         else if (!ignored.includes(ch)) ignored.push(ch);
     });
-    return { chars: chars, ignored: ignored };
+    return { chars, ignored };
 }
 
 function analyze(sys, chars) {
@@ -509,163 +1226,323 @@ function analyze(sys, chars) {
         const isDigit = c >= '0' && c <= '9';
         const v = isDigit ? Number(c) : sys.map[c];
         running += v;
-        return { n: i + 1, c: c, v: v, running: running, isDigit: isDigit };
+        return { n: i + 1, c, v, running, isDigit };
     });
-    return { rows: rows, total: running, red: reduce(running, sys.keepMaster) };
+    return { rows, total: running, red: reduce(running, sys.keepMaster) };
 }
 
 function showChar(ch) {
     return ch === ' ' ? 'space' : (/\s/.test(ch) ? 'whitespace' : ch);
 }
 
-// ---------- chart rendering ----------
-function numCardHTML(sys, n) {
+/* ============================================================
+   CHART RENDERING
+   ============================================================ */
+function numCardHTML(sys, n, k) {
     const letters = sys.groups[n] || '';
-    const hue = (n - 1) * 36;
+    const hue = (n - 1) * 40;
     const planet = sys.graha ? '<div class="planet">' + esc(GRAHA[n]) + '</div>' : '';
     const chips = letters
-        ? Array.from(letters).map(L => '<span class="chip" data-letter="' + L + '" title="' + L + ' → ' + n + '">' + L + '</span>').join('')
-        : '<span class="no-letters">No letter carries ' + n + '. It appears only as a total or result.</span>';
-    return '<div class="num-card" style="--h:' + hue + '"><div class="num-badge">' + n + '</div>' + planet +
-           '<div class="chips">' + chips + '</div></div>';
+        ? Array.from(letters).map(L =>
+              '<span class="chip" data-letter="' + L + '" title="' + L + ' → ' + n + '">' + L + '</span>'
+          ).join('')
+        : '<span class="no-letters">No letter carries ' + n + ' — it appears only as a total or a result.</span>';
+
+    return '<div class="num-card" style="--h:' + hue + ';--i:' + k + '">' +
+               '<div class="num-top"><span class="num-badge">' + n + '</span>' + planet + '</div>' +
+               '<div class="chips">' + chips + '</div>' +
+           '</div>';
 }
 
 function azHTML(sys) {
     let h = '<div class="az-grid">';
-    for (let c = 65; c <= 90; c++) {
+    for (let c = 65, k = 0; c <= 90; c++, k++) {
         const L = String.fromCharCode(c);
         const v = sys.map[L];
-        h += '<div class="az-cell" data-letter="' + L + '" title="' + L + ' → ' + v + '"><span class="az-l">' + L + '</span><span class="az-v">' + v + '</span></div>';
+        h += '<div class="az-cell" data-letter="' + L + '" style="--i:' + k + '" ' +
+             'title="' + L + ' → ' + v + '">' +
+             '<span class="az-l">' + L + '</span><span class="az-v">' + v + '</span></div>';
     }
     return h + '</div>';
 }
 
-function chartHTML(sys) {
+function chartHTML(sys, idx) {
     const badge = sys.ok
-        ? '<div class="badge ok">Table check passed: all 26 letters mapped, each exactly once</div>'
+        ? '<div class="badge ok">✓ Table verified — all 26 letters mapped exactly once</div>'
         : '<div class="badge bad">Table check failed: ' + esc(sys.issues.join('; ')) + '</div>';
 
     let grid = '';
     if (sys.ok && sys.kind === 'groups') {
-        grid = '<h4 class="sub">Chart: number → letters</h4><div class="num-grid">' +
-               [1, 2, 3, 4, 5, 6, 7, 8, 9].map(n => numCardHTML(sys, n)).join('') + '</div>';
+        grid = '<h4 class="sub">Chart · number → letters</h4><div class="num-grid">' +
+               [1, 2, 3, 4, 5, 6, 7, 8, 9].map((n, k) => numCardHTML(sys, n, k)).join('') +
+               '</div>';
     }
-    const az = sys.ok ? '<h4 class="sub">Lookup: letter → number</h4>' + azHTML(sys) : '';
+
+    const az = sys.ok ? '<h4 class="sub">Lookup · letter → number</h4>' + azHTML(sys) : '';
+
     const rules = '<h4 class="sub">How the conversion works</h4><ul class="rules">' +
                   sys.rules.map(r => '<li>' + r + '</li>').join('') + '</ul>';
+
     const note = sys.note ? '<div class="note">' + sys.note + '</div>' : '';
 
-    return '<details class="chart-card" open style="--c1:' + sys.c1 + ';--c2:' + sys.c2 + '">' +
-           '<summary>' + esc(sys.label) + ': letter to number chart</summary>' +
-           '<div class="chart-body"><p class="tagline">' + sys.tagline + '</p>' + badge + grid + az + rules + note + '</div></details>';
+    return '<details class="card chart-card" open style="--c1:' + sys.c1 + ';--c2:' + sys.c2 + ';--i:' + idx + '">' +
+               '<summary>' +
+                   '<span class="sum-dot"></span>' +
+                   '<span class="sum-title">' + esc(sys.label) + '</span>' +
+                   '<span class="final-pill" style="opacity:.75">letter chart</span>' +
+                   CHEV +
+               '</summary>' +
+               '<div class="chart-body">' +
+                   '<p class="tagline">' + sys.tagline + '</p>' +
+                   badge + grid + az + rules + note +
+               '</div>' +
+           '</details>';
 }
 
-// ---------- result rendering ----------
+/* ============================================================
+   RESULT RENDERING
+   ============================================================ */
 function reductionHTML(a) {
     const red = a.red;
+
     if (!red.steps.length) {
-        return red.masterKept
-            ? '<p class="small">' + a.total + ' is a master number, so it is kept as ' + a.total + '.</p>'
-            : '<p class="small">' + a.total + ' is already a single digit, so no reduction is needed.</p>';
+        return '<p class="small">' + (
+            red.masterKept
+                ? a.total + ' is a master number, so it is kept as ' + a.total + '.'
+                : a.total + ' is already a single digit — no reduction needed.'
+        ) + '</p>';
     }
-    const steps = red.steps.map(s =>
-        '<div class="step"><span>' + s.from + '</span> &rarr; <span>' + s.expr + '</span> = <strong>' + s.to + '</strong></div>'
+
+    const steps = red.steps.map((s, i) =>
+        '<div class="step" style="--i:' + i + '">' +
+            '<span class="step-dot"></span>' +
+            '<span>' + s.from + '</span>' +
+            '<span class="sep">→</span>' +
+            '<span>' + s.expr + '</span>' +
+            '<span class="sep">=</span>' +
+            '<strong>' + s.to + '</strong>' +
+        '</div>'
     ).join('');
-    const tail = red.masterKept ? '<p class="small">' + red.final + ' is a master number, so the reduction stops here.</p>' : '';
+
+    const tail = red.masterKept
+        ? '<p class="small">' + red.final + ' is a master number — the reduction stops here.</p>'
+        : '';
+
     return steps + tail;
 }
 
 function profileHTML(n, sys) {
     const p = numberProfiles[n];
     if (!p) return '';
+
     const r = digitRoot(n);
     const grahaBlock = (sys.graha && GRAHA[r])
         ? '<div class="info-block"><p><strong>Ruling graha:</strong> ' + esc(GRAHA[r]) +
-          (n > 9 ? ' (master number ' + n + ' takes the graha of its root digit ' + r + ')' : '') + '</p></div>'
+          (n > 9 ? ' <span class="small" style="display:inline">(master ' + n + ' takes the graha of its root digit ' + r + ')</span>' : '') +
+          '</p></div>'
         : '';
+
     return '<div class="profile-card">' +
-        '<div class="profile-header"><div class="profile-icon">' + n + '</div>' +
-        '<div class="profile-title"><h3>' + esc(p.title) + '</h3><p class="profile-subtitle">' + esc(p.what) + '</p></div></div>' +
+        '<div class="profile-header">' +
+            '<div class="profile-icon">' + n + '</div>' +
+            '<div class="profile-title">' +
+                '<h3>' + esc(p.title) + '</h3>' +
+                '<p class="profile-subtitle">' + esc(p.what) + '</p>' +
+            '</div>' +
+        '</div>' +
         grahaBlock +
         '<div class="info-block"><p><strong>What it does:</strong> ' + esc(p.does) + '</p></div>' +
-        '<p><strong>Use ' + n + ' when:</strong></p><ul>' + p.use.map(i => '<li>' + esc(i) + '</li>').join('') + '</ul>' +
-        '<p><strong>Avoid ' + n + ' when:</strong></p><ul>' + p.avoid.map(i => '<li>' + esc(i) + '</li>').join('') + '</ul>' +
+        '<p><strong>Use ' + n + ' when:</strong></p>' +
+        '<ul>' + p.use.map(i => '<li>' + esc(i) + '</li>').join('') + '</ul>' +
+        '<p><strong>Avoid ' + n + ' when:</strong></p>' +
+        '<ul>' + p.avoid.map(i => '<li>' + esc(i) + '</li>').join('') + '</ul>' +
         '<div class="risk-block"><p><strong>Risk / Truth:</strong> ' + esc(p.risk) + '</p></div>' +
-        '<div class="info-block"><p><strong>Contextual use:</strong><br>Identity/Career: 8 &bull; Creativity/Learning: 3 &bull; Relationships: 2 or 6 &bull; Change phase: 5 &bull; Reset/Growth: 9</p></div>' +
-        '</div>';
+        '<div class="info-block"><p><strong>Contextual use:</strong><br>' +
+            'Identity / Career: 8 &nbsp;·&nbsp; Creativity / Learning: 3 &nbsp;·&nbsp; ' +
+            'Relationships: 2 or 6 &nbsp;·&nbsp; Change phase: 5 &nbsp;·&nbsp; Reset / Growth: 9' +
+        '</p></div>' +
+    '</div>';
 }
 
-function resultHTML(sys, a) {
+function resultHTML(sys, a, idx) {
     const eq = a.rows.map(r => r.v).join(' + ') + ' = ' + a.total;
-    const cards = a.rows.map(r =>
-        '<div class="char-card' + (r.isDigit ? ' digit' : '') + '" title="' + (r.isDigit ? 'Digit counted at face value' : r.c + ' → ' + r.v) + '">' +
-        '<div class="char-letter">' + r.c + '</div><div class="char-value">' + r.v + '</div></div>'
-    ).join('');
-    const trs = a.rows.map(r => '<tr><td>' + r.n + '</td><td>' + r.c + '</td><td>' + r.v + '</td><td>' + r.running + '</td></tr>').join('');
 
-    return '<details class="result" open style="--c1:' + sys.c1 + ';--c2:' + sys.c2 + '">' +
-        '<summary>' + esc(sys.label) + '<span class="final-pill">Final: ' + a.red.final + '</span></summary>' +
+    const cards = a.rows.map((r, i) =>
+        '<div class="char-card' + (r.isDigit ? ' digit' : '') + '" style="--i:' + i + '" ' +
+        'title="' + (r.isDigit ? 'Digit counted at face value' : r.c + ' → ' + r.v) + '">' +
+            '<div class="char-letter">' + r.c + '</div>' +
+            '<div class="char-value">' + r.v + '</div>' +
+        '</div>'
+    ).join('');
+
+    const trs = a.rows.map(r =>
+        '<tr><td>' + r.n + '</td><td>' + r.c + '</td><td>' + r.v + '</td><td>' + r.running + '</td></tr>'
+    ).join('');
+
+    return '<details class="card result" open style="--c1:' + sys.c1 + ';--c2:' + sys.c2 + ';--i:' + idx + '">' +
+        '<summary>' +
+            '<span class="sum-dot"></span>' +
+            '<span class="sum-title">' + esc(sys.label) + '</span>' +
+            '<span class="final-pill">Final <b>' + a.red.final + '</b></span>' +
+            CHEV +
+        '</summary>' +
         '<div class="result-body">' +
-        '<h4 class="sub">Letter by letter</h4><div class="char-grid">' + cards + '</div>' +
-        '<div class="tbl-wrap"><table><tr><th>#</th><th>Character</th><th>Value</th><th>Running total</th></tr>' + trs + '</table></div>' +
-        '<div class="total-box"><h3>' + sys.totalLabel + '</h3><div class="total-number">' + a.total + '</div><p class="eq">' + eq + '</p></div>' +
-        '<div class="reduce-box"><h3>Reduction</h3>' + reductionHTML(a) + '</div>' +
-        '<div class="total-box alt"><h3>' + sys.finalLabel + '</h3><div class="total-number">' + a.red.final + '</div></div>' +
-        (sys.kind === 'groups' ? profileHTML(a.red.final, sys) : '') +
-        '</div></details>';
+
+            '<h4 class="sub">Letter by letter</h4>' +
+            '<div class="char-grid">' + cards + '</div>' +
+
+            '<h4 class="sub">Running total</h4>' +
+            '<div class="tbl-wrap"><table>' +
+                '<thead><tr><th>#</th><th>Character</th><th>Value</th><th>Running</th></tr></thead>' +
+                '<tbody>' + trs + '</tbody>' +
+            '</table></div>' +
+
+            '<div class="total-box" style="--i:1">' +
+                '<h3>' + sys.totalLabel + '</h3>' +
+                '<div class="total-number" data-count="' + a.total + '">0</div>' +
+                '<p class="eq">' + esc(eq) + '</p>' +
+            '</div>' +
+
+            '<div class="reduce-box">' +
+                '<h3>Reduction</h3>' + reductionHTML(a) +
+            '</div>' +
+
+            '<div class="total-box alt" style="--i:2">' +
+                '<h3>' + sys.finalLabel + '</h3>' +
+                '<div class="total-number" data-count="' + a.red.final + '">0</div>' +
+            '</div>' +
+
+            (sys.kind === 'groups' ? profileHTML(a.red.final, sys) : '') +
+
+        '</div>' +
+    '</details>';
 }
 
 function inputSummaryHTML(raw, parsed) {
     const letters = parsed.chars.filter(c => c >= 'A' && c <= 'Z').length;
     const digits = parsed.chars.length - letters;
+
     const ign = parsed.ignored.length
-        ? '<p class="small">Ignored: ' + parsed.ignored.map(ch => '<span class="pill">' + esc(showChar(ch)) + '</span>').join(' ') + '</p>'
+        ? '<p class="small">Ignored: ' +
+          parsed.ignored.map(ch => '<span class="pill">' + esc(showChar(ch)) + '</span>').join(' ') +
+          '</p>'
         : '';
+
     const skipped = parsed.ignored.filter(ch => /[\p{L}\p{N}]/u.test(ch));
     const warn = skipped.length
         ? '<div class="warn"><strong>Not counted:</strong> ' + skipped.map(ch => esc(ch)).join(' ') +
-          '. Only the plain letters A–Z and digits 0–9 are mapped. Type the name in plain Roman letters (for example e instead of é) for an exact result.</div>'
+          '. Only plain letters A–Z and digits 0–9 are mapped. Type the name in plain Roman letters ' +
+          '(for example e instead of é) for an exact result.</div>'
         : '';
-    return '<div class="section"><h2>Input</h2><div class="info-block"><p><strong>NAME:</strong> ' + esc(raw) + '</p>' +
-           '<p class="small">Counted ' + parsed.chars.length + ' characters (' + letters + ' letters, ' + digits + ' digits).</p>' + ign + '</div>' + warn + '</div>';
+
+    return '<div class="card section" style="--i:0">' +
+        '<div class="section-head">' +
+            '<h2>Input</h2>' +
+            '<button type="button" class="ghost-btn" data-copy>Copy results</button>' +
+        '</div>' +
+        '<div class="info-block">' +
+            '<p><strong>NAME:</strong> ' + esc(raw) + '</p>' +
+            '<p class="small">Counted ' + parsed.chars.length + ' characters (' +
+                letters + ' letters, ' + digits + ' digits).</p>' +
+            ign +
+        '</div>' +
+        warn +
+    '</div>';
 }
 
 function summaryHTML(results) {
     const rows = results.map(r =>
-        '<tr><td>' + esc(r.sys.short) + '</td><td>' + r.a.total + '</td><td><strong>' + r.a.red.final + '</strong></td></tr>'
+        '<tr><td>' + esc(r.sys.short) + '</td><td>' + r.a.total + '</td>' +
+        '<td><strong>' + r.a.red.final + '</strong></td></tr>'
     ).join('');
-    return '<div class="section summary"><h2>Side by side</h2><div class="tbl-wrap"><table style="--c1:#667eea;--c2:#764ba2">' +
-           '<tr><th>Method</th><th>Total</th><th>Final number</th></tr>' + rows + '</table></div></div>';
+
+    return '<div class="card section" style="--i:1">' +
+        '<div class="section-head"><h2>Side by side</h2></div>' +
+        '<div class="tbl-wrap"><table>' +
+            '<thead><tr><th>Method</th><th>Total</th><th>Final number</th></tr></thead>' +
+            '<tbody>' + rows + '</tbody>' +
+        '</table></div>' +
+    '</div>';
 }
 
-// ---------- state + interaction ----------
-const nameInput = document.getElementById('nameInput');
-const output = document.getElementById('output');
-const chartPanel = document.getElementById('chartPanel');
-let selected = '';
+/* ============================================================
+   ANIMATION UTILITIES
+   ============================================================ */
+function animateCounts(root) {
+    root.querySelectorAll('[data-count]').forEach((el, idx) => {
+        const target = Number(el.dataset.count);
+        if (reduceMotion || !isFinite(target)) { el.textContent = target; return; }
 
+        const duration = 950;
+        const startAt = performance.now() + idx * 90;
+
+        function tick(now) {
+            const p = Math.min(1, Math.max(0, (now - startAt) / duration));
+            const eased = 1 - Math.pow(1 - p, 4);
+            el.textContent = Math.round(target * eased);
+            if (p < 1) requestAnimationFrame(tick);
+            else el.textContent = target;
+        }
+        requestAnimationFrame(tick);
+    });
+}
+
+/* ============================================================
+   STATE + INTERACTION
+   ============================================================ */
+const nameInput  = document.getElementById('nameInput');
+const output     = document.getElementById('output');
+const chartPanel = document.getElementById('chartPanel');
+const live       = document.getElementById('live');
+
+let selected = '';
+let lastResults = null;
+
+/* ---------- charts ---------- */
 function renderCharts() {
     if (!selected) {
-        chartPanel.innerHTML = '<div class="empty">Select a method above to see how its letters convert to numbers.</div>';
+        chartPanel.innerHTML =
+            '<div class="empty-state">Select a system above to reveal how its letters convert to numbers.</div>';
         return;
     }
     const keys = selected === 'all' ? ORDER : [selected];
-    chartPanel.innerHTML = keys.map(k => chartHTML(SYSTEMS[k])).join('');
+    chartPanel.innerHTML = keys.map((k, i) => chartHTML(SYSTEMS[k], i)).join('');
 }
 
+/* ---------- used-letter highlight ---------- */
 function highlightUsed() {
     const used = new Set(
-        Array.from(nameInput.value).filter(c => /^[A-Za-z]$/.test(c)).map(c => c.toUpperCase())
+        Array.from(nameInput.value)
+            .filter(c => /^[A-Za-z]$/.test(c))
+            .map(c => c.toUpperCase())
     );
     document.querySelectorAll('[data-letter]').forEach(el => {
         el.classList.toggle('used', used.has(el.dataset.letter));
     });
 }
 
+/* ---------- live preview ---------- */
+function updateLive() {
+    const parsed = parseInput(nameInput.value);
+    if (!parsed.chars.length || !selected) { live.innerHTML = ''; return; }
+
+    const keys = selected === 'all' ? ORDER : [selected];
+    live.innerHTML = keys.map(k => {
+        const sys = SYSTEMS[k];
+        const a = analyze(sys, parsed.chars);
+        return '<span class="live-pill" style="--c1:' + sys.c1 + '">' +
+                   '<span class="dot"></span>' + esc(sys.short) +
+                   ' <b>' + a.total + '</b> <span class="arr">→</span> <b>' + a.red.final + '</b>' +
+               '</span>';
+    }).join('');
+}
+
+/* ---------- stale ---------- */
 function markStale() {
     if (output.dataset.has === '1') output.dataset.stale = '1';
 }
 
+/* ---------- method selection ---------- */
 function selectMethod(key) {
     selected = key;
     document.querySelectorAll('.tab').forEach(b => {
@@ -675,24 +1552,31 @@ function selectMethod(key) {
     });
     renderCharts();
     highlightUsed();
+    updateLive();
     markStale();
 }
 
+/* ---------- messages ---------- */
 function showMsg(text) {
-    output.innerHTML = '<div class="section"><p>' + esc(text) + '</p></div>';
+    output.innerHTML = '<div class="empty-state">' + esc(text) + '</div>';
     output.dataset.has = '';
     output.removeAttribute('data-stale');
+    lastResults = null;
 }
 
+/* ---------- calculate ---------- */
 function calculate() {
     const raw = nameInput.value;
+
     if (!raw.trim()) { showMsg('Enter a name first.'); return; }
-    if (!selected) { showMsg('Select a method first.'); return; }
+    if (!selected)   { showMsg('Choose a system first.'); return; }
 
     const keys = selected === 'all' ? ORDER : [selected];
+
     const bad = keys.filter(k => !SYSTEMS[k].ok);
     if (bad.length) {
-        showMsg('Calculation stopped: the letter table for ' + bad.map(k => SYSTEMS[k].short).join(', ') + ' failed its integrity check.');
+        showMsg('Calculation stopped: the letter table for ' +
+                bad.map(k => SYSTEMS[k].short).join(', ') + ' failed its integrity check.');
         return;
     }
 
@@ -703,34 +1587,118 @@ function calculate() {
     }
 
     const results = keys.map(k => ({ sys: SYSTEMS[k], a: analyze(SYSTEMS[k], parsed.chars) }));
+    lastResults = { raw, results };
+
     let html = inputSummaryHTML(raw, parsed);
     if (results.length > 1) html += summaryHTML(results);
-    html += results.map(r => resultHTML(r.sys, r.a)).join('');
+    html += results.map((r, i) => resultHTML(r.sys, r.a, i + (results.length > 1 ? 2 : 1))).join('');
 
     output.innerHTML = html;
     output.dataset.has = '1';
     output.removeAttribute('data-stale');
+
+    animateCounts(output);
+    highlightUsed();
+
+    // gentle reveal
+    requestAnimationFrame(() => {
+        const rect = output.getBoundingClientRect();
+        if (rect.top > window.innerHeight * 0.55 || rect.top < 0) {
+            output.scrollIntoView({ behavior: reduceMotion ? 'auto' : 'smooth', block: 'start' });
+        }
+    });
 }
 
+/* ---------- reset ---------- */
 function reset() {
     nameInput.value = '';
     selected = '';
-    document.querySelectorAll('.tab').forEach(b => { b.classList.remove('active'); b.setAttribute('aria-pressed', 'false'); });
+    lastResults = null;
+    document.querySelectorAll('.tab').forEach(b => {
+        b.classList.remove('active');
+        b.setAttribute('aria-pressed', 'false');
+    });
     renderCharts();
+    updateLive();
     output.innerHTML = '';
     output.dataset.has = '';
     output.removeAttribute('data-stale');
+    nameInput.focus({ preventScroll: true });
 }
 
+/* ---------- copy ---------- */
+function copyResults(btn) {
+    if (!lastResults) return;
+
+    const lines = ['NAME → NUMBER', 'Name: ' + lastResults.raw, ''];
+    lastResults.results.forEach(r => {
+        lines.push(r.sys.short + ': total ' + r.a.total + '  →  final ' + r.a.red.final);
+    });
+
+    const text = lines.join('\n');
+    const done = () => {
+        const original = btn.textContent;
+        btn.textContent = 'Copied ✓';
+        btn.style.color = '#6ee7b7';
+        btn.style.borderColor = 'rgba(52,211,153,.45)';
+        setTimeout(() => {
+            btn.textContent = original;
+            btn.style.color = '';
+            btn.style.borderColor = '';
+        }, 1600);
+    };
+
+    if (navigator.clipboard && navigator.clipboard.writeText) {
+        navigator.clipboard.writeText(text).then(done).catch(() => fallbackCopy(text, done));
+    } else {
+        fallbackCopy(text, done);
+    }
+}
+
+function fallbackCopy(text, done) {
+    const ta = document.createElement('textarea');
+    ta.value = text;
+    ta.style.position = 'fixed';
+    ta.style.opacity = '0';
+    document.body.appendChild(ta);
+    ta.select();
+    try { document.execCommand('copy'); done(); } catch (e) { /* ignore */ }
+    document.body.removeChild(ta);
+}
+
+/* ============================================================
+   EVENTS
+   ============================================================ */
 document.getElementById('tabs').addEventListener('click', e => {
     const b = e.target.closest('.tab');
     if (b) selectMethod(b.dataset.method);
 });
-nameInput.addEventListener('input', () => { highlightUsed(); markStale(); });
-nameInput.addEventListener('keydown', e => { if (e.key === 'Enter') calculate(); });
+
+nameInput.addEventListener('input', () => {
+    highlightUsed();
+    updateLive();
+    markStale();
+});
+
+nameInput.addEventListener('keydown', e => {
+    if (e.key === 'Enter') { e.preventDefault(); calculate(); }
+});
+
 document.getElementById('calcBtn').addEventListener('click', calculate);
 document.getElementById('resetBtn').addEventListener('click', reset);
 
+output.addEventListener('click', e => {
+    const btn = e.target.closest('[data-copy]');
+    if (btn) copyResults(btn);
+});
+
+document.addEventListener('keydown', e => {
+    if (e.key === 'Escape' && document.activeElement === nameInput) reset();
+});
+
+/* ============================================================
+   BOOT
+   ============================================================ */
 renderCharts();
 </script>
 
