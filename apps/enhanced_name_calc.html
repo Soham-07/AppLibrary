@@ -118,7 +118,7 @@ body {
     font-size: .7rem; font-weight: 600;
     letter-spacing: .18em; text-transform: uppercase;
     color: var(--muted);
-    animation: rise .8s var(--ease) both;
+    animation: rise .8s var(--ease) backwards;
 }
 .eyebrow i {
     width: 6px; height: 6px; border-radius: 50%;
@@ -141,7 +141,7 @@ h1 {
     background: linear-gradient(178deg, #ffffff 24%, #9ba0c4 100%);
     -webkit-background-clip: text; background-clip: text;
     color: transparent;
-    animation: rise .9s .06s var(--ease) both;
+    animation: rise .9s .06s var(--ease) backwards;
 }
 h1 em {
     font-style: italic;
@@ -153,7 +153,7 @@ h1 em {
 .lede {
     max-width: 540px; margin: 0 auto;
     color: var(--muted); font-size: .98rem; line-height: 1.62;
-    animation: rise .9s .12s var(--ease) both;
+    animation: rise .9s .12s var(--ease) backwards;
 }
 
 /* ============================================================
@@ -170,7 +170,7 @@ h1 em {
     box-shadow:
         0 1px 0 rgba(255,255,255,.07) inset,
         0 40px 90px -46px rgba(0,0,0,1);
-    animation: rise .9s .18s var(--ease) both;
+    animation: rise .9s .18s var(--ease) backwards;
 }
 
 .lbl {
@@ -221,7 +221,7 @@ input[type=text]:focus {
     background: rgba(255,255,255,.04);
     font-size: .78rem; font-weight: 600; color: var(--muted);
     font-variant-numeric: tabular-nums;
-    animation: pop .5s var(--ease-spring) both;
+    animation: pop .5s var(--ease-spring) backwards;
 }
 .live-pill .dot {
     width: 6px; height: 6px; border-radius: 50%;
@@ -308,7 +308,7 @@ input[type=text]:focus {
     border: 1px solid var(--line);
     background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.012));
     overflow: hidden;
-    animation: rise .75s var(--ease) both;
+    animation: rise .75s var(--ease) backwards;
     animation-delay: calc(var(--i, 0) * 70ms);
 }
 .card + .card { margin-top: 14px; }
@@ -354,6 +354,8 @@ details[open] > summary .chev { transform: rotate(180deg); color: var(--muted); 
     white-space: nowrap;
 }
 .final-pill b { font-size: .9rem; color: #fff; }
+/* keeps the pill and the arrow together on the right edge */
+.final-pill + .chev { margin-left: 0; }
 
 /* ============================================================
    CHART
@@ -364,9 +366,9 @@ details[open] > summary .chev { transform: rotate(180deg); color: var(--muted); 
 .chart-body {
     padding: 4px 20px 24px;
     border-top: 1px solid var(--line);
-    animation: revealBody .55s var(--ease) both;
+    animation: revealBody .55s var(--ease) backwards;
 }
-.result-body { padding: 20px; animation: revealBody .55s var(--ease) both; }
+.result-body { padding: 20px; animation: revealBody .55s var(--ease) backwards; }
 
 @keyframes revealBody {
     from { opacity: 0; transform: translateY(-8px); filter: blur(3px); }
@@ -400,7 +402,7 @@ details[open] > summary .chev { transform: rotate(180deg); color: var(--muted); 
     border: 1px solid hsl(var(--h) 70% 62% / .18);
     background: linear-gradient(180deg, hsl(var(--h) 70% 62% / .1), hsl(var(--h) 70% 62% / .025));
     transition: transform .5s var(--ease), border-color .4s var(--ease), box-shadow .5s var(--ease);
-    animation: rise .6s var(--ease) both;
+    animation: rise .6s var(--ease) backwards;
     animation-delay: calc(var(--i, 0) * 45ms + 90ms);
 }
 .num-card:hover {
@@ -465,7 +467,7 @@ details[open] > summary .chev { transform: rotate(180deg); color: var(--muted); 
     background: rgba(255,255,255,.03);
     cursor: default;
     transition: transform .38s var(--ease-spring), border-color .3s, background .3s, box-shadow .38s;
-    animation: pop .45s var(--ease-spring) both;
+    animation: pop .45s var(--ease-spring) backwards;
     animation-delay: calc(var(--i, 0) * 12ms + 120ms);
 }
 .az-cell:hover {
@@ -605,7 +607,7 @@ details[open] > summary .chev { transform: rotate(180deg); color: var(--muted); 
     color: var(--muted-2);
     font-size: .9rem;
     line-height: 1.6;
-    animation: rise .8s var(--ease) both;
+    animation: rise .8s var(--ease) backwards;
 }
 
 .section { padding: 22px; }
@@ -663,7 +665,7 @@ details[open] > summary .chev { transform: rotate(180deg); color: var(--muted); 
     border: 1px solid var(--line);
     background: rgba(255,255,255,.04);
     transition: transform .4s var(--ease), border-color .3s, box-shadow .45s var(--ease);
-    animation: pop .5s var(--ease-spring) both;
+    animation: pop .5s var(--ease-spring) backwards;
     animation-delay: calc(var(--i, 0) * 32ms + 80ms);
 }
 .char-card:hover {
@@ -721,7 +723,7 @@ tbody tr:hover td { background: rgba(255,255,255,.032); }
     color: #fff;
     background: linear-gradient(140deg, var(--c1), var(--c2));
     box-shadow: 0 30px 64px -34px var(--c1);
-    animation: rise .7s var(--ease) both;
+    animation: rise .7s var(--ease) backwards;
     animation-delay: calc(var(--i, 0) * 70ms + 160ms);
 }
 .total-box::after {
@@ -777,7 +779,7 @@ tbody tr:hover td { background: rgba(255,255,255,.032); }
     font-family: var(--mono);
     font-size: .87rem;
     color: #cfd2e6;
-    animation: rise .5s var(--ease) both;
+    animation: rise .5s var(--ease) backwards;
     animation-delay: calc(var(--i, 0) * 90ms + 140ms);
 }
 .step .step-dot {
@@ -796,7 +798,7 @@ tbody tr:hover td { background: rgba(255,255,255,.032); }
     border-radius: 18px;
     border: 1px solid var(--line);
     background: linear-gradient(180deg, rgba(255,255,255,.045), rgba(255,255,255,.012));
-    animation: rise .7s var(--ease) both;
+    animation: rise .7s var(--ease) backwards;
     animation-delay: .2s;
 }
 .profile-header {
@@ -862,7 +864,7 @@ tbody tr:hover td { background: rgba(255,255,255,.032); }
     background: rgba(251,191,36,.075);
     color: #fcd9a0;
     font-size: .82rem; font-weight: 600;
-    animation: rise .5s var(--ease) both;
+    animation: rise .5s var(--ease) backwards;
 }
 #output[data-stale="1"] > .card {
     opacity: .4;
@@ -1399,7 +1401,7 @@ function resultHTML(sys, a, idx) {
 
             '<div class="total-box" style="--i:1">' +
                 '<h3>' + sys.totalLabel + '</h3>' +
-                '<div class="total-number" data-count="' + a.total + '">0</div>' +
+                '<div class="total-number" data-count="' + a.total + '">' + a.total + '</div>' +
                 '<p class="eq">' + esc(eq) + '</p>' +
             '</div>' +
 
@@ -1409,7 +1411,7 @@ function resultHTML(sys, a, idx) {
 
             '<div class="total-box alt" style="--i:2">' +
                 '<h3>' + sys.finalLabel + '</h3>' +
-                '<div class="total-number" data-count="' + a.red.final + '">0</div>' +
+                '<div class="total-number" data-count="' + a.red.final + '">' + a.red.final + '</div>' +
             '</div>' +
 
             (sys.kind === 'groups' ? profileHTML(a.red.final, sys) : '') +
@@ -1484,6 +1486,10 @@ function animateCounts(root) {
             else el.textContent = target;
         }
         requestAnimationFrame(tick);
+
+        /* Safety net: if the browser pauses animation frames (for example the tab
+           is in the background), the true value still ends up on screen. */
+        setTimeout(() => { el.textContent = target; }, duration + idx * 90 + 500);
     });
 }
 
