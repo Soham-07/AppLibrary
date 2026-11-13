@@ -1,0 +1,902 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width,initial-scale=1" />
+<title>Real Vaastu Digit Combinations</title>
+<style>
+/* ============ THEME ============ */
+:root{
+  --bg:#07070e;
+  --txt:#eef0f7;
+  --muted:#868ba4;
+  --line:rgba(255,255,255,.09);
+  --accent:#7c5cff;
+  --accent2:#00e0c6;
+  --ease:cubic-bezier(.16,1,.3,1);
+  --mono: ui-monospace, "SF Mono", "JetBrains Mono", "Fira Code", Menlo, Consolas, monospace;
+}
+*{box-sizing:border-box;margin:0;padding:0}
+html,body{min-height:100%}
+body{
+  background:var(--bg);
+  color:var(--txt);
+  font-family:-apple-system, BlinkMacSystemFont, "Inter", "Segoe UI", Roboto, sans-serif;
+  -webkit-font-smoothing:antialiased;
+  overflow-x:hidden;
+}
+
+/* ============ BACKGROUND ============ */
+.bg{position:fixed;inset:0;z-index:-2;overflow:hidden;
+  background:
+    radial-gradient(1200px 800px at 12% -12%, #1a1140 0%, transparent 60%),
+    radial-gradient(1000px 700px at 92% 6%, #062a3a 0%, transparent 58%),
+    radial-gradient(900px 900px at 50% 115%, #2b0d38 0%, transparent 62%),
+    #07070e;
+}
+.blob{position:absolute;border-radius:50%;filter:blur(100px);opacity:.5;will-change:transform}
+.b1{width:520px;height:520px;background:#6d4bff;top:-180px;left:-140px;animation:f1 24s var(--ease) infinite alternate}
+.b2{width:460px;height:460px;background:#00c2b0;top:8%;right:-160px;animation:f2 28s var(--ease) infinite alternate}
+.b3{width:560px;height:560px;background:#c02b7a;bottom:-260px;left:38%;animation:f3 32s var(--ease) infinite alternate}
+@keyframes f1{to{transform:translate3d(140px,110px,0) scale(1.18)}}
+@keyframes f2{to{transform:translate3d(-120px,140px,0) scale(1.22)}}
+@keyframes f3{to{transform:translate3d(90px,-130px,0) scale(1.15)}}
+.grid{
+  position:absolute;inset:0;
+  background-image:
+    linear-gradient(rgba(255,255,255,.03) 1px, transparent 1px),
+    linear-gradient(90deg, rgba(255,255,255,.03) 1px, transparent 1px);
+  background-size:64px 64px;
+  -webkit-mask-image:radial-gradient(circle at 50% 25%, #000 0%, transparent 72%);
+  mask-image:radial-gradient(circle at 50% 25%, #000 0%, transparent 72%);
+}
+
+/* ============ SHELL ============ */
+.shell{max-width:1140px;margin:0 auto;padding:38px 22px 90px;display:flex;flex-direction:column;gap:22px}
+
+/* ============ HEADER ============ */
+.top{display:flex;align-items:center;justify-content:space-between;gap:16px;animation:rise .9s var(--ease) both}
+.brand{display:flex;align-items:center;gap:14px}
+.mark{
+  width:48px;height:48px;border-radius:15px;display:grid;place-items:center;
+  font-weight:800;font-size:17px;letter-spacing:-.03em;
+  background:linear-gradient(135deg,#7c5cff,#00e0c6);
+  color:#07070e;
+  box-shadow:0 10px 34px -6px rgba(124,92,255,.7), inset 0 1px 0 rgba(255,255,255,.4);
+  animation:pulseMark 4.5s ease-in-out infinite;
+}
+@keyframes pulseMark{0%,100%{box-shadow:0 10px 34px -6px rgba(124,92,255,.7), inset 0 1px 0 rgba(255,255,255,.4)}
+50%{box-shadow:0 10px 44px -2px rgba(0,224,198,.65), inset 0 1px 0 rgba(255,255,255,.5)}}
+.brand h1{font-size:17px;letter-spacing:-.025em;font-weight:700;line-height:1.2}
+.brand p{font-size:12.5px;color:var(--muted);margin-top:2px}
+.badge{
+  font-size:11px;letter-spacing:.16em;text-transform:uppercase;font-weight:700;
+  padding:7px 13px;border-radius:999px;
+  border:1px solid rgba(255,255,255,.12);
+  background:rgba(255,255,255,.045);
+  color:#a9afc6;
+}
+
+/* ============ CARDS ============ */
+.card{
+  position:relative;
+  background:linear-gradient(180deg, rgba(255,255,255,.058), rgba(255,255,255,.022));
+  border:1px solid var(--line);
+  border-radius:26px;
+  padding:26px;
+  backdrop-filter:blur(26px) saturate(150%);
+  -webkit-backdrop-filter:blur(26px) saturate(150%);
+  box-shadow:0 30px 80px -40px rgba(0,0,0,.95), inset 0 1px 0 rgba(255,255,255,.07);
+  animation:rise .9s var(--ease) both;
+}
+.card::after{
+  content:"";position:absolute;inset:0;border-radius:inherit;pointer-events:none;
+  background:linear-gradient(180deg, rgba(255,255,255,.10), transparent 34%);
+  -webkit-mask:linear-gradient(#000, transparent 30%);
+  mask:linear-gradient(#000, transparent 30%);
+  opacity:.5;
+}
+.card:nth-of-type(2){animation-delay:.08s}
+@keyframes rise{from{opacity:0;transform:translateY(20px)}to{opacity:1;transform:none}}
+
+/* ============ FORM ============ */
+.panel{display:grid;grid-template-columns:1fr 1fr;gap:26px 40px}
+@media (max-width:840px){.panel{grid-template-columns:1fr;gap:24px}}
+
+.lbl{
+  font-size:11px;letter-spacing:.15em;text-transform:uppercase;font-weight:700;
+  color:#7f859e;margin-bottom:13px;display:flex;align-items:center;gap:9px;flex-wrap:wrap;
+}
+.lbl em{
+  font-style:normal;font-size:9.5px;letter-spacing:.12em;padding:3px 8px;border-radius:999px;
+  background:rgba(124,92,255,.16);color:#b7a8ff;border:1px solid rgba(124,92,255,.28);
+}
+
+/* target pills */
+.pills{display:grid;grid-template-columns:repeat(9,minmax(0,1fr));gap:8px}
+.pill{
+  aspect-ratio:1/1;border-radius:14px;border:1px solid rgba(255,255,255,.08);
+  background:rgba(255,255,255,.032);color:var(--txt);
+  font-family:var(--mono);font-size:15px;font-weight:700;
+  cursor:pointer;display:grid;place-items:center;
+  transition:transform .38s var(--ease), background .38s var(--ease),
+             border-color .38s var(--ease), box-shadow .38s var(--ease), color .3s;
+}
+.pill:hover{transform:translateY(-3px);background:rgba(255,255,255,.075);border-color:rgba(255,255,255,.2)}
+.pill:active{transform:translateY(-1px) scale(.96)}
+.pill.active{
+  background:linear-gradient(135deg,#7c5cff,#00e0c6);
+  color:#07070e;border-color:transparent;
+  box-shadow:0 12px 34px -10px rgba(124,92,255,.95);
+  transform:translateY(-2px);
+}
+@media (max-width:560px){
+  .pills{gap:5px}
+  .pill{font-size:13px;border-radius:11px}
+}
+
+/* stepper */
+.stepper{display:flex;align-items:center;justify-content:space-between;gap:14px;margin-bottom:16px}
+.stepBtn{
+  width:44px;height:44px;border-radius:14px;flex:none;
+  border:1px solid rgba(255,255,255,.1);background:rgba(255,255,255,.05);
+  color:var(--txt);font-size:20px;line-height:1;cursor:pointer;
+  transition:transform .3s var(--ease), background .3s, border-color .3s, box-shadow .3s;
+}
+.stepBtn:hover{background:rgba(255,255,255,.1);transform:translateY(-2px);border-color:rgba(255,255,255,.2)}
+.stepBtn:active{transform:scale(.93)}
+.digitVal{display:flex;align-items:baseline;gap:9px;font-family:var(--mono)}
+.digitVal span{
+  font-size:40px;font-weight:800;letter-spacing:-.04em;line-height:1;
+  background:linear-gradient(135deg,#ffffff,#9d8cff 70%,#00e0c6);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+  display:inline-block;
+}
+.digitVal small{font-size:11px;letter-spacing:.18em;text-transform:uppercase;color:var(--muted);font-weight:700}
+.bump{animation:bump .5s var(--ease)}
+@keyframes bump{0%{transform:scale(1)}40%{transform:scale(1.16)}100%{transform:scale(1)}}
+
+/* range */
+.range{
+  -webkit-appearance:none;appearance:none;width:100%;height:7px;border-radius:999px;
+  background:rgba(255,255,255,.09);outline:none;cursor:pointer;
+  transition:background .2s;
+}
+.range::-webkit-slider-thumb{
+  -webkit-appearance:none;width:22px;height:22px;border-radius:50%;
+  background:linear-gradient(135deg,#7c5cff,#00e0c6);
+  box-shadow:0 0 0 5px rgba(124,92,255,.15), 0 8px 20px rgba(0,0,0,.6);
+  transition:transform .3s var(--ease), box-shadow .3s var(--ease);
+}
+.range::-webkit-slider-thumb:hover{transform:scale(1.14);box-shadow:0 0 0 8px rgba(124,92,255,.18), 0 8px 24px rgba(0,0,0,.65)}
+.range::-moz-range-thumb{
+  width:22px;height:22px;border:none;border-radius:50%;
+  background:linear-gradient(135deg,#7c5cff,#00e0c6);
+  box-shadow:0 0 0 5px rgba(124,92,255,.15), 0 8px 20px rgba(0,0,0,.6);
+}
+.range::-moz-range-track{height:7px;border-radius:999px;background:transparent}
+.ticks{display:flex;justify-content:space-between;margin-top:9px;font-family:var(--mono);font-size:11px;color:#61667e}
+
+/* ============ ALLOWED DIGITS ============ */
+.digitPick{
+  grid-column:1/-1;
+  padding-top:22px;
+  border-top:1px solid rgba(255,255,255,.06);
+}
+.digitGrid{display:flex;flex-wrap:wrap;gap:9px;margin-bottom:14px}
+.digit{
+  width:48px;height:48px;border-radius:50%;
+  display:grid;place-items:center;
+  font-family:var(--mono);font-size:17px;font-weight:700;
+  border:1px solid rgba(255,255,255,.09);
+  background:rgba(255,255,255,.03);
+  color:#5e637a;
+  cursor:pointer;
+  transition:transform .38s var(--ease), background .38s var(--ease),
+             border-color .38s var(--ease), box-shadow .38s var(--ease), color .3s;
+  -webkit-tap-highlight-color:transparent;
+}
+.digit:hover{transform:translateY(-3px);background:rgba(255,255,255,.07);border-color:rgba(255,255,255,.2)}
+.digit:active{transform:translateY(-1px) scale(.94)}
+.digit.on{
+  background:linear-gradient(135deg,#7c5cff,#00e0c6);
+  color:#07070e;border-color:transparent;
+  box-shadow:0 10px 28px -10px rgba(124,92,255,.9), inset 0 1px 0 rgba(255,255,255,.35);
+}
+.digit.on:hover{transform:translateY(-3px);box-shadow:0 14px 34px -10px rgba(124,92,255,1)}
+@media (max-width:560px){
+  .digit{width:42px;height:42px;font-size:15px}
+}
+.quickRow{display:flex;gap:8px;flex-wrap:wrap}
+.quick{
+  padding:7px 13px;border-radius:10px;border:1px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,.04);color:#a9afc6;
+  font-family:inherit;font-size:12px;font-weight:600;cursor:pointer;
+  transition:all .3s var(--ease);
+}
+.quick:hover{background:rgba(255,255,255,.09);color:#fff;transform:translateY(-1px)}
+.quick:active{transform:scale(.96)}
+
+/* toggles */
+.options{
+  grid-column:1/-1;
+  display:flex;gap:30px;flex-wrap:wrap;
+  padding-top:22px;
+  border-top:1px solid rgba(255,255,255,.06);
+  margin-top:2px;
+}
+.switch{display:inline-flex;align-items:center;gap:11px;cursor:pointer;user-select:none;font-size:13.5px;color:#c3c7da;position:relative}
+.switch input{position:absolute;opacity:0;width:0;height:0}
+.track{
+  width:44px;height:25px;border-radius:999px;background:rgba(255,255,255,.1);
+  position:relative;transition:background .42s var(--ease);flex:none;
+}
+.knob{
+  position:absolute;top:3.5px;left:3.5px;width:18px;height:18px;border-radius:50%;
+  background:#8c92ab;
+  transition:transform .42s var(--ease), background .42s var(--ease);
+}
+.switch input:checked + .track{background:linear-gradient(135deg,#7c5cff,#00e0c6)}
+.switch input:checked + .track .knob{transform:translateX(19px);background:#fff}
+.switch.dim{opacity:.4;pointer-events:none;transition:opacity .35s}
+
+/* ============ BUTTONS ============ */
+.btn{
+  display:inline-flex;align-items:center;justify-content:center;gap:9px;
+  padding:12px 20px;border-radius:14px;border:1px solid rgba(255,255,255,.1);
+  background:rgba(255,255,255,.05);color:var(--txt);
+  font-family:inherit;font-size:13.5px;font-weight:650;cursor:pointer;
+  transition:transform .35s var(--ease), background .35s, box-shadow .35s, border-color .35s, opacity .3s;
+}
+.btn svg{width:15px;height:15px;flex:none}
+.btn:hover{transform:translateY(-2px);background:rgba(255,255,255,.095);border-color:rgba(255,255,255,.2)}
+.btn:active{transform:translateY(0) scale(.97)}
+.btn.primary{
+  background:linear-gradient(135deg,#7c5cff,#00e0c6);color:#07070e;border-color:transparent;
+  box-shadow:0 16px 42px -14px rgba(124,92,255,.95);
+}
+.btn.primary:hover{box-shadow:0 20px 54px -12px rgba(124,92,255,1)}
+.btn[disabled]{opacity:.4;pointer-events:none}
+
+/* ============ RESULTS ============ */
+.resHead{display:flex;align-items:flex-start;justify-content:space-between;gap:18px;flex-wrap:wrap;margin-bottom:20px}
+.bigStat{
+  font-family:var(--mono);font-size:32px;font-weight:800;letter-spacing:-.03em;line-height:1.05;
+  background:linear-gradient(135deg,#ffffff,#a294ff 55%,#00e0c6);
+  -webkit-background-clip:text;background-clip:text;color:transparent;
+}
+.bigStat sup{font-size:.55em;vertical-align:super}
+.subStat{font-size:12.5px;color:var(--muted);margin-top:7px;font-family:var(--mono)}
+.actions{display:flex;gap:9px;flex-wrap:wrap}
+
+.spotlight{
+  margin-bottom:20px;padding:18px 22px;border-radius:20px;
+  background:linear-gradient(135deg, rgba(124,92,255,.18), rgba(0,224,198,.08));
+  border:1px solid rgba(124,92,255,.32);
+  display:flex;flex-direction:column;gap:7px;
+  animation:rise .55s var(--ease) both;
+}
+.spotMeta{font-size:10.5px;letter-spacing:.17em;text-transform:uppercase;font-weight:700;color:#a99cff}
+.spotVal{
+  font-family:var(--mono);font-size:27px;font-weight:800;letter-spacing:.07em;
+  color:#fff;word-break:break-all;line-height:1.25;
+}
+@keyframes spotIn{0%{opacity:0;transform:translateY(10px) scale(.95);filter:blur(7px)}
+100%{opacity:1;transform:none;filter:blur(0)}}
+
+.chips{display:flex;flex-wrap:wrap;gap:10px}
+.chip{
+  font-family:var(--mono);font-size:15px;letter-spacing:.07em;font-weight:600;
+  padding:10px 15px;border-radius:13px;
+  background:rgba(255,255,255,.045);
+  border:1px solid rgba(255,255,255,.085);
+  color:#e6e9f5;cursor:default;
+  animation:pop .5s var(--ease) both;
+  transition:transform .3s var(--ease), background .3s, border-color .3s, box-shadow .3s, color .3s;
+}
+.chip:hover{
+  transform:translateY(-4px);
+  background:rgba(124,92,255,.16);
+  border-color:rgba(124,92,255,.55);
+  color:#fff;
+  box-shadow:0 16px 34px -14px rgba(124,92,255,1);
+}
+@keyframes pop{from{opacity:0;transform:translateY(12px) scale(.9)}to{opacity:1;transform:none}}
+
+.empty{
+  text-align:center;padding:46px 20px;color:var(--muted);font-size:14px;line-height:1.7;
+}
+.moreWrap{display:flex;justify-content:center;margin-top:24px}
+
+/* ============ FOOTER ============ */
+.foot{
+  text-align:center;font-size:12px;color:#5c617a;line-height:1.8;
+  animation:rise 1s var(--ease) both;animation-delay:.15s;
+}
+.foot b{color:#8f95ae;font-weight:600}
+
+/* ============ REDUCED MOTION ============ */
+@media (prefers-reduced-motion: reduce){
+  *{animation-duration:.001ms !important;animation-iteration-count:1 !important;transition-duration:.001ms !important}
+}
+</style>
+</head>
+<body>
+
+<div class="bg">
+  <div class="blob b1"></div>
+  <div class="blob b2"></div>
+  <div class="blob b3"></div>
+  <div class="grid"></div>
+</div>
+
+<main class="shell">
+
+  <header class="top">
+    <div class="brand">
+      <div class="mark">RV</div>
+      <div>
+        <h1>Real Vaastu Digit Combinations</h1>
+        <p>Digit combination generator</p>
+      </div>
+    </div>
+    <div class="badge">v1.1</div>
+  </header>
+
+  <!-- ================= CONTROLS ================= -->
+  <section class="card panel">
+
+    <div>
+      <div class="lbl">Target total <em>digital root</em></div>
+      <div class="pills" id="pills"></div>
+    </div>
+
+    <div>
+      <div class="lbl">Number of digits</div>
+      <div class="stepper">
+        <button class="stepBtn" id="minus" aria-label="Decrease digits">−</button>
+        <div class="digitVal"><span id="digitNum">2</span><small>digits</small></div>
+        <button class="stepBtn" id="plus" aria-label="Increase digits">+</button>
+      </div>
+      <input type="range" class="range" id="digitRange" min="1" max="20" step="1" value="2" />
+      <div class="ticks"><span>1</span><span>20</span></div>
+    </div>
+
+    <!-- NEW: allowed digits selector -->
+    <div class="digitPick">
+      <div class="lbl">
+        Allowed digits
+        <em id="allowedCount">10 digits selected</em>
+      </div>
+      <div class="digitGrid" id="digitGrid"></div>
+      <div class="quickRow">
+        <button class="quick" id="allDigits" type="button">All 0–9</button>
+        <button class="quick" id="noDigits" type="button">Clear all</button>
+      </div>
+    </div>
+
+    <div class="options">
+      <label class="switch" id="leadWrap">
+        <input type="checkbox" id="optLead">
+        <span class="track"><span class="knob"></span></span>
+        <span class="txt">Allow leading zero</span>
+      </label>
+    </div>
+
+  </section>
+
+  <!-- ================= RESULTS ================= -->
+  <section class="card">
+
+    <div class="resHead">
+      <div>
+        <div class="lbl" style="margin-bottom:9px">Total combinations</div>
+        <div class="bigStat"><span id="totalCount">0</span></div>
+        <div class="subStat" id="subStat">Showing 0</div>
+      </div>
+      <div class="actions">
+        <button class="btn" id="btnRandom">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M16 3h5v5"/><path d="M4 20 21 3"/><path d="M21 16v5h-5"/><path d="M15 15l6 6"/><path d="M4 4l5 5"/></svg>
+          Random
+        </button>
+        <button class="btn" id="btnCopy">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><rect x="9" y="9" width="12" height="12" rx="2.5"/><path d="M5 15V5.5A2.5 2.5 0 0 1 7.5 3H17"/></svg>
+          Copy
+        </button>
+        <button class="btn" id="btnCsv">
+          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.9" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12"/><path d="M7.5 10.5 12 15l4.5-4.5"/><path d="M4 20h16"/></svg>
+          CSV
+        </button>
+      </div>
+    </div>
+
+    <div class="spotlight" id="spotlight" hidden>
+      <div class="spotMeta">Random pick · <span id="spotInfo"></span></div>
+      <div class="spotVal" id="spotVal">—</div>
+    </div>
+
+    <div class="chips" id="chips"></div>
+
+    <div class="empty" id="empty">Pick a target and digit count above.</div>
+
+    <div class="moreWrap" id="moreWrap" hidden>
+      <button class="btn primary" id="btnMore">Load more</button>
+    </div>
+
+  </section>
+
+  <p class="foot">
+    Rule: the digits are added together repeatedly until a single digit remains —
+    <b>66 → 12 → 3</b>. Use <b>Allowed digits</b> to restrict combinations to specific digits (e.g. only 0, 3 and 5).
+    Works up to <b>20 digits</b> and <b>10¹⁹+</b> combinations.
+  </p>
+
+</main>
+
+<script>
+(function () {
+  'use strict';
+
+  const MAXLEN    = 20;
+  const PAGE      = 60;
+  const MAX_CHIPS = 600;
+
+  const $ = (s, r = document) => r.querySelector(s);
+
+  /* ================= BIGINT HELPERS ================= */
+
+  function fmtBig(n) {
+    const s = n.toString();
+    if (s.length <= 15) return n.toLocaleString('en-US');
+    return s[0] + '.' + s.slice(1, 3) + ' × 10<sup>' + (s.length - 1) + '</sup>';
+  }
+
+  function randBig(max) {
+    const bits  = max.toString(2).length;
+    const bytes = Math.ceil(bits / 8);
+    const buf   = new Uint8Array(bytes);
+    const shift = BigInt(bytes * 8 - bits);
+    for (;;) {
+      crypto.getRandomValues(buf);
+      let v = 0n;
+      for (let i = 0; i < bytes; i++) v = (v << 8n) | BigInt(buf[i]);
+      v >>= shift;
+      if (v < max) return v;
+    }
+  }
+
+  /* ================= STATE ================= */
+
+  const state = {
+    target: 3,
+    digits: 2,
+    allowed: [true,true,true,true,true,true,true,true,true,true], // index 0..9
+    leadZero: false,
+    segs: [],
+    total: 0n,
+    shown: 0,
+    items: []
+  };
+
+  function allowedList() {
+    const arr = [];
+    for (let d = 0; d <= 9; d++) if (state.allowed[d]) arr.push(d);
+    return arr;
+  }
+
+  function firstList() {
+    const a = allowedList();
+    return state.leadZero ? a : a.filter(d => d !== 0);
+  }
+
+  /* ================= COUNTING DP ================= */
+  /* ways[len][sum] = # of sequences of `len` digits (from allowed set) summing to `sum` */
+
+  let cache = { key: null, ways: null };
+
+  function getWays(allowedArr) {
+    const key = allowedArr.join(',');
+    if (cache.key === key) return cache.ways;
+
+    const maxSum = 9 * MAXLEN;
+    const ways   = [];
+    for (let l = 0; l <= MAXLEN; l++) ways.push(new Array(maxSum + 1).fill(0n));
+    ways[0][0] = 1n;
+
+    for (let l = 1; l <= MAXLEN; l++) {
+      const prev = ways[l - 1];
+      const cur  = ways[l];
+      for (let s = 0; s <= maxSum; s++) {
+        let c = 0n;
+        for (let i = 0; i < allowedArr.length; i++) {
+          const d = allowedArr[i];
+          if (s - d >= 0) c += prev[s - d];
+        }
+        cur[s] = c;
+      }
+    }
+
+    cache = { key, ways };
+    return ways;
+  }
+
+  /* ================= RECOMPUTE ================= */
+
+  function recompute() {
+    const allowed = allowedList();
+    const firsts  = firstList();
+    const L       = state.digits;
+    const T       = state.target;
+    const ways    = getWays(allowed);
+
+    const segs = [];
+    let total = 0n;
+
+    if (allowed.length && firsts.length) {
+      for (let S = 1; S <= 9 * L; S++) {
+        if ((S % 9) !== (T % 9)) continue;   // digital root matches
+        let c = 0n;
+        for (let i = 0; i < firsts.length; i++) {
+          const d = firsts[i];
+          if (S - d >= 0) c += ways[L - 1][S - d];
+        }
+        if (c > 0n) {
+          segs.push({ sum: S, count: c });
+          total += c;
+        }
+      }
+    }
+
+    state.segs  = segs;
+    state.total = total;
+  }
+
+  /* ================= UNRANKING ================= */
+  /* Given a global index (BigInt), produce the actual digit string */
+
+  function unrank(k) {
+    const allowed = allowedList();
+    const firsts  = firstList();
+    const L       = state.digits;
+    const ways    = getWays(allowed);
+
+    let seg = null;
+    for (let i = 0; i < state.segs.length; i++) {
+      const s = state.segs[i];
+      if (k < s.count) { seg = s; break; }
+      k -= s.count;
+    }
+    if (!seg) return null;
+
+    let S = seg.sum;
+    const out = [];
+
+    for (let pos = 0; pos < L; pos++) {
+      const list = pos === 0 ? firsts : allowed;
+      let placed = false;
+      for (let i = 0; i < list.length; i++) {
+        const d   = list[i];
+        const rem = S - d;
+        if (rem < 0) break;                 // list ascending → no later digit fits
+        const c = ways[L - 1 - pos][rem];
+        if (k < c) { out.push(d); S = rem; placed = true; break; }
+        k -= c;
+      }
+      if (!placed) return null;
+    }
+    return out.join('');
+  }
+
+  function buildPage(start, n) {
+    const out = [];
+    for (let i = 0; i < n; i++) {
+      const idx = BigInt(start + i);
+      if (idx >= state.total) break;
+      const s = unrank(idx);
+      if (s === null) break;
+      out.push(s);
+    }
+    return out;
+  }
+
+  /* ================= DISPLAY HELPERS ================= */
+
+  function explain(str) {
+    let s = 0;
+    for (let i = 0; i < str.length; i++) s += +str[i];
+    let dr = s;
+    while (dr > 9) {
+      let t = 0;
+      while (dr > 0) { t += dr % 10; dr = (dr / 10) | 0; }
+      dr = t;
+    }
+    return str + '  →  ' + s + '  →  ' + dr;
+  }
+
+  /* ================= RENDERING ================= */
+
+  function updateStats() {
+    $('#totalCount').innerHTML = fmtBig(state.total);
+    $('#subStat').textContent  = state.total === 0n
+      ? 'No matches'
+      : 'Showing ' + state.shown.toLocaleString() + ' of ' + fmtBig(state.total).replace(/<[^>]+>/g, '');
+
+    const more = $('#btnMore');
+    if (state.total === 0n) {
+      more.disabled = true;
+      more.textContent = 'Nothing to load';
+    } else if (BigInt(state.shown) >= state.total) {
+      more.disabled = true;
+      more.textContent = 'All combinations shown';
+    } else if (state.shown >= MAX_CHIPS) {
+      more.disabled = true;
+      more.textContent = 'Display limit — refine filters';
+    } else {
+      more.disabled = false;
+      more.textContent = 'Load more';
+    }
+  }
+
+  function appendMore(n) {
+    const room = MAX_CHIPS - state.shown;
+    if (room <= 0) return;
+
+    const items = buildPage(state.shown, Math.min(n, room));
+    if (!items.length) return;
+
+    const frag = document.createDocumentFragment();
+    items.forEach(function (str, i) {
+      state.items.push(str);
+      const el = document.createElement('div');
+      el.className = 'chip';
+      el.textContent = str;
+      el.title = explain(str);
+      el.style.animationDelay = (Math.min(i, 18) * 20) + 'ms';
+      frag.appendChild(el);
+    });
+
+    $('#chips').appendChild(frag);
+    state.shown += items.length;
+    updateStats();
+  }
+
+  function regenerate() {
+    recompute();
+
+    state.shown = 0;
+    state.items = [];
+    $('#chips').innerHTML = '';
+
+    const empty = $('#empty');
+    const wrap  = $('#moreWrap');
+
+    updateStats();
+
+    if (state.total === 0n) {
+      empty.hidden = false;
+      wrap.hidden  = true;
+
+      const anyAllowed = state.allowed.some(Boolean);
+      const anyFirst   = state.leadZero
+        ? anyAllowed
+        : state.allowed.slice(1).some(Boolean);
+
+      if (!anyAllowed) {
+        empty.textContent = 'Select at least one allowed digit above to generate combinations.';
+      } else if (!anyFirst) {
+        empty.textContent = 'Only the digit 0 is allowed and leading zero is off. Turn on “Allow leading zero” or allow more digits.';
+      } else {
+        empty.textContent = 'No combinations exist for this setup. Try a different target, digit count, or allowed digits.';
+      }
+      return;
+    }
+
+    empty.hidden = true;
+    wrap.hidden  = false;
+    appendMore(PAGE);
+  }
+
+  /* ================= CONTROLS ================= */
+
+  // ---- target pills ----
+  const pillsEl = $('#pills');
+  for (let i = 1; i <= 9; i++) {
+    const b = document.createElement('button');
+    b.className = 'pill';
+    b.textContent = i;
+    b.dataset.v = i;
+    b.addEventListener('click', function () { setTarget(i); });
+    pillsEl.appendChild(b);
+  }
+
+  function setTarget(v) {
+    if (state.target === v) return;
+    state.target = v;
+    pillsEl.querySelectorAll('.pill').forEach(function (p) {
+      p.classList.toggle('active', +p.dataset.v === v);
+    });
+    regenerate();
+  }
+
+  // ---- digits stepper ----
+  function paintRange() {
+    const r = $('#digitRange');
+    const p = ((r.value - r.min) / (r.max - r.min)) * 100;
+    r.style.background =
+      'linear-gradient(90deg,#7c5cff 0%,#00e0c6 ' + p + '%,rgba(255,255,255,.09) ' + p + '%,rgba(255,255,255,.09) 100%)';
+  }
+
+  function setDigits(v, animate) {
+    v = Math.max(1, Math.min(MAXLEN, v | 0));
+    if (state.digits === v && animate) return;
+    state.digits = v;
+
+    const num = $('#digitNum');
+    num.textContent = v;
+    if (animate) {
+      num.classList.remove('bump');
+      void num.offsetWidth;
+      num.classList.add('bump');
+    }
+
+    $('#digitRange').value = v;
+    paintRange();
+    regenerate();
+  }
+
+  $('#digitRange').addEventListener('input', function (e) {
+    setDigits(+e.target.value, true);
+  });
+  $('#minus').addEventListener('click', function () { setDigits(state.digits - 1, true); });
+  $('#plus').addEventListener('click', function () { setDigits(state.digits + 1, true); });
+
+  // ---- allowed digits selector ----
+  const digitGrid = $('#digitGrid');
+  const digitEls  = [];
+
+  for (let d = 0; d <= 9; d++) {
+    const b = document.createElement('button');
+    b.type = 'button';
+    b.className = 'digit on';
+    b.textContent = d;
+    b.dataset.d = d;
+    b.setAttribute('aria-pressed', 'true');
+    b.setAttribute('aria-label', 'Digit ' + d);
+    b.addEventListener('click', function () { toggleDigit(d); });
+    digitGrid.appendChild(b);
+    digitEls.push(b);
+  }
+
+  function toggleDigit(d) {
+    state.allowed[d] = !state.allowed[d];
+    digitEls[d].classList.toggle('on', state.allowed[d]);
+    digitEls[d].setAttribute('aria-pressed', String(state.allowed[d]));
+    afterDigitsChange();
+  }
+
+  function afterDigitsChange() {
+    const n = state.allowed.filter(Boolean).length;
+    $('#allowedCount').textContent = n + (n === 1 ? ' digit selected' : ' digits selected');
+
+    // leading-zero toggle only matters when 0 is allowed
+    $('#leadWrap').classList.toggle('dim', !state.allowed[0]);
+
+    regenerate();
+  }
+
+  $('#allDigits').addEventListener('click', function () {
+    for (let d = 0; d <= 9; d++) {
+      state.allowed[d] = true;
+      digitEls[d].classList.add('on');
+      digitEls[d].setAttribute('aria-pressed', 'true');
+    }
+    afterDigitsChange();
+  });
+
+  $('#noDigits').addEventListener('click', function () {
+    for (let d = 0; d <= 9; d++) {
+      state.allowed[d] = false;
+      digitEls[d].classList.remove('on');
+      digitEls[d].setAttribute('aria-pressed', 'false');
+    }
+    afterDigitsChange();
+  });
+
+  // ---- leading zero toggle ----
+  $('#optLead').addEventListener('change', function (e) {
+    state.leadZero = e.target.checked;
+    regenerate();
+  });
+
+  // ---- load more ----
+  $('#btnMore').addEventListener('click', function () { appendMore(PAGE); });
+
+  /* ================= ACTIONS ================= */
+
+  // random pick
+  $('#btnRandom').addEventListener('click', function () {
+    if (state.total === 0n) return;
+
+    const str = unrank(randBig(state.total));
+    if (!str) return;
+
+    const spot = $('#spotlight');
+    const val  = $('#spotVal');
+
+    spot.hidden = false;
+    $('#spotInfo').textContent = state.digits + ' digits · root ' + state.target;
+    val.textContent = str;
+    val.style.animation = 'none';
+    void val.offsetWidth;
+    val.style.animation = 'spotIn .6s cubic-bezier(.16,1,.3,1) both';
+
+    spot.animate(
+      [{ transform: 'scale(1)' }, { transform: 'scale(1.012)' }, { transform: 'scale(1)' }],
+      { duration: 420, easing: 'cubic-bezier(.16,1,.3,1)' }
+    );
+  });
+
+  // copy
+  $('#btnCopy').addEventListener('click', async function () {
+    if (!state.items.length) return;
+    const text = state.items.join('\n');
+    try {
+      await navigator.clipboard.writeText(text);
+      flash($('#btnCopy'), 'Copied!');
+    } catch (err) {
+      const ta = document.createElement('textarea');
+      ta.value = text;
+      document.body.appendChild(ta);
+      ta.select();
+      document.execCommand('copy');
+      document.body.removeChild(ta);
+      flash($('#btnCopy'), 'Copied!');
+    }
+  });
+
+  // csv
+  $('#btnCsv').addEventListener('click', function () {
+    if (!state.items.length) return;
+    let csv = 'combination,digit_sum,digital_root\n';
+    state.items.forEach(function (s) {
+      let sum = 0;
+      for (let i = 0; i < s.length; i++) sum += +s[i];
+      let dr = sum;
+      while (dr > 9) {
+        let t = 0;
+        while (dr > 0) { t += dr % 10; dr = (dr / 10) | 0; }
+        dr = t;
+      }
+      csv += s + ',' + sum + ',' + dr + '\n';
+    });
+
+    const blob = new Blob([csv], { type: 'text/csv;charset=utf-8;' });
+    const url  = URL.createObjectURL(blob);
+    const a    = document.createElement('a');
+    a.href = url;
+    a.download = 'real-vaastu-' + state.target + '-' + state.digits + 'digits.csv';
+    a.click();
+    URL.revokeObjectURL(url);
+    flash($('#btnCsv'), 'Saved!');
+  });
+
+  function flash(btn, msg) {
+    const original = btn.innerHTML;
+    btn.innerHTML = msg;
+    btn.style.pointerEvents = 'none';
+    setTimeout(function () {
+      btn.innerHTML = original;
+      btn.style.pointerEvents = '';
+    }, 1100);
+  }
+
+  /* ================= INIT ================= */
+
+  pillsEl.querySelector('.pill[data-v="3"]').classList.add('active');
+  paintRange();
+  afterDigitsChange();   // sets allowed-count label, dim state, and renders
+
+})();
+</script>
+</body>
+</html>
