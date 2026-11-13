@@ -1,0 +1,1929 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="UTF-8">
+<meta name="viewport" content="width=device-width, initial-scale=1, viewport-fit=cover">
+<meta name="theme-color" content="#ede6d6">
+<title>ALMANAC Nº 07 — Sleep Windows & Reference</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..900;1,9..144,300..900&family=IBM+Plex+Mono:wght@400;500;600;700&display=swap" rel="stylesheet">
+<style>
+/* =========================================================
+   TOKENS
+   ========================================================= */
+:root {
+  --paper:      #ede6d6;
+  --paper-2:    #e5ddc9;
+  --paper-3:    #dcd3bb;
+  --ink:        #131108;
+  --ink-2:      #4a4538;
+  --ink-3:      #8e8676;
+  --ink-4:      #b8b0a0;
+  --red:        #d93a1f;
+  --red-2:      #b12b13;
+  --blue:       #1e3a8a;
+
+  --sans: 'Fraunces', 'Times New Roman', serif;
+  --mono: 'IBM Plex Mono', 'Courier New', monospace;
+
+  --hair: 1px solid rgba(19, 17, 8, 0.18);
+  --hair-2: 1px solid rgba(19, 17, 8, 0.32);
+
+  --ease: cubic-bezier(0.65, 0, 0.35, 1);
+  --snap: cubic-bezier(0.85, 0, 0.15, 1);
+  --soft: cubic-bezier(0.22, 1, 0.36, 1);
+}
+
+/* =========================================================
+   RESET
+   ========================================================= */
+*, *::before, *::after { margin: 0; padding: 0; box-sizing: border-box; }
+
+html, body {
+  background: var(--paper);
+  color: var(--ink);
+  font-family: var(--mono);
+  -webkit-font-smoothing: antialiased;
+  -moz-osx-font-smoothing: grayscale;
+  overflow-x: hidden;
+}
+
+body {
+  min-height: 100vh;
+  position: relative;
+  font-feature-settings: "kern" 1, "liga" 1;
+}
+
+/* =========================================================
+   BACKGROUND — paper grain + editorial grid
+   ========================================================= */
+.paper-bg {
+  position: fixed;
+  inset: 0;
+  z-index: 0;
+  pointer-events: none;
+  background-image:
+    linear-gradient(to right, rgba(19,17,8,0.055) 1px, transparent 1px),
+    linear-gradient(to bottom, rgba(19,17,8,0.055) 1px, transparent 1px);
+  background-size: 32px 32px;
+  -webkit-mask-image: radial-gradient(ellipse 90% 75% at 50% 30%, #000 0%, transparent 100%);
+  mask-image: radial-gradient(ellipse 90% 75% at 50% 30%, #000 0%, transparent 100%);
+}
+.paper-grain {
+  position: fixed;
+  inset: 0;
+  z-index: 9999;
+  pointer-events: none;
+  mix-blend-mode: multiply;
+  opacity: 0.55;
+  background-image: url("data:image/svg+xml;utf8,<svg xmlns='http://www.w3.org/2000/svg' width='200' height='200'><filter id='n'><feTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='2' stitchTiles='stitch'/><feColorMatrix values='0 0 0 0 0  0 0 0 0 0  0 0 0 0 0  0 0 0 0.09 0'/></filter><rect width='100%' height='100%' filter='url(%23n)'/></svg>");
+}
+
+/* =========================================================
+   LAYOUT
+   ========================================================= */
+.page {
+  max-width: 860px;
+  margin: 0 auto;
+  padding: 22px 22px 100px;
+  position: relative;
+  z-index: 1;
+}
+
+/* =========================================================
+   RUNNING HEAD
+   ========================================================= */
+.running-head {
+  display: grid;
+  grid-template-columns: 1fr auto 1fr;
+  align-items: baseline;
+  gap: 14px;
+  font-size: 10px;
+  letter-spacing: 0.22em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  padding-bottom: 8px;
+}
+.running-head .mid {
+  text-align: center;
+  color: var(--red);
+  font-weight: 600;
+}
+.running-head .right { text-align: right; }
+
+.rule-thick {
+  height: 3px;
+  background: var(--ink);
+  transform-origin: left;
+  transform: scaleX(0);
+  animation: ruleDraw 0.9s var(--ease) 0.1s forwards;
+}
+.rule-thin {
+  height: 1px;
+  background: var(--ink);
+  opacity: 0.5;
+  transform-origin: left;
+  transform: scaleX(0);
+  animation: ruleDraw 0.9s var(--ease) 0.25s forwards;
+}
+@keyframes ruleDraw { to { transform: scaleX(1); } }
+
+/* =========================================================
+   MASTHEAD / TITLE
+   ========================================================= */
+.masthead {
+  padding: 30px 0 28px;
+  border-bottom: 1px solid var(--ink);
+  position: relative;
+}
+.masthead::after {
+  content: '';
+  position: absolute;
+  bottom: -4px; left: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--ink);
+}
+
+.title-block {
+  display: grid;
+  grid-template-columns: 1fr;
+  gap: 18px;
+}
+
+h1 {
+  font-family: var(--sans);
+  font-weight: 300;
+  font-size: clamp(44px, 8vw, 92px);
+  line-height: 0.95;
+  letter-spacing: -0.035em;
+  font-variation-settings: "opsz" 144, "SOFT" 30;
+  color: var(--ink);
+}
+.tline {
+  display: block;
+  overflow: hidden;
+  padding-bottom: 0.02em;
+}
+.tline > span {
+  display: block;
+  transform: translateY(105%);
+  animation: lineUp 1.1s var(--soft) forwards;
+}
+.tline:nth-child(1) > span { animation-delay: 0.35s; }
+.tline:nth-child(2) > span { animation-delay: 0.5s; }
+.tline:nth-child(3) > span { animation-delay: 0.65s; }
+
+@keyframes lineUp { to { transform: translateY(0); } }
+
+h1 em {
+  font-style: italic;
+  font-weight: 400;
+  color: var(--red);
+  font-variation-settings: "opsz" 144, "SOFT" 100;
+}
+
+.deck {
+  max-width: 520px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  line-height: 1.65;
+  color: var(--ink-2);
+  letter-spacing: 0.01em;
+  opacity: 0;
+  animation: fadeUp 0.8s var(--soft) 0.9s forwards;
+}
+@keyframes fadeUp {
+  from { opacity: 0; transform: translateY(8px); }
+  to   { opacity: 1; transform: translateY(0); }
+}
+
+/* corner mark */
+.corner-mark {
+  position: absolute;
+  top: 30px; right: 0;
+  font-size: 9.5px;
+  letter-spacing: 0.2em;
+  color: var(--ink-3);
+  text-transform: uppercase;
+  text-align: right;
+  line-height: 1.7;
+}
+.corner-mark b {
+  color: var(--ink);
+  font-weight: 600;
+}
+.corner-mark .dot {
+  display: inline-block;
+  width: 6px; height: 6px;
+  background: var(--red);
+  border-radius: 50%;
+  margin-right: 6px;
+  transform: translateY(-1px);
+  animation: blink 2s steps(1) infinite;
+}
+@keyframes blink {
+  0%, 49% { opacity: 1; }
+  50%, 100% { opacity: 0.15; }
+}
+
+/* =========================================================
+   BLOCK FRAME
+   ========================================================= */
+.block {
+  padding: 34px 0 40px;
+  border-bottom: 1px solid var(--ink);
+  position: relative;
+}
+.block:last-of-type { border-bottom: none; }
+
+.block-head {
+  display: grid;
+  grid-template-columns: auto 1fr auto;
+  align-items: baseline;
+  gap: 18px;
+  margin-bottom: 26px;
+}
+.block-num {
+  font-family: var(--sans);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 32px;
+  line-height: 1;
+  color: var(--red);
+  letter-spacing: -0.03em;
+  font-variation-settings: "opsz" 144;
+  opacity: 0;
+  transform: translateX(-10px);
+  animation: numIn 0.7s var(--soft) forwards;
+}
+.block:nth-of-type(1) .block-num { animation-delay: 1.0s; }
+.block:nth-of-type(2) .block-num { animation-delay: 1.1s; }
+.block:nth-of-type(3) .block-num { animation-delay: 1.2s; }
+.block:nth-of-type(4) .block-num { animation-delay: 1.3s; }
+.block:nth-of-type(5) .block-num { animation-delay: 1.4s; }
+.block:nth-of-type(6) .block-num { animation-delay: 1.5s; }
+.block:nth-of-type(7) .block-num { animation-delay: 1.6s; }
+@keyframes numIn {
+  to { opacity: 1; transform: translateX(0); }
+}
+
+.block-title {
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.04em;
+  color: var(--ink);
+  font-variation-settings: "opsz" 20;
+}
+.block-meta {
+  font-size: 9.5px;
+  letter-spacing: 0.24em;
+  color: var(--ink-3);
+  text-transform: uppercase;
+  font-weight: 500;
+}
+
+/* =========================================================
+   MODE TABS
+   ========================================================= */
+.mode-tabs {
+  display: grid;
+  grid-template-columns: 1fr 1fr;
+  gap: 0;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+  margin-bottom: 30px;
+}
+.tab {
+  background: none;
+  border: none;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  font-weight: 500;
+  color: var(--ink-3);
+  padding: 15px 8px;
+  cursor: pointer;
+  position: relative;
+  transition: color 0.3s var(--ease), background 0.3s var(--ease);
+  text-align: left;
+  padding-left: 18px;
+}
+.tab::before {
+  content: attr(data-idx);
+  font-family: var(--sans);
+  font-style: italic;
+  font-size: 13px;
+  margin-right: 10px;
+  color: var(--ink-4);
+  letter-spacing: 0;
+  font-weight: 400;
+  transition: color 0.3s;
+}
+.tab:first-child { border-right: 1px solid var(--ink); }
+.tab:hover { color: var(--ink); background: rgba(19,17,8,0.03); }
+.tab.on { color: var(--ink); }
+.tab.on::before { color: var(--red); }
+.tab.on::after {
+  content: '';
+  position: absolute;
+  left: 0; bottom: -1px;
+  height: 3px;
+  width: 100%;
+  background: var(--red);
+  transform-origin: left;
+  animation: tabBar 0.45s var(--snap) forwards;
+}
+@keyframes tabBar {
+  from { transform: scaleX(0); }
+  to   { transform: scaleX(1); }
+}
+
+/* =========================================================
+   TIMEBOARD
+   ========================================================= */
+.timeboard {
+  display: flex;
+  align-items: stretch;
+  justify-content: center;
+  gap: 0;
+  padding: 26px 0 22px;
+  border-top: 1px solid var(--ink);
+  border-bottom: 1px solid var(--ink);
+  position: relative;
+  background:
+    repeating-linear-gradient(
+      to bottom,
+      transparent 0,
+      transparent calc(50% - 0.5px),
+      rgba(19,17,8,0.12) calc(50% - 0.5px),
+      rgba(19,17,8,0.12) calc(50% + 0.5px),
+      transparent calc(50% + 0.5px),
+      transparent 100%
+    );
+}
+.timeboard::before,
+.timeboard::after {
+  content: '';
+  position: absolute;
+  top: 6px; bottom: 6px;
+  width: 1px;
+  background: var(--ink);
+}
+.timeboard::before { left: 0; }
+.timeboard::after  { right: 0; }
+
+.tb-group {
+  display: flex;
+  flex-direction: column;
+  align-items: center;
+  gap: 0;
+  padding: 0 8px;
+}
+
+.flap {
+  display: flex;
+  align-items: center;
+  font-family: var(--sans);
+  font-weight: 300;
+  font-size: clamp(46px, 11.5vw, 104px);
+  line-height: 1;
+  letter-spacing: -0.045em;
+  font-variation-settings: "opsz" 144, "SOFT" 40;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  user-select: none;
+}
+.flap-cell {
+  display: inline-grid;
+  place-items: center;
+  width: 1em;
+  height: 1.05em;
+  perspective: 420px;
+  position: relative;
+}
+.flap-cell span {
+  display: block;
+  transform-origin: center;
+  will-change: transform, opacity;
+  backface-visibility: hidden;
+}
+
+.tb-colon {
+  font-family: var(--sans);
+  font-weight: 300;
+  font-size: clamp(40px, 10vw, 90px);
+  line-height: 1;
+  color: var(--ink-2);
+  transform: translateY(-4px);
+  margin: 0 -2px;
+  font-variation-settings: "opsz" 144;
+  animation: colonBlink 3.5s ease-in-out infinite;
+}
+@keyframes colonBlink {
+  0%, 100% { opacity: 0.35; }
+  50%      { opacity: 1; }
+}
+
+.flap-controls {
+  display: flex;
+  gap: 4px;
+  margin-top: 6px;
+}
+.flap-btn {
+  background: none;
+  border: 1px solid var(--ink-4);
+  color: var(--ink-2);
+  cursor: pointer;
+  width: 30px;
+  height: 22px;
+  display: grid;
+  place-items: center;
+  border-radius: 2px;
+  font-family: var(--mono);
+  font-size: 9px;
+  line-height: 1;
+  transition: all 0.15s var(--ease);
+  position: relative;
+}
+.flap-btn:hover {
+  border-color: var(--ink);
+  color: var(--ink);
+  background: rgba(19,17,8,0.06);
+}
+.flap-btn:active {
+  transform: translateY(1px);
+  background: var(--ink);
+  color: var(--paper);
+}
+
+.tb-ampm {
+  display: flex;
+  flex-direction: column;
+  justify-content: center;
+  gap: 5px;
+  margin-left: 14px;
+  padding-left: 14px;
+  border-left: 1px solid var(--ink);
+}
+.ampm-btn {
+  background: none;
+  border: 1px solid transparent;
+  font-family: var(--mono);
+  font-size: 12px;
+  letter-spacing: 0.12em;
+  font-weight: 500;
+  color: var(--ink-3);
+  cursor: pointer;
+  padding: 8px 10px;
+  min-width: 52px;
+  transition: all 0.2s var(--ease);
+  text-align: center;
+}
+.ampm-btn:hover {
+  color: var(--ink);
+  background: rgba(19,17,8,0.04);
+}
+.ampm-btn.on {
+  color: var(--paper);
+  background: var(--ink);
+  border-color: var(--ink);
+}
+
+/* =========================================================
+   TIME ACTIONS + CALC
+   ========================================================= */
+.time-actions {
+  display: flex;
+  justify-content: space-between;
+  align-items: center;
+  gap: 16px;
+  padding: 16px 0 24px;
+  border-bottom: 1px solid var(--ink-4);
+  margin-bottom: 26px;
+}
+.now-btn {
+  background: none;
+  border: none;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  cursor: pointer;
+  padding: 4px 0;
+  position: relative;
+  display: inline-flex;
+  align-items: center;
+  gap: 8px;
+  font-weight: 500;
+}
+.now-btn::after {
+  content: '';
+  position: absolute;
+  left: 0; bottom: 0;
+  width: 100%;
+  height: 1px;
+  background: var(--ink);
+  transform-origin: right;
+  transform: scaleX(1);
+  transition: transform 0.35s var(--ease);
+}
+.now-btn:hover::after {
+  transform-origin: left;
+  transform: scaleX(0.3);
+}
+.now-btn:hover { color: var(--red); }
+.now-btn svg { width: 11px; height: 11px; }
+
+.time-hint {
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.calc-btn {
+  width: 100%;
+  background: var(--ink);
+  color: var(--paper);
+  border: none;
+  padding: 22px 26px;
+  font-family: var(--mono);
+  font-size: 12.5px;
+  letter-spacing: 0.26em;
+  text-transform: uppercase;
+  font-weight: 500;
+  cursor: pointer;
+  display: flex;
+  align-items: center;
+  justify-content: space-between;
+  gap: 20px;
+  position: relative;
+  transition: transform 0.2s var(--ease), background 0.2s var(--ease);
+  box-shadow:
+    5px 5px 0 var(--red),
+    5px 5px 0 1px var(--red);
+}
+.calc-btn:hover {
+  background: var(--red-2);
+  transform: translate(-2px, -2px);
+  box-shadow:
+    7px 7px 0 var(--red),
+    7px 7px 0 1px var(--red);
+}
+.calc-btn:active {
+  transform: translate(3px, 3px);
+  box-shadow:
+    2px 2px 0 var(--red),
+    2px 2px 0 1px var(--red);
+}
+.calc-btn .arrow {
+  display: inline-block;
+  transition: transform 0.35s var(--ease);
+}
+.calc-btn:hover .arrow { transform: translateX(6px); }
+
+.calc-btn.stale {
+  animation: staleTag 1.2s ease-in-out infinite;
+}
+@keyframes staleTag {
+  0%, 100% { background: var(--ink); }
+  50%      { background: var(--red-2); }
+}
+
+/* =========================================================
+   RESULTS
+   ========================================================= */
+.results-section {
+  display: none;
+  margin-top: 34px;
+}
+.results-section.on { display: block; }
+
+.results-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--ink);
+  margin-bottom: 0;
+}
+.results-head h3 {
+  font-family: var(--sans);
+  font-size: 19px;
+  font-weight: 400;
+  font-variation-settings: "opsz" 30;
+  color: var(--ink);
+  letter-spacing: -0.01em;
+}
+.results-head h3 em {
+  font-style: italic;
+  color: var(--red);
+  font-weight: 400;
+}
+.results-from {
+  font-size: 10px;
+  letter-spacing: 0.18em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.results-from b {
+  color: var(--ink);
+  font-weight: 600;
+  letter-spacing: 0.08em;
+}
+
+.result-list {
+  list-style: none;
+  counter-reset: r;
+}
+
+.result-row {
+  display: grid;
+  grid-template-columns: 40px 1fr auto auto 24px;
+  align-items: center;
+  gap: 18px;
+  padding: 18px 14px 18px 12px;
+  border-bottom: 1px solid var(--ink-4);
+  cursor: pointer;
+  position: relative;
+  transition: background 0.28s var(--ease), padding 0.28s var(--ease);
+  opacity: 0;
+  transform: translateY(14px);
+}
+.result-row.show {
+  animation: rowIn 0.6s var(--soft) forwards;
+  animation-delay: var(--delay, 0s);
+}
+@keyframes rowIn {
+  to { opacity: 1; transform: translateY(0); }
+}
+
+.result-row::before {
+  content: '';
+  position: absolute;
+  left: 0; top: 0; bottom: 0;
+  width: 3px;
+  background: var(--red);
+  transform: scaleY(0);
+  transform-origin: center;
+  transition: transform 0.35s var(--snap);
+}
+.result-row:hover { background: rgba(19,17,8,0.045); }
+.result-row:hover::before { transform: scaleY(1); }
+
+.result-row.active {
+  background: var(--ink);
+  color: var(--paper);
+}
+.result-row.active .r-index,
+.result-row.active .r-dur,
+.result-row.active .r-label { color: rgba(237,230,214,0.6); }
+.result-row.active .r-time { color: var(--paper); }
+.result-row.active .r-time small { color: rgba(237,230,214,0.7); }
+.result-row.active .r-arrow { color: var(--red); transform: translateX(0); opacity: 1; }
+.result-row.active::before { transform: scaleY(1); }
+
+.r-index {
+  font-family: var(--sans);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 22px;
+  color: var(--red);
+  font-variation-settings: "opsz" 40;
+  transition: color 0.28s;
+}
+
+.r-time {
+  font-family: var(--sans);
+  font-weight: 400;
+  font-size: clamp(26px, 4.2vw, 34px);
+  letter-spacing: -0.02em;
+  line-height: 1;
+  font-variation-settings: "opsz" 100, "SOFT" 20;
+  color: var(--ink);
+  font-variant-numeric: tabular-nums;
+  display: flex;
+  align-items: baseline;
+  gap: 5px;
+  transition: color 0.28s;
+}
+.r-time small {
+  font-family: var(--mono);
+  font-size: 10px;
+  font-weight: 600;
+  letter-spacing: 0.16em;
+  color: var(--ink-3);
+  transition: color 0.28s;
+}
+
+.r-dur {
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+  text-align: right;
+  transition: color 0.28s;
+  white-space: nowrap;
+}
+
+.r-label {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  text-align: right;
+  padding: 3px 8px;
+  border: 1px solid var(--ink-4);
+  white-space: nowrap;
+  transition: color 0.28s, border-color 0.28s;
+}
+.r-label.rec {
+  color: var(--red);
+  border-color: var(--red);
+  font-weight: 600;
+}
+.result-row.active .r-label {
+  color: var(--paper);
+  border-color: rgba(237,230,214,0.35);
+}
+
+.r-arrow {
+  font-family: var(--mono);
+  color: var(--ink-3);
+  opacity: 0;
+  transform: translateX(-6px);
+  transition: all 0.3s var(--ease);
+  font-size: 14px;
+}
+.result-row:hover .r-arrow {
+  opacity: 1;
+  transform: translateX(0);
+  color: var(--red);
+}
+
+/* =========================================================
+   HYPNOGRAM
+   ========================================================= */
+.hypno-wrap {
+  margin-top: 30px;
+  padding: 22px 22px 18px;
+  background: rgba(255, 252, 240, 0.55);
+  border: 1px solid var(--ink);
+  position: relative;
+  opacity: 0;
+  transform: translateY(20px);
+  transition: opacity 0.7s var(--soft), transform 0.7s var(--soft);
+}
+.hypno-wrap.show { opacity: 1; transform: translateY(0); }
+.hypno-wrap::before {
+  content: '';
+  position: absolute;
+  top: 6px; left: 6px; right: 6px; bottom: 6px;
+  border: 1px solid rgba(19,17,8,0.12);
+  pointer-events: none;
+}
+
+.hypno-head {
+  display: flex;
+  justify-content: space-between;
+  align-items: baseline;
+  padding-bottom: 14px;
+  border-bottom: 1px solid var(--ink-4);
+  margin-bottom: 16px;
+  position: relative;
+  z-index: 1;
+}
+.hypno-title {
+  font-family: var(--sans);
+  font-size: 15px;
+  font-weight: 500;
+  letter-spacing: 0.02em;
+  font-variation-settings: "opsz" 20;
+}
+.hypno-meta {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.16em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+
+.hypnogram {
+  width: 100%;
+  height: auto;
+  display: block;
+  overflow: visible;
+  position: relative;
+  z-index: 1;
+}
+
+.hyp-legend {
+  display: flex;
+  gap: 22px;
+  flex-wrap: wrap;
+  padding-top: 14px;
+  margin-top: 12px;
+  border-top: 1px solid var(--ink-4);
+  position: relative;
+  z-index: 1;
+}
+.leg-item {
+  display: flex;
+  align-items: center;
+  gap: 8px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.14em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.leg-sq {
+  width: 8px; height: 8px;
+  border: 1px solid var(--ink);
+  flex-shrink: 0;
+}
+.leg-sq.deep { background: var(--ink); }
+.leg-sq.light {
+  background-image: repeating-linear-gradient(-45deg, var(--ink) 0, var(--ink) 1px, transparent 1px, transparent 3px);
+}
+.leg-sq.rem { background: var(--red); border-color: var(--red); }
+
+/* =========================================================
+   GLOSSARY / SCIENCE
+   ========================================================= */
+.glossary { list-style: none; }
+
+.gloss-row {
+  display: grid;
+  grid-template-columns: 240px 1fr;
+  gap: 24px;
+  padding: 18px 0;
+  border-bottom: 1px solid var(--ink-4);
+  align-items: baseline;
+}
+.gloss-row:last-child { border-bottom: none; }
+
+.gloss-left {
+  display: flex;
+  align-items: baseline;
+  gap: 12px;
+  font-family: var(--mono);
+  font-size: 11px;
+  letter-spacing: 0.12em;
+  text-transform: uppercase;
+  color: var(--ink-2);
+}
+.gloss-n {
+  font-family: var(--sans);
+  font-style: italic;
+  font-weight: 300;
+  font-size: 16px;
+  color: var(--red);
+  letter-spacing: 0;
+  font-variation-settings: "opsz" 30;
+  min-width: 22px;
+}
+.gloss-term {
+  font-family: var(--sans);
+  font-size: 18px;
+  font-weight: 400;
+  letter-spacing: -0.01em;
+  text-transform: none;
+  color: var(--ink);
+  font-variation-settings: "opsz" 20;
+}
+.gloss-code {
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.18em;
+  color: var(--ink-3);
+  margin-left: auto;
+  white-space: nowrap;
+}
+
+.gloss-right {
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1.75;
+  color: var(--ink-2);
+  letter-spacing: 0.005em;
+}
+.gloss-right b {
+  color: var(--ink);
+  font-weight: 600;
+}
+.gloss-right em {
+  font-style: italic;
+  color: var(--red);
+}
+
+/* =========================================================
+   DATA TABLE
+   ========================================================= */
+.data-table {
+  width: 100%;
+  border-collapse: collapse;
+  font-family: var(--mono);
+  font-size: 10.5px;
+  letter-spacing: 0.02em;
+}
+.data-table th {
+  text-align: left;
+  font-weight: 600;
+  font-size: 9px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+  padding: 8px 10px 8px 0;
+  border-bottom: 1px solid var(--ink);
+}
+.data-table td {
+  padding: 10px 10px 10px 0;
+  border-bottom: 1px solid var(--ink-4);
+  color: var(--ink-2);
+  vertical-align: top;
+  line-height: 1.6;
+}
+.data-table tr:last-child td { border-bottom: none; }
+.data-table td:first-child {
+  font-family: var(--sans);
+  font-size: 14px;
+  color: var(--ink);
+  font-weight: 400;
+  font-variation-settings: "opsz" 20;
+  white-space: nowrap;
+  padding-right: 20px;
+}
+.data-table td b {
+  color: var(--ink);
+  font-weight: 600;
+}
+.data-table td em {
+  color: var(--red);
+  font-style: normal;
+  font-weight: 600;
+}
+
+/* =========================================================
+   TIPS
+   ========================================================= */
+.tips-list {
+  list-style: none;
+  counter-reset: tip;
+}
+.tips-list li {
+  counter-increment: tip;
+  display: grid;
+  grid-template-columns: 44px 1fr;
+  gap: 16px;
+  padding: 14px 0;
+  border-bottom: 1px dashed var(--ink-4);
+  align-items: baseline;
+  font-family: var(--mono);
+  font-size: 12px;
+  line-height: 1.65;
+  color: var(--ink-2);
+  letter-spacing: 0.005em;
+}
+.tips-list li:last-child { border-bottom: none; }
+.tips-list li::before {
+  content: "§" counter(tip, decimal-leading-zero);
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.1em;
+  color: var(--red);
+  font-weight: 600;
+  padding-top: 2px;
+}
+.tips-list b {
+  color: var(--ink);
+  font-weight: 600;
+  font-family: var(--mono);
+}
+
+/* =========================================================
+   CALLOUT
+   ========================================================= */
+.callout {
+  border-left: 3px solid var(--red);
+  padding: 16px 20px;
+  margin: 18px 0;
+  background: rgba(217, 58, 31, 0.04);
+  font-family: var(--mono);
+  font-size: 11.5px;
+  line-height: 1.7;
+  color: var(--ink-2);
+}
+.callout b {
+  color: var(--ink);
+  font-weight: 600;
+}
+
+/* =========================================================
+   FOOTER
+   ========================================================= */
+.foot {
+  padding-top: 30px;
+  display: grid;
+  grid-template-columns: 1fr auto;
+  align-items: baseline;
+  gap: 16px;
+  font-family: var(--mono);
+  font-size: 9.5px;
+  letter-spacing: 0.2em;
+  text-transform: uppercase;
+  color: var(--ink-3);
+}
+.foot .stamp {
+  border: 1px solid var(--red);
+  color: var(--red);
+  padding: 5px 10px;
+  font-weight: 600;
+  transform: rotate(-2deg);
+  letter-spacing: 0.18em;
+}
+
+/* =========================================================
+   REDUCED MOTION
+   ========================================================= */
+@media (prefers-reduced-motion: reduce) {
+  *, *::before, *::after {
+    animation-duration: 0.01ms !important;
+    animation-delay: 0s !important;
+    transition-duration: 0.01ms !important;
+  }
+  .running-head, .masthead, .deck, .block-num,
+  .tline > span { opacity: 1 !important; transform: none !important; }
+}
+
+/* =========================================================
+   RESPONSIVE
+   ========================================================= */
+@media (max-width: 680px) {
+  .page { padding: 18px 16px 60px; }
+  .running-head { font-size: 8.5px; letter-spacing: 0.14em; }
+  .running-head .mid { display: none; }
+  .running-head { grid-template-columns: 1fr auto; }
+  .corner-mark { position: static; margin-top: 14px; text-align: left; }
+
+  .block-head { gap: 12px; }
+  .block-num { font-size: 26px; }
+  .block-meta { display: none; }
+
+  .result-row {
+    grid-template-columns: 28px 1fr auto 20px;
+    gap: 12px;
+    padding: 15px 10px;
+  }
+  .r-label { display: none; }
+  .r-time { font-size: 26px; }
+
+  .gloss-row {
+    grid-template-columns: 1fr;
+    gap: 8px;
+  }
+  .gloss-code { margin-left: 0; }
+
+  .data-table td:first-child { white-space: normal; }
+}
+</style>
+</head>
+<body>
+
+<div class="paper-bg"></div>
+<div class="paper-grain"></div>
+
+<main class="page">
+
+  <!-- ========== RUNNING HEAD ========== -->
+  <div class="running-head">
+    <div>ALMANAC · VOL. Ⅰ</div>
+    <div class="mid">SLEEP WINDOWS & REFERENCE</div>
+    <div class="right">REV. 04 · MMXXV</div>
+  </div>
+  <div class="rule-thick"></div>
+
+  <!-- ========== MASTHEAD ========== -->
+  <header class="masthead">
+    <div class="corner-mark">
+      <div><span class="dot"></span>LIVE INSTRUMENT</div>
+      <div style="margin-top:6px;">SET IN <b>FRAUNCES</b></div>
+      <div><b>90</b>-MIN CYCLE · <b>4–8</b> CYCLES</div>
+      <div><b>7–9</b> HRS ADULT NEED</div>
+    </div>
+
+    <div class="title-block">
+      <h1>
+        <span class="tline"><span>Wake between</span></span>
+        <span class="tline"><span><em>cycles</em>, not</span></span>
+        <span class="tline"><span>inside them.</span></span>
+      </h1>
+      <p class="deck">A pocket instrument and reference for computing sleep windows. Ninety-minute cycles are an average — real cycles vary from roughly 60 to 120 minutes, and the first is almost always the shortest. Find the moment your body is already rising, not buried in delta waves.</p>
+    </div>
+  </header>
+
+  <!-- ========== I. PARAMETERS ========== -->
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">Ⅰ</span>
+      <h2 class="block-title">Sleep Parameters</h2>
+      <span class="block-meta">SET YOUR WINDOW</span>
+    </div>
+
+    <div class="mode-tabs">
+      <button class="tab on" data-mode="sleep" data-idx="a.">I'm sleeping at</button>
+      <button class="tab" data-mode="wake" data-idx="b.">I want to wake at</button>
+    </div>
+
+    <div class="timeboard">
+      <div class="tb-group">
+        <div class="flap flap-h">
+          <span class="flap-cell"><span>1</span></span>
+          <span class="flap-cell"><span>1</span></span>
+        </div>
+        <div class="flap-controls">
+          <button class="flap-btn" data-adj="h+" aria-label="Hour up">▲</button>
+          <button class="flap-btn" data-adj="h-" aria-label="Hour down">▼</button>
+        </div>
+      </div>
+
+      <div class="tb-colon">:</div>
+
+      <div class="tb-group">
+        <div class="flap flap-m">
+          <span class="flap-cell"><span>0</span></span>
+          <span class="flap-cell"><span>0</span></span>
+        </div>
+        <div class="flap-controls">
+          <button class="flap-btn" data-adj="m+" aria-label="Minutes up">▲</button>
+          <button class="flap-btn" data-adj="m-" aria-label="Minutes down">▼</button>
+        </div>
+      </div>
+
+      <div class="tb-ampm">
+        <button class="ampm-btn" data-ampm="AM">AM</button>
+        <button class="ampm-btn on" data-ampm="PM">PM</button>
+      </div>
+    </div>
+
+    <div class="time-actions">
+      <button class="now-btn" id="nowBtn">
+        <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round">
+          <circle cx="12" cy="12" r="9"/><path d="M12 7v5l3 2"/>
+        </svg>
+        Use current time
+      </button>
+      <span class="time-hint">≤ 15 min to sleep onset</span>
+    </div>
+
+    <button class="calc-btn" id="calcBtn">
+      <span id="calcLabel">Calculate windows</span>
+      <span class="arrow">→</span>
+    </button>
+
+    <!-- ===== RESULTS ===== -->
+    <div class="results-section" id="resultsSection">
+      <div class="results-head">
+        <h3 id="resultsTitle">Set your alarm for <em>—</em></h3>
+        <div class="results-from" id="resultsFrom"></div>
+      </div>
+      <ol class="result-list" id="resultList"></ol>
+
+      <!-- HYPNOGRAM -->
+      <div class="hypno-wrap" id="hypnoWrap">
+        <div class="hypno-head">
+          <div class="hypno-title">Sleep architecture</div>
+          <div class="hypno-meta" id="hypnoMeta"></div>
+        </div>
+        <svg class="hypnogram" id="hypnogram" viewBox="0 0 800 210" preserveAspectRatio="none">
+          <g id="hypGrid"></g>
+          <g id="hypMarks"></g>
+          <path id="hypPath" fill="none" stroke="#131108" stroke-width="1.8" stroke-linejoin="miter" stroke-linecap="square"/>
+        </svg>
+        <div class="hyp-legend">
+          <div class="leg-item"><span class="leg-sq light"></span>Light · N1/N2</div>
+          <div class="leg-item"><span class="leg-sq deep"></span>Deep · N3</div>
+          <div class="leg-item"><span class="leg-sq rem"></span>REM</div>
+        </div>
+      </div>
+    </div>
+  </section>
+
+  <!-- ========== II. CYCLE SCIENCE ========== -->
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">Ⅱ</span>
+      <h2 class="block-title">Cycle Science</h2>
+      <span class="block-meta">THE 90-MINUTE MYTH</span>
+    </div>
+    <ul class="glossary">
+      <li class="gloss-row">
+        <div class="gloss-left">
+          <span class="gloss-n">01</span>
+          <span class="gloss-term">The average is not the rule</span>
+          <span class="gloss-code">60–120 MIN</span>
+        </div>
+        <div class="gloss-right">Ninety minutes is a teaching average, not a physiological constant. In controlled laboratory recordings, cycle length has ranged from roughly <b>60 to 120 minutes</b>, with most healthy adults falling between <b>70 and 120</b>. A large retrospective analysis of 6,064 polysomnographic cycles found a median duration of <b>96 minutes</b> — six minutes longer than the textbook figure.[reference:0][reference:1]</div>
+      </li>
+      <li class="gloss-row">
+        <div class="gloss-left">
+          <span class="gloss-n">02</span>
+          <span class="gloss-term">The first cycle is shortest</span>
+          <span class="gloss-code">70–100 MIN</span>
+        </div>
+        <div class="gloss-right">The first NREM–REM cycle of the night typically lasts <b>70 to 100 minutes</b>. Subsequent cycles lengthen to roughly <b>90 to 120 minutes</b>. This means a calculator that assumes a fixed 90-minute cycle for every block will drift out of alignment as the night progresses.[reference:2]</div>
+      </li>
+      <li class="gloss-row">
+        <div class="gloss-left">
+          <span class="gloss-n">03</span>
+          <span class="gloss-term">Night-to-night variability</span>
+          <span class="gloss-code">UNPREDICTABLE</span>
+        </div>
+        <div class="gloss-right">Even the same individual can show <b>unpredictable differences in cycle length from one night to the next</b>. Age, genetics, stress, illness, medications, sleep pressure, and prior sleep history can stretch or shrink a cycle by <b>10–30 minutes</b>. Cycle timing is an endogenous biological rhythm, not a fixed gear.[reference:3][reference:4][reference:5]</div>
+      </li>
+      <li class="gloss-row">
+        <div class="gloss-left">
+          <span class="gloss-n">04</span>
+          <span class="gloss-term">Sleep onset is not instant</span>
+          <span class="gloss-code">10–20 MIN</span>
+        </div>
+        <div class="gloss-right">Most people take <b>10 to 20 minutes</b> to fall asleep. The same person may take quite different times on different nights, and people differ from each other. A calculator must add a <b>sleep-onset buffer</b> — typically 15 minutes — to bedtime, or it will predict wake times that are systematically too early.[reference:6]</div>
+      </li>
+      <li class="gloss-row">
+        <div class="gloss-left">
+          <span class="gloss-n">05</span>
+          <span class="gloss-term">Four to six cycles</span>
+          <span class="gloss-code">4–6 / NIGHT</span>
+        </div>
+        <div class="gloss-right">Most adults complete <b>four to six cycles</b> per night. At an average of 90 minutes, that corresponds to <b>6 to 9 hours</b> of sleep. Five cycles — <b>7.5 hours</b> — is a common sweet spot, but individual need varies and is set by genetics, age, and health status.[reference:7][reference:8]</div>
+      </li>
+    </ul>
+
+    <div class="callout">
+      <b>Important limitation.</b> Cycle-based calculators take two real facts — that sleep is cyclical and that waking from light or REM sleep is often easier — and over-generalize them. Waking between cycles may feel better on average, but it does not guarantee restoration. Total sleep duration, sleep continuity, circadian timing, and sleep pressure matter more than cycle arithmetic alone.[reference:9]
+    </div>
+  </section>
+
+  <!-- ========== III. STAGE PHYSIOLOGY ========== -->
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">Ⅲ</span>
+      <h2 class="block-title">Stage Physiology</h2>
+      <span class="block-meta">N1 · N2 · N3 · REM</span>
+    </div>
+    <ul class="glossary">
+      <li class="gloss-row">
+        <div class="gloss-left">
+          <span class="gloss-n">01</span>
+          <span class="gloss-term">Stage N1 — transition</span>
+          <span class="gloss-code">2–5%</span>
+        </div>
+        <div class="gloss-right">The brief drift from wake to sleep. Muscle tone begins to relax, eye movements slow, and theta activity appears on EEG. N1 occupies only <b>2 to 5%</b> of total sleep time in healthy young adults. It is the lightest stage and the easiest from which to be aroused.[reference:10][reference:11]</div>
+      </li>
+      <li class="gloss-row">
+        <div class="gloss-left">
+          <span class="gloss-n">02</span>
+          <span class="gloss-term">Stage N2 — the workhorse</span>
+          <span class="gloss-code">45–55%</span>
+        </div>
+        <div class="gloss-right">N2 is the largest single block of sleep, occupying roughly <b>45 to 55%</b> of the night. It is defined by <b>sleep spindles</b> (bursts of 11–16 Hz activity) and <b>K-complexes</b> (large, slow biphasic waves). These features are not decorative: spindles and K-complexes are involved in <b>memory consolidation</b>, especially the transfer of hippocampus-dependent declarative memories to cortical long-term storage. N2 also reduces sensory responsiveness to external stimuli, protecting sleep continuity.[reference:12][reference:13][reference:14]</div>
+      </li>
+      <li class="gloss-row">
+        <div class="gloss-left">
+          <span class="gloss-n">03</span>
+          <span class="gloss-term">Stage N3 — deep sleep</span>
+          <span class="gloss-code">13–23%</span>
+        </div>
+        <div class="gloss-right">N3, or slow-wave sleep, is dominated by high-amplitude <b>delta waves</b> (0.5–4 Hz). It occupies <b>13 to 23%</b> of the night and is concentrated in the <b>first half</b> of sleep. This is the most physically restorative stage: the brain’s <b>glymphatic system</b> becomes highly active, flushing metabolic waste including <b>beta-amyloid</b>; the body releases its largest pulses of <b>growth hormone</b> for tissue repair, muscle building, and bone strengthening; and immune and metabolic systems reset. Waking directly out of N3 produces the worst sleep inertia — the heavy, foggy, disoriented feeling.[reference:15][reference:16][reference:17][reference:18]</div>
+      </li>
+      <li class="gloss-row">
+        <div class="gloss-left">
+          <span class="gloss-n">04</span>
+          <span class="gloss-term">REM — dream sleep</span>
+          <span class="gloss-code">20–25%</span>
+        </div>
+        <div class="gloss-right">REM occupies <b>20 to 25%</b> of total sleep and becomes progressively longer and more frequent toward morning. The brain is highly active — sometimes more active than waking — while the body is immobilized by <b>REM atonia</b>, a glycine- and GABA-mediated inhibition of spinal motor neurons. REM supports <b>emotional memory consolidation</b>, the processing of emotional experiences, procedural learning, and synaptic modulation. Experimental REM deprivation impairs emotional adaptation and cognitive performance. Because REM periods lengthen near morning, the final cycles are the most favorable for a natural-feeling wake.[reference:19][reference:20][reference:21]</div>
+      </li>
+      <li class="gloss-row">
+        <div class="gloss-left">
+          <span class="gloss-n">05</span>
+          <span class="gloss-term">Stage shifts across the night</span>
+          <span class="gloss-code">N3 → REM</span>
+        </div>
+        <div class="gloss-right">Early cycles are <b>deep-sleep-heavy</b>; later cycles are <b>REM-heavy</b>. This is why sleeping only the first half of the night — say, four hours — captures most of your deep sleep but very little of your REM sleep. Both matter, and they serve different functions. A night shortened at the end is a night disproportionately short on REM.[reference:22]</div>
+      </li>
+    </ul>
+
+    <div class="callout">
+      <b>Waking from N3 is not “bad sleep.”</b> Deep sleep is essential. The problem is timing the alarm <em>into</em> N3. If you wake spontaneously from N3, you may feel groggy for 15–60 minutes, but the sleep itself was restorative. The goal is not to avoid deep sleep — it is to avoid being pulled out of it by an alarm when you could instead rise at a lighter boundary.[reference:23]
+    </div>
+  </section>
+
+  <!-- ========== IV. AGE & NEED ========== -->
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">Ⅳ</span>
+      <h2 class="block-title">Sleep Need by Age</h2>
+      <span class="block-meta">CDC / NSF</span>
+    </div>
+    <table class="data-table">
+      <thead>
+        <tr>
+          <th>Age</th>
+          <th>Recommended sleep per 24 h</th>
+          <th>Notes</th>
+        </tr>
+      </thead>
+      <tbody>
+        <tr>
+          <td>0–3 months</td>
+          <td><b>14–17 h</b></td>
+          <td>Includes naps; highly variable</td>
+        </tr>
+        <tr>
+          <td>4–12 months</td>
+          <td><b>12–16 h</b></td>
+          <td>Includes naps</td>
+        </tr>
+        <tr>
+          <td>1–2 years</td>
+          <td><b>11–14 h</b></td>
+          <td>Includes naps</td>
+        </tr>
+        <tr>
+          <td>3–5 years</td>
+          <td><b>10–13 h</b></td>
+          <td>Includes naps</td>
+        </tr>
+        <tr>
+          <td>6–12 years</td>
+          <td><b>9–12 h</b></td>
+          <td>School-age; sleep affects learning</td>
+        </tr>
+        <tr>
+          <td>13–18 years</td>
+          <td><b>8–10 h</b></td>
+          <td>Circadian phase delay is common</td>
+        </tr>
+        <tr>
+          <td>19–64 years</td>
+          <td><b>7–9 h</b></td>
+          <td><em>Most adults</em></td>
+        </tr>
+        <tr>
+          <td>65+ years</td>
+          <td><b>7–8 h</b></td>
+          <td>Lighter, more fragmented sleep is common</td>
+        </tr>
+      </tbody>
+    </table>
+    <div class="callout" style="margin-top:18px;">
+      <b>Short sleepers are rare.</b> A small minority of people carry genetic variants that allow them to function on less sleep without apparent impairment. Most people who believe they thrive on 5–6 hours are chronically sleep-restricted and poor judges of their own impairment. The National Sleep Foundation, American Academy of Sleep Medicine, and CDC all converge on <b>at least 7 hours</b> for adults.[reference:24][reference:25]
+    </div>
+  </section>
+
+  <!-- ========== V. TWO-PROCESS MODEL ========== -->
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">Ⅴ</span>
+      <h2 class="block-title">The Two-Process Model</h2>
+      <span class="block-meta">SLEEP PRESSURE & CIRCADIAN</span>
+    </div>
+    <ul class="glossary">
+      <li class="gloss-row">
+        <div class="gloss-left">
+          <span class="gloss-n">01</span>
+          <span class="gloss-term">Process S — sleep pressure</span>
+          <span class="gloss-code">ADENOSINE</span>
+        </div>
+        <div class="gloss-right">The longer you are awake, the more <b>adenosine</b> accumulates in the brain. Adenosine is a byproduct of neural energy use and the primary homeostatic sleep-pressure signal. As it builds, you feel sleepier. During sleep, adenosine is cleared, and sleep pressure dissipates. This is why a night of poor sleep makes you feel pressure earlier the next evening.[reference:26]</div>
+      </li>
+      <li class="gloss-row">
+        <div class="gloss-left">
+          <span class="gloss-n">02</span>
+          <span class="gloss-term">Process C — circadian rhythm</span>
+          <span class="gloss-code">~24 H</span>
+        </div>
+        <div class="gloss-right">The suprachiasmatic nucleus (SCN) of the hypothalamus generates an approximately 24-hour rhythm that regulates alertness, core body temperature, hormone secretion, and sleep timing. Process C does not simply tell you to sleep; it actively promotes wakefulness during the day and permits sleep at night. The interaction between Process S and Process C determines how sleepy you feel at any given moment.[reference:27][reference:28]</div>
+      </li>
+      <li class="gloss-row">
+        <div class="gloss-left">
+          <span class="gloss-n">03</span>
+          <span class="gloss-term">Caffeine blocks adenosine</span>
+          <span class="gloss-code">ANTAGONIST</span>
+        </div>
+        <div class="gloss-right">Caffeine is a non-selective <b>adenosine receptor antagonist</b>. It does not remove adenosine; it prevents adenosine from binding to its receptors, masking sleep pressure. This is why caffeine can make you feel alert even when your sleep debt is high — and why it can delay sleep onset and reduce deep sleep if consumed too late. Caffeine’s half-life is roughly <b>5–6 hours</b>, meaning a 3 p.m. coffee still has meaningful adenosine-blocking activity at 9 p.m.[reference:29][reference:30]</div>
+      </li>
+      <li class="gloss-row">
+        <div class="gloss-left">
+          <span class="gloss-n">04</span>
+          <span class="gloss-term">Sleep debt accumulates</span>
+          <span class="gloss-code">CHRONIC</span>
+        </div>
+        <div class="gloss-right">Sleep debt is the difference between the sleep you need and the sleep you obtain. It accumulates over time and produces <b>poor cognitive performance, increased sleepiness, poor mood, and a higher risk of accidents</b>. Recovery is not instantaneous: mood, sleepiness, and different cognitive domains recover at different rates, and the process depends on the type of sleep loss (acute vs. chronic) and the number of recovery opportunities.[reference:31]</div>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ========== VI. INERTIA & DISRUPTORS ========== -->
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">Ⅵ</span>
+      <h2 class="block-title">Inertia & Disruptors</h2>
+      <span class="block-meta">WHAT MAKES WAKING HARD</span>
+    </div>
+    <ul class="glossary">
+      <li class="gloss-row">
+        <div class="gloss-left">
+          <span class="gloss-n">01</span>
+          <span class="gloss-term">Sleep inertia</span>
+          <span class="gloss-code">15–60 MIN</span>
+        </div>
+        <div class="gloss-right">Sleep inertia is the transitional state between sleep and wakefulness: <b>drowsiness, disorientation, inattentiveness, poor reaction time, decreased motor skills, difficulty reasoning and remembering, and irritability</b>. It usually lasts <b>15 to 60 minutes</b>, but can last longer — up to <b>2 hours</b> — especially after awakening from deep sleep or when sleep-deprived. Performance and mood can be significantly impaired during this window, which is why critical tasks should be delayed until inertia dissipates.[reference:32][reference:33]</div>
+      </li>
+      <li class="gloss-row">
+        <div class="gloss-left">
+          <span class="gloss-n">02</span>
+          <span class="gloss-term">Waking from deep sleep</span>
+          <span class="gloss-code">WORST INERTIA</span>
+        </div>
+        <div class="gloss-right">Inertia is most severe when awakening occurs from <b>slow-wave sleep (N3)</b>. The brain is in its most synchronized, low-frequency state; transitioning abruptly to waking requires a larger state shift than waking from N1, N2, or REM. If you are sleep-deprived, your brain may prioritize deep sleep even in the morning, increasing the chance that an alarm pulls you out of N3.[reference:34][reference:35]</div>
+      </li>
+      <li class="gloss-row">
+        <div class="gloss-left">
+          <span class="gloss-n">03</span>
+          <span class="gloss-term">Alcohol</span>
+          <span class="gloss-code">REM SUPPRESSANT</span>
+        </div>
+        <div class="gloss-right">Alcohol before bed may shorten sleep onset latency and increase slow-wave sleep in the first half of the night, but it <b>suppresses REM sleep</b> — delaying the first REM period and reducing total REM time. It also increases sleep disruption in the second half of the night as the body metabolizes it. The result is a night that looks “deep” early but is architecturally distorted and less restorative overall.[reference:36][reference:37]</div>
+      </li>
+      <li class="gloss-row">
+        <div class="gloss-left">
+          <span class="gloss-n">04</span>
+          <span class="gloss-term">Sleep paralysis</span>
+          <span class="gloss-code">REM ATONIA</span>
+        </div>
+        <div class="gloss-right">During REM sleep, the brain inhibits spinal motor neurons to prevent the body from acting out dreams. This is <b>REM atonia</b>. Sleep paralysis occurs when atonia persists into wakefulness: the person is conscious but temporarily unable to move or speak, often with hypnagogic or hypnopompic hallucinations. It is a <b>state dissociation</b> — part of the brain is awake while the motor system is still in REM. It is usually harmless and does not require drug treatment.[reference:38]</div>
+      </li>
+      <li class="gloss-row">
+        <div class="gloss-left">
+          <span class="gloss-n">05</span>
+          <span class="gloss-term">What reduces deep sleep</span>
+          <span class="gloss-code">CHECKLIST</span>
+        </div>
+        <div class="gloss-right">Common disruptors of deep sleep include <b>alcohol, late caffeine, irregular sleep schedules, stress, chronic pain, certain medications, and sleep apnea</b>. Signs of insufficient deep sleep include waking unrefreshed, daytime fatigue, poor memory, weakened immunity, and slow recovery from illness or exercise. If these persist despite adequate time in bed, an underlying sleep disorder may be the cause.[reference:39]</div>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ========== VII. CHRONOTYPES ========== -->
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">Ⅶ</span>
+      <h2 class="block-title">Chronotypes</h2>
+      <span class="block-meta">LARKS & OWLS</span>
+    </div>
+    <ul class="glossary">
+      <li class="gloss-row">
+        <div class="gloss-left">
+          <span class="gloss-n">01</span>
+          <span class="gloss-term">Chronotype is biological</span>
+          <span class="gloss-code">GENETIC</span>
+        </div>
+        <div class="gloss-right">Chronotype — your preference for earlier or later sleep timing — is a behavioral manifestation of the interaction between your internal circadian clock and sleep homeostasis. It is not a lifestyle choice. A genome-wide association study of <b>697,828 individuals</b> identified <b>351 genetic loci</b> associated with being a morning person, enriched for genes involved in circadian regulation and expressed in the retina, hindbrain, hypothalamus, and pituitary. The mean sleep timing of the 5% carrying the most morningness alleles was <b>25 minutes earlier</b> than the 5% carrying the fewest.[reference:40]</div>
+      </li>
+      <li class="gloss-row">
+        <div class="gloss-left">
+          <span class="gloss-n">02</span>
+          <span class="gloss-term">Larks, owls, intermediates</span>
+          <span class="gloss-code">SPECTRUM</span>
+        </div>
+        <div class="gloss-right">Chronotype is distributed continuously, but people are often grouped into <b>morning types (larks)</b>, <b>evening types (owls)</b>, and <b>intermediates</b>. Age and sex explain a substantial proportion of variation: adolescents tend to shift toward eveningness, while older adults tend to shift earlier. Environmental light exposure also modulates chronotype.[reference:41]</div>
+      </li>
+      <li class="gloss-row">
+        <div class="gloss-left">
+          <span class="gloss-n">03</span>
+          <span class="gloss-term">Eveningness and health</span>
+          <span class="gloss-code">ASSOCIATION</span>
+        </div>
+        <div class="gloss-right">Evening chronotype is associated with higher frequencies of <b>obesity, Type 2 diabetes, and depression</b>, independent of sleep disturbance. Mendelian randomisation suggests that being a morning person is <b>causally associated with better mental health</b>, but not with BMI or Type 2 diabetes risk. The relationship between chronotype and health is partly biological and partly social — owls forced into early schedules experience chronic circadian misalignment.[reference:42][reference:43]</div>
+      </li>
+      <li class="gloss-row">
+        <div class="gloss-left">
+          <span class="gloss-n">04</span>
+          <span class="gloss-term">Practical implication</span>
+          <span class="gloss-code">ALIGN</span>
+        </div>
+        <div class="gloss-right">A sleep-window calculator assumes a generic 90-minute cycle and a generic sleep onset. It cannot know your chronotype, your personal cycle length, or your sleep pressure. The best use of the instrument is to <b>experiment within your chronotype’s natural range</b> — not to fight it. If you are an owl, a 9 p.m. bedtime will likely produce long sleep-onset latency and fragmented sleep, regardless of what the arithmetic says.[reference:44]</div>
+      </li>
+    </ul>
+  </section>
+
+  <!-- ========== VIII. TIMED HYGIENE ========== -->
+  <section class="block">
+    <div class="block-head">
+      <span class="block-num">Ⅷ</span>
+      <h2 class="block-title">Timed Hygiene</h2>
+      <span class="block-meta">MARGIN NOTES</span>
+    </div>
+    <ul class="tips-list">
+      <li><span><b>Caffeine</b> — last cup at least eight hours before bed. Half-life is five to six hours, and individual clearance varies widely. Caffeine blocks adenosine receptors; it does not remove sleep debt.[reference:45]</span></li>
+      <li><span><b>Alcohol</b> — even a low dose reduces REM sleep and increases second-half disruption. If you drink, allow at least three hours before bed and expect a lighter, more fragmented night.[reference:46]</span></li>
+      <li><span><b>Screens</b> — dim and put away sixty minutes before bedtime. Blue light delays melatonin onset and shifts circadian timing later.[reference:47]</span></li>
+      <li><span><b>Last meal</b> — finish three hours before bed. Digestion fragments deep sleep and raises core temperature, opposing the natural temperature drop that triggers sleep onset.</span></li>
+      <li><span><b>Room temperature</b> — 18–20°C / 65–68°F. A cooler core and cooler skin promote sleep onset and slow-wave sleep.</span></li>
+      <li><span><b>Consistency</b> — same bedtime and wake time, even weekends. Your circadian clock is a predictive system; irregular schedules produce a chronic “social jet lag” that mimics traveling across time zones every week.[reference:48]</span></li>
+      <li><span><b>Morning light</b> — bright light within an hour of waking advances circadian phase and improves alertness. It also helps dissipate sleep inertia.[reference:49]</span></li>
+      <li><span><b>Caffeine on waking</b> — 100 mg of caffeine on awakening has been shown to reduce sleep-inertia duration and restore reaction time faster than placebo. Caffeine takes about 30 minutes to reach full effect, so a “coffee nap” — caffeine before a 20-minute nap — can produce compounding benefits.[reference:50]</span></li>
+      <li><span><b>Naps</b> — keep naps to 10–15 minutes if you want to avoid post-nap grogginess. Longer naps allow progression into deep sleep, which can worsen inertia on awakening.[reference:51]</span></li>
+      <li><span><b>Don’t fight inertia with snooze</b> — repeated snoozing fragments the final minutes of sleep and does not restore alertness. One alarm, then get up and increase activity.[reference:52]</span></li>
+    </ul>
+  </section>
+
+  <footer class="foot">
+    <div class="colophon">Compiled from peer-reviewed sleep science · Not medical advice · Consult a clinician for persistent symptoms</div>
+    <div class="stamp">ALMANAC · Nº 07</div>
+  </footer>
+
+</main>
+
+<script>
+/* =========================================================
+   CONSTANTS
+   ========================================================= */
+const CYCLE_MIN = 90;
+const ONSET_MIN = 15;
+const MIN_CYCLES = 4;
+const MAX_CYCLES = 8;
+
+/* =========================================================
+   STATE
+   ========================================================= */
+const state = {
+  mode: 'sleep',
+  hours: 11,
+  minutes: 0,
+  ampm: 'PM',
+  hasResults: false,
+  isStale: false,
+  activeCycles: 5,
+};
+
+/* =========================================================
+   TIME HELPERS
+   ========================================================= */
+const to24 = (h12, m, ap) => {
+  let h = h12 % 12;
+  if (ap === 'PM') h += 12;
+  return h * 60 + m;
+};
+const from24 = (total) => {
+  const m = ((total % 1440) + 1440) % 1440;
+  const h24 = Math.floor(m / 60);
+  const min = m % 60;
+  let h = h24 % 12;
+  if (h === 0) h = 12;
+  return { hours: h, minutes: min, ampm: h24 < 12 ? 'AM' : 'PM' };
+};
+const pad2 = n => String(n).padStart(2, '0');
+const dur = m => {
+  const h = Math.floor(m / 60);
+  const r = m % 60;
+  return r ? `${h}h ${pad2(r)}m` : `${h}h 00m`;
+};
+
+/* =========================================================
+   SPLIT-FLAP DIGITS
+   ========================================================= */
+const hoursCells = document.querySelectorAll('.flap-h .flap-cell span');
+const minutesCells = document.querySelectorAll('.flap-m .flap-cell span');
+
+function flip(el, newChar) {
+  if (el.textContent === newChar) return;
+  el.animate(
+    [
+      { transform: 'rotateX(0deg)',   opacity: 1, offset: 0 },
+      { transform: 'rotateX(-88deg)', opacity: 0.15, offset: 0.5 },
+      { transform: 'rotateX(88deg)',  opacity: 0.15, offset: 0.51 },
+      { transform: 'rotateX(0deg)',   opacity: 1, offset: 1 },
+    ],
+    { duration: 420, easing: 'cubic-bezier(0.7, 0, 0.3, 1)', fill: 'both' }
+  );
+  setTimeout(() => { el.textContent = newChar; }, 210);
+}
+
+function updateTime() {
+  const hStr = pad2(state.hours);
+  const mStr = pad2(state.minutes);
+  flip(hoursCells[0], hStr[0]);
+  flip(hoursCells[1], hStr[1]);
+  flip(minutesCells[0], mStr[0]);
+  flip(minutesCells[1], mStr[1]);
+  document.querySelectorAll('.ampm-btn').forEach(b =>
+    b.classList.toggle('on', b.dataset.ampm === state.ampm)
+  );
+}
+
+/* =========================================================
+   MODE TABS
+   ========================================================= */
+document.querySelectorAll('.tab').forEach(tab => {
+  tab.addEventListener('click', () => {
+    if (tab.dataset.mode === state.mode) return;
+    state.mode = tab.dataset.mode;
+    document.querySelectorAll('.tab').forEach(t =>
+      t.classList.toggle('on', t === tab)
+    );
+    markStale();
+  });
+});
+
+/* =========================================================
+   ADJUST CONTROLS
+   ========================================================= */
+document.querySelectorAll('.flap-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    const a = btn.dataset.adj;
+    if (a === 'h+') state.hours = state.hours === 12 ? 1 : state.hours + 1;
+    if (a === 'h-') state.hours = state.hours === 1 ? 12 : state.hours - 1;
+    if (a === 'm+') state.minutes = (state.minutes + 5) % 60;
+    if (a === 'm-') state.minutes = (state.minutes - 5 + 60) % 60;
+    updateTime();
+    markStale();
+  });
+});
+
+document.querySelectorAll('.ampm-btn').forEach(btn => {
+  btn.addEventListener('click', () => {
+    if (btn.dataset.ampm === state.ampm) return;
+    state.ampm = btn.dataset.ampm;
+    updateTime();
+    markStale();
+  });
+});
+
+/* =========================================================
+   NOW BUTTON
+   ========================================================= */
+document.getElementById('nowBtn').addEventListener('click', () => {
+  const now = new Date();
+  let h24 = now.getHours();
+  let m = Math.round(now.getMinutes() / 5) * 5;
+  if (m === 60) { m = 0; h24 = (h24 + 1) % 24; }
+  state.ampm = h24 >= 12 ? 'PM' : 'AM';
+  state.hours = h24 % 12 || 12;
+  state.minutes = m;
+  updateTime();
+  markStale();
+});
+
+/* =========================================================
+   STALE
+   ========================================================= */
+const calcBtn = document.getElementById('calcBtn');
+const calcLabel = document.getElementById('calcLabel');
+
+function markStale() {
+  if (!state.hasResults) return;
+  state.isStale = true;
+  calcBtn.classList.add('stale');
+  calcLabel.textContent = 'Recalculate';
+}
+function clearStale() {
+  state.isStale = false;
+  calcBtn.classList.remove('stale');
+  calcLabel.textContent = 'Calculate windows';
+}
+
+/* =========================================================
+   CALCULATION
+   ========================================================= */
+function computeWindows() {
+  const base = to24(state.hours, state.minutes, state.ampm);
+  const out = [];
+  for (let n = MIN_CYCLES; n <= MAX_CYCLES; n++) {
+    const target = state.mode === 'sleep'
+      ? base + ONSET_MIN + n * CYCLE_MIN
+      : base - ONSET_MIN - n * CYCLE_MIN;
+    out.push({ cycles: n, minutes: target, sleep: n * CYCLE_MIN });
+  }
+  return out;
+}
+
+const QUALITY = {
+  4: 'MINIMUM RECOVERY',
+  5: 'SWEET SPOT',
+  6: 'FULL RECOVERY',
+  7: 'EXTENDED',
+  8: 'LONG SLEEP',
+};
+
+/* =========================================================
+   RENDER RESULTS
+   ========================================================= */
+const resultsSection = document.getElementById('resultsSection');
+const resultList = document.getElementById('resultList');
+const resultsTitle = document.getElementById('resultsTitle');
+const resultsFrom = document.getElementById('resultsFrom');
+const hypnoWrap = document.getElementById('hypnoWrap');
+const hypnoMeta = document.getElementById('hypnoMeta');
+
+function renderResults() {
+  const windows = computeWindows();
+  const baseTime = from24(to24(state.hours, state.minutes, state.ampm));
+  const baseStr = `${pad2(baseTime.hours)}:${pad2(baseTime.minutes)} ${baseTime.ampm}`;
+
+  if (state.mode === 'sleep') {
+    resultsTitle.innerHTML = 'Set your alarm for <em>—</em>';
+    resultsFrom.innerHTML = `BEDTIME · <b>${baseStr}</b>`;
+  } else {
+    resultsTitle.innerHTML = 'Go to bed at <em>—</em>';
+    resultsFrom.innerHTML = `WAKE · <b>${baseStr}</b>`;
+  }
+
+  resultList.innerHTML = '';
+
+  windows.forEach((w, i) => {
+    const t = from24(w.minutes);
+    const isRec = w.cycles === 5;
+    const isActive = w.cycles === state.activeCycles && state.hasResults;
+
+    const li = document.createElement('li');
+    li.className = 'result-row' + (isActive ? ' active' : '');
+    li.style.setProperty('--delay', `${i * 0.08}s`);
+    li.dataset.cycles = w.cycles;
+
+    li.innerHTML = `
+      <span class="r-index">${pad2(w.cycles)}</span>
+      <span class="r-time">${pad2(t.hours)}:${pad2(t.minutes)}<small>${t.ampm}</small></span>
+      <span class="r-dur">${dur(w.sleep)}</span>
+      <span class="r-label ${isRec ? 'rec' : ''}">${isRec ? '★ ' : ''}${QUALITY[w.cycles]}</span>
+      <span class="r-arrow">→</span>
+    `;
+
+    li.addEventListener('click', () => {
+      state.activeCycles = w.cycles;
+      document.querySelectorAll('.result-row').forEach(row =>
+        row.classList.toggle('active', Number(row.dataset.cycles) === w.cycles)
+      );
+      drawHypnogram(w.cycles);
+    });
+
+    resultList.appendChild(li);
+    requestAnimationFrame(() => {
+      setTimeout(() => li.classList.add('show'), 10);
+    });
+  });
+
+  resultsSection.classList.add('on');
+  hypnoWrap.classList.add('show');
+
+  const showCycles = state.hasResults ? state.activeCycles : 5;
+  state.activeCycles = showCycles;
+  drawHypnogram(showCycles);
+}
+
+/* =========================================================
+   HYPNOGRAM
+   ========================================================= */
+const Y_AWAKE = 20;
+const Y_REM   = 55;
+const Y_LIGHT = 105;
+const Y_DEEP  = 178;
+const CHART_W = 800;
+const CHART_H = 210;
+
+const hypPath = document.getElementById('hypPath');
+const hypGrid = document.getElementById('hypGrid');
+const hypMarks = document.getElementById('hypMarks');
+
+function buildPoints(cycles) {
+  const pts = [{ t: 0, y: Y_AWAKE }];
+  pts.push({ t: 3, y: Y_LIGHT });
+
+  for (let c = 0; c < cycles; c++) {
+    const s = c * CYCLE_MIN;
+    const deepDur = Math.max(15, 45 - c * 8);
+    const remDur = Math.min(35, 12 + c * 6);
+    const deepStart = s + 28;
+    const deepEnd = deepStart + deepDur;
+    const remStart = deepEnd + 7;
+    const remEnd = s + CYCLE_MIN;
+
+    pts.push({ t: deepStart, y: Y_DEEP });
+    pts.push({ t: deepEnd, y: Y_LIGHT });
+    pts.push({ t: remStart, y: Y_REM });
+    pts.push({ t: remEnd, y: Y_REM });
+
+    if (c < cycles - 1) {
+      pts.push({ t: remEnd + 1, y: Y_LIGHT });
+    }
+  }
+  pts.push({ t: cycles * CYCLE_MIN, y: Y_AWAKE });
+  return pts;
+}
+
+function steppedPath(pts, sx) {
+  let d = `M ${(pts[0].t * sx).toFixed(1)} ${pts[0].y}`;
+  for (let i = 1; i < pts.length; i++) {
+    d += ` H ${(pts[i].t * sx).toFixed(1)} V ${pts[i].y}`;
+  }
+  return d;
+}
+
+function drawHypnogram(cycles) {
+  hypnoMeta.textContent = `${cycles} CYCLES · ${dur(cycles * CYCLE_MIN)}`;
+
+  const totalMin = cycles * CYCLE_MIN;
+  const sx = CHART_W / totalMin;
+
+  /* --- grid --- */
+  let g = '';
+  for (let c = 0; c <= cycles; c++) {
+    const x = (c / cycles) * CHART_W;
+    g += `<line x1="${x}" y1="0" x2="${x}" y2="${CHART_H}"
+          stroke="rgba(19,17,8,0.16)" stroke-width="1" vector-effect="non-scaling-stroke"/>`;
+  }
+  [Y_REM, Y_LIGHT, Y_DEEP].forEach(y => {
+    g += `<line x1="0" y1="${y}" x2="${CHART_W}" y2="${y}"
+          stroke="rgba(19,17,8,0.10)" stroke-width="1"
+          stroke-dasharray="2 5" vector-effect="non-scaling-stroke"/>`;
+  });
+  g += `<line x1="${CHART_W - 1}" y1="0" x2="${CHART_W - 1}" y2="${CHART_H}"
+        stroke="#d93a1f" stroke-width="1.2" vector-effect="non-scaling-stroke"/>`;
+  hypGrid.innerHTML = g;
+
+  /* --- path --- */
+  const pts = buildPoints(cycles);
+  const d = steppedPath(pts, sx);
+  hypPath.setAttribute('d', d);
+
+  /* --- markers --- */
+  let m = '';
+  for (let c = 0; c < cycles; c++) {
+    const deepDur = Math.max(15, 45 - c * 8);
+    const remDur = Math.min(35, 12 + c * 6);
+    const deepMid = (c * CYCLE_MIN + 28 + deepDur / 2) * sx;
+    const remStart = (c * CYCLE_MIN + 28 + deepDur + 7) * sx;
+    const remEnd = ((c + 1) * CYCLE_MIN) * sx;
+    const remMid = (remStart + remEnd) / 2;
+
+    m += `<rect x="${(deepMid - 2.5).toFixed(1)}" y="${Y_DEEP - 2.5}"
+            width="5" height="5" fill="#131108"/>`;
+    m += `<rect x="${(remMid - 2.5).toFixed(1)}" y="${Y_REM - 2.5}"
+            width="5" height="5" fill="#d93a1f"/>`;
+  }
+  hypMarks.innerHTML = m;
+
+  /* --- animate --- */
+  const len = hypPath.getTotalLength();
+  hypPath.style.transition = 'none';
+  hypPath.style.strokeDasharray = len;
+  hypPath.style.strokeDashoffset = len;
+  hypPath.getBoundingClientRect();
+  hypPath.style.transition = 'stroke-dashoffset 1.7s cubic-bezier(0.85, 0, 0.15, 1)';
+  hypPath.style.strokeDashoffset = 0;
+
+  hypMarks.style.opacity = 0;
+  hypMarks.getBoundingClientRect();
+  hypMarks.style.transition = 'opacity 0.5s ease 1.4s';
+  hypMarks.style.opacity = 1;
+}
+
+/* =========================================================
+   CALC BUTTON
+   ========================================================= */
+calcBtn.addEventListener('click', () => {
+  calcBtn.animate(
+    [{ transform: 'translate(0,0)' }, { transform: 'translate(3px,3px)' }, { transform: 'translate(-2px,-2px)' }, { transform: 'translate(0,0)' }],
+    { duration: 400, easing: 'cubic-bezier(0.65,0,0.35,1)' }
+  );
+
+  state.hasResults = true;
+  clearStale();
+  renderResults();
+
+  setTimeout(() => {
+    resultsSection.scrollIntoView({ behavior: 'smooth', block: 'start' });
+  }, 180);
+});
+
+/* =========================================================
+   INIT
+   ========================================================= */
+function init() {
+  updateTime();
+  drawHypnogram(5);
+  hypnoWrap.classList.remove('show');
+}
+init();
+</script>
+</body>
+</html>
