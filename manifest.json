@@ -31,14 +31,6 @@
           "addedAt": "2026-08-22T12:19:11.328Z"
         },
         {
-          "id": "9ed02536-32f8-470d-ba65-ddfb2f6b34e2",
-          "name": "The Ledger Salary Guide",
-          "description": "",
-          "filename": "the-ledger-salary-guide.html",
-          "type": "html",
-          "addedAt": "2026-08-22T12:19:11.328Z"
-        },
-        {
           "id": "d0757c2c-c0e2-4152-825b-483592b30305",
           "name": "3d Artist Salary",
           "description": "",
@@ -355,6 +347,14 @@
           "name": "Professional Life Operating System",
           "description": "",
           "filename": "professional-life-operating-system.html",
+          "type": "html",
+          "addedAt": "2026-08-22T12:19:11.328Z"
+        },
+        {
+          "id": "9ed02536-32f8-470d-ba65-ddfb2f6b34e2",
+          "name": "The Ledger Salary Guide",
+          "description": "",
+          "filename": "the-ledger-salary-guide.html",
           "type": "html",
           "addedAt": "2026-08-22T12:19:11.328Z"
         }
