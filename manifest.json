@@ -71,14 +71,6 @@
           "addedAt": "2026-08-27T11:19:34.784Z"
         },
         {
-          "id": "411f3b12-59ba-4461-8cec-d58fe0cbdc5b",
-          "name": "Career Clarity Report",
-          "description": "",
-          "filename": "career_clarity_report.pdf",
-          "type": "pdf",
-          "addedAt": "2026-08-29T11:17:23.255Z"
-        },
-        {
           "id": "11f7197d-c407-4684-adb3-4145001b96e1",
           "name": "Elite Mobile MOBA Comparison MLBB OA AoV 2026",
           "description": "",
@@ -333,6 +325,14 @@
           "filename": "opx_fieldmanual_report.pdf",
           "type": "pdf",
           "addedAt": "2026-08-28T00:34:25.876Z"
+        },
+        {
+          "id": "411f3b12-59ba-4461-8cec-d58fe0cbdc5b",
+          "name": "Career Clarity Report",
+          "description": "",
+          "filename": "career_clarity_report.pdf",
+          "type": "pdf",
+          "addedAt": "2026-08-29T11:17:23.255Z"
         }
       ]
     },
