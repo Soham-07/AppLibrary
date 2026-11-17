@@ -71,14 +71,6 @@
           "addedAt": "2026-08-27T11:19:34.784Z"
         },
         {
-          "id": "1e5ce46e-a4b5-4525-9d69-4c62bed376ee",
-          "name": "Freelance To Business Roadmap Md",
-          "description": "",
-          "filename": "freelance-to-business-roadmap-md.pdf",
-          "type": "pdf",
-          "addedAt": "2026-09-22T06:02:37.639Z"
-        },
-        {
           "id": "a6355602-1b01-47c9-8c2e-2b00e7ce8e60",
           "name": "Manifestation Law Of Attraction Deep Dive",
           "description": "",
@@ -324,6 +316,14 @@
           "name": "Client Acquisition Freelancing Business Master Manual Final",
           "description": "",
           "filename": "client_acquisition_freelancing_business_master_manual_final.pdf",
+          "type": "pdf",
+          "addedAt": "2026-09-22T06:02:37.639Z"
+        },
+        {
+          "id": "1e5ce46e-a4b5-4525-9d69-4c62bed376ee",
+          "name": "Freelance To Business Roadmap Md",
+          "description": "",
+          "filename": "freelance-to-business-roadmap-md.pdf",
           "type": "pdf",
           "addedAt": "2026-09-22T06:02:37.639Z"
         }
