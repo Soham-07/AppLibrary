@@ -71,14 +71,6 @@
           "addedAt": "2026-08-27T11:19:34.784Z"
         },
         {
-          "id": "ef5faf1d-faab-414b-b1df-e07990086c6c",
-          "name": "Opx Fieldmanual Report",
-          "description": "",
-          "filename": "opx_fieldmanual_report.pdf",
-          "type": "pdf",
-          "addedAt": "2026-08-28T00:34:25.876Z"
-        },
-        {
           "id": "411f3b12-59ba-4461-8cec-d58fe0cbdc5b",
           "name": "Career Clarity Report",
           "description": "",
@@ -333,6 +325,14 @@
           "filename": "3d-artist-salary-reality-india-2026_1.html",
           "type": "html",
           "addedAt": "2026-08-22T12:19:11.328Z"
+        },
+        {
+          "id": "ef5faf1d-faab-414b-b1df-e07990086c6c",
+          "name": "Opx Fieldmanual Report",
+          "description": "",
+          "filename": "opx_fieldmanual_report.pdf",
+          "type": "pdf",
+          "addedAt": "2026-08-28T00:34:25.876Z"
         }
       ]
     },
