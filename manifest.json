@@ -258,6 +258,14 @@
           "filename": "sohaam-numerology-report.pdf",
           "type": "pdf",
           "addedAt": "2026-11-17T05:53:34.729Z"
+        },
+        {
+          "id": "60593c02-cd94-419a-a168-3ad8e21f7491",
+          "name": "Sohaam Vediik Astrology Gurukul",
+          "description": "",
+          "filename": "sohaam-vediik-astrology-gurukul.pdf",
+          "type": "pdf",
+          "addedAt": "2026-11-17T05:53:43.790Z"
         }
       ]
     },
