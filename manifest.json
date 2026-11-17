@@ -71,14 +71,6 @@
           "addedAt": "2026-08-27T11:19:34.784Z"
         },
         {
-          "id": "4dd78632-38ab-4490-aa00-3dc5bd615fd4",
-          "name": "Ultimate Trading Indicators Master Wiki",
-          "description": "",
-          "filename": "ultimate_trading_indicators_master_wiki.pdf",
-          "type": "pdf",
-          "addedAt": "2026-09-17T13:44:29.011Z"
-        },
-        {
           "id": "e210bdbd-35b3-40fc-9c19-67f7b67b5ae6",
           "name": "Client Acquisition Freelancing Business Master Manual Final",
           "description": "",
@@ -259,6 +251,14 @@
           "filename": "coping_mechanisms_report.pdf",
           "type": "pdf",
           "addedAt": "2026-09-17T12:32:28.010Z"
+        },
+        {
+          "id": "4dd78632-38ab-4490-aa00-3dc5bd615fd4",
+          "name": "Ultimate Trading Indicators Master Wiki",
+          "description": "",
+          "filename": "ultimate_trading_indicators_master_wiki.pdf",
+          "type": "pdf",
+          "addedAt": "2026-09-17T13:44:29.011Z"
         }
       ]
     },
