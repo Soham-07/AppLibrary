@@ -345,6 +345,12 @@
       "name": "Astro",
       "icon": "box",
       "items": []
+    },
+    {
+      "id": "documents",
+      "name": "Documents",
+      "icon": "folder",
+      "items": []
     }
   ]
 }
