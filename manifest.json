@@ -71,14 +71,6 @@
           "addedAt": "2026-08-27T11:19:34.784Z"
         },
         {
-          "id": "a6355602-1b01-47c9-8c2e-2b00e7ce8e60",
-          "name": "Manifestation Law Of Attraction Deep Dive",
-          "description": "",
-          "filename": "manifestation-law-of-attraction-deep-dive.pdf",
-          "type": "pdf",
-          "addedAt": "2026-09-22T06:02:37.639Z"
-        },
-        {
           "id": "d1b3f2e4-684e-4c66-9371-05cf98bae37e",
           "name": "Pricing Package",
           "description": "",
@@ -243,6 +235,14 @@
           "filename": "ultimate_trading_indicators_master_wiki.pdf",
           "type": "pdf",
           "addedAt": "2026-09-17T13:44:29.011Z"
+        },
+        {
+          "id": "a6355602-1b01-47c9-8c2e-2b00e7ce8e60",
+          "name": "Manifestation Law Of Attraction Deep Dive",
+          "description": "",
+          "filename": "manifestation-law-of-attraction-deep-dive.pdf",
+          "type": "pdf",
+          "addedAt": "2026-09-22T06:02:37.639Z"
         }
       ]
     },
