@@ -71,14 +71,6 @@
           "addedAt": "2026-08-27T11:19:34.784Z"
         },
         {
-          "id": "995318f4-4466-4f91-a8ba-7eba40778950",
-          "name": "Smartphone Users",
-          "description": "",
-          "filename": "complete_smartphone_consumer_brand_analysis_india_global_2026.pdf",
-          "type": "pdf",
-          "addedAt": "2026-09-16T17:05:17.150Z"
-        },
-        {
           "id": "8d010e11-32bd-4bc8-bf46-eba7d36d181c",
           "name": "Coping Mechanisms Report",
           "description": "",
@@ -259,7 +251,16 @@
       "id": "media",
       "name": "Pdfs",
       "icon": "image",
-      "items": []
+      "items": [
+        {
+          "id": "995318f4-4466-4f91-a8ba-7eba40778950",
+          "name": "Smartphone Users",
+          "description": "",
+          "filename": "complete_smartphone_consumer_brand_analysis_india_global_2026.pdf",
+          "type": "pdf",
+          "addedAt": "2026-09-16T17:05:17.150Z"
+        }
+      ]
     },
     {
       "id": "other",
