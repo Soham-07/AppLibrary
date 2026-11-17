@@ -71,14 +71,6 @@
           "addedAt": "2026-08-27T11:19:34.784Z"
         },
         {
-          "id": "e210bdbd-35b3-40fc-9c19-67f7b67b5ae6",
-          "name": "Client Acquisition Freelancing Business Master Manual Final",
-          "description": "",
-          "filename": "client_acquisition_freelancing_business_master_manual_final.pdf",
-          "type": "pdf",
-          "addedAt": "2026-09-22T06:02:37.639Z"
-        },
-        {
           "id": "52d71fe9-86b9-415d-9038-5f6c5bcffe98",
           "name": "Cold Vs Hot Showers Complete Guide",
           "description": "",
@@ -326,6 +318,14 @@
           "filename": "career_clarity_report.pdf",
           "type": "pdf",
           "addedAt": "2026-08-29T11:17:23.255Z"
+        },
+        {
+          "id": "e210bdbd-35b3-40fc-9c19-67f7b67b5ae6",
+          "name": "Client Acquisition Freelancing Business Master Manual Final",
+          "description": "",
+          "filename": "client_acquisition_freelancing_business_master_manual_final.pdf",
+          "type": "pdf",
+          "addedAt": "2026-09-22T06:02:37.639Z"
         }
       ]
     },
