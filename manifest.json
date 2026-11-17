@@ -79,14 +79,6 @@
           "addedAt": "2026-09-22T20:12:09.309Z"
         },
         {
-          "id": "f570aba5-0cc9-4891-b0f7-f6ffd6c393c8",
-          "name": "Soham Tretiya Complete Brand Bible Master Edition",
-          "description": "",
-          "filename": "soham_tretiya_complete_brand_bible_master_edition.pdf",
-          "type": "pdf",
-          "addedAt": "2026-09-29T11:19:29.621Z"
-        },
-        {
           "id": "af43e3ca-b897-4e26-83ea-7dec9dd2bbcb",
           "name": "Digit Combination",
           "description": "",
@@ -326,6 +318,14 @@
           "filename": "freelance-to-business-roadmap-md.pdf",
           "type": "pdf",
           "addedAt": "2026-09-22T06:02:37.639Z"
+        },
+        {
+          "id": "f570aba5-0cc9-4891-b0f7-f6ffd6c393c8",
+          "name": "Soham Tretiya Complete Brand Bible Master Edition",
+          "description": "",
+          "filename": "soham_tretiya_complete_brand_bible_master_edition.pdf",
+          "type": "pdf",
+          "addedAt": "2026-09-29T11:19:29.621Z"
         }
       ]
     },
