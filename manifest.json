@@ -23,14 +23,6 @@
           "addedAt": "2026-08-22T05:47:04.656Z"
         },
         {
-          "id": "8fa435fd-5aa8-4d4d-aab4-aeef31ba8d2b",
-          "name": "Brand vs Personal Brand",
-          "description": "",
-          "filename": "brand-strategy.html",
-          "type": "html",
-          "addedAt": "2026-08-22T05:50:03.682Z"
-        },
-        {
           "id": "0d9784be-dc40-44ba-9335-93fc641d64cd",
           "name": "Opx Treasury",
           "description": "",
@@ -357,7 +349,16 @@
       "id": "business",
       "name": "Business",
       "icon": "terminal",
-      "items": []
+      "items": [
+        {
+          "id": "8fa435fd-5aa8-4d4d-aab4-aeef31ba8d2b",
+          "name": "Brand vs Personal Brand",
+          "description": "",
+          "filename": "brand-strategy.html",
+          "type": "html",
+          "addedAt": "2026-08-22T05:50:03.682Z"
+        }
+      ]
     }
   ]
 }
