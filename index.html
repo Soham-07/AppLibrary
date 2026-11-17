@@ -154,13 +154,15 @@ a{color:inherit;text-decoration:none} button,input,select,textarea{font:inherit;
 .foot .dot{opacity:.4}
 .foot .foot-brand{color:var(--green);opacity:.7}
 
-/* ADMIN PANEL */
-.admin{border-top:1px solid var(--border);background:linear-gradient(180deg,var(--bg-2),var(--bg));animation:slideUp .4s cubic-bezier(.2,.7,.3,1) both}
-.admin.hidden{display:none}
-.admin-inner{max-width:1200px;margin:0 auto;padding:clamp(20px,4vw,36px) clamp(14px,3.5vw,32px) 60px}
-.admin-header{display:flex;align-items:center;justify-content:space-between;gap:12px;margin-bottom:28px;padding-bottom:16px;border-bottom:1px solid var(--border)}
+/* ADMIN PANEL (NOW A MODAL POPUP) */
+.admin-overlay{position:fixed;inset:0;z-index:90;background:rgba(3,6,4,0.85);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:16px;animation:fadeIn .2s ease}
+.admin-overlay.hidden{display:none}
+.admin-modal{background:var(--bg);width:100%;max-width:900px;max-height:92vh;border-radius:var(--radius-lg);border:1px solid var(--border-bright);box-shadow:0 20px 60px rgba(0,0,0,0.6),0 0 40px var(--green-dim);display:flex;flex-direction:column;overflow:hidden;animation:scaleIn .25s cubic-bezier(.2,.7,.3,1)}
+.admin-header{display:flex;align-items:center;justify-content:space-between;padding:16px 24px;border-bottom:1px solid var(--border);background:var(--bg-2);position:sticky;top:0;z-index:10;flex:none}
 .admin-header h2{font-family:var(--font-mono);font-size:13px;color:var(--green);letter-spacing:.08em;text-transform:uppercase;font-weight:500}
 .admin-header h2 b{color:var(--text);font-weight:700}
+.admin-inner{padding:24px clamp(16px,4vw,32px);overflow-y:auto;flex:1;scroll-behavior:smooth}
+
 .admin-section{background:var(--surface);border:1px solid var(--border);border-radius:var(--radius-lg);padding:22px clamp(16px,3vw,26px);margin-bottom:16px}
 .admin-section > h3{font-family:var(--font-display);font-size:15px;font-weight:600;letter-spacing:-.01em;color:var(--text);display:flex;align-items:center;gap:8px;margin-bottom:16px}
 .admin-section > h3::before{content:'§';color:var(--green);font-family:var(--font-mono);font-weight:700;font-size:14px}
@@ -229,7 +231,7 @@ details.guide code{font-family:var(--font-mono);font-size:11.5px;padding:1px 6px
 /* Modal */
 .modal-overlay{position:fixed;inset:0;z-index:100;display:flex;align-items:center;justify-content:center;padding:20px;background:rgba(3,6,4,.85);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);animation:fadeIn .2s ease}
 .modal-overlay.hidden{display:none}
-.modal{width:min(380px,100%);background:linear-gradient(160deg,var(--surface),var(--surface-2));border:1px solid var(--border-bright);border-radius:var(--radius-lg);padding:26px;box-shadow:0 20px 60px rgba(0,0,0,.6),0 0 40px var(--green-dim);animation:scaleIn .25s cubic-bezier(.2,.7,.3,1)}
+.modal{width:min(400px,100%);background:linear-gradient(160deg,var(--surface),var(--surface-2));border:1px solid var(--border-bright);border-radius:var(--radius-lg);padding:26px;box-shadow:0 20px 60px rgba(0,0,0,.6),0 0 40px var(--green-dim);animation:scaleIn .25s cubic-bezier(.2,.7,.3,1)}
 .modal h3{font-family:var(--font-display);font-size:18px;font-weight:600;letter-spacing:-.01em;margin-bottom:6px}
 .modal .modal-sub{font-size:12.5px;color:var(--text-dim);line-height:1.6;margin-bottom:16px}
 .modal .modal-input{width:100%;background:var(--bg-2);border:1px solid var(--border);border-radius:var(--radius);padding:10px 12px;font-size:14px;color:var(--text);margin-bottom:8px;transition:border-color .2s}
@@ -300,117 +302,119 @@ details.guide code{font-family:var(--font-mono);font-size:11.5px;padding:1px 6px
   <span id="footStat">—</span>
 </footer>
 
-<!-- ADMIN PANEL -->
-<section id="adminPanel" class="admin hidden">
-  <div class="admin-inner">
+<!-- ADMIN PANEL OVERLAY -->
+<div id="adminOverlay" class="admin-overlay hidden">
+  <div class="admin-modal">
     <div class="admin-header">
       <h2>// <b>production office</b></h2>
       <button class="btn btn-ghost btn-sm" id="closeAdminBtn">Close</button>
     </div>
+    
+    <div class="admin-inner">
+      <!-- CONNECTION -->
+      <div class="admin-section">
+        <h3>Connection</h3>
+        <p class="section-sub">Your GitHub repo is the source of truth. Everything here lives in it.</p>
 
-    <!-- CONNECTION -->
-    <div class="admin-section">
-      <h3>Connection</h3>
-      <p class="section-sub">Your GitHub repo is the source of truth. Everything here lives in it.</p>
+        <details class="guide">
+          <summary>
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
+            First time? Set up your free hangar in 5 steps
+          </summary>
+          <ol>
+            <li>Create a free account at <b>github.com</b>.</li>
+            <li>Create a new repository. Make it <b>Public</b>, name it anything — e.g. <code>hangar</code>.</li>
+            <li>Upload this file into that repo, rename it to <code>index.html</code>.</li>
+            <li>In the repo, open <b>Settings → Pages</b>. Branch: <code>main</code>, folder <code>/ (root)</code>. Save. Your live URL appears above.</li>
+            <li>Visit <b>github.com/settings/tokens</b> → generate a <b>fine-grained token</b> → give it access to only this repo, with <b>Contents: Read &amp; write</b>. Paste below.</li>
+          </ol>
+        </details>
 
-      <details class="guide">
-        <summary>
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="2.4"><path d="M9 6l6 6-6 6"/></svg>
-          First time? Set up your free hangar in 5 steps
-        </summary>
-        <ol>
-          <li>Create a free account at <b>github.com</b>.</li>
-          <li>Create a new repository. Make it <b>Public</b>, name it anything — e.g. <code>hangar</code>.</li>
-          <li>Upload this file into that repo, rename it to <code>index.html</code>.</li>
-          <li>In the repo, open <b>Settings → Pages</b>. Branch: <code>main</code>, folder <code>/ (root)</code>. Save. Your live URL appears above.</li>
-          <li>Visit <b>github.com/settings/tokens</b> → generate a <b>fine-grained token</b> → give it access to only this repo, with <b>Contents: Read &amp; write</b>. Paste below.</li>
-        </ol>
-      </details>
-
-      <div class="form-grid">
-        <div class="field">
-          <label for="cfgOwner">GitHub username</label>
-          <input id="cfgOwner" type="text" placeholder="e.g. opx" autocomplete="off" spellcheck="false">
+        <div class="form-grid">
+          <div class="field">
+            <label for="cfgOwner">GitHub username</label>
+            <input id="cfgOwner" type="text" placeholder="e.g. opx" autocomplete="off" spellcheck="false">
+          </div>
+          <div class="field">
+            <label for="cfgRepo">Repository name</label>
+            <input id="cfgRepo" type="text" placeholder="e.g. hangar" autocomplete="off" spellcheck="false">
+          </div>
+          <div class="field">
+            <label for="cfgBranch">Branch</label>
+            <input id="cfgBranch" type="text" placeholder="main" autocomplete="off" spellcheck="false">
+          </div>
+          <div class="field">
+            <label for="cfgToken">Personal access token</label>
+            <input id="cfgToken" type="password" placeholder="ghp_..." autocomplete="off">
+          </div>
         </div>
-        <div class="field">
-          <label for="cfgRepo">Repository name</label>
-          <input id="cfgRepo" type="text" placeholder="e.g. hangar" autocomplete="off" spellcheck="false">
-        </div>
-        <div class="field">
-          <label for="cfgBranch">Branch</label>
-          <input id="cfgBranch" type="text" placeholder="main" autocomplete="off" spellcheck="false">
-        </div>
-        <div class="field">
-          <label for="cfgToken">Personal access token</label>
-          <input id="cfgToken" type="password" placeholder="ghp_..." autocomplete="off">
-        </div>
-      </div>
-      <p class="field-hint">Token stays in this browser only. It's never written into the site's files — it's your real lock on the repo.</p>
-      <div class="btn-row">
-        <button class="btn" id="testBtn">Test</button>
-        <button class="btn btn-primary" id="saveCfgBtn">Save &amp; sync</button>
-        <button class="btn btn-ghost" id="forgetBtn">Forget token</button>
-        <button class="btn btn-ghost" id="changePwBtn">Change password</button>
-        <button class="btn btn-ghost" id="syncNowBtn">Sync now</button>
-      </div>
-    </div>
-
-    <!-- PUBLISH -->
-    <div class="admin-section">
-      <h3>Publish a file</h3>
-      <p class="section-sub">Drop one file. It will be saved into your <code>apps/</code> folder and appear on every device after sync.</p>
-
-      <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Choose or drop a file">
-        <input type="file" id="fileInput" hidden>
-        <div class="dz-icon">
-          <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0-12-4 4m4-4 4 4M5 21h14"/></svg>
-        </div>
-        <div class="dz-text">Drop file here, or click to choose</div>
-        <div class="dz-name" id="fname"></div>
-      </div>
-
-      <div class="form-grid">
-        <div class="field">
-          <label for="pubCategory">Category</label>
-          <select id="pubCategory"></select>
-        </div>
-        <div class="field">
-          <label for="pubName">Display name</label>
-          <input id="pubName" type="text" placeholder="e.g. Life OS" autocomplete="off">
+        <p class="field-hint">Token stays in this browser only. It's never written into the site's files — it's your real lock on the repo.</p>
+        <div class="btn-row">
+          <button class="btn" id="testBtn">Test</button>
+          <button class="btn btn-primary" id="saveCfgBtn">Save &amp; sync</button>
+          <button class="btn btn-ghost" id="forgetBtn">Forget token</button>
+          <button class="btn btn-ghost" id="changePwBtn">Change password</button>
+          <button class="btn btn-ghost" id="syncNowBtn">Sync now</button>
         </div>
       </div>
-      <div class="form-grid cols-1">
-        <div class="field">
-          <label for="pubDesc">Description (optional)</label>
-          <input id="pubDesc" type="text" placeholder="What is it?" autocomplete="off">
+
+      <!-- PUBLISH -->
+      <div class="admin-section">
+        <h3>Publish a file</h3>
+        <p class="section-sub">Drop one file. It will be saved into your <code>apps/</code> folder and appear on every device after sync.</p>
+
+        <div class="dropzone" id="dropzone" tabindex="0" role="button" aria-label="Choose or drop a file">
+          <input type="file" id="fileInput" hidden>
+          <div class="dz-icon">
+            <svg viewBox="0 0 24 24" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linecap="round" stroke-linejoin="round"><path d="M12 3v12m0-12-4 4m4-4 4 4M5 21h14"/></svg>
+          </div>
+          <div class="dz-text">Drop file here, or click to choose</div>
+          <div class="dz-name" id="fname"></div>
+        </div>
+
+        <div class="form-grid">
+          <div class="field">
+            <label for="pubCategory">Category</label>
+            <select id="pubCategory"></select>
+          </div>
+          <div class="field">
+            <label for="pubName">Display name</label>
+            <input id="pubName" type="text" placeholder="e.g. Life OS" autocomplete="off">
+          </div>
+        </div>
+        <div class="form-grid cols-1">
+          <div class="field">
+            <label for="pubDesc">Description (optional)</label>
+            <input id="pubDesc" type="text" placeholder="What is it?" autocomplete="off">
+          </div>
+        </div>
+        <div class="btn-row">
+          <button class="btn btn-primary" id="publishBtn" disabled>Publish to GitHub</button>
+          <button class="btn btn-ghost" id="resetPubBtn">Reset</button>
         </div>
       </div>
-      <div class="btn-row">
-        <button class="btn btn-primary" id="publishBtn" disabled>Publish to GitHub</button>
-        <button class="btn btn-ghost" id="resetPubBtn">Reset</button>
-      </div>
-    </div>
 
-    <!-- CATEGORIES -->
-    <div class="admin-section">
-      <h3>Categories</h3>
-      <p class="section-sub">Reorder, rename, or remove. Empty categories are hidden from visitors.</p>
-      <div class="admin-list" id="adminCategories"></div>
-      <div class="btn-row" style="margin-top:12px">
-        <button class="btn btn-primary btn-sm" id="addCategoryBtn">+ New category</button>
+      <!-- CATEGORIES -->
+      <div class="admin-section">
+        <h3>Categories</h3>
+        <p class="section-sub">Reorder, rename, or remove. Empty categories are hidden from visitors.</p>
+        <div class="admin-list" id="adminCategories"></div>
+        <div class="btn-row" style="margin-top:12px">
+          <button class="btn btn-primary btn-sm" id="addCategoryBtn">+ New category</button>
+        </div>
       </div>
-    </div>
 
-    <!-- ITEMS -->
-    <div class="admin-section">
-      <h3>Catalog</h3>
-      <p class="section-sub">All files, grouped by category. Reorder, rename, or retire.</p>
-      <div id="adminItems"></div>
+      <!-- ITEMS -->
+      <div class="admin-section">
+        <h3>Catalog</h3>
+        <p class="section-sub">All files, grouped by category. Reorder, rename, or retire.</p>
+        <div id="adminItems"></div>
+      </div>
     </div>
   </div>
-</section>
+</div>
 
-<!-- Modals -->
+<!-- Generic Modals -->
 <div class="modal-overlay hidden" id="modalOverlay">
   <div class="modal" id="modalBody"></div>
 </div>
@@ -424,6 +428,7 @@ details.guide code{font-family:var(--font-mono);font-size:11.5px;padding:1px 6px
 
   const LS = { owner: 'opx_owner', repo: 'opx_repo', branch: 'opx_branch', token: 'opx_token', adminHash: 'opx_admin_hash' };
   const SYNC_INTERVAL = 25000;
+  const DEFAULT_ADMIN_PASSWORD = 'opx';
 
   const EXT_TYPE = { html:'html', htm:'html', pdf:'pdf', doc:'doc', docx:'doc', odt:'doc', rtf:'doc', txt:'doc', md:'doc', png:'image', jpg:'image', jpeg:'image', gif:'image', svg:'image', webp:'image', bmp:'image', ico:'image', mp4:'video', webm:'video', mov:'video', mkv:'video', mp3:'audio', wav:'audio', ogg:'audio', m4a:'audio', flac:'audio', zip:'archive', rar:'archive', '7z':'archive', tar:'archive', gz:'archive' };
   const ICON_PATHS = {
@@ -503,12 +508,10 @@ details.guide code{font-family:var(--font-mono);font-size:11.5px;padding:1px 6px
   function createDefaultManifest(){
     return { version: 2, categories: [ { id: 'apps', name: 'Apps', icon: 'terminal', items: [] }, { id: 'docs', name: 'Documents', icon: 'file', items: [] }, { id: 'media', name: 'Media', icon: 'image', items: [] }, { id: 'other', name: 'Other', icon: 'box', items: [] } ] };
   }
-
   function normalizeItem(item){
     const filename = item.filename || (item.path ? item.path.split('/').pop() : 'file.bin');
     return { id: item.id || uid(), name: item.name || titleCase(filename), description: item.description || '', filename, type: item.type || detectType(filename), addedAt: item.addedAt || new Date().toISOString() };
   }
-
   function normalizeManifest(data){
     if (!data) return createDefaultManifest();
     if (Array.isArray(data)){
@@ -532,7 +535,6 @@ details.guide code{font-family:var(--font-mono);font-size:11.5px;padding:1px 6px
     await ghPut('manifest.json', b64EncodeUnicode(JSON.stringify(manifest, null, 2)), message || 'Update manifest', cfg, sha);
   }
 
-  // NEW RECONCILE LOGIC: Looks directly into the /apps folder!
   async function reconcile(cfg){
     if (!cfg.token || !cfg.owner || !cfg.repo || !state.manifest) return false;
     let changed = false;
@@ -544,7 +546,6 @@ details.guide code{font-family:var(--font-mono);font-size:11.5px;padding:1px 6px
 
     const known = new Set();
     state.manifest.categories.forEach(c => c.items.forEach(i => known.add(i.filename)));
-
     const appsCat = state.manifest.categories.find(c => c.id === 'apps') || state.manifest.categories[0];
     
     folderFiles.forEach(fname => {
@@ -637,43 +638,111 @@ details.guide code{font-family:var(--font-mono);font-size:11.5px;padding:1px 6px
       const typeClass = 't-' + (it.type || 'file');
       const isStandalone = window.matchMedia('(display-mode: standalone)').matches || window.navigator.standalone === true;
       const targetAttr = isStandalone ? '' : ' target="_blank" rel="noopener"';
-      // Path logic: Everything points to the apps/ folder!
       const filePath = 'apps/' + encodeURIComponent(it.filename);
       return '<div class="item-card" style="animation-delay:' + (i*35) + 'ms"><div class="item-top"><div class="item-icon ' + typeClass + '">' + initial + '</div><div class="item-info"><div class="item-name">' + esc(it.name) + '</div>' + (it.description ? '<div class="item-desc">' + esc(it.description) + '</div>' : '') + '</div></div><div class="item-bottom"><span class="item-type">' + esc(it.type || 'file') + '</span><a class="open-btn" href="' + filePath + '"' + targetAttr + '>Open ' + icon('external',12) + '</a></div></div>';
     }).join('');
     view.innerHTML = head + '<div class="item-grid">' + cards + '</div>';
   }
 
-  function hasPassword(){ return !!localStorage.getItem(LS.adminHash); }
+  // ==========================================
+  // MODALS (PASSWORD & ADD CATEGORY)
+  // ==========================================
+  
+  function closeModal(){ $('#modalOverlay').classList.add('hidden'); }
 
   async function openPasswordModal(mode){
     const isSet = mode === 'set';
-    const html = '<h3>' + (isSet ? (hasPassword() ? 'Change admin password' : 'Set admin password') : 'Unlock production office') + '</h3><p class="modal-sub">' + (isSet ? 'Kept in this browser only. Your GitHub token is still the real lock on the repo.' : 'Enter the admin password to manage categories, files, and settings.') + '</p><input type="password" class="modal-input" id="pwIn" placeholder="Password" autocomplete="off">' + (isSet ? '<input type="password" class="modal-input" id="pwIn2" placeholder="Confirm password" autocomplete="off">' : '') + '<p class="modal-error hidden" id="pwErr"></p><div class="btn-row"><button class="btn btn-primary" id="pwOk">' + (isSet ? 'Save password' : 'Unlock') + '</button><button class="btn btn-ghost" id="pwCancel">Cancel</button></div>';
-    $('#modalBody').innerHTML = html; $('#modalOverlay').classList.remove('hidden'); setTimeout(() => $('#pwIn').focus(), 50);
-    function close(){ $('#modalOverlay').classList.add('hidden'); }
-    function err(msg){ const e = $('#pwErr'); e.textContent = msg; e.classList.remove('hidden'); }
-    $('#pwCancel').onclick = close;
-    $('#pwOk').onclick = async () => {
-      const v = $('#pwIn').value; if (!v){ err('Enter a password.'); return; }
-      if (isSet){
-        if (v !== $('#pwIn2').value){ err("Passwords don't match."); return; }
-        localStorage.setItem(LS.adminHash, await sha256Hex(v)); close(); revealAdmin();
-      } else {
+    
+    if (isSet) {
+      // Change password mode
+      const html = '<h3>Change admin password</h3>' +
+        '<p class="modal-sub">Enter your new password below. You will need this next time you open the admin panel.</p>' +
+        '<input type="password" class="modal-input" id="pwIn" placeholder="New password" autocomplete="off">' +
+        '<input type="password" class="modal-input" id="pwIn2" placeholder="Confirm new password" autocomplete="off">' +
+        '<p class="modal-error hidden" id="pwErr"></p>' +
+        '<div class="btn-row"><button class="btn btn-primary" id="pwOk">Save password</button><button class="btn btn-ghost" id="pwCancel">Cancel</button></div>';
+      $('#modalBody').innerHTML = html; $('#modalOverlay').classList.remove('hidden'); setTimeout(() => $('#pwIn').focus(), 50);
+      
+      $('#pwCancel').onclick = closeModal;
+      $('#pwOk').onclick = async () => {
+        const v = $('#pwIn').value; if (!v){ $('#pwErr').textContent = 'Enter a password.'; $('#pwErr').classList.remove('hidden'); return; }
+        if (v !== $('#pwIn2').value){ $('#pwErr').textContent = "Passwords don't match."; $('#pwErr').classList.remove('hidden'); return; }
+        localStorage.setItem(LS.adminHash, await sha256Hex(v)); closeModal(); toast('Password updated', 'success');
+      };
+    } else {
+      // Login mode
+      const html = '<h3>Unlock production office</h3>' +
+        '<p class="modal-sub">Enter the admin password to manage categories, files, and settings.</p>' +
+        '<input type="password" class="modal-input" id="pwIn" placeholder="Password" autocomplete="off">' +
+        '<p class="modal-error hidden" id="pwErr"></p>' +
+        '<div class="btn-row"><button class="btn btn-primary" id="pwOk">Unlock</button><button class="btn btn-ghost" id="pwCancel">Cancel</button></div>';
+      $('#modalBody').innerHTML = html; $('#modalOverlay').classList.remove('hidden'); setTimeout(() => $('#pwIn').focus(), 50);
+      
+      $('#pwCancel').onclick = closeModal;
+      $('#pwOk').onclick = async () => {
+        const v = $('#pwIn').value; if (!v){ $('#pwErr').textContent = 'Enter a password.'; $('#pwErr').classList.remove('hidden'); return; }
         const h = await sha256Hex(v);
-        if (h === localStorage.getItem(LS.adminHash)){ close(); revealAdmin(); } else { err('Incorrect password.'); $('#pwIn').value = ''; $('#pwIn').focus(); }
-      }
-    };
-    $('#modalOverlay').addEventListener('click', e => { if (e.target.id === 'modalOverlay') close(); }, { once:true });
-    document.addEventListener('keydown', function esc(e){ if (e.key === 'Escape'){ close(); document.removeEventListener('keydown', esc); } });
+        if (h === localStorage.getItem(LS.adminHash)){ closeModal(); revealAdmin(); } 
+        else { $('#pwErr').textContent = 'Incorrect password.'; $('#pwErr').classList.remove('hidden'); $('#pwIn').value = ''; $('#pwIn').focus(); }
+      };
+    }
+
+    // Support Enter key
+    $('#modalBody').addEventListener('keydown', e => {
+      if (e.key === 'Enter') $('#pwOk').click();
+    });
   }
 
+  function openAddCategoryModal() {
+    const icons = ['folder', 'terminal', 'file', 'image', 'box', 'music', 'video', 'archive'];
+    const html = '<h3>Add Category</h3>' +
+      '<p class="modal-sub">Create a new category to organize your files.</p>' +
+      '<div class="field" style="margin-bottom:12px"><label>Name</label><input type="text" class="modal-input" id="newCatName" placeholder="e.g. Design Assets"></div>' +
+      '<div class="field" style="margin-bottom:12px"><label>Icon</label><select id="newCatIcon" class="modal-input">' +
+      icons.map(i => `<option value="${i}">${i.charAt(0).toUpperCase() + i.slice(1)}</option>`).join('') + '</select></div>' +
+      '<div class="btn-row"><button class="btn btn-primary" id="newCatSave">Create</button><button class="btn btn-ghost" id="newCatCancel">Cancel</button></div>';
+      
+    $('#modalBody').innerHTML = html; $('#modalOverlay').classList.remove('hidden');
+    setTimeout(() => $('#newCatName').focus(), 50);
+
+    $('#newCatCancel').onclick = closeModal;
+    $('#newCatSave').onclick = async () => {
+      const name = $('#newCatName').value.trim();
+      if (!name) return;
+      const iconName = $('#newCatIcon').value;
+      const id = slug(name);
+      
+      if (state.manifest.categories.some(c => c.id === id)) { toast('Category id exists', 'warn'); return; }
+      
+      state.manifest.categories.push({ id, name, icon: iconName, items: [] });
+      await persistManifest('Add category');
+      renderAdminCategories();
+      populatePubCategories();
+      closeModal();
+    };
+  }
+
+  // ==========================================
+  // ADMIN LOGIC
+  // ==========================================
+
   function revealAdmin(){
-    state.adminUnlocked = true; $('#adminPanel').classList.remove('hidden'); $('#lockBtn').classList.add('unlocked'); $('#lockBtn').setAttribute('aria-pressed', 'true');
+    state.adminUnlocked = true; 
+    $('#adminOverlay').classList.remove('hidden'); 
+    $('#lockBtn').classList.add('unlocked'); 
+    $('#lockBtn').setAttribute('aria-pressed', 'true');
     fillConfigForm(); renderAdminCategories(); renderAdminItems(); populatePubCategories();
-    setTimeout(() => { $('#adminPanel').scrollIntoView({ behavior:'smooth', block:'start' }); }, 100);
     syncNow({ force:true, reconcile:true });
   }
-  function hideAdmin(){ state.adminUnlocked = false; $('#adminPanel').classList.add('hidden'); $('#lockBtn').classList.remove('unlocked'); $('#lockBtn').setAttribute('aria-pressed', 'false'); render(); }
+  
+  function hideAdmin(){ 
+    state.adminUnlocked = false; 
+    $('#adminOverlay').classList.add('hidden'); 
+    $('#lockBtn').classList.remove('unlocked'); 
+    $('#lockBtn').setAttribute('aria-pressed', 'false'); 
+    render(); 
+  }
+
   function fillConfigForm(){ const c = getConfig(); $('#cfgOwner').value = c.owner; $('#cfgRepo').value = c.repo; $('#cfgBranch').value = c.branch; $('#cfgToken').value = c.token; }
   function populatePubCategories(){ const sel = $('#pubCategory'); if (!state.manifest){ sel.innerHTML = ''; return; } sel.innerHTML = state.manifest.categories.map(c => '<option value="' + esc(c.id) + '">' + esc(c.name) + '</option>').join(''); }
 
@@ -762,7 +831,6 @@ details.guide code{font-family:var(--font-mono);font-size:11.5px;padding:1px 6px
       try{
         if (cfg.token){
           setSyncBadge('syncing', 'deleting');
-          // Delete from apps/ folder
           const fi = await ghGet('apps/' + item.filename, cfg);
           if (fi) await ghDelete('apps/' + item.filename, fi.sha, 'Delete ' + item.filename, cfg);
         }
@@ -792,8 +860,6 @@ details.guide code{font-family:var(--font-mono);font-size:11.5px;padding:1px 6px
     const name = $('#pubName').value.trim() || titleCase(state.selectedFile.name);
     const description = $('#pubDesc').value.trim();
     const filename = sanitizeFilename(state.selectedFile.name);
-    
-    // EVERYTHING GOES TO APPS FOLDER!
     const path = 'apps/' + filename; 
 
     const btn = $('#publishBtn'); btn.disabled = true; btn.innerHTML = '<span class="spinner"></span> Uploading...'; setSyncBadge('syncing', 'publishing');
@@ -827,8 +893,21 @@ details.guide code{font-family:var(--font-mono);font-size:11.5px;padding:1px 6px
 
   function wire(){
     $('#brandLink').onclick = e => { e.preventDefault(); navigateTo('#'); };
-    $('#lockBtn').onclick = () => { if (state.adminUnlocked) hideAdmin(); else if (hasPassword()) openPasswordModal('check'); else openPasswordModal('set'); };
+    
+    // Lock button just opens password prompt now (unlock logic)
+    $('#lockBtn').onclick = () => { 
+      if (state.adminUnlocked) hideAdmin(); 
+      else openPasswordModal('check'); 
+    };
+    
+    // Close admin panel (also auto-locks because hideAdmin sets unlocked=false)
     $('#closeAdminBtn').onclick = hideAdmin;
+    
+    // Click outside admin modal to close it
+    $('#adminOverlay').addEventListener('click', e => {
+      if (e.target.id === 'adminOverlay') hideAdmin();
+    });
+
     $('#saveCfgBtn').onclick = async () => {
       saveConfig({ owner: $('#cfgOwner').value.trim(), repo: $('#cfgRepo').value.trim(), branch: $('#cfgBranch').value.trim() || 'main', token: $('#cfgToken').value.trim() });
       state.lastSyncHash = ''; toast('Config saved', 'success'); await syncNow({ force:true, reconcile:true });
@@ -855,15 +934,9 @@ details.guide code{font-family:var(--font-mono);font-size:11.5px;padding:1px 6px
 
     $('#publishBtn').onclick = publishFile;
     $('#resetPubBtn').onclick = resetPublishForm;
-
-    $('#addCategoryBtn').onclick = async () => {
-      const name = prompt('Category name:'); if (!name) return;
-      const trimmed = name.trim(); if (!trimmed) return;
-      const id = slug(trimmed);
-      if (state.manifest.categories.some(c => c.id === id)){ toast('Category id exists', 'warn'); return; }
-      state.manifest.categories.push({ id, name: trimmed, icon: 'folder', items: [] });
-      await persistManifest('Add category'); renderAdminCategories(); renderAdminItems(); populatePubCategories();
-    };
+    
+    // New Category Modal
+    $('#addCategoryBtn').onclick = openAddCategoryModal;
 
     window.addEventListener('hashchange', onRouteChange);
     document.addEventListener('visibilitychange', () => { if (!document.hidden) syncNow({ silent: true }); });
@@ -871,6 +944,11 @@ details.guide code{font-family:var(--font-mono);font-size:11.5px;padding:1px 6px
   }
 
   async function boot(){
+    // Set default password if none exists
+    if (!localStorage.getItem(LS.adminHash)) {
+      localStorage.setItem(LS.adminHash, await sha256Hex(DEFAULT_ADMIN_PASSWORD));
+    }
+
     wire();
     const cfg = getConfig();
     if (!cfg.owner || !cfg.repo){
