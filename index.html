@@ -154,7 +154,7 @@ a{color:inherit;text-decoration:none} button,input,select,textarea{font:inherit;
 .foot .dot{opacity:.4}
 .foot .foot-brand{color:var(--green);opacity:.7}
 
-/* ADMIN PANEL (NOW A MODAL POPUP) */
+/* ADMIN PANEL (MODAL POPUP) */
 .admin-overlay{position:fixed;inset:0;z-index:90;background:rgba(3,6,4,0.85);backdrop-filter:blur(6px);-webkit-backdrop-filter:blur(6px);display:flex;align-items:center;justify-content:center;padding:16px;animation:fadeIn .2s ease}
 .admin-overlay.hidden{display:none}
 .admin-modal{background:var(--bg);width:100%;max-width:900px;max-height:92vh;border-radius:var(--radius-lg);border:1px solid var(--border-bright);box-shadow:0 20px 60px rgba(0,0,0,0.6),0 0 40px var(--green-dim);display:flex;flex-direction:column;overflow:hidden;animation:scaleIn .25s cubic-bezier(.2,.7,.3,1)}
@@ -221,9 +221,29 @@ details.guide code{font-family:var(--font-mono);font-size:11.5px;padding:1px 6px
 .admin-row .row-info{flex:1;min-width:0}
 .admin-row .row-name{font-size:13.5px;font-weight:500;color:var(--text);white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
 .admin-row .row-meta{font-family:var(--font-mono);font-size:10.5px;color:var(--text-faint);letter-spacing:.04em;white-space:nowrap;overflow:hidden;text-overflow:ellipsis}
-.admin-row .row-actions{display:flex;gap:4px;flex:none}
+.admin-row .row-actions{display:flex;gap:4px;flex:none;align-items:center;}
 .admin-row .row-actions .btn{padding:5px 8px;font-size:10px;min-width:28px}
 .admin-row .row-actions svg{width:12px;height:12px}
+
+/* Move Dropdown */
+.move-select {
+  background: var(--surface-2);
+  border: 1px solid var(--border);
+  color: var(--text-dim);
+  border-radius: var(--radius);
+  padding: 5px 22px 5px 8px;
+  font-family: var(--font-mono);
+  font-size: 10.5px;
+  cursor: pointer;
+  appearance: none;
+  background-image: url("data:image/svg+xml,%3Csvg xmlns='http://www.w3.org/2000/svg' width='10' height='10' viewBox='0 0 24 24' fill='none' stroke='%238fa598' stroke-width='2'%3E%3Cpath d='m6 9 6 6 6-6'/%3E%3C/svg%3E");
+  background-repeat: no-repeat;
+  background-position: right 6px center;
+  transition: all .2s;
+  margin-right: 4px;
+}
+.move-select:hover { border-color: var(--border-bright); color: var(--text); }
+.move-select:focus { outline: none; border-color: var(--green); }
 
 .rename-inline{display:flex;gap:6px;align-items:center;flex:1}
 .rename-inline input{flex:1;min-width:0;background:var(--bg);border:1px solid var(--green);border-radius:3px;padding:6px 9px;font-size:13px;color:var(--text)}
@@ -258,7 +278,7 @@ details.guide code{font-family:var(--font-mono);font-size:11.5px;padding:1px 6px
 @keyframes spin{to{transform:rotate(360deg)}}
 
 @media (prefers-reduced-motion:reduce){*,*::before,*::after{animation-duration:.01ms !important;transition-duration:.01ms !important;animation-iteration-count:1 !important} .console-caret{animation:none;opacity:1}}
-@media (max-width:600px){.brand-sub{display:none}.sync-badge .sync-label{display:none}.sync-badge{padding:8px}.admin-row{flex-wrap:wrap}.admin-row .row-actions{width:100%;justify-content:flex-end}}
+@media (max-width:600px){.brand-sub{display:none}.sync-badge .sync-label{display:none}.sync-badge{padding:8px}.admin-row{flex-wrap:wrap}.admin-row .row-actions{width:100%;justify-content:flex-end;margin-top:8px}}
 </style>
 </head>
 <body>
@@ -407,7 +427,7 @@ details.guide code{font-family:var(--font-mono);font-size:11.5px;padding:1px 6px
       <!-- ITEMS -->
       <div class="admin-section">
         <h3>Catalog</h3>
-        <p class="section-sub">All files, grouped by category. Reorder, rename, or retire.</p>
+        <p class="section-sub">All files. Use the dropdown to move files between categories.</p>
         <div id="adminItems"></div>
       </div>
     </div>
@@ -632,7 +652,7 @@ details.guide code{font-family:var(--font-mono);font-size:11.5px;padding:1px 6px
   function renderItemsView(cat){
     const view = $('#view'); const items = cat.items;
     const head = '<div class="view-head"><div><h1>' + esc(cat.name) + '</h1><div class="head-sub"><b>' + items.length + '</b> ' + (items.length === 1 ? 'file' : 'files') + '</div></div><a href="#" class="btn">' + icon('arrowLeft',12) + ' Back</a></div>';
-    if (!items.length){ view.innerHTML = head + '<div class="empty"><div class="empty-icon">'+icon('folder',24)+'</div><h3>Nothing here yet</h3><p>' + (state.adminUnlocked ? 'Publish a file to this category from the production office below.' : 'This category is empty. Check back soon.') + '</p></div>'; return; }
+    if (!items.length){ view.innerHTML = head + '<div class="empty"><div class="empty-icon">'+icon('folder',24)+'</div><h3>Nothing here yet</h3><p>' + (state.adminUnlocked ? 'Publish a file to this category from the production office.' : 'This category is empty. Check back soon.') + '</p></div>'; return; }
     const cards = items.map((it, i) => {
       const initial = esc((it.name || '?').charAt(0).toUpperCase());
       const typeClass = 't-' + (it.type || 'file');
@@ -654,7 +674,6 @@ details.guide code{font-family:var(--font-mono);font-size:11.5px;padding:1px 6px
     const isSet = mode === 'set';
     
     if (isSet) {
-      // Change password mode
       const html = '<h3>Change admin password</h3>' +
         '<p class="modal-sub">Enter your new password below. You will need this next time you open the admin panel.</p>' +
         '<input type="password" class="modal-input" id="pwIn" placeholder="New password" autocomplete="off">' +
@@ -670,7 +689,6 @@ details.guide code{font-family:var(--font-mono);font-size:11.5px;padding:1px 6px
         localStorage.setItem(LS.adminHash, await sha256Hex(v)); closeModal(); toast('Password updated', 'success');
       };
     } else {
-      // Login mode
       const html = '<h3>Unlock production office</h3>' +
         '<p class="modal-sub">Enter the admin password to manage categories, files, and settings.</p>' +
         '<input type="password" class="modal-input" id="pwIn" placeholder="Password" autocomplete="off">' +
@@ -687,7 +705,6 @@ details.guide code{font-family:var(--font-mono);font-size:11.5px;padding:1px 6px
       };
     }
 
-    // Support Enter key
     $('#modalBody').addEventListener('keydown', e => {
       if (e.key === 'Enter') $('#pwOk').click();
     });
@@ -806,16 +823,61 @@ details.guide code{font-family:var(--font-mono);font-size:11.5px;padding:1px 6px
       html += '<div class="admin-list" data-cat="' + esc(cat.id) + '">';
       cat.items.forEach((it, i) => {
         const initial = esc((it.name || '?').charAt(0).toUpperCase());
-        html += '<div class="admin-row" data-cat="' + esc(cat.id) + '" data-item="' + esc(it.id) + '"><div class="row-icon">' + initial + '</div><div class="row-info"><div class="row-name">' + esc(it.name) + '</div><div class="row-meta">' + esc(it.filename) + ' · ' + fmtDate(it.addedAt) + '</div></div><div class="row-actions">' + (i > 0 ? '<button class="btn btn-icon" data-act="up" title="Move up">' + icon('up',12) + '</button>' : '') + (i < cat.items.length-1 ? '<button class="btn btn-icon" data-act="down" title="Move down">' + icon('down',12) + '</button>' : '') + '<button class="btn btn-icon" data-act="rename" title="Rename">' + icon('edit',12) + '</button><button class="btn btn-icon btn-danger" data-act="delete" title="Delete">' + icon('trash',12) + '</button></div></div>';
+        
+        // Build category options for the move dropdown
+        const catOptions = state.manifest.categories.map(c => 
+          `<option value="${esc(c.id)}" ${c.id === cat.id ? 'selected' : ''}>${esc(c.name)}</option>`
+        ).join('');
+
+        html += `<div class="admin-row" data-cat="${esc(cat.id)}" data-item="${esc(it.id)}">
+          <div class="row-icon">${initial}</div>
+          <div class="row-info">
+            <div class="row-name">${esc(it.name)}</div>
+            <div class="row-meta">${esc(it.filename)} · ${fmtDate(it.addedAt)}</div>
+          </div>
+          <div class="row-actions">
+            <select class="move-select" data-item="${esc(it.id)}" data-oldcat="${esc(cat.id)}" title="Move to category">
+              ${catOptions}
+            </select>
+            ${i > 0 ? '<button class="btn btn-icon" data-act="up" title="Move up">' + icon('up',12) + '</button>' : ''}
+            ${i < cat.items.length-1 ? '<button class="btn btn-icon" data-act="down" title="Move down">' + icon('down',12) + '</button>' : ''}
+            <button class="btn btn-icon" data-act="rename" title="Rename">${icon('edit',12)}</button>
+            <button class="btn btn-icon btn-danger" data-act="delete" title="Delete">${icon('trash',12)}</button>
+          </div>
+        </div>`;
       });
       html += '</div>';
     });
     if (!hasAny) html = '<p class="field-hint" style="margin:0">No files yet. Publish one above.</p>';
     el.innerHTML = html;
+
     el.querySelectorAll('.admin-row[data-item]').forEach(row => {
       const catId = row.dataset.cat; const itemId = row.dataset.item;
       row.querySelectorAll('button[data-act]').forEach(btn => { btn.onclick = () => handleItemAction(btn.dataset.act, catId, itemId, row); });
     });
+
+    // Attach listeners for the Move Dropdown
+    el.querySelectorAll('.move-select').forEach(sel => {
+      sel.onchange = (e) => moveItemToCategory(sel.dataset.item, sel.dataset.oldcat, e.target.value);
+    });
+  }
+
+  async function moveItemToCategory(itemId, oldCatId, newCatId) {
+    if (oldCatId === newCatId) return;
+    const oldCat = state.manifest.categories.find(c => c.id === oldCatId);
+    const newCat = state.manifest.categories.find(c => c.id === newCatId);
+    if (!oldCat || !newCat) return;
+
+    const itemIdx = oldCat.items.findIndex(i => i.id === itemId);
+    if (itemIdx === -1) return;
+
+    const [item] = oldCat.items.splice(itemIdx, 1);
+    newCat.items.push(item);
+
+    await persistManifest(`Move "${item.name}" to ${newCat.name}`);
+    renderAdminCategories();
+    renderAdminItems();
+    render();
   }
 
   async function handleItemAction(act, catId, itemId, row){
@@ -893,17 +955,12 @@ details.guide code{font-family:var(--font-mono);font-size:11.5px;padding:1px 6px
 
   function wire(){
     $('#brandLink').onclick = e => { e.preventDefault(); navigateTo('#'); };
-    
-    // Lock button just opens password prompt now (unlock logic)
     $('#lockBtn').onclick = () => { 
       if (state.adminUnlocked) hideAdmin(); 
       else openPasswordModal('check'); 
     };
-    
-    // Close admin panel (also auto-locks because hideAdmin sets unlocked=false)
     $('#closeAdminBtn').onclick = hideAdmin;
     
-    // Click outside admin modal to close it
     $('#adminOverlay').addEventListener('click', e => {
       if (e.target.id === 'adminOverlay') hideAdmin();
     });
@@ -934,8 +991,6 @@ details.guide code{font-family:var(--font-mono);font-size:11.5px;padding:1px 6px
 
     $('#publishBtn').onclick = publishFile;
     $('#resetPubBtn').onclick = resetPublishForm;
-    
-    // New Category Modal
     $('#addCategoryBtn').onclick = openAddCategoryModal;
 
     window.addEventListener('hashchange', onRouteChange);
@@ -944,7 +999,6 @@ details.guide code{font-family:var(--font-mono);font-size:11.5px;padding:1px 6px
   }
 
   async function boot(){
-    // Set default password if none exists
     if (!localStorage.getItem(LS.adminHash)) {
       localStorage.setItem(LS.adminHash, await sha256Hex(DEFAULT_ADMIN_PASSWORD));
     }
