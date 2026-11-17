@@ -23,14 +23,6 @@
           "addedAt": "2026-08-22T05:47:04.656Z"
         },
         {
-          "id": "694a1678-3658-46a2-9806-a7b3e25e1be0",
-          "name": "Full Care",
-          "description": "",
-          "filename": "opx-care-guide-3.html",
-          "type": "html",
-          "addedAt": "2026-08-22T05:50:29.766Z"
-        },
-        {
           "id": "916e80f7-60c1-4c79-88aa-0283ace864ed",
           "name": "Encyclopedia",
           "description": "",
@@ -332,7 +324,16 @@
       "id": "docs",
       "name": "Reports",
       "icon": "file",
-      "items": []
+      "items": [
+        {
+          "id": "694a1678-3658-46a2-9806-a7b3e25e1be0",
+          "name": "Full Care",
+          "description": "",
+          "filename": "opx-care-guide-3.html",
+          "type": "html",
+          "addedAt": "2026-08-22T05:50:29.766Z"
+        }
+      ]
     },
     {
       "id": "media",
