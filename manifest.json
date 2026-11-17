@@ -352,6 +352,12 @@
       "name": "Documents",
       "icon": "archive",
       "items": []
+    },
+    {
+      "id": "business",
+      "name": "Business",
+      "icon": "terminal",
+      "items": []
     }
   ]
 }
