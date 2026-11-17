@@ -23,14 +23,6 @@
           "addedAt": "2026-08-22T05:47:04.656Z"
         },
         {
-          "id": "ee368e13-de60-4dee-aae5-849b308f82e6",
-          "name": "Opx Nightowl Routine",
-          "description": "",
-          "filename": "opx_nightowl_routine.html",
-          "type": "html",
-          "addedAt": "2026-08-22T12:19:11.328Z"
-        },
-        {
           "id": "8fa435fd-5aa8-4d4d-aab4-aeef31ba8d2b",
           "name": "Brand vs Personal Brand",
           "description": "",
@@ -332,6 +324,14 @@
           "filename": "opx-complete-os.html",
           "type": "html",
           "addedAt": "2026-08-22T05:52:20.715Z"
+        },
+        {
+          "id": "ee368e13-de60-4dee-aae5-849b308f82e6",
+          "name": "Opx Nightowl Routine",
+          "description": "",
+          "filename": "opx_nightowl_routine.html",
+          "type": "html",
+          "addedAt": "2026-08-22T12:19:11.328Z"
         }
       ]
     },
