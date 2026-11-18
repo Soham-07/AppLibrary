@@ -1,0 +1,2860 @@
+<!DOCTYPE html>
+<html lang="en">
+<head>
+<meta charset="utf-8" />
+<meta name="viewport" content="width=device-width, initial-scale=1" />
+<title>LIFE/OS — Human Life Analysis</title>
+<link rel="preconnect" href="https://fonts.googleapis.com">
+<link rel="preconnect" href="https://fonts.gstatic.com" crossorigin>
+<link href="https://fonts.googleapis.com/css2?family=Fraunces:ital,opsz,wght@0,9..144,300..700;1,9..144,300..700&family=Inter:wght@300..800&family=JetBrains+Mono:wght@400..700&display=swap" rel="stylesheet">
+<script src="https://cdn.jsdelivr.net/npm/chart.js@4.4.1/dist/chart.umd.min.js"></script>
+<style>
+/* ============================================================
+   LIFE/OS — Design System v3.1 (Complete)
+   ============================================================ */
+*{box-sizing:border-box;margin:0;padding:0}
+
+:root{
+  --bg:#0b0a08; --panel:#12110e;
+  --line:rgba(240,235,224,.08); --line-2:rgba(240,235,224,.04);
+  --text:#f0ebe0; --muted:#8a8275; --dim:#4a453d;
+  --lime:#d4ff3a; --coral:#ff5c35; --violet:#a78bfa;
+  --cyan:#67e8f9; --pink:#f472b6; --mint:#34d399; --amber:#fbbf24;
+  --serif:'Fraunces',Georgia,'Times New Roman',serif;
+  --sans:'Inter',system-ui,-apple-system,sans-serif;
+  --mono:'JetBrains Mono',ui-monospace,monospace;
+}
+
+html,body{height:100%}
+body{
+  font-family:var(--sans);background:var(--bg);color:var(--text);
+  -webkit-font-smoothing:antialiased;overflow-x:hidden;
+  padding-top:64px;padding-bottom:52px;min-height:100vh;
+  font-feature-settings:"ss01","cv11";
+  transition:background .4s ease;
+}
+
+/* Subtle glow + grain overlay */
+body::before{
+  content:'';position:fixed;inset:0;z-index:-2;pointer-events:none;
+  background:
+    radial-gradient(900px 600px at 85% -10%, rgba(212,255,58,.07), transparent 60%),
+    radial-gradient(700px 500px at 5% 110%, rgba(255,92,53,.05), transparent 60%);
+}
+body::after{
+  content:'';position:fixed;inset:0;z-index:-1;pointer-events:none;opacity:.35;
+  background-image:url("data:image/svg+xml,%3Csvg viewBox='0 0 220 220' xmlns='http://www.w3.org/2000/svg'%3E%3Cfilter id='n'%3E%3CfeTurbulence type='fractalNoise' baseFrequency='0.85' numOctaves='3' stitchTiles='stitch'/%3E%3C/filter%3E%3Crect width='100%25' height='100%25' filter='url(%23n)' opacity='0.55'/%3E%3C/svg%3E");
+  mix-blend-mode:overlay;
+}
+
+/* ============================================================
+   TOP BAR
+   ============================================================ */
+.top{
+  position:fixed;top:0;left:0;right:0;z-index:50;height:64px;
+  display:flex;align-items:center;gap:24px;padding:0 22px;
+  background:rgba(11,10,8,.78);
+  backdrop-filter:blur(20px) saturate(140%);
+  border-bottom:1px solid var(--line);
+}
+.brand{display:flex;align-items:center;gap:9px;flex-shrink:0}
+.brand-mark{
+  font-size:20px;color:var(--lime);display:inline-block;
+  animation:spin 18s linear infinite;
+}
+@keyframes spin{to{transform:rotate(360deg)}}
+.brand-name{
+  font-family:var(--mono);font-weight:700;font-size:14px;
+  letter-spacing:.5px;
+}
+.brand-name .slash{color:var(--lime)}
+.brand-ver{
+  font-family:var(--mono);font-size:9px;color:var(--dim);
+  padding:2px 5px;border:1px solid var(--line);border-radius:3px;
+}
+
+.filters{display:flex;align-items:center;gap:16px;flex:1;overflow-x:auto;scrollbar-width:none}
+.filters::-webkit-scrollbar{display:none}
+.filter-group{display:flex;align-items:center;gap:6px;flex-shrink:0}
+.filter-label{
+  font-family:var(--mono);font-size:9px;color:var(--dim);
+  letter-spacing:1.5px;text-transform:uppercase;
+}
+
+.seg{
+  display:inline-flex;border:1px solid var(--line);border-radius:7px;
+  padding:2px;gap:1px;background:rgba(255,255,255,.02);
+}
+.seg button{
+  border:0;background:transparent;color:var(--muted);
+  font:600 11px var(--sans);padding:5px 10px;border-radius:5px;
+  cursor:pointer;letter-spacing:.2px;transition:all .18s ease;
+  white-space:nowrap;
+}
+.seg button:hover{color:var(--text)}
+.seg button.on{background:var(--lime);color:#0b0a08}
+
+.tool-btn{
+  border:1px solid var(--line);background:transparent;color:var(--muted);
+  padding:7px 11px;border-radius:7px;cursor:pointer;
+  font:600 11px var(--sans);display:flex;align-items:center;gap:6px;
+  transition:all .2s ease;flex-shrink:0;
+}
+.tool-btn:hover{color:var(--text);border-color:var(--dim);background:rgba(255,255,255,.02)}
+.tool-btn.on{background:var(--coral);color:#0b0a08;border-color:var(--coral)}
+.tool-btn kbd{
+  font-family:var(--mono);font-size:9px;padding:1px 4px;
+  border:1px solid currentColor;border-radius:3px;opacity:.5;
+}
+.tool-btn svg{width:13px;height:13px}
+
+.tool-group{display:flex;gap:6px;flex-shrink:0}
+
+/* ============================================================
+   SHELL
+   ============================================================ */
+.shell{display:grid;grid-template-columns:220px 1fr;min-height:calc(100vh - 116px)}
+
+/* ============================================================
+   SPINE NAV
+   ============================================================ */
+.spine{
+  border-right:1px solid var(--line);padding:20px 0;
+  position:sticky;top:64px;height:calc(100vh - 116px);
+  overflow-y:auto;scrollbar-width:thin;
+}
+.spine button{
+  display:block;width:100%;text-align:left;background:transparent;
+  border:0;padding:14px 22px;color:var(--muted);cursor:pointer;
+  font-family:var(--sans);border-left:2px solid transparent;
+  transition:all .25s cubic-bezier(.2,.8,.2,1);position:relative;
+}
+.spine button .num{
+  font-family:var(--mono);font-size:9px;color:var(--dim);
+  letter-spacing:.8px;display:block;margin-bottom:5px;transition:color .25s;
+}
+.spine button .lbl{font-size:13px;font-weight:600}
+.spine button:hover{background:rgba(255,255,255,.02);color:var(--text)}
+.spine button.on{
+  border-left-color:var(--lime);color:var(--text);
+  background:linear-gradient(90deg,rgba(212,255,58,.07),transparent);
+}
+.spine button.on .num{color:var(--lime)}
+
+/* ============================================================
+   MAIN
+   ============================================================ */
+main{padding:0 36px 60px;max-width:1600px;width:100%}
+
+.view{display:none}
+.view.on{display:block;animation:fadeUp .5s cubic-bezier(.2,.8,.2,1)}
+@keyframes fadeUp{from{opacity:0;transform:translateY(12px)}to{opacity:1;transform:none}}
+
+.view-head{padding:44px 0 28px;border-bottom:1px solid var(--line)}
+.view-head .eyebrow{
+  font-family:var(--mono);font-size:10px;color:var(--lime);
+  letter-spacing:2px;text-transform:uppercase;margin-bottom:16px;
+}
+.view-head h2{
+  font-family:var(--serif);font-weight:300;font-size:42px;
+  line-height:1.05;letter-spacing:-.02em;margin-bottom:8px;
+}
+.view-head .sub{font-size:13px;color:var(--muted);max-width:640px;line-height:1.65}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+.hero{
+  display:grid;grid-template-columns:1fr 420px;gap:56px;
+  align-items:center;padding:44px 0 48px;border-bottom:1px solid var(--line);
+}
+.hero-text .eyebrow{
+  font-family:var(--mono);font-size:10px;color:var(--lime);
+  letter-spacing:2px;text-transform:uppercase;margin-bottom:22px;
+}
+.hero-title{
+  font-family:var(--serif);font-weight:300;font-size:46px;
+  line-height:1.05;letter-spacing:-.02em;margin-bottom:22px;
+}
+.hero-title em{font-style:italic;color:var(--lime);font-weight:400}
+.hero-title b{font-weight:500}
+.lede{font-size:14px;line-height:1.75;color:var(--muted);max-width:520px}
+.lede b{color:var(--text);font-weight:600}
+
+.kpi-strip{
+  display:grid;grid-template-columns:repeat(4,1fr);
+  margin-top:40px;border-top:1px solid var(--line);
+}
+.kpi-strip > div{padding:18px 0 18px 18px;border-right:1px solid var(--line)}
+.kpi-strip > div:first-child{padding-left:0}
+.kpi-strip > div:last-child{border-right:0}
+.kpi-strip .v{
+  font-family:var(--mono);font-size:26px;font-weight:600;
+  letter-spacing:-.03em;display:flex;align-items:baseline;gap:3px;
+}
+.kpi-strip .v small{font-size:11px;color:var(--muted);font-weight:400}
+.kpi-strip .l{
+  font-family:var(--mono);font-size:9px;color:var(--muted);
+  letter-spacing:1.5px;text-transform:uppercase;margin-top:8px;
+}
+
+.dial-wrap{
+  position:relative;width:100%;aspect-ratio:1;max-width:420px;margin:0 auto;
+}
+.dial-wrap svg{width:100%;height:100%;display:block;overflow:visible}
+.dial-seg{cursor:pointer;transition:opacity .25s ease}
+
+/* ============================================================
+   SPEC
+   ============================================================ */
+.spec{border-top:1px solid var(--line);padding:30px 0}
+.spec-head{
+  display:flex;align-items:flex-start;justify-content:space-between;
+  gap:24px;margin-bottom:20px;
+}
+.spec-head h3{
+  font-family:var(--serif);font-weight:400;font-size:21px;
+  letter-spacing:-.01em;
+}
+.spec-head p{font-size:12px;color:var(--muted);margin-top:6px;max-width:420px;line-height:1.6}
+
+.grid-2{
+  display:grid;grid-template-columns:1fr 1fr;gap:0 44px;
+  padding:30px 0;border-top:1px solid var(--line);position:relative;
+}
+.grid-2::after{
+  content:'';position:absolute;left:50%;top:30px;bottom:30px;
+  width:1px;background:var(--line);transform:translateX(-.5px);
+}
+.grid-2 .spec{border:0;padding:0}
+
+/* ============================================================
+   TYPE SWITCHER
+   ============================================================ */
+.type-switch{
+  display:inline-flex;flex-shrink:0;border:1px solid var(--line);
+  border-radius:6px;padding:2px;gap:1px;background:rgba(255,255,255,.015);
+}
+.type-switch button{
+  border:0;background:transparent;width:26px;height:22px;
+  border-radius:4px;cursor:pointer;display:grid;place-items:center;
+  color:var(--muted);transition:all .18s ease;
+}
+.type-switch button:hover{color:var(--text);background:rgba(255,255,255,.04)}
+.type-switch button.on{background:var(--lime);color:#0b0a08}
+.type-switch svg{width:11px;height:11px;display:block}
+
+/* ============================================================
+   CANVAS
+   ============================================================ */
+.canvas-wrap{position:relative;height:280px}
+.canvas-wrap.tall{height:380px}
+.canvas-wrap.sm{height:200px}
+.canvas-wrap canvas{position:relative;z-index:2}
+
+/* Chart loading skeleton */
+.canvas-wrap.loading::before{
+  content:'';position:absolute;inset:0;z-index:1;
+  background:linear-gradient(90deg,
+    rgba(255,255,255,.02) 0%,
+    rgba(255,255,255,.06) 50%,
+    rgba(255,255,255,.02) 100%);
+  background-size:200% 100%;
+  animation:shimmer 1.2s ease-in-out infinite;
+  border-radius:8px;
+}
+@keyframes shimmer{0%{background-position:-200% 0}100%{background-position:200% 0}}
+
+/* ============================================================
+   FACTS
+   ============================================================ */
+.facts{
+  display:grid;grid-template-columns:repeat(auto-fit,minmax(220px,1fr));
+  gap:32px 36px;padding:6px 0;
+}
+.facts.small{grid-template-columns:1fr;gap:22px}
+.fact{border-left:2px solid var(--lime);padding-left:16px}
+.fact .num{
+  font-family:var(--mono);font-size:32px;font-weight:600;
+  color:var(--lime);letter-spacing:-.03em;line-height:1;margin-bottom:8px;
+}
+.fact .num small{font-size:13px;color:var(--muted);font-weight:400;margin-left:2px}
+.fact .lbl{
+  font-family:var(--mono);font-size:9px;color:var(--muted);
+  letter-spacing:1.5px;text-transform:uppercase;margin-bottom:12px;
+}
+.fact .desc{font-size:12px;color:var(--muted);line-height:1.7}
+.fact .desc b{color:var(--text);font-weight:600}
+
+/* ============================================================
+   BARS
+   ============================================================ */
+.bar-list{display:flex;flex-direction:column;gap:14px}
+.bar-row{display:grid;grid-template-columns:1fr auto;gap:5px 12px;align-items:center}
+.bar-row .lbl{font-size:12px;color:var(--text);font-weight:600}
+.bar-row .val{
+  font-family:var(--mono);font-size:11.5px;font-weight:600;
+  color:var(--lime);font-variant-numeric:tabular-nums;
+}
+.bar-row .track{
+  grid-column:1/-1;height:4px;border-radius:3px;
+  background:rgba(255,255,255,.06);overflow:hidden;
+}
+.bar-row .track i{
+  display:block;height:100%;border-radius:3px;width:0;
+  background:var(--lime);transition:width 1s cubic-bezier(.2,.8,.2,1);
+  box-shadow:0 0 10px -2px var(--lime);
+}
+.bar-row .note{
+  grid-column:1/-1;font-size:10px;color:var(--muted);
+  margin-top:-2px;line-height:1.5;font-family:var(--mono);
+}
+
+/* ============================================================
+   TABLE
+   ============================================================ */
+.table-wrap{overflow-x:auto}
+.tbl{width:100%;border-collapse:collapse;font-size:12px}
+.tbl th{
+  text-align:left;font-family:var(--mono);font-size:9px;
+  text-transform:uppercase;letter-spacing:1.2px;color:var(--muted);
+  font-weight:500;padding:0 10px 10px;border-bottom:1px solid var(--line);
+}
+.tbl td{padding:11px 10px;border-bottom:1px solid var(--line-2);vertical-align:middle}
+.tbl tr:last-child td{border-bottom:0}
+.tbl tbody tr{transition:background .2s}
+.tbl tbody tr:hover{background:rgba(255,255,255,.025)}
+.tbl .cat{font-weight:600;color:var(--text)}
+.tbl .desc{font-size:10.5px;color:var(--muted);line-height:1.5}
+.tbl .mini{height:4px;border-radius:3px;background:rgba(255,255,255,.06);overflow:hidden;min-width:60px}
+.tbl .mini i{display:block;height:100%;border-radius:3px;transition:width 1s cubic-bezier(.2,.8,.2,1)}
+
+/* Ledger table */
+.ledger-controls{
+  display:flex;gap:8px;flex-wrap:wrap;margin-bottom:16px;align-items:center;
+}
+.ledger-cat-btn{
+  border:1px solid var(--line);background:transparent;
+  color:var(--muted);padding:5px 10px;border-radius:20px;
+  cursor:pointer;font:600 10px var(--sans);
+  letter-spacing:.4px;transition:all .18s ease;
+}
+.ledger-cat-btn:hover{color:var(--text);border-color:var(--dim)}
+.ledger-cat-btn.on{background:var(--lime);color:#0b0a08;border-color:var(--lime)}
+.ledger-tbl{font-size:11.5px}
+.ledger-tbl td{padding:9px 8px}
+
+/* ============================================================
+   GAUGES
+   ============================================================ */
+.gauge-row{
+  display:grid;grid-template-columns:repeat(3,1fr);gap:26px;
+  padding:28px 0;border-top:1px solid var(--line);
+}
+.gauge{position:relative}
+.gauge .canvas-wrap{height:170px}
+.gauge-label{
+  display:flex;align-items:center;justify-content:space-between;
+  gap:10px;margin-top:-4px;padding:0 8px;
+}
+.gauge-label span{
+  font-family:var(--mono);font-size:9px;color:var(--muted);
+  letter-spacing:1.8px;text-transform:uppercase;
+}
+
+/* ============================================================
+   STATUS BAR
+   ============================================================ */
+.statusbar{
+  position:fixed;bottom:0;left:0;right:0;z-index:40;height:52px;
+  background:rgba(11,10,8,.92);
+  backdrop-filter:blur(20px) saturate(140%);
+  border-top:1px solid var(--line);
+  display:flex;align-items:center;overflow:hidden;
+  font-family:var(--mono);font-size:10.5px;color:var(--muted);
+}
+.status-left{
+  display:flex;align-items:center;gap:10px;padding:0 20px;
+  border-right:1px solid var(--line);height:100%;flex-shrink:0;
+  font-size:9px;letter-spacing:1.5px;
+}
+.status-dot{
+  width:6px;height:6px;border-radius:50%;background:var(--lime);
+  box-shadow:0 0 10px var(--lime);animation:blink 2s ease-in-out infinite;
+}
+@keyframes blink{0%,100%{opacity:1}50%{opacity:.4}}
+
+.integrity{
+  display:flex;align-items:center;gap:6px;padding:0 14px;
+  border-right:1px solid var(--line);height:100%;flex-shrink:0;
+  font-size:9px;letter-spacing:1.2px;color:var(--mint);
+}
+.integrity svg{width:11px;height:11px}
+
+.ticker-wrap{flex:1;overflow:hidden;height:100%;display:flex;align-items:center}
+.ticker{display:flex;white-space:nowrap;animation:ticker 90s linear infinite}
+.ticker span{
+  padding:0 24px;border-right:1px solid var(--line);
+  display:flex;align-items:center;gap:6px;
+}
+.ticker b{color:var(--lime);font-weight:600}
+@keyframes ticker{from{transform:translateX(0)}to{transform:translateX(-50%)}}
+
+/* ============================================================
+   COMMAND PALETTE
+   ============================================================ */
+.cmdk{
+  position:fixed;inset:0;z-index:100;
+  background:rgba(5,4,3,.7);backdrop-filter:blur(10px);
+  display:none;align-items:flex-start;justify-content:center;padding-top:16vh;
+}
+.cmdk.on{display:flex;animation:fadeIn .18s ease}
+@keyframes fadeIn{from{opacity:0}to{opacity:1}}
+.cmdk-box{
+  width:100%;max-width:560px;background:#12110e;
+  border:1px solid rgba(240,235,224,.14);border-radius:12px;
+  overflow:hidden;box-shadow:0 40px 100px -20px rgba(0,0,0,.9);
+  animation:popIn .25s cubic-bezier(.2,.8,.2,1);
+}
+@keyframes popIn{from{opacity:0;transform:scale(.96) translateY(-8px)}to{opacity:1;transform:none}}
+.cmdk-input{
+  width:100%;border:0;background:transparent;color:var(--text);
+  font:400 15px var(--sans);padding:16px 20px;outline:none;
+  border-bottom:1px solid var(--line);
+}
+.cmdk-input::placeholder{color:var(--dim)}
+.cmdk-list{max-height:340px;overflow-y:auto;padding:6px}
+.cmdk-item{
+  display:flex;align-items:center;gap:12px;padding:10px 12px;
+  border-radius:6px;cursor:pointer;transition:background .15s;
+}
+.cmdk-item:hover,.cmdk-item.sel{background:rgba(212,255,58,.08)}
+.cmdk-item .k{
+  font-family:var(--mono);font-size:9px;color:var(--dim);
+  letter-spacing:1px;width:48px;flex-shrink:0;
+}
+.cmdk-item .t{font-size:13px;color:var(--text);font-weight:500}
+.cmdk-item .d{font-size:11px;color:var(--muted);margin-left:auto;font-family:var(--mono)}
+
+/* ============================================================
+   TOAST
+   ============================================================ */
+.toast{
+  position:fixed;bottom:80px;left:50%;transform:translateX(-50%) translateY(20px);
+  background:var(--lime);color:#0b0a08;font:600 12px var(--sans);
+  padding:10px 18px;border-radius:8px;opacity:0;pointer-events:none;
+  transition:all .3s cubic-bezier(.2,.8,.2,1);z-index:90;
+  box-shadow:0 20px 40px -10px rgba(212,255,58,.4);
+}
+.toast.on{opacity:1;transform:translateX(-50%) translateY(0)}
+
+/* ============================================================
+   PRINT
+   ============================================================ */
+@media print{
+  body{background:#fff;color:#000;padding:0}
+  body::before,body::after{display:none}
+  .top,.spine,.statusbar,.cmdk,.toast,.type-switch,.filter-group,.tool-group{display:none!important}
+  .shell{grid-template-columns:1fr}
+  main{padding:0}
+  .view{display:block!important;break-inside:avoid;page-break-before:always}
+  .view:first-child{page-break-before:auto}
+  .card,.spec,.fact{background:#fff!important;border-color:#ddd!important}
+  .fact .num,.fact .lbl{color:#000!important}
+  .fact .desc{color:#444!important}
+  .tbl th,.tbl td{border-color:#ddd!important}
+  canvas{max-width:100%!important}
+}
+
+/* ============================================================
+   RESPONSIVE
+   ============================================================ */
+@media(max-width:1200px){
+  .hero{grid-template-columns:1fr;gap:36px}
+  .dial-wrap{max-width:340px}
+}
+@media(max-width:960px){
+  .shell{grid-template-columns:1fr}
+  .spine{
+    display:flex;position:sticky;top:64px;height:auto;padding:0;
+    overflow-x:auto;border-right:0;border-bottom:1px solid var(--line);
+    background:rgba(11,10,8,.94);backdrop-filter:blur(12px);z-index:40;
+    scrollbar-width:none;
+  }
+  .spine::-webkit-scrollbar{display:none}
+  .spine button{
+    flex-shrink:0;width:auto;border-left:0;
+    border-bottom:2px solid transparent;padding:12px 16px;
+  }
+  .spine button.on{
+    border-left:0;border-bottom-color:var(--lime);background:transparent;
+  }
+  .spine button .num{margin-bottom:3px}
+  .grid-2{grid-template-columns:1fr;gap:36px}
+  .grid-2::after{display:none}
+  .hero-title{font-size:32px}
+  .view-head h2{font-size:28px}
+  .kpi-strip{grid-template-columns:repeat(2,1fr)}
+  .kpi-strip > div:nth-child(2){border-right:0}
+  .gauge-row{grid-template-columns:1fr;gap:16px}
+}
+@media(max-width:640px){
+  main{padding:0 18px 40px}
+  .top{padding:0 14px;gap:12px}
+  .filter-group .filter-label{display:none}
+  .hero-title{font-size:26px}
+  .view-head h2{font-size:22px}
+  .spec-head{flex-direction:column;gap:12px}
+  .tool-btn kbd{display:none}
+  .facts{gap:24px}
+  .ledger-controls{gap:5px}
+  .ledger-cat-btn{font-size:9px;padding:4px 8px}
+}
+</style>
+</head>
+<body>
+
+<!-- ============ TOP BAR ============ -->
+<header class="top">
+  <div class="brand">
+    <span class="brand-mark">◐</span>
+    <span class="brand-name">LIFE<span class="slash">/</span>OS</span>
+    <span class="brand-ver">v3.1</span>
+  </div>
+  <div class="filters">
+    <div class="filter-group">
+      <span class="filter-label">POV</span>
+      <div class="seg" id="povSeg">
+        <button data-v="man" class="on">Man</button>
+        <button data-v="woman">Woman</button>
+      </div>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">Age</span>
+      <div class="seg" id="ageSeg">
+        <button data-v="18-24">18</button>
+        <button data-v="25-34" class="on">25</button>
+        <button data-v="35-49">35</button>
+        <button data-v="50+">50</button>
+      </div>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">Day</span>
+      <div class="seg" id="daySeg">
+        <button data-v="avg" class="on">Avg</button>
+        <button data-v="weekday">WD</button>
+        <button data-v="weekend">WE</button>
+      </div>
+    </div>
+    <div class="filter-group">
+      <span class="filter-label">Lens</span>
+      <div class="seg" id="lensSeg">
+        <button data-v="all" class="on">All</button>
+        <button data-v="work">Work</button>
+        <button data-v="life">Life</button>
+        <button data-v="growth">Growth</button>
+      </div>
+    </div>
+    <button class="tool-btn" id="cmpBtn" title="Compare POVs">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M4 2v12M12 2v12M2 8h12"/></svg>
+      Compare
+    </button>
+  </div>
+  <div class="tool-group">
+    <button class="tool-btn" id="exportBtn" title="Export data">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><path d="M8 2v8M4 6l4 4 4-4M2 12v1a1 1 0 001 1h10a1 1 0 001-1v-1"/></svg>
+      Export
+    </button>
+    <button class="tool-btn" id="shareBtn" title="Copy shareable link">
+      <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="1.5"><circle cx="12" cy="3.5" r="2"/><circle cx="4" cy="8" r="2"/><circle cx="12" cy="12.5" r="2"/><path d="M5.7 7l4.6-2.5M5.7 9l4.6 2.5"/></svg>
+      Share
+    </button>
+    <button class="tool-btn" id="cmdHint" title="Command palette (⌘K)">
+      <kbd>⌘</kbd><kbd>K</kbd>
+    </button>
+  </div>
+</header>
+
+<!-- ============ SHELL ============ -->
+<div class="shell">
+  <nav class="spine" id="spine">
+    <button data-view="overview" class="on"><span class="num">01</span><span class="lbl">Overview</span></button>
+    <button data-view="time"><span class="num">02</span><span class="lbl">Time</span></button>
+    <button data-view="money"><span class="num">03</span><span class="lbl">Money</span></button>
+    <button data-view="growth"><span class="num">04</span><span class="lbl">Growth</span></button>
+    <button data-view="wellbeing"><span class="num">05</span><span class="lbl">Wellbeing</span></button>
+    <button data-view="advanced"><span class="num">06</span><span class="lbl">Advanced</span></button>
+    <button data-view="ledger"><span class="num">07</span><span class="lbl">Ledger · 100</span></button>
+  </nav>
+
+  <main>
+
+    <!-- ==================== OVERVIEW ==================== -->
+    <section class="view on" data-view="overview">
+      <div class="hero">
+        <div class="hero-text">
+          <div class="eyebrow" id="heroMeta">↳ Man · 25–34 · Average day</div>
+          <h1 class="hero-title" id="heroTitle"></h1>
+          <p class="lede" id="heroLede"></p>
+          <div class="kpi-strip" id="heroKpis"></div>
+        </div>
+        <div class="dial-wrap"><div id="dial"></div></div>
+      </div>
+
+      <div class="grid-2">
+        <div class="spec">
+          <div class="spec-head">
+            <div><h3>Life scorecard</h3><p>Ten dimensions of a human life, scored 0–100.</p></div>
+            <div class="type-switch" data-switch="cScore"></div>
+          </div>
+          <div class="canvas-wrap tall" id="wrap-cScore"><canvas id="cScore"></canvas></div>
+        </div>
+        <div class="spec">
+          <div class="spec-head">
+            <div><h3>Seven-day rhythm</h3><p>Sleep against screen time, with productivity and mood indices.</p></div>
+            <div class="type-switch" data-switch="cTrend"></div>
+          </div>
+          <div class="canvas-wrap tall" id="wrap-cTrend"><canvas id="cTrend"></canvas></div>
+        </div>
+      </div>
+
+      <div class="spec">
+        <div class="spec-head">
+          <div><h3>What the numbers say</h3><p>Computed live from the current filter selection.</p></div>
+        </div>
+        <div class="facts" id="ovFacts"></div>
+      </div>
+    </section>
+
+    <!-- ==================== TIME ==================== -->
+    <section class="view" data-view="time">
+      <div class="view-head">
+        <div class="eyebrow">02 — Time allocation</div>
+        <h2>Where the 24 hours actually go.</h2>
+        <p class="sub">Every category of the day. The total is always exactly 24.0 hours. Hover the dial in Overview to isolate any category.</p>
+      </div>
+      <div class="grid-2">
+        <div class="spec">
+          <div class="spec-head">
+            <div><h3>24-hour breakdown</h3><p>Sleep, work, screen, family and all the rest.</p></div>
+            <div class="type-switch" data-switch="cDay"></div>
+          </div>
+          <div class="canvas-wrap tall" id="wrap-cDay"><canvas id="cDay"></canvas></div>
+        </div>
+        <div class="spec">
+          <div class="spec-head">
+            <div><h3>Who gets your time</h3><p>Waking hours split by the people you are with.</p></div>
+            <div class="type-switch" data-switch="cPeople"></div>
+          </div>
+          <div class="canvas-wrap tall" id="wrap-cPeople"><canvas id="cPeople"></canvas></div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="spec">
+          <div class="spec-head">
+            <div><h3>Learning vs leisure vs work</h3><p>Investment in the future versus consumption in the present.</p></div>
+            <div class="type-switch" data-switch="cLeisure"></div>
+          </div>
+          <div class="canvas-wrap" id="wrap-cLeisure"><canvas id="cLeisure"></canvas></div>
+        </div>
+        <div class="spec">
+          <div class="spec-head">
+            <div><h3>Time facts</h3><p>Computed from the current filters.</p></div>
+          </div>
+          <div class="facts small" id="tmFacts"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== MONEY ==================== -->
+    <section class="view" data-view="money">
+      <div class="view-head">
+        <div class="eyebrow">03 — Money</div>
+        <h2>Where every rupee of income goes.</h2>
+        <p class="sub">Monthly net income, fully allocated. The sum of spend + save + invest + debt always equals income.</p>
+      </div>
+      <div class="grid-2">
+        <div class="spec">
+          <div class="spec-head">
+            <div><h3>Monthly cash flow</h3><p>Income against spending, saving, investing, and debt repayment.</p></div>
+            <div class="type-switch" data-switch="cMoneyFlow"></div>
+          </div>
+          <div class="canvas-wrap tall" id="wrap-cMoneyFlow"><canvas id="cMoneyFlow"></canvas></div>
+        </div>
+        <div class="spec">
+          <div class="spec-head">
+            <div><h3>Spending split</h3><p>Category share of total expenditure.</p></div>
+            <div class="type-switch" data-switch="cSpend"></div>
+          </div>
+          <div class="canvas-wrap tall" id="wrap-cSpend"><canvas id="cSpend"></canvas></div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="spec">
+          <div class="spec-head">
+            <div><h3>Capital allocation</h3><p>Savings vs investments vs debt repayment vs free cash.</p></div>
+            <div class="type-switch" data-switch="cAlloc"></div>
+          </div>
+          <div class="canvas-wrap" id="wrap-cAlloc"><canvas id="cAlloc"></canvas></div>
+        </div>
+        <div class="spec">
+          <div class="spec-head">
+            <div><h3>Money facts</h3><p>Numbers that don't lie.</p></div>
+          </div>
+          <div class="facts small" id="mnFacts"></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== GROWTH ==================== -->
+    <section class="view" data-view="growth">
+      <div class="view-head">
+        <div class="eyebrow">04 — Growth</div>
+        <h2>What you built in the last twelve months.</h2>
+        <p class="sub">Skills, books, goals, experiences, creative output, problems solved, risks taken, opportunities created — the compound ledger of a year.</p>
+      </div>
+      <div class="grid-2">
+        <div class="spec">
+          <div class="spec-head">
+            <div><h3>Growth ledger</h3><p>Accumulated output over twelve months.</p></div>
+            <div class="type-switch" data-switch="cGrowth"></div>
+          </div>
+          <div class="canvas-wrap tall" id="wrap-cGrowth"><canvas id="cGrowth"></canvas></div>
+        </div>
+        <div class="spec">
+          <div class="spec-head">
+            <div><h3>Goals &amp; follow-through</h3><p>Set versus achieved, and the discipline behind it.</p></div>
+          </div>
+          <div class="bar-list" id="grBars"></div>
+        </div>
+      </div>
+      <div class="spec">
+        <div class="spec-head">
+          <div><h3>Growth facts</h3><p>Computed from the current filters.</p></div>
+        </div>
+        <div class="facts" id="grFacts"></div>
+      </div>
+    </section>
+
+    <!-- ==================== WELLBEING ==================== -->
+    <section class="view" data-view="wellbeing">
+      <div class="view-head">
+        <div class="eyebrow">05 — Wellbeing</div>
+        <h2>Ten dimensions of a human life.</h2>
+        <p class="sub">Each gauge is a live score out of 100. Click any card to change the chart type — the same data, five ways.</p>
+      </div>
+      <div class="gauge-row">
+        <div class="gauge">
+          <div class="spec-head" style="margin-bottom:6px">
+            <div><h3 style="font-size:15px">Mental health</h3></div>
+            <div class="type-switch" data-switch="cG1"></div>
+          </div>
+          <div class="canvas-wrap" id="wrap-cG1"><canvas id="cG1"></canvas></div>
+          <div class="gauge-label"><span>Stress · anxiety · mental peace</span></div>
+        </div>
+        <div class="gauge">
+          <div class="spec-head" style="margin-bottom:6px">
+            <div><h3 style="font-size:15px">Physical health</h3></div>
+            <div class="type-switch" data-switch="cG2"></div>
+          </div>
+          <div class="canvas-wrap" id="wrap-cG2"><canvas id="cG2"></canvas></div>
+          <div class="gauge-label"><span>Fitness · illness · recovery</span></div>
+        </div>
+        <div class="gauge">
+          <div class="spec-head" style="margin-bottom:6px">
+            <div><h3 style="font-size:15px">Emotional energy</h3></div>
+            <div class="type-switch" data-switch="cG3"></div>
+          </div>
+          <div class="canvas-wrap" id="wrap-cG3"><canvas id="cG3"></canvas></div>
+          <div class="gauge-label"><span>Happiness · sadness · frustration</span></div>
+        </div>
+      </div>
+      <div class="grid-2">
+        <div class="spec">
+          <div class="spec-head">
+            <div><h3>Wellbeing radar</h3><p>The full ten-dimension profile.</p></div>
+            <div class="type-switch" data-switch="cWellRadar"></div>
+          </div>
+          <div class="canvas-wrap tall" id="wrap-cWellRadar"><canvas id="cWellRadar"></canvas></div>
+        </div>
+        <div class="spec">
+          <div class="spec-head">
+            <div><h3>Category audit</h3><p>What each dimension measures and how it scores.</p></div>
+          </div>
+          <div class="table-wrap"><table class="tbl" id="wellTable"></table></div>
+        </div>
+      </div>
+    </section>
+
+    <!-- ==================== ADVANCED ==================== -->
+    <section class="view" data-view="advanced">
+      <div class="view-head">
+        <div class="eyebrow">06 — Advanced</div>
+        <h2>Things people rarely measure.</h2>
+        <p class="sub">Fifteen metrics that reveal how someone actually lives, not what they report.</p>
+      </div>
+      <div class="grid-2">
+        <div class="spec">
+          <div class="spec-head">
+            <div><h3>Hidden load</h3><p>Attention, bandwidth, emotional investment, opportunity cost, freedom, dependency, obligations, regret, balance.</p></div>
+            <div class="type-switch" data-switch="cAdv"></div>
+          </div>
+          <div class="canvas-wrap tall" id="wrap-cAdv"><canvas id="cAdv"></canvas></div>
+        </div>
+        <div class="spec">
+          <div class="spec-head">
+            <div><h3>Life balance shape</h3><p>A radar of the hidden load you carry.</p></div>
+            <div class="type-switch" data-switch="cAdvRadar"></div>
+          </div>
+          <div class="canvas-wrap tall" id="wrap-cAdvRadar"><canvas id="cAdvRadar"></canvas></div>
+        </div>
+      </div>
+      <div class="spec">
+        <div class="spec-head">
+          <div><h3>Interpretation</h3><p>Reading the advanced layer.</p></div>
+        </div>
+        <div class="facts" id="advFacts"></div>
+      </div>
+    </section>
+
+    <!-- ==================== LEDGER ==================== -->
+    <section class="view" data-view="ledger">
+      <div class="view-head">
+        <div class="eyebrow">07 — Complete ledger</div>
+        <h2>All one hundred metrics, one table.</h2>
+        <p class="sub">The full taxonomy from the original spec — every category, every metric, every value computed live from your filters. Filter by category to focus.</p>
+      </div>
+      <div class="spec">
+        <div class="spec-head" style="margin-bottom:14px">
+          <div><h3>Metrics · 100</h3><p id="ledgerCount">Showing all categories</p></div>
+          <div class="type-switch" data-switch="cLedger"></div>
+        </div>
+        <div class="ledger-controls" id="ledgerCats"></div>
+        <div class="table-wrap">
+          <table class="tbl ledger-tbl" id="ledgerTable">
+            <thead>
+              <tr><th style="width:50px">#</th><th>Metric</th><th>Value</th><th style="width:130px">Bar</th></tr>
+            </thead>
+            <tbody id="ledgerBody"></tbody>
+          </table>
+        </div>
+        <div class="canvas-wrap tall" id="wrap-cLedger" style="display:none;margin-top:20px"><canvas id="cLedger"></canvas></div>
+      </div>
+    </section>
+
+  </main>
+</div>
+
+<!-- ============ STATUS BAR ============ -->
+<footer class="statusbar">
+  <div class="status-left"><span class="status-dot"></span>LIVE</div>
+  <div class="integrity" id="integrity" title="Data integrity check">
+    <svg viewBox="0 0 16 16" fill="none" stroke="currentColor" stroke-width="2"><path d="M3 8l3.5 3.5L13 5"/></svg>
+    <span>24.0h · ₹ balanced</span>
+  </div>
+  <div class="ticker-wrap"><div class="ticker" id="ticker"></div></div>
+</footer>
+
+<!-- ============ COMMAND PALETTE ============ -->
+<div class="cmdk" id="cmdk">
+  <div class="cmdk-box">
+    <input class="cmdk-input" id="cmdkInput" placeholder="Jump to a view, toggle a filter, change a chart…" autocomplete="off">
+    <div class="cmdk-list" id="cmdkList"></div>
+  </div>
+</div>
+
+<!-- ============ TOAST ============ -->
+<div class="toast" id="toast"></div>
+
+<script>
+/* ============================================================
+   LIFE/OS — Runtime v3.1
+   ============================================================ */
+
+/* ---------- helpers ---------- */
+const $  = s => document.querySelector(s);
+const $$ = s => [...document.querySelectorAll(s)];
+const clamp = (v,a=0,b=100)=>Math.max(a,Math.min(b,v));
+const h1 = n => n.toFixed(1);
+const inr = n => '₹' + Math.round(n).toLocaleString('en-IN');
+const inrShort = n => n>=100000 ? '₹'+(n/100000).toFixed(1)+'L'
+                 : n>=1000 ? '₹'+(n/1000).toFixed(0)+'k'
+                 : '₹'+Math.round(n);
+
+const hexA = (hex,a)=>{
+  const c = hex.replace('#','');
+  return `rgba(${parseInt(c.slice(0,2),16)},${parseInt(c.slice(2,4),16)},${parseInt(c.slice(4,6),16)},${a})`;
+};
+
+function animateValue(el, to, {decimals=1, suffix='', money=false, dur=850}={}){
+  if(!el) return;
+  const from = parseFloat(el.dataset.v ?? 0);
+  el.dataset.v = to;
+  const t0 = performance.now();
+  function frame(t){
+    const k = Math.min(1,(t-t0)/dur);
+    const e = 1 - Math.pow(1-k,3);
+    const v = from + (to-from)*e;
+    el.textContent = money ? inr(v) : v.toFixed(decimals) + suffix;
+    if(k<1) requestAnimationFrame(frame);
+  }
+  requestAnimationFrame(frame);
+}
+
+function toast(msg){
+  const t = $('#toast');
+  t.textContent = msg;
+  t.classList.add('on');
+  clearTimeout(t._t);
+  t._t = setTimeout(()=>t.classList.remove('on'), 2200);
+}
+
+/* ============================================================
+   DATA MODEL
+   ============================================================ */
+const BASE = {
+  man: {
+    time:{ sleep:6.6, work:8.0, travel:1.0, learning:0.6, entertainment:1.4,
+           social:1.6, hobbies:0.5, exercise:0.4, household:0.9, waiting:0.5,
+           personalDev:0.4, spiritual:0.2, selfcare:1.9 },
+    people:{ alone:38, family:17, friends:7, colleagues:26, partner:9, others:3 },
+    money:{ income:85000, essential:26000, luxury:8000, family:7000, friends:3000,
+            growth:2000, health:2000, donations:1000, savings:16000, investments:12000, debt:8000 },
+    scores:{ mental:66, physical:72, emotional:64, relationships:70, career:74,
+             contribution:58, freedom:55, digital:48, productivity:71, satisfaction:67 },
+    growth:{ skills:6, books:9, goalsAchieved:7, goalsDelayed:4, experiences:14,
+             creative:22, problems:96, risks:9, opportunities:5, discipline:68,
+             newPlaces:3, newPeople:42, decisions:340, failures:7, successes:11 },
+    advanced:{ attention:61, bandwidth:72, emotional:58, opportunityCost:64, freedom:55,
+               dependency:38, socialObligations:47, decisionFatigue:63, regret:41,
+               balance:52, selfRespect:66, boundaries:58, riskExposure:45,
+               futureInvestment:62, presentEnjoyment:54 },
+    trend:{ sleep:[6.4,6.8,6.5,7.0,6.2,7.4,7.6],
+            screen:[7.2,6.8,7.5,7.1,6.9,8.4,8.9],
+            productivity:[68,74,71,76,64,42,38],
+            mood:[62,68,65,71,58,74,78] }
+  },
+  woman: {
+    time:{ sleep:6.9, work:7.2, travel:1.0, learning:0.7, entertainment:0.9,
+           social:1.7, hobbies:0.6, exercise:0.5, household:1.5, waiting:0.5,
+           personalDev:0.5, spiritual:0.3, selfcare:1.7 },
+    people:{ alone:30, family:22, friends:9, colleagues:23, partner:12, others:4 },
+    money:{ income:72000, essential:24000, luxury:7500, family:9000, friends:3500,
+            growth:3000, health:2500, donations:1500, savings:11000, investments:7000, debt:3000 },
+    scores:{ mental:62, physical:69, emotional:66, relationships:76, career:66,
+             contribution:68, freedom:48, digital:52, productivity:64, satisfaction:64 },
+    growth:{ skills:8, books:12, goalsAchieved:8, goalsDelayed:3, experiences:16,
+             creative:31, problems:112, risks:7, opportunities:6, discipline:74,
+             newPlaces:4, newPeople:56, decisions:410, failures:5, successes:14 },
+    advanced:{ attention:58, bandwidth:76, emotional:71, opportunityCost:69, freedom:48,
+               dependency:44, socialObligations:61, decisionFatigue:71, regret:47,
+               balance:49, selfRespect:61, boundaries:52, riskExposure:38,
+               futureInvestment:58, presentEnjoyment:61 },
+    trend:{ sleep:[6.7,7.0,6.8,7.2,6.5,7.6,7.8],
+            screen:[7.6,7.1,7.9,7.4,7.2,8.8,9.2],
+            productivity:[64,70,66,72,60,44,40],
+            mood:[66,71,68,74,61,77,80] }
+  }
+};
+
+const AGE_MOD = {
+  '18-24':{
+    income:0.42,
+    time:{ sleep:1.05, work:0.72, social:1.35, learning:1.50, exercise:1.15,
+           entertainment:1.30, household:0.80, spiritual:0.80, travel:1.10 },
+    scores:{ career:-14, freedom:8, satisfaction:2, contribution:-6, productivity:-10, relationships:4 },
+    adv:{ futureInvestment:6, socialObligations:-8 }
+  },
+  '25-34':{ income:1.00, time:{}, scores:{}, adv:{} },
+  '35-49':{
+    income:1.55,
+    time:{ sleep:0.93, work:1.12, social:0.82, household:1.30, exercise:0.85,
+           learning:0.85, entertainment:0.85, selfcare:0.95, travel:1.05 },
+    scores:{ career:6, freedom:-8, relationships:-4, mental:-5, productivity:5, contribution:4 },
+    adv:{ socialObligations:10, decisionFatigue:8, freedom:-8, dependency:6 }
+  },
+  '50+':{
+    income:1.35,
+    time:{ sleep:1.02, work:0.62, social:0.70, exercise:1.25, household:1.10,
+           learning:0.90, entertainment:1.10, spiritual:1.50, selfcare:1.15 },
+    scores:{ career:-8, freedom:10, satisfaction:4, mental:5, contribution:6, physical:-6 },
+    adv:{ presentEnjoyment:8, regret:6, bandwidth:-6 }
+  }
+};
+
+const DAY_MOD = {
+  avg:{},
+  weekday:{ sleep:0.95, work:1.15, travel:1.12, learning:0.90, entertainment:0.72,
+            social:0.85, hobbies:0.60, exercise:0.80, household:0.95, waiting:1.15,
+            personalDev:0.90, spiritual:0.80, selfcare:0.95 },
+  weekend:{ sleep:1.10, work:0.22, travel:0.60, learning:0.70, entertainment:1.70,
+            social:1.55, hobbies:2.20, exercise:1.35, household:1.45, waiting:0.85,
+            personalDev:1.20, spiritual:1.25, selfcare:1.15 }
+};
+
+const DAY_SCORE_MOD = {
+  avg:{}, weekday:{ productivity:6, freedom:-6, satisfaction:-3 },
+  weekend:{ productivity:-14, freedom:12, satisfaction:6, mental:4, emotional:5 }
+};
+
+const TIME_LABELS = {
+  sleep:'Sleep', work:'Work', travel:'Travel', learning:'Learning & studying',
+  entertainment:'Entertainment & gaming', social:'Social media & scrolling',
+  hobbies:'Personal hobbies', exercise:'Exercise & fitness',
+  household:'Household responsibilities', waiting:'Waiting / unproductive',
+  personalDev:'Personal development', spiritual:'Spirituality & meditation',
+  selfcare:'Eating & self-care'
+};
+
+const PEOPLE_LABELS = {
+  alone:'Time alone', family:'Family', friends:'Friends',
+  colleagues:'Colleagues', partner:'Partner', others:'Other people'
+};
+
+const MONEY_SPEND_LABELS = {
+  essential:'Essential expenses', luxury:'Luxury / unnecessary', family:'Family',
+  friends:'Friends & social', growth:'Personal growth', health:'Health & fitness',
+  donations:'Donations & charity'
+};
+
+const CAT_COLORS = {
+  sleep:'#6b7280', work:'#d4ff3a', travel:'#ff5c35', learning:'#67e8f9',
+  entertainment:'#a78bfa', social:'#f472b6', hobbies:'#fbbf24', exercise:'#34d399',
+  household:'#94a3b8', waiting:'#52525b', personalDev:'#818cf8',
+  spiritual:'#e879f9', selfcare:'#fda4af'
+};
+
+const LENS_KEYS = {
+  all: null,
+  work: ['work','travel','learning'],
+  life: ['sleep','selfcare','exercise','social','entertainment','hobbies','household'],
+  growth: ['learning','personalDev','spiritual','hobbies']
+};
+
+/* ============================================================
+   STATE (with URL persistence)
+   ============================================================ */
+const urlState = (()=>{
+  try{
+    const h = location.hash.slice(1);
+    if(!h) return {};
+    return JSON.parse(decodeURIComponent(h));
+  }catch{ return {}; }
+})();
+
+const state = {
+  pov: urlState.pov || 'man',
+  age: urlState.age || '25-34',
+  day: urlState.day || 'avg',
+  lens: urlState.lens || 'all',
+  compare: urlState.compare || false,
+  view: urlState.view || 'overview'
+};
+
+function persistState(){
+  const s = {
+    pov:state.pov, age:state.age, day:state.day,
+    lens:state.lens, compare:state.compare, view:state.view
+  };
+  history.replaceState(null, '', '#' + encodeURIComponent(JSON.stringify(s)));
+}
+
+/* ============================================================
+   COMPUTE
+   ============================================================ */
+function computeProfile(pov, ageKey, dayKey){
+  const base = BASE[pov];
+  const am = AGE_MOD[ageKey], dm = DAY_MOD[dayKey], dsm = DAY_SCORE_MOD[dayKey];
+
+  const raw = {}; let sum = 0;
+  for(const k in base.time){
+    const v = base.time[k] * (am.time[k] ?? 1) * (dm[k] ?? 1);
+    raw[k] = v; sum += v;
+  }
+  const time = {};
+  for(const k in raw) time[k] = raw[k] * 24 / sum;
+  const waking = 24 - time.sleep;
+
+  const people = {};
+  for(const k in base.people) people[k] = base.people[k] / 100 * waking;
+
+  const money = {};
+  for(const k in base.money) money[k] = base.money[k] * am.income;
+
+  const scores = {};
+  for(const k in base.scores) scores[k] = clamp(base.scores[k] + (am.scores[k]||0) + (dsm[k]||0));
+
+  const growth = { ...base.growth };
+  const advanced = {};
+  for(const k in base.advanced) advanced[k] = clamp(base.advanced[k] + (am.adv[k]||0));
+
+  const spend = money.essential + money.luxury + money.family + money.friends
+              + money.growth + money.health + money.donations;
+  const savingsRate = (money.savings + money.investments) / money.income * 100;
+  const screen = time.social + time.entertainment;
+  const focused = time.work * 0.42;
+
+  return { time, people, money, scores, growth, advanced,
+           trend: base.trend, waking, spend, savingsRate, screen, focused,
+           pov, ageKey, dayKey };
+}
+
+/* ============================================================
+   INTEGRITY CHECK
+   ============================================================ */
+function verifyIntegrity(p){
+  const timeSum = Object.values(p.time).reduce((a,b)=>a+b,0);
+  const moneyOut = p.spend + p.money.savings + p.money.investments + p.money.debt;
+  const moneyOk = Math.abs(moneyOut - p.money.income) < 1;
+  const timeOk = Math.abs(timeSum - 24) < 0.01;
+  const el = $('#integrity span');
+  if(timeOk && moneyOk){
+    el.textContent = '24.0h · ₹ balanced';
+    el.style.color = 'var(--mint)';
+    $('#integrity').style.color = 'var(--mint)';
+  } else {
+    el.textContent = (timeOk?'24.0h':'⚠ time') + ' · ' + (moneyOk?'₹ balanced':'⚠ money');
+    $('#integrity').style.color = 'var(--coral)';
+  }
+}
+
+/* ============================================================
+   CHART REGISTRY
+   ============================================================ */
+const CHART_REGISTRY = {};
+const charts = {};
+const savedTypes = JSON.parse(localStorage.getItem('lifeos.types.v3') || '{}');
+
+const TYPE_NAMES = {
+  bar:'Bar', hbar:'Horizontal bar', line:'Line', area:'Area',
+  radar:'Radar', doughnut:'Doughnut', polarArea:'Polar area', pie:'Pie',
+  gauge:'Gauge'
+};
+
+const TYPE_ICONS = {
+  bar:'<svg viewBox="0 0 16 16"><rect x="2" y="8" width="3" height="6"/><rect x="6.5" y="4" width="3" height="10"/><rect x="11" y="6" width="3" height="8"/></svg>',
+  hbar:'<svg viewBox="0 0 16 16"><rect x="2" y="2" width="12" height="3"/><rect x="2" y="6.5" width="8" height="3"/><rect x="2" y="11" width="10" height="3"/></svg>',
+  line:'<svg viewBox="0 0 16 16"><polyline points="2,12 6,8 9,10 14,4" fill="none" stroke="currentColor" stroke-width="1.8" stroke-linejoin="round"/></svg>',
+  area:'<svg viewBox="0 0 16 16"><path d="M2,12 L6,8 L9,10 L14,4 L14,14 L2,14 Z" fill="currentColor" opacity=".75"/></svg>',
+  radar:'<svg viewBox="0 0 16 16"><polygon points="8,2 14,6 12,13 4,13 2,6" fill="none" stroke="currentColor" stroke-width="1.5"/></svg>',
+  doughnut:'<svg viewBox="0 0 16 16"><circle cx="8" cy="8" r="5.5" fill="none" stroke="currentColor" stroke-width="3"/></svg>',
+  polarArea:'<svg viewBox="0 0 16 16"><path d="M8,8 L8,2 A6,6 0 0,1 14,8 Z" fill="currentColor"/><path d="M8,8 L14,8 A6,6 0 0,1 8,14 Z" fill="currentColor" opacity=".65"/></svg>',
+  pie:'<svg viewBox="0 0 16 16"><path d="M8,8 L8,2 A6,6 0 0,1 14,8 Z" fill="currentColor"/><path d="M8,8 L14,8 A6,6 0 0,1 8,14 Z" fill="currentColor" opacity=".65"/><path d="M8,8 L8,14 A6,6 0 0,1 2,8 Z" fill="currentColor" opacity=".4"/></svg>',
+  gauge:'<svg viewBox="0 0 16 16"><path d="M2,13 A6,6 0 0,1 14,13" fill="none" stroke="currentColor" stroke-width="2"/><line x1="8" y1="13" x2="11" y2="7" stroke="currentColor" stroke-width="1.8"/></svg>'
+};
+
+function registerChart(spec){
+  spec.currentType = savedTypes[spec.id] || spec.currentType || spec.types[0];
+  CHART_REGISTRY[spec.id] = spec;
+
+  const sw = document.querySelector(`[data-switch="${spec.id}"]`);
+  if(sw){
+    sw.innerHTML = spec.types.map(t =>
+      `<button data-type="${t}" class="${t===spec.currentType?'on':''}" title="${TYPE_NAMES[t]}">${TYPE_ICONS[t]}</button>`
+    ).join('');
+    sw.querySelectorAll('button').forEach(btn=>{
+      btn.addEventListener('click', ()=>{
+        spec.currentType = btn.dataset.type;
+        savedTypes[spec.id] = spec.currentType;
+        localStorage.setItem('lifeos.types.v3', JSON.stringify(savedTypes));
+        sw.querySelectorAll('button').forEach(b=>b.classList.toggle('on', b.dataset.type === spec.currentType));
+        renderChart(spec);
+      });
+    });
+  }
+  renderChart(spec);
+}
+
+function renderChart(spec){
+  const canvas = document.getElementById(spec.id);
+  if(!canvas) return;
+  const wrap = document.getElementById('wrap-' + spec.id);
+  if(wrap) wrap.classList.add('loading');
+  if(charts[spec.id]) charts[spec.id].destroy();
+  const t = spec.currentType;
+  let chartType = t;
+  if(t==='hbar') chartType = 'bar';
+  if(t==='area') chartType = 'line';
+
+  setTimeout(()=>{
+    if(wrap) wrap.classList.remove('loading');
+    charts[spec.id] = new Chart(canvas, {
+      type: chartType,
+      data: spec.buildData(t),
+      options: { ...spec.buildOptions(t), responsive:true, maintainAspectRatio:false }
+    });
+  }, 30);
+}
+
+/* ============================================================
+   CHART THEME
+   ============================================================ */
+Chart.defaults.color = '#8a8275';
+Chart.defaults.font.family = "'JetBrains Mono', monospace";
+Chart.defaults.font.size = 10;
+Chart.defaults.borderColor = 'rgba(240,235,224,.06)';
+Chart.defaults.plugins.legend.labels.usePointStyle = true;
+Chart.defaults.plugins.legend.labels.boxWidth = 7;
+Chart.defaults.plugins.legend.labels.padding = 14;
+Chart.defaults.plugins.legend.labels.font = { family:"'Inter', sans-serif", size:11, weight:'500' };
+Chart.defaults.plugins.tooltip.backgroundColor = '#12110e';
+Chart.defaults.plugins.tooltip.borderColor = 'rgba(240,235,224,.16)';
+Chart.defaults.plugins.tooltip.borderWidth = 1;
+Chart.defaults.plugins.tooltip.padding = 11;
+Chart.defaults.plugins.tooltip.cornerRadius = 6;
+Chart.defaults.plugins.tooltip.titleFont = { family:"'Inter', sans-serif", weight:'700', size:12 };
+Chart.defaults.plugins.tooltip.bodyFont = { family:"'JetBrains Mono', monospace", size:11 };
+Chart.defaults.plugins.tooltip.titleColor = '#f0ebe0';
+Chart.defaults.plugins.tooltip.bodyColor = '#d4ff3a';
+
+const centerTextPlugin = {
+  id:'centerText',
+  afterDraw(chart){
+    const o = chart.options.plugins?.centerText;
+    if(!o || !o.text) return;
+    const {ctx, chartArea} = chart;
+    if(!chartArea) return;
+    const x = (chartArea.left + chartArea.right) / 2;
+    const y = (chartArea.top + chartArea.bottom) / 2;
+    ctx.save();
+    ctx.textAlign = 'center';
+    ctx.textBaseline = 'middle';
+    ctx.fillStyle = o.color || '#f0ebe0';
+    ctx.font = `600 ${o.size||28}px 'JetBrains Mono', monospace`;
+    ctx.fillText(o.text, x, y - 4);
+    if(o.sub){
+      ctx.fillStyle = '#8a8275';
+      ctx.font = "500 9px 'JetBrains Mono', monospace";
+      ctx.fillText(o.sub, x, y + 18);
+    }
+    ctx.restore();
+  }
+};
+Chart.register(centerTextPlugin);
+
+const RADAR_KEYS   = ['mental','physical','emotional','relationships','career','contribution','freedom','digital','productivity','satisfaction'];
+const RADAR_LABELS = ['Mental','Physical','Emotional','Relationships','Career','Contribution','Freedom','Digital','Productivity','Satisfaction'];
+
+/* ============================================================
+   LIFE DIAL
+   ============================================================ */
+function polar(cx, cy, r, deg){
+  const a = (deg - 90) * Math.PI / 180;
+  return { x: cx + r * Math.cos(a), y: cy + r * Math.sin(a) };
+}
+
+function donutSegment(cx, cy, rOut, rIn, a1, a2){
+  const p1 = polar(cx, cy, rOut, a1);
+  const p2 = polar(cx, cy, rOut, a2);
+  const p3 = polar(cx, cy, rIn, a2);
+  const p4 = polar(cx, cy, rIn, a1);
+  const large = (a2 - a1) > 180 ? 1 : 0;
+  return `M ${p1.x} ${p1.y} A ${rOut} ${rOut} 0 ${large} 1 ${p2.x} ${p2.y} L ${p3.x} ${p3.y} A ${rIn} ${rIn} 0 ${large} 0 ${p4.x} ${p4.y} Z`;
+}
+
+function renderDial(p){
+  const wrap = document.getElementById('dial');
+  if(!wrap) return;
+  const S = 400, cx = S/2, cy = S/2;
+  const rOut = 156, rIn = 104;
+
+  const cats = Object.entries(p.time).map(([k,v])=>({
+    key:k, label:TIME_LABELS[k], hours:v, color:CAT_COLORS[k]
+  })).sort((a,b)=>b.hours-a.hours);
+
+  const lensKeys = LENS_KEYS[state.lens];
+  const gap = 1.4;
+
+  let ticks = '';
+  for(let i=0;i<24;i++){
+    const ang = i*15;
+    const major = i%6===0;
+    const p1 = polar(cx, cy, rOut+6, ang);
+    const p2 = polar(cx, cy, rOut+(major?16:11), ang);
+    ticks += `<line x1="${p1.x}" y1="${p1.y}" x2="${p2.x}" y2="${p2.y}" stroke="${major?'#f0ebe0':'#3a352d'}" stroke-width="${major?1.4:1}" opacity="${major?0.85:0.7}"/>`;
+    if(major){
+      const pl = polar(cx, cy, rOut+28, ang);
+      const lbl = i===0?'0':i===6?'6':i===12?'12':'18';
+      ticks += `<text x="${pl.x}" y="${pl.y}" text-anchor="middle" dominant-baseline="middle" fill="#8a8275" font-family="'JetBrains Mono', monospace" font-size="9" letter-spacing="1">${lbl}</text>`;
+    }
+  }
+
+  let segs = '';
+  let angle = 0;
+  cats.forEach(cat=>{
+    const sweep = (cat.hours / 24) * 360;
+    const a1 = angle + gap/2;
+    const a2 = angle + sweep - gap/2;
+    if(a2 > a1){
+      const dimmed = lensKeys && !lensKeys.includes(cat.key);
+      segs += `<path d="${donutSegment(cx,cy,rOut,rIn,a1,a2)}"
+        fill="${cat.color}" opacity="${dimmed ? 0.18 : 0.88}"
+        data-key="${cat.key}" class="dial-seg"/>`;
+    }
+    angle += sweep;
+  });
+
+  wrap.innerHTML = `
+    <svg viewBox="0 0 ${S} ${S}" role="img" aria-label="24-hour life dial">
+      <defs><filter id="glow"><feGaussianBlur stdDeviation="3" result="b"/><feMerge><feMergeNode in="b"/><feMergeNode in="SourceGraphic"/></feMerge></filter></defs>
+      <g>${ticks}</g>
+      <g>${segs}</g>
+      <g id="dialCenter">
+        <text x="${cx}" y="${cy-6}" text-anchor="middle" fill="#f0ebe0"
+              font-family="'Fraunces', Georgia, serif" font-size="46" font-weight="300"
+              id="dialNum">${h1(p.waking)}</text>
+        <text x="${cx}" y="${cy+22}" text-anchor="middle" fill="#8a8275"
+              font-family="'JetBrains Mono', monospace" font-size="9"
+              letter-spacing="2.5" id="dialLbl">AWAKE HOURS</text>
+        <line x1="${cx-20}" y1="${cy+38}" x2="${cx+20}" y2="${cy+38}"
+              stroke="#3a352d" stroke-width="1"/>
+        <text x="${cx}" y="${cy+56}" text-anchor="middle" fill="#d4ff3a"
+              font-family="'JetBrains Mono', monospace" font-size="9"
+              letter-spacing="1.5" id="dialSub">24H CYCLE</text>
+      </g>
+    </svg>`;
+
+  const num = wrap.querySelector('#dialNum');
+  const lbl = wrap.querySelector('#dialLbl');
+  const sub = wrap.querySelector('#dialSub');
+
+  wrap.querySelectorAll('.dial-seg').forEach(seg=>{
+    seg.addEventListener('mouseenter', ()=>{
+      const cat = cats.find(c=>c.key===seg.dataset.key);
+      num.textContent = h1(cat.hours);
+      lbl.textContent = cat.label.toUpperCase().slice(0,18);
+      sub.textContent = ((cat.hours/24)*100).toFixed(0) + '% OF DAY';
+      wrap.querySelectorAll('.dial-seg').forEach(s=>{
+        s.style.opacity = s === seg ? '1' : '0.22';
+      });
+    });
+    seg.addEventListener('mouseleave', ()=>{
+      num.textContent = h1(p.waking);
+      lbl.textContent = 'AWAKE HOURS';
+      sub.textContent = '24H CYCLE';
+      wrap.querySelectorAll('.dial-seg').forEach(s=>{
+        const dimmed = lensKeys && !lensKeys.includes(s.dataset.key);
+        s.style.opacity = dimmed ? '0.18' : '0.88';
+      });
+    });
+  });
+}
+
+/* ============================================================
+   HERO
+   ============================================================ */
+function renderHero(p){
+  const povLabel = state.pov === 'man' ? 'Man' : 'Woman';
+  const ageLabel = state.age.replace('-', '–');
+  const dayLabel = {avg:'Average day', weekday:'Weekday', weekend:'Weekend'}[state.day];
+  $('#heroMeta').textContent = `↳ ${povLabel} · ${ageLabel} · ${dayLabel}`;
+
+  const alonePct = Math.round(p.people.alone / p.waking * 100);
+  const workPct  = Math.round(p.time.work / 24 * 100);
+
+  $('#heroTitle').innerHTML = `You are awake <em>${h1(p.waking)} hours</em>. You give <em>${alonePct}%</em> to yourself and <em>${workPct}%</em> to work.`;
+
+  $('#heroLede').innerHTML = `The day breaks down into <b>${h1(p.time.sleep)} h</b> of sleep, <b>${h1(p.time.work)} h</b> of work, <b>${h1(p.screen)} h</b> of screen time, and <b>${h1(p.people.family)} h</b> with family. <b>${h1(p.time.learning + p.time.personalDev)} h</b> go to learning and <b>${h1(p.time.exercise)} h</b> to the body.`;
+
+  $('#heroKpis').innerHTML = `
+    <div><div class="v">${h1(p.time.sleep)}<small>h</small></div><div class="l">Sleep</div></div>
+    <div><div class="v">${h1(p.time.work)}<small>h</small></div><div class="l">Work</div></div>
+    <div><div class="v">${h1(p.screen)}<small>h</small></div><div class="l">Screen</div></div>
+    <div><div class="v">${Math.round(p.savingsRate)}<small>%</small></div><div class="l">Savings rate</div></div>`;
+}
+
+/* ============================================================
+   CHART BUILDERS
+   ============================================================ */
+function buildScoreChart(p){
+  const primaryColor = state.pov === 'man' ? '#d4ff3a' : '#f472b6';
+  return {
+    types:['radar','bar','hbar','polarArea'],
+    currentType:'radar',
+    buildData(type){
+      const sets = [{
+        label: state.pov === 'man' ? 'Man' : 'Woman',
+        data: RADAR_KEYS.map(k=>Math.round(p.scores[k])),
+        borderColor: primaryColor,
+        backgroundColor: type==='radar' ? hexA(primaryColor,.16) : hexA(primaryColor,.8),
+        pointBackgroundColor: primaryColor,
+        pointBorderColor: '#0b0a08',
+        pointRadius: type==='radar' ? 4 : 0,
+        borderWidth: 2,
+        fill: type==='radar',
+        borderRadius: 4,
+        borderSkipped: false
+      }];
+      if(state.compare){
+        const other = computeProfile(state.pov==='man'?'woman':'man', state.age, state.day);
+        const oc = state.pov === 'man' ? '#f472b6' : '#d4ff3a';
+        sets.push({
+          label: state.pov === 'man' ? 'Woman' : 'Man',
+          data: RADAR_KEYS.map(k=>Math.round(other.scores[k])),
+          borderColor: oc,
+          backgroundColor: type==='radar' ? hexA(oc,.08) : hexA(oc,.55),
+          borderDash: type==='radar' ? [5,4] : [],
+          pointRadius: type==='radar' ? 3 : 0,
+          borderWidth: 2,
+          fill: type==='radar',
+          borderRadius: 4,
+          borderSkipped: false
+        });
+      }
+      return { labels: RADAR_LABELS, datasets: sets };
+    },
+    buildOptions(type){
+      const isPolar = type==='polarArea';
+      const isBar = type==='bar' || type==='hbar';
+      const opts = {
+        animation:{ duration:850, easing:'easeOutQuart' },
+        plugins:{ legend:{ position:'bottom', display: state.compare || type==='radar' } },
+        scales:{}
+      };
+      if(type==='radar'){
+        opts.scales.r = {
+          min:0, max:100,
+          angleLines:{ color:'rgba(240,235,224,.06)' },
+          grid:{ color:'rgba(240,235,224,.06)' },
+          pointLabels:{ color:'#b8b0a0', font:{ size:10, weight:'600' } },
+          ticks:{ display:false, stepSize:25 }
+        };
+      } else if(isBar){
+        opts.scales = {
+          x:{ grid:{ display:false }, ticks:{ color:'#b8b0a0' } },
+          y:{ beginAtZero:true, max:100, grid:{ color:'rgba(240,235,224,.05)' } }
+        };
+        if(type==='hbar') opts.indexAxis = 'y';
+      } else if(isPolar){
+        opts.scales.r = {
+          min:0, max:100,
+          grid:{ color:'rgba(240,235,224,.06)' },
+          angleLines:{ color:'rgba(240,235,224,.06)' },
+          ticks:{ display:false, stepSize:25 }
+        };
+      }
+      return opts;
+    }
+  };
+}
+
+function buildTrendChart(p){
+  return {
+    types:['line','area','bar'],
+    currentType:'line',
+    buildData(type){
+      const area = type==='area';
+      const bar = type==='bar';
+      return {
+        labels:['Mon','Tue','Wed','Thu','Fri','Sat','Sun'],
+        datasets:[
+          { label:'Sleep (h)', data:p.trend.sleep, borderColor:'#a78bfa',
+            backgroundColor: hexA('#a78bfa', bar?.85:area?.25:.10), tension:.4,
+            fill: area, borderWidth: bar?0:2.5, pointRadius: bar?0:3, pointHoverRadius:6,
+            yAxisID:'y', borderRadius: bar?4:0, borderSkipped:false },
+          { label:'Screen (h)', data:p.trend.screen, borderColor:'#ff5c35',
+            backgroundColor: hexA('#ff5c35', bar?.85:area?.20:.10), tension:.4,
+            fill: area, borderWidth: bar?0:2.5, pointRadius: bar?0:3, pointHoverRadius:6,
+            yAxisID:'y', borderRadius: bar?4:0, borderSkipped:false },
+          { label:'Productivity', data:p.trend.productivity, borderColor:'#34d399',
+            borderDash:bar?[]:[6,4], tension:.4, borderWidth:1.8, pointRadius:2.5,
+            pointHoverRadius:6, yAxisID:'y1', fill:false, backgroundColor: hexA('#34d399',.85) },
+          { label:'Mood', data:p.trend.mood, borderColor:'#d4ff3a',
+            borderDash:bar?[]:[3,4], tension:.4, borderWidth:1.8, pointRadius:2.5,
+            pointHoverRadius:6, yAxisID:'y1', fill:false, backgroundColor: hexA('#d4ff3a',.85) }
+        ]
+      };
+    },
+    buildOptions(type){
+      return {
+        animation:{ duration:1000, easing:'easeOutQuart' },
+        interaction:{ mode:'index', intersect:false },
+        scales:{
+          x:{ grid:{ color:'rgba(240,235,224,.04)' }, ticks:{ color:'#b8b0a0' } },
+          y:{ position:'left', min:0, max:12, grid:{ color:'rgba(240,235,224,.05)' },
+              title:{ display:true, text:'HOURS', color:'#8a8275', font:{size:9} } },
+          y1:{ position:'right', min:0, max:100, grid:{ drawOnChartArea:false },
+               title:{ display:true, text:'INDEX', color:'#8a8275', font:{size:9} } }
+        },
+        plugins:{ legend:{ position:'bottom' } }
+      };
+    }
+  };
+}
+
+function buildDayChart(p){
+  return {
+    types:['hbar','polarArea','doughnut','radar','bar'],
+    currentType:'hbar',
+    buildData(type){
+      const entries = Object.entries(p.time).map(([k,v])=>({
+        k, label:TIME_LABELS[k], hours:v, color:CAT_COLORS[k]
+      })).sort((a,b)=>b.hours-a.hours);
+      const labels = entries.map(e=>e.label);
+      const values = entries.map(e=>+e.hours.toFixed(2));
+      const colors = entries.map(e=>e.color);
+      const isPolar = type==='polarArea' || type==='doughnut' || type==='radar';
+      return {
+        labels,
+        datasets:[{
+          label:'Hours / day',
+          data: values,
+          backgroundColor: isPolar ? colors.map(c=>hexA(c,.8)) : colors.map(c=>hexA(c,.85)),
+          hoverBackgroundColor: colors,
+          borderColor: type==='radar' ? '#d4ff3a' : 'transparent',
+          borderWidth: type==='radar' ? 2 : 0,
+          borderRadius: 5, borderSkipped:false,
+          pointBackgroundColor: colors,
+          pointRadius: type==='radar' ? 3 : 0,
+          barThickness: 14
+        }]
+      };
+    },
+    buildOptions(type){
+      const base = {
+        animation:{ duration:1000, easing:'easeOutQuart' },
+        plugins:{ legend:{ display: type==='doughnut' || type==='polarArea', position:'bottom' } }
+      };
+      if(type==='hbar' || type==='bar'){
+        base.indexAxis = type==='hbar' ? 'y' : 'x';
+        base.scales = {
+          x:{ beginAtZero:true, max:9, grid:{ color:'rgba(240,235,224,.04)' },
+              ticks:{ color:'#8a8275' } },
+          y:{ grid:{ display:false }, ticks:{ color:'#b8b0a0', font:{ size:10, weight:'600' } } }
+        };
+        if(type==='hbar') base.scales.x.title = { display:true, text:'HOURS', color:'#8a8275', font:{size:9} };
+      } else if(type==='radar'){
+        base.scales = { r:{ min:0, max:3,
+          angleLines:{ color:'rgba(240,235,224,.06)' },
+          grid:{ color:'rgba(240,235,224,.06)' },
+          pointLabels:{ color:'#b8b0a0', font:{ size:10, weight:'600' } },
+          ticks:{ display:false, stepSize:.5 } } };
+        base.plugins.legend = { display:false };
+      } else if(type==='polarArea'){
+        base.scales = { r:{ grid:{ color:'rgba(240,235,224,.06)' },
+          angleLines:{ color:'rgba(240,235,224,.06)' },
+          ticks:{ display:false } } };
+      }
+      return base;
+    }
+  };
+}
+
+function buildPeopleChart(p){
+  return {
+    types:['doughnut','polarArea','pie','bar','hbar'],
+    currentType:'doughnut',
+    buildData(type){
+      const keys = ['alone','family','friends','colleagues','partner','others'];
+      const values = keys.map(k=>+p.people[k].toFixed(2));
+      const colors = ['#6366f1','#34d399','#fbbf24','#67e8f9','#f472b6','#a78bfa'];
+      const isBar = type==='bar' || type==='hbar';
+      return {
+        labels: keys.map(k=>PEOPLE_LABELS[k]),
+        datasets:[{
+          data: values,
+          backgroundColor: colors.map(c=>hexA(c,.85)),
+          hoverBackgroundColor: colors,
+          borderWidth:0, hoverOffset:10,
+          borderRadius: isBar ? 5 : 0,
+          borderSkipped:false
+        }]
+      };
+    },
+    buildOptions(type){
+      const isPie = type==='doughnut' || type==='polarArea' || type==='pie';
+      const opts = {
+        animation:{ duration:1000, easing:'easeOutQuart' },
+        plugins:{ legend:{ position:'bottom' } }
+      };
+      if(isPie){
+        if(type==='doughnut') opts.cutout = '62%';
+        opts.plugins.centerText = {
+          text: h1(p.waking), sub:'WAKING HOURS', size:28, color:'#f0ebe0'
+        };
+      } else {
+        opts.indexAxis = type==='hbar' ? 'y' : 'x';
+        opts.scales = {
+          x:{ beginAtZero:true, grid:{ color:'rgba(240,235,224,.04)' } },
+          y:{ grid:{ display:false }, ticks:{ color:'#b8b0a0' } }
+        };
+      }
+      return opts;
+    }
+  };
+}
+
+function buildLeisureChart(p){
+  return {
+    types:['bar','hbar','line','area','radar'],
+    currentType:'bar',
+    buildData(type){
+      const labels = ['Learning','Reading','Entertainment','Social media','Hobbies','Exercise','Deep work'];
+      const values = [
+        +p.time.learning.toFixed(2),
+        +(p.time.learning*0.45).toFixed(2),
+        +p.time.entertainment.toFixed(2),
+        +p.time.social.toFixed(2),
+        +p.time.hobbies.toFixed(2),
+        +p.time.exercise.toFixed(2),
+        +p.focused.toFixed(2)
+      ];
+      const colors = ['#34d399','#4ade80','#ff5c35','#f472b6','#a78bfa','#67e8f9','#d4ff3a'];
+      const isLine = type==='line' || type==='area';
+      return {
+        labels,
+        datasets:[{
+          label:'Hours / day',
+          data: values,
+          backgroundColor: isLine ? hexA('#d4ff3a',.10) : colors.map(c=>hexA(c,.85)),
+          borderColor: isLine ? '#d4ff3a' : 'transparent',
+          borderWidth: isLine ? 2.5 : 0,
+          fill: type==='area',
+          tension: .4,
+          pointBackgroundColor: colors,
+          pointRadius: isLine ? 3.5 : 0,
+          borderRadius: isLine ? 0 : 6,
+          borderSkipped: false,
+          barThickness: 26
+        }]
+      };
+    },
+    buildOptions(type){
+      const base = {
+        animation:{ duration:900, easing:'easeOutQuart' },
+        plugins:{ legend:{ display:false } }
+      };
+      if(type==='radar'){
+        base.scales = { r:{ min:0, max:3,
+          angleLines:{ color:'rgba(240,235,224,.06)' },
+          grid:{ color:'rgba(240,235,224,.06)' },
+          pointLabels:{ color:'#b8b0a0', font:{size:10,weight:'600'} },
+          ticks:{ display:false } } };
+      } else {
+        base.indexAxis = type==='hbar' ? 'y' : 'x';
+        base.scales = {
+          x:{ grid:{ display: type==='hbar' }, ticks:{ color:'#b8b0a0', font:{size:10.5,weight:'600'} } },
+          y:{ beginAtZero:true, grid:{ color:'rgba(240,235,224,.05)' },
+              title:{ display:true, text:'HOURS', color:'#8a8275', font:{size:9} } }
+        };
+      }
+      return base;
+    }
+  };
+}
+
+function buildMoneyFlowChart(p){
+  return {
+    types:['bar','hbar','line','area'],
+    currentType:'bar',
+    buildData(type){
+      const m = p.money;
+      const labels = ['Earned','Spent','Saved','Invested','Debt','Donated'];
+      const values = [m.income, p.spend, m.savings, m.investments, m.debt, m.donations];
+      const colors = ['#34d399','#ff5c35','#67e8f9','#a78bfa','#fbbf24','#f472b6'];
+      const isLine = type==='line' || type==='area';
+      return {
+        labels,
+        datasets:[{
+          label:'Amount (₹)',
+          data: values,
+          backgroundColor: isLine ? hexA('#d4ff3a',.10) : colors.map(c=>hexA(c,.85)),
+          borderColor: isLine ? '#d4ff3a' : 'transparent',
+          borderWidth: isLine ? 2.5 : 0,
+          fill: type==='area',
+          tension: .4,
+          pointBackgroundColor: colors,
+          pointRadius: isLine ? 4 : 0,
+          borderRadius: isLine ? 0 : 6,
+          borderSkipped:false,
+          barThickness: 34
+        }]
+      };
+    },
+    buildOptions(type){
+      const base = {
+        animation:{ duration:1000, easing:'easeOutQuart' },
+        plugins:{ legend:{ display:false },
+          tooltip:{ callbacks:{ label: c => ' ' + inr(c.parsed.y ?? c.parsed) + ' / month' } } }
+      };
+      base.indexAxis = type==='hbar' ? 'y' : 'x';
+      base.scales = {
+        x:{ grid:{ display: type==='hbar' }, ticks:{ color:'#b8b0a0', font:{size:10.5,weight:'600'} } },
+        y:{ beginAtZero:true, grid:{ color:'rgba(240,235,224,.05)' },
+            ticks:{ callback:v => inrShort(v) } }
+      };
+      return base;
+    }
+  };
+}
+
+function buildSpendChart(p){
+  return {
+    types:['doughnut','polarArea','pie','bar','hbar'],
+    currentType:'doughnut',
+    buildData(type){
+      const m = p.money;
+      const keys = Object.keys(MONEY_SPEND_LABELS);
+      const values = keys.map(k=>m[k]);
+      const colors = ['#ff5c35','#fb923c','#34d399','#fbbf24','#67e8f9','#22d3ee','#a78bfa'];
+      const isBar = type==='bar' || type==='hbar';
+      return {
+        labels: keys.map(k=>MONEY_SPEND_LABELS[k]),
+        datasets:[{
+          data: values,
+          backgroundColor: colors.map(c=>hexA(c,.85)),
+          hoverBackgroundColor: colors,
+          borderWidth:0, hoverOffset:10,
+          borderRadius: isBar ? 5 : 0,
+          borderSkipped:false
+        }]
+      };
+    },
+    buildOptions(type){
+      const isPie = type==='doughnut' || type==='polarArea' || type==='pie';
+      const opts = {
+        animation:{ duration:1000, easing:'easeOutQuart' },
+        plugins:{ legend:{ position:'bottom' } }
+      };
+      if(isPie){
+        if(type==='doughnut') opts.cutout = '62%';
+        opts.plugins.centerText = {
+          text: inrShort(p.spend), sub:'TOTAL SPEND', size:22, color:'#f0ebe0'
+        };
+      } else {
+        opts.indexAxis = type==='hbar' ? 'y' : 'x';
+        opts.scales = {
+          x:{ beginAtZero:true, grid:{ color:'rgba(240,235,224,.04)' },
+              ticks:{ callback:v => inrShort(v) } },
+          y:{ grid:{ display:false }, ticks:{ color:'#b8b0a0' } }
+        };
+      }
+      return opts;
+    }
+  };
+}
+
+function buildAllocChart(p){
+  return {
+    types:['polarArea','radar','doughnut','bar'],
+    currentType:'polarArea',
+    buildData(type){
+      const m = p.money;
+      const surplus = Math.max(0, m.income - p.spend - m.savings - m.investments - m.debt);
+      const values = [m.savings, m.investments, m.debt, surplus];
+      const labels = ['Savings','Investments','Debt repayment','Free cash'];
+      const colors = ['#67e8f9','#a78bfa','#fbbf24','#34d399'];
+      return {
+        labels,
+        datasets:[{
+          data: values,
+          backgroundColor: colors.map(c=>hexA(c,.8)),
+          borderColor: type==='radar' ? '#d4ff3a' : 'rgba(240,235,224,.08)',
+          borderWidth: type==='radar' ? 2 : 1,
+          pointBackgroundColor: colors,
+          pointRadius: type==='radar' ? 3 : 0,
+          borderRadius: 4,
+          borderSkipped:false
+        }]
+      };
+    },
+    buildOptions(type){
+      const base = {
+        animation:{ duration:1000, easing:'easeOutQuart' },
+        plugins:{ legend:{ position:'bottom' },
+          tooltip:{ callbacks:{ label: c => ' ' + inr(c.parsed.r ?? c.parsed.y ?? c.parsed) + ' / month' } } }
+      };
+      if(type==='polarArea' || type==='radar'){
+        base.scales = { r:{ grid:{ color:'rgba(240,235,224,.06)' },
+          angleLines:{ color:'rgba(240,235,224,.06)' },
+          ticks:{ display:false },
+          pointLabels: type==='radar' ? { color:'#b8b0a0', font:{size:10,weight:'600'} } : undefined } };
+      } else if(type==='bar'){
+        base.scales = {
+          x:{ grid:{ display:false }, ticks:{ color:'#b8b0a0' } },
+          y:{ beginAtZero:true, grid:{ color:'rgba(240,235,224,.05)' },
+              ticks:{ callback:v => inrShort(v) } }
+        };
+      }
+      return base;
+    }
+  };
+}
+
+function buildGrowthChart(p){
+  return {
+    types:['bar','hbar','radar','polarArea'],
+    currentType:'bar',
+    buildData(type){
+      const g = p.growth;
+      const labels = ['Skills','Books','Goals hit','Goals missed','Experiences','Creative','Problems','Risks','Opportunities'];
+      const values = [g.skills, g.books, g.goalsAchieved, g.goalsDelayed, g.experiences, g.creative, g.problems, g.risks, g.opportunities];
+      const colors = ['#34d399','#67e8f9','#22d3ee','#ff5c35','#a78bfa','#f472b6','#fbbf24','#fb923c','#4ade80'];
+      return {
+        labels,
+        datasets:[{
+          label:'Count (12 months)',
+          data: values,
+          backgroundColor: colors.map(c=>hexA(c,.85)),
+          borderColor: type==='radar' ? '#d4ff3a' : 'transparent',
+          borderWidth: type==='radar' ? 2 : 0,
+          pointBackgroundColor: colors,
+          pointRadius: type==='radar' ? 3 : 0,
+          borderRadius: 5,
+          borderSkipped:false,
+          barThickness: 15
+        }]
+      };
+    },
+    buildOptions(type){
+      const base = {
+        animation:{ duration:1000, easing:'easeOutQuart' },
+        plugins:{ legend:{ display:false } }
+      };
+      if(type==='radar'){
+        base.scales = { r:{ beginAtZero:true,
+          angleLines:{ color:'rgba(240,235,224,.06)' },
+          grid:{ color:'rgba(240,235,224,.06)' },
+          pointLabels:{ color:'#b8b0a0', font:{size:9.5,weight:'600'} },
+          ticks:{ display:false } } };
+      } else if(type==='hbar'){
+        base.indexAxis = 'y';
+        base.scales = {
+          x:{ type:'logarithmic', beginAtZero:false,
+              grid:{ color:'rgba(240,235,224,.04)' },
+              ticks:{ color:'#8a8275' } },
+          y:{ grid:{ display:false }, ticks:{ color:'#b8b0a0', font:{size:10.5,weight:'600'} } }
+        };
+      } else if(type==='bar'){
+        base.scales = {
+          x:{ grid:{ display:false }, ticks:{ color:'#b8b0a0', font:{size:10.5,weight:'600'} } },
+          y:{ beginAtZero:true, type:'logarithmic',
+              grid:{ color:'rgba(240,235,224,.05)' } }
+        };
+      } else if(type==='polarArea'){
+        base.scales = { r:{ beginAtZero:true,
+          grid:{ color:'rgba(240,235,224,.06)' },
+          angleLines:{ color:'rgba(240,235,224,.06)' },
+          ticks:{ display:false } } };
+      }
+      return base;
+    }
+  };
+}
+
+function buildWellGaugeChart(p, key, label){
+  return {
+    types:['gauge','bar','radar','polarArea'],
+    currentType:'gauge',
+    buildData(type){
+      const val = Math.round(p.scores[key]);
+      const color = key==='mental' ? (state.pov==='man'?'#d4ff3a':'#f472b6')
+                  : key==='physical' ? '#34d399' : '#fbbf24';
+      if(type==='gauge'){
+        return { labels:[label, ''], datasets:[{ data:[val, 100-val],
+          backgroundColor:[hexA(color,.9), 'rgba(255,255,255,.05)'],
+          borderWidth:0, circumference:270, rotation:225 }] };
+      }
+      if(type==='bar'){
+        return { labels:[label], datasets:[{ label:'Score', data:[val],
+          backgroundColor: hexA(color,.85), borderRadius:5, borderSkipped:false,
+          barThickness: 60 }] };
+      }
+      if(type==='radar'){
+        return { labels:['Mental','Physical','Emotional','Relationships','Career','Contribution','Freedom','Digital','Productivity','Satisfaction'],
+          datasets:[{ label:'Score', data:RADAR_KEYS.map(k=>Math.round(p.scores[k])),
+            borderColor: color, backgroundColor: hexA(color,.16),
+            pointBackgroundColor: color, pointRadius:3, borderWidth:2, fill:true }] };
+      }
+      if(type==='polarArea'){
+        return { labels: RADAR_LABELS, datasets:[{ data:RADAR_KEYS.map(k=>Math.round(p.scores[k])),
+          backgroundColor: RADAR_KEYS.map((_,i)=>hexA(PALETTE[i%PALETTE.length],.8)),
+          borderWidth:1, borderColor:'rgba(255,255,255,.08)' }] };
+      }
+    },
+    buildOptions(type){
+      const opts = { animation:{ duration:1000, easing:'easeOutQuart' } };
+      if(type==='gauge'){
+        opts.cutout = '78%';
+        opts.plugins = {
+          legend:{ display:false },
+          centerText:{ text:String(Math.round(p.scores[key])), sub:label.toUpperCase(), size:32, color:'#f0ebe0' },
+          tooltip:{ enabled:false }
+        };
+      } else if(type==='bar'){
+        opts.plugins = { legend:{ display:false } };
+        opts.scales = {
+          x:{ grid:{ display:false }, ticks:{ color:'#b8b0a0' } },
+          y:{ beginAtZero:true, max:100, grid:{ color:'rgba(240,235,224,.05)' } }
+        };
+      } else if(type==='radar'){
+        opts.plugins = { legend:{ display:false } };
+        opts.scales = { r:{ min:0, max:100,
+          angleLines:{ color:'rgba(240,235,224,.06)' },
+          grid:{ color:'rgba(240,235,224,.06)' },
+          pointLabels:{ color:'#b8b0a0', font:{size:9,weight:'600'} },
+          ticks:{ display:false, stepSize:25 } } };
+      } else if(type==='polarArea'){
+        opts.plugins = { legend:{ display:false } };
+        opts.scales = { r:{ min:0, max:100,
+          grid:{ color:'rgba(240,235,224,.06)' },
+          angleLines:{ color:'rgba(240,235,224,.06)' },
+          ticks:{ display:false, stepSize:25 } } };
+      }
+      return opts;
+    }
+  };
+}
+
+function buildWellRadarChart(p){
+  return {
+    types:['radar','bar','hbar','polarArea'],
+    currentType:'radar',
+    buildData(type){
+      const primary = state.pov === 'man' ? '#d4ff3a' : '#f472b6';
+      const sets = [{
+        label: state.pov === 'man' ? 'Man' : 'Woman',
+        data: RADAR_KEYS.map(k=>Math.round(p.scores[k])),
+        borderColor: primary,
+        backgroundColor: type==='radar' ? hexA(primary,.16) : hexA(primary,.8),
+        pointBackgroundColor: primary,
+        pointRadius: type==='radar' ? 3.5 : 0,
+        borderWidth: 2,
+        fill: type==='radar',
+        borderRadius: 4,
+        borderSkipped:false
+      }];
+      if(state.compare){
+        const other = computeProfile(state.pov==='man'?'woman':'man', state.age, state.day);
+        const oc = state.pov === 'man' ? '#f472b6' : '#d4ff3a';
+        sets.push({
+          label: state.pov === 'man' ? 'Woman' : 'Man',
+          data: RADAR_KEYS.map(k=>Math.round(other.scores[k])),
+          borderColor: oc,
+          backgroundColor: type==='radar' ? hexA(oc,.08) : hexA(oc,.55),
+          borderDash: type==='radar' ? [5,4] : [],
+          pointRadius: type==='radar' ? 2.5 : 0,
+          borderWidth: 2,
+          fill: type==='radar',
+          borderRadius: 4,
+          borderSkipped:false
+        });
+      }
+      return { labels: RADAR_LABELS, datasets: sets };
+    },
+    buildOptions(type){
+      const opts = {
+        animation:{ duration:900, easing:'easeOutQuart' },
+        plugins:{ legend:{ position:'bottom', display: state.compare || type==='radar' } }
+      };
+      if(type==='radar' || type==='polarArea'){
+        opts.scales = { r:{ min:0, max:100,
+          angleLines:{ color:'rgba(240,235,224,.06)' },
+          grid:{ color:'rgba(240,235,224,.06)' },
+          pointLabels:{ color:'#b8b0a0', font:{size:10,weight:'600'} },
+          ticks:{ display:false, stepSize:25 } } };
+      } else {
+        opts.indexAxis = type==='hbar' ? 'y' : 'x';
+        opts.scales = {
+          x:{ beginAtZero:true, max:100, grid:{ color:'rgba(240,235,224,.04)' } },
+          y:{ grid:{ display:false }, ticks:{ color:'#b8b0a0' } }
+        };
+      }
+      return opts;
+    }
+  };
+}
+
+const ADV_DEFS = [
+  ['attention','Attention distribution'],
+  ['bandwidth','Mental bandwidth'],
+  ['emotional','Emotional investment'],
+  ['opportunityCost','Opportunity cost'],
+  ['freedom','Personal freedom'],
+  ['dependency','Dependency'],
+  ['socialObligations','Social obligations'],
+  ['decisionFatigue','Decision fatigue'],
+  ['regret','Regret'],
+  ['balance','Life balance'],
+  ['selfRespect','Self-respect'],
+  ['boundaries','Personal boundaries'],
+  ['riskExposure','Risk exposure'],
+  ['futureInvestment','Future investment'],
+  ['presentEnjoyment','Present enjoyment']
+];
+
+const PALETTE = ['#d4ff3a','#a78bfa','#34d399','#fbbf24','#f472b6','#67e8f9',
+                 '#ff5c35','#4ade80','#22d3ee','#f87171','#c084fc','#facc15'];
+
+function buildAdvChart(p){
+  return {
+    types:['bar','hbar','radar','polarArea'],
+    currentType:'hbar',
+    buildData(type){
+      const values = ADV_DEFS.map(d=>p.advanced[d[0]]);
+      const colors = values.map(v=>v>=70?'#34d399':v>=50?'#fbbf24':'#ff5c35');
+      return {
+        labels: ADV_DEFS.map(d=>d[1]),
+        datasets:[{
+          label:'Score (0–100)',
+          data: values,
+          backgroundColor: colors.map(c=>hexA(c,.82)),
+          borderColor: type==='radar' ? '#d4ff3a' : 'transparent',
+          borderWidth: type==='radar' ? 2 : 0,
+          pointBackgroundColor: colors,
+          pointRadius: type==='radar' ? 3 : 0,
+          borderRadius: 5,
+          borderSkipped:false,
+          barThickness: 13
+        }]
+      };
+    },
+    buildOptions(type){
+      const base = {
+        animation:{ duration:1000, easing:'easeOutQuart' },
+        plugins:{ legend:{ display:false } }
+      };
+      if(type==='radar' || type==='polarArea'){
+        base.scales = { r:{ min:0, max:100,
+          angleLines:{ color:'rgba(240,235,224,.06)' },
+          grid:{ color:'rgba(240,235,224,.06)' },
+          pointLabels:{ color:'#b8b0a0', font:{size:9,weight:'600'} },
+          ticks:{ display:false, stepSize:25 } } };
+      } else {
+        base.indexAxis = type==='hbar' ? 'y' : 'x';
+        base.scales = {
+          x:{ beginAtZero:true, max:100, grid:{ color:'rgba(240,235,224,.04)' } },
+          y:{ grid:{ display:false }, ticks:{ color:'#b8b0a0', font:{size:10} } }
+        };
+      }
+      return base;
+    }
+  };
+}
+
+function buildAdvRadarChart(p){
+  return {
+    types:['radar','bar','hbar','polarArea'],
+    currentType:'radar',
+    buildData(type){
+      const values = ADV_DEFS.map(d=>p.advanced[d[0]]);
+      const color = state.pov === 'man' ? '#a78bfa' : '#f472b6';
+      return {
+        labels: ADV_DEFS.map(d=>d[1]),
+        datasets:[{
+          label:'Hidden load',
+          data: values,
+          borderColor: color,
+          backgroundColor: type==='radar' ? hexA(color,.20) : hexA(color,.8),
+          pointBackgroundColor: color,
+          pointRadius: type==='radar' ? 3 : 0,
+          borderWidth: 2,
+          fill: type==='radar',
+          borderRadius: 4,
+          borderSkipped:false
+        }]
+      };
+    },
+    buildOptions(type){
+      const opts = {
+        animation:{ duration:900, easing:'easeOutQuart' },
+        plugins:{ legend:{ display:false } }
+      };
+      if(type==='radar' || type==='polarArea'){
+        opts.scales = { r:{ min:0, max:100,
+          angleLines:{ color:'rgba(240,235,224,.06)' },
+          grid:{ color:'rgba(240,235,224,.06)' },
+          pointLabels:{ color:'#b8b0a0', font:{size:8.5,weight:'600'} },
+          ticks:{ display:false, stepSize:25 } } };
+      } else {
+        opts.indexAxis = type==='hbar' ? 'y' : 'x';
+        opts.scales = {
+          x:{ beginAtZero:true, max:100, grid:{ color:'rgba(240,235,224,.04)' } },
+          y:{ grid:{ display:false }, ticks:{ color:'#b8b0a0', font:{size:10} } }
+        };
+      }
+      return opts;
+    }
+  };
+}
+
+/* ============================================================
+   LEDGER — all 100 metrics
+   ============================================================ */
+const LEDGER = [
+  /* Category 1: Time & daily activities */
+  { cat:'time', id:1,  name:'Morning routine time',       unit:'h',  val:p=>+(p.time.selfcare*0.35).toFixed(2), max:2 },
+  { cat:'time', id:2,  name:'Night routine time',          unit:'h',  val:p=>+(p.time.selfcare*0.30).toFixed(2), max:2 },
+  { cat:'time', id:3,  name:'Bathing and grooming time',   unit:'h',  val:p=>+(p.time.selfcare*0.25).toFixed(2), max:1.5 },
+  { cat:'time', id:4,  name:'Eating and cooking time',     unit:'h',  val:p=>+(p.time.selfcare*0.55).toFixed(2), max:3 },
+  { cat:'time', id:5,  name:'Household cleaning time',     unit:'h',  val:p=>+p.time.household.toFixed(2), max:3 },
+  { cat:'time', id:6,  name:'Phone usage time',            unit:'h',  val:p=>+(p.time.social*0.85).toFixed(2), max:8 },
+  { cat:'time', id:7,  name:'Television & OTT time',       unit:'h',  val:p=>+(p.time.entertainment*0.55).toFixed(2), max:6 },
+  { cat:'time', id:8,  name:'Reading books time',          unit:'h',  val:p=>+(p.time.learning*0.45).toFixed(2), max:3 },
+  { cat:'time', id:9,  name:'Outdoor activity time',       unit:'h',  val:p=>+(p.time.exercise + p.time.hobbies*0.4).toFixed(2), max:4 },
+  { cat:'time', id:10, name:'Relaxation / doing nothing',  unit:'h',  val:p=>+(p.time.waiting*0.6).toFixed(2), max:3 },
+  /* Category 2: Relationships */
+  { cat:'rel', id:11, name:'Time talking to family',       unit:'h',  val:p=>+(p.people.family*0.7).toFixed(2), max:5 },
+  { cat:'rel', id:12, name:'Time helping family',          unit:'h',  val:p=>+(p.people.family*0.3).toFixed(2), max:3 },
+  { cat:'rel', id:13, name:'Time with old friends',        unit:'h',  val:p=>+(p.people.friends*0.6).toFixed(2), max:4 },
+  { cat:'rel', id:14, name:'Time making new friends',      unit:'h',  val:p=>+(p.people.friends*0.15).toFixed(2), max:2 },
+  { cat:'rel', id:15, name:'Time maintaining relationships', unit:'h', val:p=>+(p.people.partner*0.6).toFixed(2), max:4 },
+  { cat:'rel', id:16, name:'Time resolving conflicts',     unit:'h',  val:p=>+(p.people.others*0.3).toFixed(2), max:2 },
+  { cat:'rel', id:17, name:'Time helping strangers',       unit:'h',  val:p=>+(p.people.others*0.2).toFixed(2), max:1 },
+  { cat:'rel', id:18, name:'Time networking',              unit:'h',  val:p=>+(p.people.colleagues*0.15).toFixed(2), max:2 },
+  { cat:'rel', id:19, name:'Time communicating online',    unit:'h',  val:p=>+(p.time.social*0.55).toFixed(2), max:6 },
+  { cat:'rel', id:20, name:'Time communicating face-to-face', unit:'h', val:p=>+(p.people.family+p.people.friends+p.people.partner).toFixed(1), max:10 },
+  /* Category 3: Money */
+  { cat:'money', id:21, name:'Money wasted',               unit:'₹',  val:p=>p.money.luxury*0.6, max:20000, money:true },
+  { cat:'money', id:22, name:'Money borrowed',             unit:'₹',  val:p=>p.money.debt*0.5, max:20000, money:true },
+  { cat:'money', id:23, name:'Money lent to others',       unit:'₹',  val:p=>p.money.friends*0.25, max:5000, money:true },
+  { cat:'money', id:24, name:'Money received as gifts',    unit:'₹',  val:p=>3000, max:10000, money:true },
+  { cat:'money', id:25, name:'Money given as gifts',       unit:'₹',  val:p=>p.money.family*0.4+p.money.friends*0.3, max:10000, money:true },
+  { cat:'money', id:26, name:'Money spent on education',   unit:'₹',  val:p=>p.money.growth*0.6, max:8000, money:true },
+  { cat:'money', id:27, name:'Money spent on transportation', unit:'₹', val:p=>p.money.essential*0.18, max:8000, money:true },
+  { cat:'money', id:28, name:'Money spent on entertainment', unit:'₹', val:p=>p.money.luxury*0.4+p.money.friends*0.5, max:10000, money:true },
+  { cat:'money', id:29, name:'Money spent on subscriptions', unit:'₹', val:p=>2500, max:5000, money:true },
+  { cat:'money', id:30, name:'Money lost through poor decisions', unit:'₹', val:p=>p.money.luxury*0.15, max:5000, money:true },
+  /* Category 4: Work */
+  { cat:'work', id:31, name:'Deep work hours',              unit:'h',  val:p=>+p.focused.toFixed(1), max:6 },
+  { cat:'work', id:32, name:'Administrative work hours',    unit:'h',  val:p=>+(p.time.work*0.18).toFixed(1), max:3 },
+  { cat:'work', id:33, name:'Meetings and discussions',     unit:'h',  val:p=>+(p.time.work*0.15).toFixed(1), max:3 },
+  { cat:'work', id:34, name:'Client communication',         unit:'h',  val:p=>+(p.time.work*0.10).toFixed(1), max:2 },
+  { cat:'work', id:35, name:'Research and planning',        unit:'h',  val:p=>+(p.time.work*0.08).toFixed(1), max:2 },
+  { cat:'work', id:36, name:'Problem-solving efforts',      unit:'h',  val:p=>+(p.time.work*0.12).toFixed(1), max:2 },
+  { cat:'work', id:37, name:'Team management',              unit:'h',  val:p=>+(p.time.work*0.05).toFixed(1), max:2 },
+  { cat:'work', id:38, name:'Delegated work',               unit:'h',  val:p=>+(p.time.work*0.04).toFixed(1), max:1 },
+  { cat:'work', id:39, name:'Unpaid work',                  unit:'h',  val:p=>+(p.time.household*0.5).toFixed(1), max:3 },
+  { cat:'work', id:40, name:'Work-related stress',          unit:'/100', val:p=>Math.round(100-p.scores.mental), max:100 },
+  /* Category 5: Mental & emotional */
+  { cat:'mental', id:41, name:'Time spent overthinking',    unit:'h',  val:p=>+(p.time.waiting*0.4).toFixed(2), max:2 },
+  { cat:'mental', id:42, name:'Time spent worrying',        unit:'h',  val:p=>+(p.time.waiting*0.3).toFixed(2), max:2 },
+  { cat:'mental', id:43, name:'Time spent being happy',     unit:'h',  val:p=>+(p.scores.emotional/100*4).toFixed(1), max:4 },
+  { cat:'mental', id:44, name:'Time spent feeling stressed', unit:'h', val:p=>+(p.scores.mental<50?3:1.5).toFixed(1), max:4 },
+  { cat:'mental', id:45, name:'Time spent feeling lonely',  unit:'h',  val:p=>+((100-p.scores.relationships)/100*3).toFixed(1), max:3 },
+  { cat:'mental', id:46, name:'Time spent feeling motivated', unit:'h', val:p=>+(p.scores.productivity/100*5).toFixed(1), max:5 },
+  { cat:'mental', id:47, name:'Time spent feeling frustrated', unit:'h', val:p=>+(p.advanced.decisionFatigue/100*3).toFixed(1), max:3 },
+  { cat:'mental', id:48, name:'Time spent reflecting on life', unit:'h', val:p=>+(p.time.spiritual + p.time.personalDev*0.3).toFixed(1), max:2 },
+  { cat:'mental', id:49, name:'Time spent making decisions', unit:'h', val:p=>+(p.advanced.decisionFatigue/100*2).toFixed(1), max:2 },
+  { cat:'mental', id:50, name:'Time spent managing emotions', unit:'h', val:p=>+(p.scores.emotional<60?2:1).toFixed(1), max:3 },
+  /* Category 6: Physical health */
+  { cat:'health', id:51, name:'Walking distance (km)',      unit:'km', val:p=>+(p.time.exercise*3 + p.time.travel*0.5).toFixed(1), max:15 },
+  { cat:'health', id:52, name:'Daily steps',                unit:'',   val:p=>Math.round(p.time.exercise*3000 + p.time.travel*2000 + 1500), max:15000 },
+  { cat:'health', id:53, name:'Workout duration (min)',     unit:'min',val:p=>Math.round(p.time.exercise*60), max:120 },
+  { cat:'health', id:54, name:'Calories consumed',          unit:'kcal', val:p=>Math.round(1900 + p.time.exercise*150), max:3000 },
+  { cat:'health', id:55, name:'Water consumed (L)',         unit:'L',  val:p=>2.5, max:4 },
+  { cat:'health', id:56, name:'Sleep quality',              unit:'/100', val:p=>Math.round(p.scores.physical*0.9), max:100 },
+  { cat:'health', id:57, name:'Recovery time (min)',        unit:'min',val:p=>Math.round(60 + p.time.sleep*15), max:180 },
+  { cat:'health', id:58, name:'Time spent sitting',         unit:'h',  val:p=>+(p.time.work*0.75 + p.time.social*0.9).toFixed(1), max:14 },
+  { cat:'health', id:59, name:'Time spent standing',        unit:'h',  val:p=>+(p.time.household + p.time.exercise + p.time.travel*0.4).toFixed(1), max:8 },
+  { cat:'health', id:60, name:'Time outdoors in sunlight',  unit:'h',  val:p=>+(p.time.exercise + p.time.hobbies*0.5 + p.time.travel*0.3).toFixed(1), max:5 },
+  /* Category 7: Personal development */
+  { cat:'growth', id:61, name:'New skills learned',         unit:'',   val:p=>p.growth.skills, max:20 },
+  { cat:'growth', id:62, name:'Courses completed',          unit:'',   val:p=>Math.round(p.growth.skills*0.6), max:10 },
+  { cat:'growth', id:63, name:'Books completed',            unit:'',   val:p=>p.growth.books, max:50 },
+  { cat:'growth', id:64, name:'Practical experience gained', unit:'',  val:p=>Math.round(p.growth.experiences*1.5), max:50 },
+  { cat:'growth', id:65, name:'Mistakes made',              unit:'',   val:p=>Math.round(p.growth.failures*1.2), max:30 },
+  { cat:'growth', id:66, name:'Lessons learned',            unit:'',   val:p=>Math.round(p.growth.failures*1.6), max:40 },
+  { cat:'growth', id:67, name:'Goals achieved',             unit:'',   val:p=>p.growth.goalsAchieved, max:20 },
+  { cat:'growth', id:68, name:'Goals missed',               unit:'',   val:p=>p.growth.goalsDelayed, max:20 },
+  { cat:'growth', id:69, name:'Time spent experimenting',   unit:'h',  val:p=>+(p.time.personalDev*0.5).toFixed(1), max:3 },
+  { cat:'growth', id:70, name:'Time practising existing skills', unit:'h', val:p=>+(p.time.personalDev*0.4 + p.time.learning*0.3).toFixed(1), max:3 },
+  /* Category 8: Digital behaviour */
+  { cat:'digital', id:71, name:'Social media usage',        unit:'h',  val:p=>+(p.time.social).toFixed(1), max:6 },
+  { cat:'digital', id:72, name:'Gaming hours',              unit:'h',  val:p=>+(p.time.entertainment*0.35).toFixed(1), max:4 },
+  { cat:'digital', id:73, name:'YouTube consumption',       unit:'h',  val:p=>+(p.time.entertainment*0.45).toFixed(1), max:4 },
+  { cat:'digital', id:74, name:'Productive computer usage', unit:'h',  val:p=>+(p.time.work*0.4 + p.time.learning).toFixed(1), max:8 },
+  { cat:'digital', id:75, name:'Unproductive computer usage', unit:'h', val:p=>+(p.time.social*0.7 + p.time.entertainment*0.3).toFixed(1), max:6 },
+  { cat:'digital', id:76, name:'AI tool usage',             unit:'h',  val:p=>+(p.time.work*0.08 + p.time.learning*0.15).toFixed(1), max:2 },
+  { cat:'digital', id:77, name:'Online shopping time',      unit:'h',  val:p=>+(p.time.social*0.10).toFixed(1), max:1 },
+  { cat:'digital', id:78, name:'Messaging and chatting time', unit:'h', val:p=>+(p.time.social*0.30).toFixed(1), max:2 },
+  { cat:'digital', id:79, name:'Content creation time',     unit:'h',  val:p=>+(p.time.hobbies*0.5).toFixed(1), max:3 },
+  { cat:'digital', id:80, name:'Consume vs create ratio',   unit:'',   val:p=>+(p.time.social/Math.max(0.1,p.time.hobbies)).toFixed(1), max:10 },
+  /* Category 9: Effort & contribution */
+  { cat:'effort', id:81, name:'Effort on personal goals',   unit:'%',  val:p=>Math.round(p.scores.productivity*0.9), max:100 },
+  { cat:'effort', id:82, name:'Effort on family goals',     unit:'%',  val:p=>Math.round(p.scores.relationships*0.8), max:100 },
+  { cat:'effort', id:83, name:'Effort on friends',          unit:'%',  val:p=>Math.round(p.people.friends/Math.max(0.1,p.waking)*100), max:100 },
+  { cat:'effort', id:84, name:'Effort on partner',          unit:'%',  val:p=>Math.round(p.people.partner/Math.max(0.1,p.waking)*100), max:100 },
+  { cat:'effort', id:85, name:'Effort on career',           unit:'%',  val:p=>Math.round(p.scores.career*0.9), max:100 },
+  { cat:'effort', id:86, name:'Effort helping others',      unit:'%',  val:p=>Math.round(p.scores.contribution), max:100 },
+  { cat:'effort', id:87, name:'Personal sacrifices made',   unit:'',   val:p=>Math.round((100-p.advanced.freedom)*0.2), max:20 },
+  { cat:'effort', id:88, name:'Responsibilities carried',   unit:'',   val:p=>Math.round(p.advanced.socialObligations*0.2), max:20 },
+  { cat:'effort', id:89, name:'Promises fulfilled',         unit:'',   val:p=>Math.round(p.growth.goalsAchieved*1.3), max:20 },
+  { cat:'effort', id:90, name:'Commitments broken',         unit:'',   val:p=>p.growth.goalsDelayed, max:15 },
+  /* Category 10: Experiences & decisions */
+  { cat:'exp', id:91, name:'New places visited',            unit:'',   val:p=>p.growth.newPlaces, max:12 },
+  { cat:'exp', id:92, name:'New people met',                unit:'',   val:p=>p.growth.newPeople, max:200 },
+  { cat:'exp', id:93, name:'New opportunities discovered',  unit:'',   val:p=>Math.round(p.growth.opportunities*1.6), max:20 },
+  { cat:'exp', id:94, name:'Opportunities accepted',        unit:'',   val:p=>p.growth.opportunities, max:15 },
+  { cat:'exp', id:95, name:'Opportunities rejected',        unit:'',   val:p=>Math.round(p.growth.opportunities*0.6), max:10 },
+  { cat:'exp', id:96, name:'Important decisions made',      unit:'',   val:p=>p.growth.decisions, max:1000 },
+  { cat:'exp', id:97, name:'Risks taken',                   unit:'',   val:p=>p.growth.risks, max:30 },
+  { cat:'exp', id:98, name:'Failures experienced',          unit:'',   val:p=>p.growth.failures, max:20 },
+  { cat:'exp', id:99, name:'Successes achieved',            unit:'',   val:p=>p.growth.successes, max:30 },
+  { cat:'exp', id:100, name:'Memorable experiences created', unit:'',  val:p=>p.growth.experiences, max:30 }
+];
+
+const LEDGER_CATS = {
+  all:'All', time:'Time', rel:'Relationships', money:'Money', work:'Work',
+  mental:'Mental', health:'Health', growth:'Growth', digital:'Digital',
+  effort:'Effort', exp:'Experiences'
+};
+
+let ledgerCat = 'all';
+
+function buildLedgerChart(p){
+  return {
+    types:['bar','hbar'],
+    currentType:'hbar',
+    buildData(){
+      const items = LEDGER.filter(m => ledgerCat==='all' || m.cat === ledgerCat);
+      return {
+        labels: items.map(m=>m.name),
+        datasets:[{
+          label:'Value',
+          data: items.map(m=>{
+            const v = m.val(p);
+            return +(v / m.max * 100).toFixed(1);
+          }),
+          backgroundColor: items.map((_,i)=>hexA(PALETTE[i%PALETTE.length],.85)),
+          borderRadius: 4, borderSkipped:false, barThickness: 10
+        }]
+      };
+    },
+    buildOptions(type){
+      return {
+        indexAxis: type==='hbar' ? 'y' : 'x',
+        animation:{ duration:800, easing:'easeOutQuart' },
+        scales:{
+          x:{ beginAtZero:true, max:100, grid:{ color:'rgba(240,235,224,.04)' } },
+          y:{ grid:{ display:false }, ticks:{ color:'#b8b0a0', font:{size:8.5} } }
+        },
+        plugins:{ legend:{ display:false },
+          tooltip:{ callbacks:{ label: c => ' ' + c.parsed.x + '% of reference' } } }
+      };
+    }
+  };
+}
+
+function renderLedger(p){
+  const items = LEDGER.filter(m => ledgerCat==='all' || m.cat === ledgerCat);
+  const total = items.length;
+
+  $('#ledgerCount').textContent = `Showing ${total} of 100 · ${LEDGER_CATS[ledgerCat]}`;
+
+  const tbody = $('#ledgerBody');
+  tbody.innerHTML = items.map(m=>{
+    const v = m.val(p);
+    const pct = clamp(v / m.max * 100);
+    const col = pct >= 70 ? '#34d399' : pct >= 40 ? '#d4ff3a' : '#ff5c35';
+    const display = m.money ? inr(v) : (m.unit === 'h' ? v.toFixed(2) + ' h'
+                    : m.unit === '₹' ? inr(v)
+                    : m.unit === '%' ? v + '%'
+                    : m.unit === 'km' ? v + ' km'
+                    : m.unit === 'min' ? v + ' min'
+                    : m.unit === 'L' ? v + ' L'
+                    : m.unit === 'kcal' ? v + ' kcal'
+                    : m.unit === '/100' ? v + ' / 100'
+                    : v.toString());
+    return `<tr>
+      <td style="font-family:var(--mono);color:var(--dim);font-size:10px">${String(m.id).padStart(3,'0')}</td>
+      <td style="color:var(--text)">${m.name}</td>
+      <td style="font-family:var(--mono);font-size:11px;color:${col}">${display}</td>
+      <td><div class="mini"><i style="width:${pct}%;background:${col}"></i></div></td>
+    </tr>`;
+  }).join('');
+
+  /* render chart */
+  const spec = CHART_REGISTRY.cLedger;
+  if(spec){
+    spec.buildData = buildLedgerChart(p).buildData;
+    spec.buildOptions = buildLedgerChart(p).buildOptions;
+    renderChart(spec);
+  }
+}
+
+function renderLedgerCats(){
+  $('#ledgerCats').innerHTML = Object.entries(LEDGER_CATS).map(([k,v])=>
+    `<button class="ledger-cat-btn ${k===ledgerCat?'on':''}" data-cat="${k}">${v}</button>`
+  ).join('');
+  $$('#ledgerCats button').forEach(btn=>{
+    btn.addEventListener('click', ()=>{
+      ledgerCat = btn.dataset.cat;
+      $$('#ledgerCats button').forEach(b=>b.classList.toggle('on', b.dataset.cat === ledgerCat));
+      const p = computeProfile(state.pov, state.age, state.day);
+      renderLedger(p);
+    });
+  });
+}
+
+/* ============================================================
+   FACTS
+   ============================================================ */
+function factsHTML(arr){
+  return arr.map(([num, lbl, desc])=>`
+    <div class="fact">
+      <div class="num">${num}</div>
+      <div class="lbl">${lbl}</div>
+      <div class="desc">${desc}</div>
+    </div>`).join('');
+}
+
+function renderOverviewFacts(p){
+  const alonePct = (p.people.alone / p.waking * 100).toFixed(0);
+  const screenDays = (p.screen * 365 / 24).toFixed(0);
+  const scrollDays = (p.time.social * 365 / 24).toFixed(0);
+  const workDays = (p.time.work * 250 / 24).toFixed(0);
+  const learnYear = Math.round((p.time.learning + p.time.personalDev) * 365);
+  const waitDays = (p.time.waiting * 365 / 24).toFixed(0);
+
+  $('#ovFacts').innerHTML = factsHTML([
+    [alonePct + '%', 'of waking hours alone',
+      `That is <b>${h1(p.people.alone)} h per day</b> — about <b>${Math.round(p.people.alone*365)} hours</b> a year in your own company.`],
+    [screenDays, 'full days on screen / year',
+      `Social media alone is <b>${scrollDays} full days</b>. Total screen time is <b>${h1(p.screen)} h/day</b>.`],
+    [workDays, 'full days of work / year',
+      `<b>${h1(p.time.work)} h/day</b> × 250 working days. Only <b>${h1(p.focused)} h/day</b> is genuinely focused.`],
+    [(p.people.colleagues/Math.max(0.1,p.people.partner)).toFixed(1) + '×', 'more time with colleagues than partner',
+      `Colleagues get <b>${h1(p.people.colleagues)} h</b>, your partner gets <b>${h1(p.people.partner)} h</b>.`],
+    [learnYear, 'hours on learning / year',
+      `Learning + personal development at <b>${h1(p.time.learning+p.time.personalDev)} h/day</b>.`],
+    [waitDays, 'full days waiting / year',
+      `Idle time eats <b>${h1(p.time.waiting)} h/day</b> — roughly <b>${waitDays} entire days</b>.`]
+  ]);
+}
+
+function renderTimeFacts(p){
+  const keys = Object.keys(TIME_LABELS).sort((a,b)=>p.time[b]-p.time[a]);
+  const top3 = keys.slice(0,3);
+  const top3Pct = top3.reduce((s,k)=>s+p.time[k],0) / 24 * 100;
+
+  $('#tmFacts').innerHTML = factsHTML([
+    [top3Pct.toFixed(0) + '%', 'of your day in 3 activities',
+      `Top 3: ${top3.map(k=>`<b>${TIME_LABELS[k]}</b>`).join(', ')}.`],
+    [h1(p.time.work * 250 / 24), 'full work days / year',
+      `At <b>${h1(p.time.work)} h/day</b> across ~250 days.`],
+    [h1(p.people.family), 'hours with family / day',
+      `That's <b>${(p.people.family/p.waking*100).toFixed(0)}%</b> of your waking hours.`],
+    [h1(p.people.partner), 'hours with partner / day',
+      `Quality couple time is <b>${(p.people.partner/p.waking*100).toFixed(0)}%</b> of waking hours.`],
+    [h1(p.time.learning), 'hours learning / day',
+      `Across a year: <b>${Math.round(p.time.learning*365)} hours</b>.`],
+    [h1(p.time.waiting), 'hours waiting / day',
+      `Idle time is <b>${(p.time.waiting/24*100).toFixed(1)}%</b> of your entire day.`]
+  ]);
+}
+
+function renderMoneyFacts(p){
+  const m = p.money;
+  const essPct = (m.essential / p.spend * 100).toFixed(0);
+  const luxPct = (m.luxury / p.spend * 100).toFixed(0);
+  const givePct = ((m.donations + m.family + m.friends) / m.income * 100).toFixed(1);
+  const surplus = m.income - p.spend - m.savings - m.investments - m.debt;
+  const compound10 = (m.savings + m.investments) * 12 * 10 * 1.6;
+
+  $('#mnFacts').innerHTML = factsHTML([
+    [essPct + '%', 'of spending on essentials',
+      `${inr(m.essential)}/month. Healthy benchmark is under <b>50%</b>.`],
+    [inrShort(m.luxury), 'luxury spending / month',
+      `${luxPct}% of all spending. Redirected, that's <b>${inr(m.luxury*12)}</b> per year.`],
+    [givePct + '%', 'of income given away',
+      `Family, friends, charity: <b>${inr(m.family+m.friends+m.donations)}/month</b>.`],
+    [inrShort(m.savings + m.investments), 'saved + invested / month',
+      `Savings rate <b>${p.savingsRate.toFixed(0)}%</b>. Compounded at 12%, that becomes roughly <b>${inrShort(compound10)}</b> in 10 years.`],
+    [inrShort(m.debt), 'debt repayment / month',
+      `<b>${(m.debt/m.income*100).toFixed(0)}%</b> of income. Above <b>36%</b> is financially fragile.`],
+    [surplus >= -1 ? '✓' : '!', surplus >= -1 ? 'books balanced' : 'running deficit',
+      `Income <b>${inr(m.income)}</b> vs outflow <b>${inr(p.spend + m.savings + m.investments + m.debt)}</b>. Surplus: <b>${inr(Math.max(0,surplus))}</b>.`]
+  ]);
+}
+
+function renderGrowthFacts(p){
+  const g = p.growth;
+  const totalGoals = g.goalsAchieved + g.goalsDelayed;
+  const completion = (g.goalsAchieved / totalGoals * 100).toFixed(0);
+
+  $('#grFacts').innerHTML = factsHTML([
+    [g.books, 'books completed / year',
+      `${(g.books/12).toFixed(1)} books per month. Average adult reads fewer than <b>4</b> a year.`],
+    [completion + '%', 'goal follow-through',
+      `<b>${g.goalsAchieved}</b> achieved against <b>${g.goalsDelayed}</b> delayed or abandoned.`],
+    [g.problems, 'problems solved / year',
+      `Roughly <b>${(g.problems/365).toFixed(1)} per day</b> — invisible labour almost nobody tracks.`],
+    [g.risks, 'meaningful risks taken',
+      `Alongside <b>${g.opportunities} opportunities</b> created. Zero risks means zero new opportunities.`],
+    [g.discipline + '%', 'self-discipline score',
+      `${g.discipline>=70?'Top tier of habit reliability.':'Room to close the intention–action gap.'}`]
+  ]);
+}
+
+function renderAdvancedFacts(p){
+  const top = [...ADV_DEFS].sort((a,b)=>p.advanced[b[0]]-p.advanced[a[0]]);
+  const best = top[0], worst = top[top.length-1];
+  const decFatigueDecisions = Math.round(p.advanced.decisionFatigue/100*35);
+
+  $('#advFacts').innerHTML = factsHTML([
+    [Math.round(p.advanced[best[0]]), 'highest hidden load',
+      `<b>${best[1]}</b> — the strongest pressure you carry.`],
+    [Math.round(p.advanced[worst[0]]), 'lowest score',
+      `<b>${worst[1]}</b> is your weakest link in this layer.`],
+    [Math.round(p.advanced.freedom), 'personal freedom',
+      `Against <b>${Math.round(p.advanced.socialObligations)}</b> for social obligations.`],
+    [decFatigueDecisions, 'draining decisions / day',
+      `Estimated from a <b>${Math.round(p.advanced.decisionFatigue)}/100</b> decision fatigue score.`],
+    [Math.round(p.advanced.futureInvestment), 'future investment',
+      `Against <b>${Math.round(p.advanced.presentEnjoyment)}</b> for present enjoyment — ${p.advanced.futureInvestment>p.advanced.presentEnjoyment?'deferring more than living.':'living now but under-investing in tomorrow.'}`]
+  ]);
+}
+
+/* ============================================================
+   BARS & TABLE
+   ============================================================ */
+function renderBars(containerId, items){
+  const el = document.getElementById(containerId);
+  if(!el) return;
+  el.innerHTML = items.map(it=>{
+    const col = it.value >= 70 ? '#34d399' : it.value >= 50 ? '#d4ff3a' : '#ff5c35';
+    return `<div class="bar-row">
+      <span class="lbl">${it.label}</span>
+      <span class="val" style="color:${col}">${Math.round(it.value)}${it.max===100?'':' / '+it.max}</span>
+      <div class="track"><i data-w="${clamp(it.value/it.max*100)}" style="background:${col};box-shadow:0 0 10px -2px ${col}"></i></div>
+      ${it.note?`<div class="note">${it.note}</div>`:''}
+    </div>`;
+  }).join('');
+
+  requestAnimationFrame(()=>{
+    el.querySelectorAll('.track i').forEach((bar,i)=>{
+      setTimeout(()=>{ bar.style.width = bar.dataset.w + '%'; }, 40 + i*40);
+    });
+  });
+}
+
+function renderGrowthBars(p){
+  const g = p.growth;
+  const total = g.goalsAchieved + g.goalsDelayed;
+  renderBars('grBars', [
+    { label:'Goals achieved', value:g.goalsAchieved, max:total,
+      note:`${(g.goalsAchieved/total*100).toFixed(0)}% follow-through on goals you set` },
+    { label:'Goals delayed or abandoned', value:g.goalsDelayed, max:total,
+      note:'Each abandoned goal is a sunk cost of time and motivation' },
+    { label:'Self-discipline & consistency', value:g.discipline, max:100,
+      note:'How reliably you do the thing you said you would do' },
+    { label:'Learning velocity', value:Math.min(100, g.books*4 + g.skills*6), max:100,
+      note:`${g.books} books and ${g.skills} new skills in 12 months` },
+    { label:'Experience breadth', value:Math.min(100, g.experiences*5), max:100,
+      note:`${g.experiences} new experiences this year` }
+  ]);
+}
+
+function renderWellTable(p){
+  const rows = [
+    ['Mental health','Stress, anxiety, mental peace', p.scores.mental],
+    ['Physical health','Fitness, illness, recovery', p.scores.physical],
+    ['Emotional energy','Happiness, sadness, frustration', p.scores.emotional],
+    ['Relationships','Connection, communication, conflicts', p.scores.relationships],
+    ['Career','Career progress and professional growth', p.scores.career],
+    ['Contribution','Value created for others', p.scores.contribution],
+    ['Freedom','Time under your own control', p.scores.freedom],
+    ['Digital life','Screen time and internet usage', p.scores.digital],
+    ['Productivity','Planned vs completed work', p.scores.productivity],
+    ['Life satisfaction','Overall satisfaction', p.scores.satisfaction]
+  ];
+  $('#wellTable').innerHTML = `
+    <thead><tr><th>Category</th><th>Measures</th><th>Score</th></tr></thead>
+    <tbody>${rows.map(([cat,desc,score])=>{
+      const col = score >= 70 ? '#34d399' : score >= 50 ? '#d4ff3a' : '#ff5c35';
+      return `<tr>
+        <td class="cat">${cat}</td>
+        <td class="desc">${desc}</td>
+        <td style="width:100px">
+          <div style="display:flex;align-items:center;gap:8px">
+            <div class="mini" style="flex:1"><i style="width:${score}%;background:${col}"></i></div>
+            <b style="font-family:var(--mono);font-size:11px;color:${col}">${Math.round(score)}</b>
+          </div>
+        </td>
+      </tr>`;
+    }).join('')}</tbody>`;
+}
+
+/* ============================================================
+   TICKER
+   ============================================================ */
+function renderTicker(p){
+  const facts = [
+    `<b>${h1(p.time.sleep)}h</b> sleep · <b>${h1(p.time.work)}h</b> work · <b>${h1(p.screen)}h</b> screen`,
+    `savings rate <b>${p.savingsRate.toFixed(0)}%</b>`,
+    `<b>${Math.round(p.people.alone*365)}h</b> alone per year`,
+    `<b>${(p.screen*365/24).toFixed(0)}</b> full screen days per year`,
+    `focused work <b>${h1(p.focused)}h</b> of ${h1(p.time.work)}h`,
+    `<b>${p.growth.books}</b> books · <b>${p.growth.skills}</b> skills this year`,
+    `life satisfaction <b>${Math.round(p.scores.satisfaction)}/100</b>`,
+    `decision fatigue <b>${Math.round(p.advanced.decisionFatigue)}/100</b>`,
+    `personal freedom <b>${Math.round(p.advanced.freedom)}/100</b>`,
+    `<b>${Math.round(p.time.waiting*365/24)}</b> full days waiting per year`,
+    `learning velocity <b>${Math.round((p.time.learning+p.time.personalDev)*365)}h</b>/year`,
+    `partner time <b>${h1(p.people.partner)}h</b> vs colleagues <b>${h1(p.people.colleagues)}h</b>`
+  ];
+  const html = facts.map(f=>`<span>${f}</span>`).join('');
+  $('#ticker').innerHTML = html + html;
+}
+
+/* ============================================================
+   EXPORT & SHARE
+   ============================================================ */
+function exportJSON(){
+  const p = computeProfile(state.pov, state.age, state.day);
+  const data = {
+    generated: new Date().toISOString(),
+    profile: { pov: state.pov, age: state.age, day: state.day },
+    time: p.time, people: p.people, money: p.money,
+    scores: p.scores, growth: p.growth, advanced: p.advanced,
+    ledger: LEDGER.map(m=>({ id: m.id, category: m.cat, name: m.name, value: m.val(p) }))
+  };
+  const blob = new Blob([JSON.stringify(data, null, 2)], { type:'application/json' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `lifeos-${state.pov}-${state.age}-${state.day}.json`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('JSON downloaded');
+}
+
+function exportCSV(){
+  const p = computeProfile(state.pov, state.age, state.day);
+  let csv = 'id,category,metric,value\n';
+  LEDGER.forEach(m=>{
+    csv += `${m.id},${m.cat},"${m.name.replace(/"/g,'""')}",${m.val(p)}\n`;
+  });
+  const blob = new Blob([csv], { type:'text/csv' });
+  const url = URL.createObjectURL(blob);
+  const a = document.createElement('a');
+  a.href = url; a.download = `lifeos-${state.pov}-${state.age}-${state.day}.csv`;
+  a.click();
+  URL.revokeObjectURL(url);
+  toast('CSV downloaded');
+}
+
+function showExportMenu(){
+  const choice = confirm('Export as JSON? (Cancel for CSV)');
+  if(choice) exportJSON(); else exportCSV();
+}
+
+async function shareLink(){
+  persistState();
+  const url = location.href;
+  try{
+    await navigator.clipboard.writeText(url);
+    toast('Link copied to clipboard');
+  }catch{
+    toast('Copy failed — URL is in the address bar');
+  }
+}
+
+/* ============================================================
+   INIT CHARTS
+   ============================================================ */
+registerChart({ id:'cScore', types:['radar','bar','hbar','polarArea'], currentType:'radar', buildData:()=>({}), buildOptions:()=>({}) });
+registerChart({ id:'cTrend', types:['line','area','bar'], currentType:'line', buildData:()=>({}), buildOptions:()=>({}) });
+registerChart({ id:'cDay', types:['hbar','polarArea','doughnut','radar','bar'], currentType:'hbar', buildData:()=>({}), buildOptions:()=>({}) });
+registerChart({ id:'cPeople', types:['doughnut','polarArea','pie','bar','hbar'], currentType:'doughnut', buildData:()=>({}), buildOptions:()=>({}) });
+registerChart({ id:'cLeisure', types:['bar','hbar','line','area','radar'], currentType:'bar', buildData:()=>({}), buildOptions:()=>({}) });
+registerChart({ id:'cMoneyFlow', types:['bar','hbar','line','area'], currentType:'bar', buildData:()=>({}), buildOptions:()=>({}) });
+registerChart({ id:'cSpend', types:['doughnut','polarArea','pie','bar','hbar'], currentType:'doughnut', buildData:()=>({}), buildOptions:()=>({}) });
+registerChart({ id:'cAlloc', types:['polarArea','radar','doughnut','bar'], currentType:'polarArea', buildData:()=>({}), buildOptions:()=>({}) });
+registerChart({ id:'cGrowth', types:['bar','hbar','radar','polarArea'], currentType:'bar', buildData:()=>({}), buildOptions:()=>({}) });
+registerChart({ id:'cG1', types:['gauge','bar','radar','polarArea'], currentType:'gauge', buildData:()=>({}), buildOptions:()=>({}) });
+registerChart({ id:'cG2', types:['gauge','bar','radar','polarArea'], currentType:'gauge', buildData:()=>({}), buildOptions:()=>({}) });
+registerChart({ id:'cG3', types:['gauge','bar','radar','polarArea'], currentType:'gauge', buildData:()=>({}), buildOptions:()=>({}) });
+registerChart({ id:'cWellRadar', types:['radar','bar','hbar','polarArea'], currentType:'radar', buildData:()=>({}), buildOptions:()=>({}) });
+registerChart({ id:'cAdv', types:['bar','hbar','radar','polarArea'], currentType:'hbar', buildData:()=>({}), buildOptions:()=>({}) });
+registerChart({ id:'cAdvRadar', types:['radar','bar','hbar','polarArea'], currentType:'radar', buildData:()=>({}), buildOptions:()=>({}) });
+registerChart({ id:'cLedger', types:['hbar','bar'], currentType:'hbar', buildData:()=>({}), buildOptions:()=>({}) });
+
+/* ============================================================
+   MASTER RENDER
+   ============================================================ */
+function renderAll(){
+  const p = computeProfile(state.pov, state.age, state.day);
+  persistState();
+  renderHero(p);
+  renderDial(p);
+  verifyIntegrity(p);
+
+  /* overview */
+  const scoreSpec = CHART_REGISTRY.cScore;
+  scoreSpec.buildData = buildScoreChart(p).buildData;
+  scoreSpec.buildOptions = buildScoreChart(p).buildOptions;
+  renderChart(scoreSpec);
+
+  const trendSpec = CHART_REGISTRY.cTrend;
+  trendSpec.buildData = buildTrendChart(p).buildData;
+  trendSpec.buildOptions = buildTrendChart(p).buildOptions;
+  renderChart(trendSpec);
+
+  /* time */
+  const daySpec = CHART_REGISTRY.cDay;
+  daySpec.buildData = buildDayChart(p).buildData;
+  daySpec.buildOptions = buildDayChart(p).buildOptions;
+  renderChart(daySpec);
+
+  const peopleSpec = CHART_REGISTRY.cPeople;
+  peopleSpec.buildData = buildPeopleChart(p).buildData;
+  peopleSpec.buildOptions = buildPeopleChart(p).buildOptions;
+  renderChart(peopleSpec);
+
+  const leisureSpec = CHART_REGISTRY.cLeisure;
+  leisureSpec.buildData = buildLeisureChart(p).buildData;
+  leisureSpec.buildOptions = buildLeisureChart(p).buildOptions;
+  renderChart(leisureSpec);
+
+  /* money */
+  const flowSpec = CHART_REGISTRY.cMoneyFlow;
+  flowSpec.buildData = buildMoneyFlowChart(p).buildData;
+  flowSpec.buildOptions = buildMoneyFlowChart(p).buildOptions;
+  renderChart(flowSpec);
+
+  const spendSpec = CHART_REGISTRY.cSpend;
+  spendSpec.buildData = buildSpendChart(p).buildData;
+  spendSpec.buildOptions = buildSpendChart(p).buildOptions;
+  renderChart(spendSpec);
+
+  const allocSpec = CHART_REGISTRY.cAlloc;
+  allocSpec.buildData = buildAllocChart(p).buildData;
+  allocSpec.buildOptions = buildAllocChart(p).buildOptions;
+  renderChart(allocSpec);
+
+  /* growth */
+  const growthSpec = CHART_REGISTRY.cGrowth;
+  growthSpec.buildData = buildGrowthChart(p).buildData;
+  growthSpec.buildOptions = buildGrowthChart(p).buildOptions;
+  renderChart(growthSpec);
+
+  /* wellbeing */
+  ['cG1','cG2','cG3'].forEach((id, i)=>{
+    const spec = CHART_REGISTRY[id];
+    const key = ['mental','physical','emotional'][i];
+    const label = ['Mental health','Physical health','Emotional energy'][i];
+    const built = buildWellGaugeChart(p, key, label);
+    spec.buildData = built.buildData;
+    spec.buildOptions = built.buildOptions;
+    renderChart(spec);
+  });
+
+  const wellRadarSpec = CHART_REGISTRY.cWellRadar;
+  wellRadarSpec.buildData = buildWellRadarChart(p).buildData;
+  wellRadarSpec.buildOptions = buildWellRadarChart(p).buildOptions;
+  renderChart(wellRadarSpec);
+
+  /* advanced */
+  const advSpec = CHART_REGISTRY.cAdv;
+  advSpec.buildData = buildAdvChart(p).buildData;
+  advSpec.buildOptions = buildAdvChart(p).buildOptions;
+  renderChart(advSpec);
+
+  const advRadarSpec = CHART_REGISTRY.cAdvRadar;
+  advRadarSpec.buildData = buildAdvRadarChart(p).buildData;
+  advRadarSpec.buildOptions = buildAdvRadarChart(p).buildOptions;
+  renderChart(advRadarSpec);
+
+  /* facts + tables */
+  renderOverviewFacts(p);
+  renderTimeFacts(p);
+  renderMoneyFacts(p);
+  renderGrowthFacts(p);
+  renderAdvancedFacts(p);
+  renderGrowthBars(p);
+  renderWellTable(p);
+  renderLedger(p);
+  renderTicker(p);
+}
+
+/* ============================================================
+   EVENTS — Filters
+   ============================================================ */
+$$('#povSeg button').forEach(b=>b.addEventListener('click', ()=>{
+  $$('#povSeg button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); state.pov = b.dataset.v; renderAll();
+}));
+$$('#ageSeg button').forEach(b=>b.addEventListener('click', ()=>{
+  $$('#ageSeg button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); state.age = b.dataset.v; renderAll();
+}));
+$$('#daySeg button').forEach(b=>b.addEventListener('click', ()=>{
+  $$('#daySeg button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); state.day = b.dataset.v; renderAll();
+}));
+$$('#lensSeg button').forEach(b=>b.addEventListener('click', ()=>{
+  $$('#lensSeg button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on'); state.lens = b.dataset.v;
+  const p = computeProfile(state.pov, state.age, state.day);
+  renderDial(p);
+  persistState();
+}));
+$('#cmpBtn').addEventListener('click', ()=>{
+  state.compare = !state.compare;
+  $('#cmpBtn').classList.toggle('on', state.compare);
+  renderAll();
+});
+$('#exportBtn').addEventListener('click', showExportMenu);
+$('#shareBtn').addEventListener('click', shareLink);
+
+/* ============================================================
+   EVENTS — Navigation
+   ============================================================ */
+$$('#spine button').forEach(b=>b.addEventListener('click', ()=>{
+  $$('#spine button').forEach(x=>x.classList.remove('on'));
+  b.classList.add('on');
+  state.view = b.dataset.view;
+  $$('.view').forEach(v=>v.classList.toggle('on', v.dataset.view === state.view));
+  persistState();
+  requestAnimationFrame(()=>{ Object.values(charts).forEach(c=>c.resize()); });
+}));
+
+function goView(v){
+  $$('#spine button').forEach(b=>b.classList.toggle('on', b.dataset.view === v));
+  state.view = v;
+  $$('.view').forEach(x=>x.classList.toggle('on', x.dataset.view === v));
+  persistState();
+  requestAnimationFrame(()=>{ Object.values(charts).forEach(c=>c.resize()); });
+}
+
+/* ============================================================
+   COMMAND PALETTE
+   ============================================================ */
+const CMD_ITEMS = [
+  { k:'GO', t:'Overview', d:'1', act:()=>goView('overview') },
+  { k:'GO', t:'Time', d:'2', act:()=>goView('time') },
+  { k:'GO', t:'Money', d:'3', act:()=>goView('money') },
+  { k:'GO', t:'Growth', d:'4', act:()=>goView('growth') },
+  { k:'GO', t:'Wellbeing', d:'5', act:()=>goView('wellbeing') },
+  { k:'GO', t:'Advanced', d:'6', act:()=>goView('advanced') },
+  { k:'GO', t:'Ledger · 100', d:'7', act:()=>goView('ledger') },
+  { k:'POV', t:'Switch to Man', d:'♂', act:()=>{ setSeg('povSeg','man'); state.pov='man'; renderAll(); } },
+  { k:'POV', t:'Switch to Woman', d:'♀', act:()=>{ setSeg('povSeg','woman'); state.pov='woman'; renderAll(); } },
+  { k:'DAY', t:'Average day', d:'◐', act:()=>{ setSeg('daySeg','avg'); state.day='avg'; renderAll(); } },
+  { k:'DAY', t:'Weekday', d:'▤', act:()=>{ setSeg('daySeg','weekday'); state.day='weekday'; renderAll(); } },
+  { k:'DAY', t:'Weekend', d:'▥', act:()=>{ setSeg('daySeg','weekend'); state.day='weekend'; renderAll(); } },
+  { k:'AGE', t:'Age 18–24', d:'', act:()=>{ setSeg('ageSeg','18-24'); state.age='18-24'; renderAll(); } },
+  { k:'AGE', t:'Age 25–34', d:'', act:()=>{ setSeg('ageSeg','25-34'); state.age='25-34'; renderAll(); } },
+  { k:'AGE', t:'Age 35–49', d:'', act:()=>{ setSeg('ageSeg','35-49'); state.age='35-49'; renderAll(); } },
+  { k:'AGE', t:'Age 50+', d:'', act:()=>{ setSeg('ageSeg','50+'); state.age='50+'; renderAll(); } },
+  { k:'LENS', t:'All categories', d:'◯', act:()=>{ setSeg('lensSeg','all'); state.lens='all'; renderAll(); } },
+  { k:'LENS', t:'Work lens', d:'▣', act:()=>{ setSeg('lensSeg','work'); state.lens='work'; renderAll(); } },
+  { k:'LENS', t:'Life lens', d:'♥', act:()=>{ setSeg('lensSeg','life'); state.lens='life'; renderAll(); } },
+  { k:'LENS', t:'Growth lens', d:'▲', act:()=>{ setSeg('lensSeg','growth'); state.lens='growth'; renderAll(); } },
+  { k:'CMP', t:'Toggle Compare', d:'⇄', act:()=>{ state.compare=!state.compare; $('#cmpBtn').classList.toggle('on', state.compare); renderAll(); } },
+  { k:'EXP', t:'Export data (JSON / CSV)', d:'↓', act:showExportMenu },
+  { k:'LNK', t:'Copy shareable link', d:'🔗', act:shareLink }
+];
+
+function setSeg(id, v){
+  $$('#'+id+' button').forEach(b=>b.classList.toggle('on', b.dataset.v === v));
+}
+
+let cmdkSel = 0;
+function openCmdk(){
+  $('#cmdk').classList.add('on');
+  $('#cmdkInput').value = '';
+  renderCmdk('');
+  setTimeout(()=>$('#cmdkInput').focus(), 30);
+}
+function closeCmdk(){ $('#cmdk').classList.remove('on'); }
+function renderCmdk(q){
+  const filtered = CMD_ITEMS.filter(it =>
+    !q || (it.t + ' ' + it.k).toLowerCase().includes(q.toLowerCase())
+  );
+  const list = $('#cmdkList');
+  list.innerHTML = filtered.map((it,i)=>`
+    <div class="cmdk-item ${i===0?'sel':''}" data-i="${i}">
+      <span class="k">${it.k}</span>
+      <span class="t">${it.t}</span>
+      <span class="d">${it.d}</span>
+    </div>`).join('') || `<div style="padding:20px;color:#8a8275;font-size:12px">No results.</div>`;
+  list.querySelectorAll('.cmdk-item').forEach(el=>{
+    el.addEventListener('click', ()=>{
+      const item = filtered[+el.dataset.i];
+      if(item){ item.act(); closeCmdk(); }
+    });
+  });
+  cmdkSel = 0;
+}
+
+$('#cmdHint').addEventListener('click', openCmdk);
+$('#cmdk').addEventListener('click', e=>{ if(e.target.id === 'cmdk') closeCmdk(); });
+$('#cmdkInput').addEventListener('input', e=>renderCmdk(e.target.value));
+$('#cmdkInput').addEventListener('keydown', e=>{
+  const items = $$('#cmdkList .cmdk-item');
+  if(e.key === 'ArrowDown'){ e.preventDefault(); cmdkSel = (cmdkSel+1) % items.length; updateCmdkSel(items); }
+  else if(e.key === 'ArrowUp'){ e.preventDefault(); cmdkSel = (cmdkSel-1+items.length) % items.length; updateCmdkSel(items); }
+  else if(e.key === 'Enter'){ e.preventDefault(); items[cmdkSel]?.click(); }
+  else if(e.key === 'Escape'){ closeCmdk(); }
+});
+function updateCmdkSel(items){
+  items.forEach((it,i)=>it.classList.toggle('sel', i === cmdkSel));
+  items[cmdkSel]?.scrollIntoView({ block:'nearest' });
+}
+
+/* ============================================================
+   KEYBOARD SHORTCUTS
+   ============================================================ */
+document.addEventListener('keydown', e=>{
+  if((e.metaKey || e.ctrlKey) && e.key.toLowerCase() === 'k'){
+    e.preventDefault(); openCmdk(); return;
+  }
+  if(e.key === 'Escape'){ closeCmdk(); return; }
+
+  /* skip if typing in an input */
+  if(['INPUT','TEXTAREA','SELECT'].includes(document.activeElement.tagName)) return;
+
+  /* 1-7 jump to view */
+  const viewMap = ['overview','time','money','growth','wellbeing','advanced','ledger'];
+  if(/^[1-7]$/.test(e.key)){ goView(viewMap[+e.key - 1]); return; }
+  /* j/k next/prev view */
+  if(e.key === 'j' || e.key === 'k'){
+    e.preventDefault();
+    const cur = viewMap.indexOf(state.view);
+    const next = e.key === 'j' ? (cur+1)%7 : (cur-1+7)%7;
+    goView(viewMap[next]);
+    return;
+  }
+});
+
+/* ============================================================
+   APPLY URL STATE TO UI
+   ============================================================ */
+function applyStateToUI(){
+  setSeg('povSeg', state.pov);
+  setSeg('ageSeg', state.age);
+  setSeg('daySeg', state.day);
+  setSeg('lensSeg', state.lens);
+  $('#cmpBtn').classList.toggle('on', state.compare);
+
+  $$('#spine button').forEach(b=>b.classList.toggle('on', b.dataset.view === state.view));
+  $$('.view').forEach(x=>x.classList.toggle('on', x.dataset.view === state.view));
+}
+
+/* ============================================================
+   BOOT
+   ============================================================ */
+renderLedgerCats();
+applyStateToUI();
+renderAll();
+
+window.addEventListener('load', ()=>{ Object.values(charts).forEach(c=>c.resize()); });
+window.addEventListener('resize', ()=>{ Object.values(charts).forEach(c=>c.resize()); });
+window.addEventListener('hashchange', ()=>{
+  try{
+    const s = JSON.parse(decodeURIComponent(location.hash.slice(1)));
+    if(s.pov) state.pov = s.pov;
+    if(s.age) state.age = s.age;
+    if(s.day) state.day = s.day;
+    if(s.lens) state.lens = s.lens;
+    if(typeof s.compare === 'boolean') state.compare = s.compare;
+    if(s.view) state.view = s.view;
+    applyStateToUI();
+    renderAll();
+  }catch{}
+});
+</script>
+</body>
+</html>
