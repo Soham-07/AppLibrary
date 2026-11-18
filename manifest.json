@@ -196,6 +196,14 @@
           "filename": "opx_urge_and_relapse_wiki.pdf",
           "type": "pdf",
           "addedAt": "2026-09-28T11:41:34.326Z"
+        },
+        {
+          "id": "50bb21cf-df88-4df8-982a-96d2328ba2a7",
+          "name": "Human Life Analysis Dashboard",
+          "description": "",
+          "filename": "human-life-analysis-dashboard.html",
+          "type": "html",
+          "addedAt": "2026-11-18T17:58:57.886Z"
         }
       ]
     },
